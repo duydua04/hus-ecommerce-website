@@ -11,10 +11,11 @@ class Address(Base):
 
     address_id = Column(Integer, primary_key=True)
     fullname = Column(String(255), nullable=False)
+    phone = Column(String(20), nullable=False)
     street = Column(String(255), nullable=False)
-    city = Column(String(50), nullable=False)
-    state = Column(String(50), nullable=False)
-    country = Column(String(50), nullable=False)
+    ward = Column(String(50), nullable=False)
+    district = Column(String(50), nullable=False)
+    province = Column(String(100), nullable=False)
 
     buyer_links = relationship("BuyerAddress", back_populates="address")
     seller_links = relationship("SellerAddress", back_populates="address")
@@ -28,7 +29,6 @@ class BuyerAddress(Base):
     buyer_address_id = Column(Integer, primary_key=True)
     buyer_id = Column(Integer, ForeignKey("buyer.buyer_id"), nullable=False)
     address_id = Column(Integer, ForeignKey("address.address_id"), nullable=False)
-    phone = Column(String(20), nullable=False)
     is_default = Column(Boolean, nullable=False, default=False)
     label = Column(BuyerAddrLabelEnum)  # nullable theo DDL
 
@@ -45,7 +45,6 @@ class SellerAddress(Base):
     seller_address_id = Column(Integer, primary_key=True)
     seller_id = Column(Integer, ForeignKey("seller.seller_id"), nullable=False)
     address_id = Column(Integer, ForeignKey("address.address_id"), nullable=False)
-    phone = Column(String(20), nullable=False)
     is_default = Column(Boolean, nullable=False, default=False)
     label = Column(SellerAddrLabelEnum)  # nullable theo DDL
 
