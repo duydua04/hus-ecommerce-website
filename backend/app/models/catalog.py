@@ -13,7 +13,7 @@ class Category(Base):
     """
     __tablename__ = "category"
 
-    category_id = Column(Integer, primary_key=True)
+    category_id = Column(Integer, primary_key=True, autoincrement=True)
     category_name = Column(String(255), nullable=False, unique=True)
 
     products = relationship("Product", back_populates="category")
@@ -24,7 +24,7 @@ class Carrier(Base):
     """
     __tablename__ = "carrier"
 
-    carrier_id = Column(Integer, primary_key=True)
+    carrier_id = Column(Integer, primary_key=True, autoincrement=True)
     carrier_name = Column(String(255), nullable=False)
     carrier_avt_url = Column(String(255))
     base_price = Column(Numeric(10, 2), nullable=False)
@@ -39,7 +39,7 @@ class Product(Base):
     """
     __tablename__ = "product"
 
-    product_id = Column(Integer, primary_key=True)
+    product_id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(255), nullable=False)
     seller_id = Column(Integer, ForeignKey("seller.seller_id"), nullable=False)
     base_price = Column(Numeric(10, 2), nullable=False)
@@ -64,7 +64,7 @@ class ProductVariant(Base):
     """
     __tablename__ = "product_variant"
 
-    variant_id = Column(Integer, primary_key=True)
+    variant_id = Column(Integer, primary_key=True, autoincrement=True)
     product_id = Column(Integer, ForeignKey("product.product_id"), nullable=False)
     variant_name = Column(String(100), nullable=False)  # color/model/style
     price_adjustment = Column(Numeric(10, 2), nullable=False, default=0)
@@ -78,7 +78,7 @@ class ProductSize(Base):
     """
     __tablename__ = "product_size"
 
-    size_id = Column(Integer, primary_key=True)
+    size_id = Column(Integer, primary_key=True, autoincrement=True)
     variant_id = Column(Integer, ForeignKey("product_variant.variant_id"), nullable=False)
     size_name = Column(String(20), nullable=False)
     available_units = Column(Integer, nullable=False, default=0)
@@ -93,7 +93,7 @@ class ProductImage(Base):
     """
     __tablename__ = "product_image"
 
-    product_image_id = Column(Integer, primary_key=True)
+    product_image_id = Column(Integer, primary_key=True, autoincrement=True)
     product_id = Column(Integer, ForeignKey("product.product_id"), nullable=False)
     image_url = Column(String(500), nullable=False)
     is_primary = Column(Boolean, nullable=False, default=False)
@@ -105,7 +105,7 @@ class Discount(Base):
     """
     __tablename__ = "discount"
 
-    discount_id = Column(Integer, primary_key=True)
+    discount_id = Column(Integer, primary_key=True, autoincrement=True)
     code = Column(String(50), nullable=False, unique=True)
     discount_percent = Column(Numeric(4, 2), nullable=False)
     min_order_value = Column(Numeric(10, 2), nullable=False, default=0)

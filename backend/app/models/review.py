@@ -6,7 +6,7 @@ from ..config.db import Base
 class Review(Base):
     __tablename__ = "review"
 
-    review_id = Column(Integer, primary_key=True)
+    review_id = Column(Integer, primary_key=True, autoincrement=True)
     product_id = Column(Integer, ForeignKey("product.product_id"), nullable=False)
     buyer_id = Column(Integer, ForeignKey("buyer.buyer_id"), nullable=False)
     order_id = Column(Integer, ForeignKey("order.order_id"), nullable=False)
@@ -29,7 +29,7 @@ class Review(Base):
 class ReviewImage(Base):
     __tablename__ = "review_image"
 
-    review_image_id = Column(Integer, primary_key=True)
+    review_image_id = Column(Integer, primary_key=True, autoincrement=True)
     review_id = Column(Integer, ForeignKey("review.review_id"), nullable=False)
     image_url = Column(String(500), nullable=False)
 
@@ -38,7 +38,7 @@ class ReviewImage(Base):
 class ReviewReply(Base):
     __tablename__ = "review_reply"
 
-    review_reply_id = Column(Integer, primary_key=True)
+    review_reply_id = Column(Integer, primary_key=True, autoincrement=True)
     review_id = Column(Integer, ForeignKey("review.review_id"), nullable=False)
     seller_id = Column(Integer, ForeignKey("seller.seller_id"), nullable=False)
     reply_text = Column(Text, nullable=False)

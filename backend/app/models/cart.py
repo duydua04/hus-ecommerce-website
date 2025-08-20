@@ -12,7 +12,7 @@ class ShoppingCart(Base):
     """
     __tablename__ = "shopping_cart"
 
-    shopping_cart_id = Column(Integer, primary_key=True)
+    shopping_cart_id = Column(Integer, primary_key=True, autoincrement=True)
     buyer_id = Column(Integer, ForeignKey("buyer.buyer_id"), nullable=False)
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime)
@@ -30,7 +30,7 @@ class ShoppingCartItem(Base):
     """
     __tablename__ = "shopping_cart_item"
 
-    shopping_cart_item_id = Column(Integer, primary_key=True)
+    shopping_cart_item_id = Column(Integer, primary_key=True, autoincrement=True)
     shopping_cart_id = Column(Integer, ForeignKey("shopping_cart.shopping_cart_id"), nullable=False)
     product_id = Column(Integer, ForeignKey("product.product_id"), nullable=False)
     variant_id = Column(Integer, ForeignKey("product_variant.variant_id"))

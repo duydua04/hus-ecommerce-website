@@ -9,7 +9,7 @@ class Address(Base):
     """
     __tablename__ = "address"
 
-    address_id = Column(Integer, primary_key=True)
+    address_id = Column(Integer, primary_key=True, autoincrement=True)
     fullname = Column(String(255), nullable=False)
     phone = Column(String(20), nullable=False)
     street = Column(String(255), nullable=False)
@@ -26,7 +26,7 @@ class BuyerAddress(Base):
     """
     __tablename__ = "buyer_address"
 
-    buyer_address_id = Column(Integer, primary_key=True)
+    buyer_address_id = Column(Integer, primary_key=True, autoincrement=True)
     buyer_id = Column(Integer, ForeignKey("buyer.buyer_id"), nullable=False)
     address_id = Column(Integer, ForeignKey("address.address_id"), nullable=False)
     is_default = Column(Boolean, nullable=False, default=False)
@@ -42,7 +42,7 @@ class SellerAddress(Base):
     """
     __tablename__ = "seller_address"
 
-    seller_address_id = Column(Integer, primary_key=True)
+    seller_address_id = Column(Integer, primary_key=True, autoincrement=True)
     seller_id = Column(Integer, ForeignKey("seller.seller_id"), nullable=False)
     address_id = Column(Integer, ForeignKey("address.address_id"), nullable=False)
     is_default = Column(Boolean, nullable=False, default=False)

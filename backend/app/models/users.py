@@ -8,7 +8,7 @@ from .enums import BuyerTierEnum, SellerTierEnum
 class Admin(Base):
     __tablename__ = "admin"
 
-    admin_id = Column(Integer, primary_key=True)
+    admin_id = Column(Integer, primary_key=True, autoincrement=True)
     email = Column(String(255), nullable=False, unique=True)
     phone = Column(String(20), nullable=False, unique=True)
     fname = Column(String(255), nullable=False)
@@ -21,7 +21,7 @@ class Admin(Base):
 class Buyer(Base):
     __tablename__ = "buyer"
 
-    buyer_id = Column(Integer, primary_key=True)
+    buyer_id = Column(Integer, primary_key=True, autoincrement=True)
     email = Column(String(255), nullable=False, unique=True)
     phone = Column(String(20), nullable=False, unique=True)
     fname = Column(String(255), nullable=False)
@@ -41,7 +41,7 @@ class Buyer(Base):
 class Seller(Base):
     __tablename__ = "seller"
 
-    seller_id = Column(Integer, primary_key=True)
+    seller_id = Column(Integer, primary_key=True, autoincrement=True)
     email = Column(String(255), nullable=False, unique=True)
     phone = Column(String(20), nullable=False, unique=True)
     fname = Column(String(255), nullable=False)

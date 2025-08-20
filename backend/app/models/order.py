@@ -11,7 +11,7 @@ class Order(Base):
     # Bảng đơn hàng
     __tablename__ = "order"
 
-    order_id = Column(Integer, primary_key=True)
+    order_id = Column(Integer, primary_key=True, autoincrement=True)
     buyer_id = Column(Integer, ForeignKey("buyer.buyer_id"), nullable=False)
     buyer_address_id = Column(Integer, ForeignKey("buyer_address.buyer_address_id"), nullable=False)
     payment_method = Column(PaymentMethodEnum, nullable=False)  # bank_transfer | cod | mim_pay
@@ -48,7 +48,7 @@ class OrderItem(Base):
     # Sản phẩm trong đơn hàng
     __tablename__ = "order_item"
 
-    order_item_id = Column(Integer, primary_key=True)
+    order_item_id = Column(Integer, primary_key=True, autoincrement=True)
     order_id = Column(Integer, ForeignKey("order.order_id"), nullable=False)
     product_id = Column(Integer, ForeignKey("product.product_id"), nullable=False)
     variant_id = Column(Integer, ForeignKey("product_variant.variant_id"))
