@@ -3,7 +3,7 @@ from pydantic import BaseModel, EmailStr, Field
 from .common import ORMBase, TimestampedOut, BuyerTier, SellerTier
 
 # Respone từ server trả về thông tin admin
-class AdminResponse(BaseModel):
+class AdminResponse(TimestampedOut):
     admin_id: str
     email: EmailStr
     phone: str
