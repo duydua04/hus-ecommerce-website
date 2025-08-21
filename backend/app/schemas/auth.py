@@ -25,3 +25,4 @@ class Login(BaseModel):
 class Token:
     access_token: str
     token_type: str
+    expires_int: int
