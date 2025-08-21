@@ -4,7 +4,7 @@ import bcrypt, jwt
 from ..config.settings import settings
 
 # ===== Password hashing =====
-def hash_password(plain: str) -> str:
+def hash_password(plain: str):
     """Hàm băm mật khẩu thô thành hash đê lưu vào database"""
     salt = bcrypt.gensalt()
     return bcrypt.hashpw(plain.encode("utf-8"), salt).decode("utf-8")
@@ -17,7 +17,7 @@ def verify_password(plain: str, hashed: str) -> bool:
         return False
 
 # ===== JWT =====
-def create_access_token(sub: str, role: str, expires_minutes: int | None = None, extra: Dict[str, Any] | None = None) -> str:
+def create_access_token(sub: str, role: str, expires_minutes: int | None = None, extra: Dict[str, Any] | None = None):
     """Tạo JWT access token để xác thực người dùng trong các request tiếp theo"""
     if expires_minutes is None:
         expires_minutes = int(getattr(settings, "JWT_EXPIRE_MIN", 60))
@@ -33,7 +33,7 @@ def create_access_token(sub: str, role: str, expires_minutes: int | None = None,
     token = jwt.encode(payload, settings.JWT_SECRET, algorithm=settings.JWT_ALG)
     return token
 
-def decode_token(token: str) -> Dict[str, Any]:
+def decode_token(token: str):
     """
     Giải mã và xác thực JWT token, trả về payload chứa thông tin user
     """
