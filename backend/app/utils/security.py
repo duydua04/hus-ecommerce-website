@@ -1,0 +1,40 @@
+from datetime import datetime, timedelta, timezone
+from typing import Any, Dict
+import bcrypt, jwt
+from ..config.settings import settings
+
+# ===== Password hashing =====
+def hash_password(plain: str) -> str:
+    """Hàm băm mật khẩu thô thành hash đê lưu vào database"""
+    salt = bcrypt.gensalt()
+    return bcrypt.hashpw(plain.encode("utf-8"), salt).decode("utf-8")
+
+def verify_password(plain: str, hashed: str) -> bool:
+    """So khớp mật khẩu nhập với hash trong DB."""
+    try:
+        return bcrypt.checkpw(plain.encode("utf-8"), hashed.encode("utf-8"))
+    except Exception:
+        return False
+
+# ===== JWT =====
+def create_access_token(sub: str, role: str, expires_minutes: int | None = None, extra: Dict[str, Any] | None = None) -> str:
+    """Tạo JWT access token để xác thực người dùng trong các request tiếp theo"""
+    if expires_minutes is None:
+        expires_minutes = int(getattr(settings, "JWT_EXPIRE_MIN", 60))
+    now = datetime.now(timezone.utc)
+    payload = {
+        "sub": sub,
+        "role": role,
+        "iat": int(now.timestamp()),
+        "exp": int((now + timedelta(minutes=expires_minutes)).timestamp()),
+    }
+    if extra:
+        payload.update(extra)
+    token = jwt.encode(payload, settings.JWT_SECRET, algorithm=settings.JWT_ALG)
+    return token
+
+def decode_token(token: str) -> Dict[str, Any]:
+    """
+    Giải mã và xác thực JWT token, trả về payload chứa thông tin user
+    """
+    return jwt.decode(token, settings.JWT_SECRET, algorithms=[settings.JWT_ALG])
