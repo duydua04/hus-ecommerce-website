@@ -18,7 +18,10 @@ def verify_password(plain: str, hashed: str) -> bool:
 
 # ===== JWT =====
 def create_access_token(sub: str, role: str, expires_minutes: int | None = None, extra: Dict[str, Any] | None = None):
-    """Tạo JWT access token để xác thực người dùng trong các request tiếp theo"""
+    """
+    Tạo JWT access token để xác thực người dùng trong các request tiếp theo,
+    sub va role la thong tin xax thuc de xac dinh nguoi dung khi nguoi dung goi API
+    """
     if expires_minutes is None:
         expires_minutes = int(getattr(settings, "JWT_EXPIRE_MIN", 60))
     now = datetime.now(timezone.utc)
