@@ -10,6 +10,7 @@ class Settings(BaseSettings):
 
     # Object storage (MinIO or S3-compatible)
     S3_ENDPOINT: str
+    S3_PUBLIC_ENDPOINT: str
     S3_ACCESS_KEY: str
     S3_SECRET_KEY: str
     S3_BUCKET: str
