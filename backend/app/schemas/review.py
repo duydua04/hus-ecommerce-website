@@ -36,7 +36,7 @@ class ReviewImageCreate(BaseModel):
     image_url: str  # object_key
 
 # (Response)
-class ReviewImageOut(ORMBase):
+class ReviewImageResponse(ORMBase):
     review_image_id: int
     review_id: int
     image_url: str
@@ -50,7 +50,7 @@ class ReviewReplyCreate(BaseModel):
     reply_text: str
 
 # (Response)
-class ReviewReplyOut(ORMBase):
+class ReviewReplyResponse(ORMBase):
     review_reply_id: int
     review_id: int
     seller_id: int
