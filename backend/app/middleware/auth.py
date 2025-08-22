@@ -9,7 +9,9 @@ bearer = HTTPBearer(auto_error=False)
 
 def get_current_user(cred: HTTPAuthorizationCredentials = Depends(bearer),
                      db: Session = Depends(get_db())):
-
+    """
+    Kiem tra va tra ve nguoi dung hient ai dang truy cap
+    """
     if cred is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing token")
     try:
