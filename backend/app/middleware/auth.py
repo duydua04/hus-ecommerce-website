@@ -8,7 +8,7 @@ from ..models.users import Admin, Buyer, Seller
 bearer = HTTPBearer(auto_error=False)
 
 def get_current_user(cred: HTTPAuthorizationCredentials = Depends(bearer),
-                     db: Session = Depends(get_db())):
+                     db: Session = Depends(get_db)):
     """
     Kiem tra va tra ve nguoi dung hient ai dang truy cap
     """
@@ -22,6 +22,7 @@ def get_current_user(cred: HTTPAuthorizationCredentials = Depends(bearer),
     user = None
     role = payload.get('role')
     sub = payload.get('sub')
+
     if role == 'admin':
         user = db.query(Admin).filter(Admin.email == sub).first()
     elif role == 'buyer':
