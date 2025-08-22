@@ -46,12 +46,8 @@ def decode_token(token: str):
             token,
             settings.JWT_SECRET,
             algorithms=[settings.JWT_ALG],
-            # options={"require": ["exp", "iat"]},  # nếu muốn bắt buộc
-            # audience=getattr(settings, "JWT_AUD", None),
-            # issuer=getattr(settings, "JWT_ISS", None),
         )
     except ExpiredSignatureError as e:
-        # Cho phép layer trên phân biệt lỗi hết hạn
         raise e
     except InvalidTokenError as e:
         raise e

@@ -1,5 +1,5 @@
 from __future__ import annotations
-from demical import Demical
+from decimal import Decimal
 from pydantic import BaseModel, Field
 from .common import ORMBase
 

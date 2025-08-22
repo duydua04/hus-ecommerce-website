@@ -1,6 +1,6 @@
 import boto3
 from botocore.client import Config
-from settings import settings
+from .settings import settings
 
 def client():
     # Tạo boto3 client
