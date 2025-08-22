@@ -72,7 +72,7 @@ class SellerResponse(TimestampedOut):
     phone: str
     fname: str
     lname: str | None = None
-    shopname: str
+    shop_name: str
     seller_tier: SellerTier
     avt_url: str | None = None
     description: str | None = None
