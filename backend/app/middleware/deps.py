@@ -9,15 +9,15 @@ bearer = HTTPBearer(auto_error=False)
 
 def get_current_user(cred: HTTPAuthorizationCredentials = Depends(bearer),
                      db: Session = Depends(get_db())):
-    #Neu khong co token thi tra ve loi 401
+
     if cred is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing token")
-
     try:
         payload = decode_token(cred.credentials)
     except Exception:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
 
+    user = None
     role = payload.get('role')
     sub = payload.get('sub')
     if role == 'admin':
@@ -33,3 +33,19 @@ def get_current_user(cred: HTTPAuthorizationCredentials = Depends(bearer),
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
 
     return {"role": role, "sub": sub, "user": user}
+
+# Các hàm dùng làm depends router cần giới hạn quyền, code 403 may chu tu choi xac thuc
+def require_admin(info = Depends(get_current_user)):
+    if info["role"] != "admin":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin only")
+    return info
+
+def require_buyer(info = Depends(get_current_user)):
+    if info["role"] != 'buyer':
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Buyer only")
+    return info
+
+def require_seller(info = Depends(get_current_user)):
+    if info["role"] != 'seller':
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Seller only")
+    return info
