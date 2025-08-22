@@ -16,7 +16,7 @@ class RegisterSeller(BaseModel):
     fname: str
     lname: str
     password: str = Field(..., min_length=6)
-    shopname: str
+    shop_name: str
 
 class Login(BaseModel):
     email: EmailStr
