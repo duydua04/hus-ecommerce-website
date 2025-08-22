@@ -1,6 +1,8 @@
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict
 import bcrypt, jwt
+from jwt import ExpiredSignatureError, InvalidTokenError
+
 from ..config.settings import settings
 
 # ===== Password hashing =====
@@ -16,7 +18,6 @@ def verify_password(plain: str, hashed: str) -> bool:
     except Exception:
         return False
 
-# ===== JWT =====
 def create_access_token(sub: str, role: str, expires_minutes: int | None = None, extra: Dict[str, Any] | None = None):
     """
     Tạo JWT access token để xác thực người dùng trong các request tiếp theo,
@@ -40,4 +41,17 @@ def decode_token(token: str):
     """
     Giải mã và xác thực JWT token, trả về payload chứa thông tin user
     """
-    return jwt.decode(token, settings.JWT_SECRET, algorithms=[settings.JWT_ALG])
+    try:
+        return jwt.decode(
+            token,
+            settings.JWT_SECRET,
+            algorithms=[settings.JWT_ALG],
+            # options={"require": ["exp", "iat"]},  # nếu muốn bắt buộc
+            # audience=getattr(settings, "JWT_AUD", None),
+            # issuer=getattr(settings, "JWT_ISS", None),
+        )
+    except ExpiredSignatureError as e:
+        # Cho phép layer trên phân biệt lỗi hết hạn
+        raise e
+    except InvalidTokenError as e:
+        raise e
