@@ -6,13 +6,13 @@ from ..schemas.auth import RegisterBuyer, RegisterSeller, Login, Token
 from ..schemas.user import BuyerResponse, SellerResponse
 from ..utils.security import hash_password, verify_password, create_access_token
 
-def email_or_phone_token(db: Session, model, email: str, phone: str):
+def email_or_phone_taken(db: Session, model, email: str, phone: str):
     return db.query(model).filter((model.email == email) | (model.phone == phone)).first() is not None
 
 # Cac ham Register
 def register_buyer(db: Session, payload: RegisterBuyer):
     # Kiem tra neu email va phone da ton tai thi bao loi
-    if email_or_phone_token(db, Buyer, payload.email, payload.phone):
+    if email_or_phone_taken(db, Buyer, payload.email, payload.phone):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email or phone already buyer")
 
     buyer = Buyer(
@@ -29,7 +29,7 @@ def register_buyer(db: Session, payload: RegisterBuyer):
     return BuyerResponse.model_validate(buyer)
 
 def register_seller(db: Session, payload: RegisterSeller):
-    if email_or_phone_token(db, Seller, payload.email, payload.phone):
+    if email_or_phone_taken(db, Seller, payload.email, payload.phone):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email or phone already seller")
 
     seller = Seller(
@@ -50,7 +50,7 @@ def register_seller(db: Session, payload: RegisterSeller):
 def issue_token(email: str, role: str):
     expires_minutes = int(getattr(settings, "JWT_EXPIRE_MIN", 60))
     token = create_access_token(sub=email, role=role, expires_minutes=expires_minutes)
-    return Token(access_token=token, expires_in=expires_minutes * 60)
+    return Token(access_token=token, expires_in=expires_minutes * 60, token_type="bearer")
 
 # Cac ham login
 

@@ -22,7 +22,7 @@ class Login(BaseModel):
     email: EmailStr
     password: str
 
-class Token:
+class Token(BaseModel):
     access_token: str
     token_type: str
-    expires_int: int
+    expires_in: int

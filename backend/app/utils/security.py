@@ -11,8 +11,10 @@ def hash_password(plain: str):
     salt = bcrypt.gensalt()
     return bcrypt.hashpw(plain.encode("utf-8"), salt).decode("utf-8")
 
-def verify_password(plain: str, hashed: str) -> bool:
+def verify_password(plain: str, hashed: str):
     """So khớp mật khẩu nhập với hash trong DB."""
+    if not hashed or not plain:
+        return False
     try:
         return bcrypt.checkpw(plain.encode("utf-8"), hashed.encode("utf-8"))
     except Exception:
@@ -42,11 +44,7 @@ def decode_token(token: str):
     Giải mã và xác thực JWT token, trả về payload chứa thông tin user
     """
     try:
-        return jwt.decode(
-            token,
-            settings.JWT_SECRET,
-            algorithms=[settings.JWT_ALG],
-        )
+        return jwt.decode(token, settings.JWT_SECRET, algorithms=[settings.JWT_ALG])
     except ExpiredSignatureError as e:
         raise e
     except InvalidTokenError as e:

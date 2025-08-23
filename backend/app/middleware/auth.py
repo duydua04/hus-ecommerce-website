@@ -1,5 +1,6 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from jwt import ExpiredSignatureError, InvalidTokenError
 from sqlalchemy.orm import Session
 from ..config.db import get_db
 from ..utils.security import decode_token
@@ -16,7 +17,9 @@ def get_current_user(cred: HTTPAuthorizationCredentials = Depends(bearer),
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing token")
     try:
         payload = decode_token(cred.credentials)
-    except Exception:
+    except ExpiredSignatureError:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token expired")
+    except InvalidTokenError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
 
     user = None

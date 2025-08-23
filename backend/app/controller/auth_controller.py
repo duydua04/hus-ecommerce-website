@@ -32,17 +32,18 @@ def register_buyer(payload: RegisterBuyer, db: Session = Depends(get_db)):
 def register_seller(payload: RegisterSeller, db: Session = Depends(get_db)):
     return auth_service.register_seller(db, payload)
 
+# Cac router dang nhap deu tra ve token de biet la ai
 #Router dang nhap cho admin
-@router.post("/login/admin", response_model=AdminResponse)
+@router.post("/login/admin", response_model=Token)
 def login_admin(payload: Login, db: Session = Depends(get_db)):
     return auth_service.login_admin(db, payload)
 
 #Router dang nhap cho buyer
-@router.post("/login/buyer", response_model=BuyerResponse)
+@router.post("/login/buyer", response_model=Token)
 def login_buyer(payload: Login, db: Session = Depends(get_db)):
     return auth_service.login_buyer(db, payload)
 
 #Router dang nhap cho seller
-@router.post("/login/seller", response_model=SellerResponse)
+@router.post("/login/seller", response_model=Token)
 def login_seller(payload: Login, db: Session = Depends(get_db)):
     return auth_service.login_seller(db, payload)
