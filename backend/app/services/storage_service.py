@@ -6,6 +6,7 @@ from botocore.exceptions import ClientError
 from ..config.settings import settings
 from ..config.s3 import get_s3_client
 import time, uuid, mimetypes, boto3
+from urllib.parse import urlparse
 
 # Luu tru nhung dinh dang file cho phep tai
 IMAGE_MIME = {"image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"}
@@ -124,3 +125,23 @@ def delete_object(object_key: str):
     except ClientError as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"S3 delete failed {e}")
 
+def extract_object_key(url_or_key: str):
+    # Nhan vao full url sau do tra ve object key
+    if not url_or_key:
+        return ""
+
+    # Kiem tra neu chuoi bat dau bang http thi la url khong phai thi tra ve chuoi do bo di "/"
+    if not url_or_key.lower().startswith("http"):
+        return url_or_key.lstrip("/")
+
+    # Phan tich url thanh cac phan sau do lay phan path cua url
+    u = urlparse(url_or_key)
+    path = u.path.lstrip("/")
+    bucket = settings.S3_BUCKET
+
+    # neu path bat dau bang ten bucket + "/" thi tra ve doan sau cua path
+    # neu khong tra ve toan bo path
+    if path.startswith(bucket + "/"):
+        return path[len(bucket) + 1]
+
+    return path
