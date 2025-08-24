@@ -131,7 +131,7 @@ def extract_object_key(url_or_key: str):
         return ""
 
     # Kiem tra neu chuoi bat dau bang http thi la url khong phai thi tra ve chuoi do bo di "/"
-    if not url_or_key.lower().startswith("http"):
+    if not url_or_key.lower().startswith(("http://", "https://")):
         return url_or_key.lstrip("/")
 
     # Phan tich url thanh cac phan sau do lay phan path cua url
@@ -142,6 +142,6 @@ def extract_object_key(url_or_key: str):
     # neu path bat dau bang ten bucket + "/" thi tra ve doan sau cua path
     # neu khong tra ve toan bo path
     if path.startswith(bucket + "/"):
-        return path[len(bucket) + 1]
+        return path[len(bucket) + 1:]
 
     return path
