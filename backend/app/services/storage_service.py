@@ -123,3 +123,4 @@ def delete_object(object_key: str):
         return {'deleted': True, 'object_key': object_key}
     except ClientError as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"S3 delete failed {e}")
+
