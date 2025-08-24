@@ -8,7 +8,7 @@ from ..config.s3 import get_s3_client
 import time, uuid, mimetypes, boto3
 
 # Luu tru nhung dinh dang file cho phep tai
-IMAGE_MIME = {"image/jpeg", "image/png", "image/webp", "image/gif"}
+IMAGE_MIME = {"image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"}
 VIDEO_MIME = {"video/mp4", "video/webm"}
 
 def _s3():
