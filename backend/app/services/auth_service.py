@@ -1,6 +1,6 @@
 from fastapi import  HTTPException, status
 from sqlalchemy.orm import Session
-from ..config import settings
+from ..config.settings import settings
 from ..models.users import Admin, Seller, Buyer
 from ..schemas.auth import RegisterBuyer, RegisterSeller, Login, Token
 from ..schemas.user import BuyerResponse, SellerResponse
