@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends, Header, HTTPException, status, Query
 from fastapi.responses import StreamingResponse
-from sqlalchemy.orm import Session
 from typing import Optional, Literal
 from ..config.db import get_db
 from ..config.settings import settings

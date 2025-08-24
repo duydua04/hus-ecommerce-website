@@ -3,8 +3,7 @@ from sqlalchemy.orm import Session
 from ..config.db import get_db
 from ..config.s3 import public_url
 from ..middleware.auth import get_current_user
-from ..services.storage_service import upload_via_backend
-from ..models import Admin, Buyer, Seller
+from ..services.storage_service import upload_via_backend, delete_object
 
 router = APIRouter(
     prefix="/avatars",
@@ -40,7 +39,12 @@ async def upload_my_avatar(file: UploadFile, db: Session = Depends(get_db), info
 @router.delete("/me")
 def delete_my_avatar(db: Session = Depends(get_db), info = Depends(get_current_user)):
     user = info["user"]
+
+    if user.avt_url:
+        object_key = user.avt_url
+        delete_object(object_key)
+
     user.avt_url = None
     db.commit()
 
-    return {"deleted": True}
+    return {"deleted": True, "removed_from_storage": True}
