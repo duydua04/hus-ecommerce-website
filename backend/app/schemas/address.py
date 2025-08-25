@@ -32,7 +32,6 @@ class AddressResponse(ORMBase):
 
 # Request toi server gan dia chi cho buyer
 class BuyerAddressCreate(BaseModel):
-    buyer_id: int
     address_id: int
     is_default: bool | None = None
     label: BuyerAddressLabel | None = None
@@ -52,7 +51,6 @@ class BuyerAddressResponse(ORMBase):
 
 # Request tao dia chi seller
 class SellerAddressCreate(BaseModel):
-    seller_id: int
     address_id: int
     is_default: bool | None = None
     label: SellerAddressLabel | None = None
