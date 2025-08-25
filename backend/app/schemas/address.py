@@ -47,14 +47,14 @@ class BuyerAddressResponse(ORMBase):
     buyer_address_id: int
     buyer_id: int
     address_id: int
-    is_defalut:bool
+    is_default:bool
     label: BuyerAddressLabel | None = None
 
 # Request tao dia chi seller
 class SellerAddressCreate(BaseModel):
     seller_id: int
     address_id: int
-    is_defalut: bool | None = None
+    is_default: bool | None = None
     label: SellerAddressLabel | None = None
 
 # Request cap nhat cho dia chi seller
