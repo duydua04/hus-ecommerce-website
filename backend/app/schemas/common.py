@@ -17,7 +17,7 @@ class BuyerTier(str, Enum):
 # Enum về thứ hạng người bán bao gồm từ shop thường đến shop mall
 class SellerTier(str, Enum):
     regular = "regular"
-    preferred = "Preferred"
+    preferred = "preferred"
     mall = "mall"
 
 class BuyerAddressLabel(str, Enum):
