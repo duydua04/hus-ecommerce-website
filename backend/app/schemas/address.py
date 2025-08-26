@@ -36,7 +36,7 @@ class BuyerAddressCreate(BaseModel):
     is_default: bool | None = None
     label: BuyerAddressLabel | None = None
 
-# Response tra ve thong tin dia chi cua buyer
+# Request thong tin dia chi cua buyer
 class BuyerAddressUpdate(BaseModel):
     is_default: bool | None = None
     label: BuyerAddressLabel | None = None
