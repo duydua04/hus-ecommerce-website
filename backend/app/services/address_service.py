@@ -5,24 +5,25 @@ from ..schemas.address import AddressCreate, AddressUpdate, BuyerAddressUpdate, 
 from ..schemas.common import BuyerAddressLabel, SellerAddressLabel
 
 # Xac minh quyen so huu cua mot dia chi link, dam bao rang nguoi dung hien tai co quyen truy cap vao link do
-def ensure_owner_link(link, user_id, role: str):
-    if role == "buyer":
-        if not link or link.buyer_id != user_id:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Address link not found")
-    else:
-        if not link or link.seller_id != user_id:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Address link not found")
+def ensure_owner_link(link, user_id: int, role: str):
+    if not link:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Address link not found")
+
+    if role == "buyer" and link.buyer_id != user_id:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Address link not found")
+    elif role == "seller" and link.seller_id != user_id:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Address link not found")
 
 # Setting dia chi mac dinh cho buyer, chi co 1 dia chi mac dinh
-def set_single_default_address_for_buyer(db: Session, buyer_id: int, keep_id: int):
+def set_single_default_address_for_buyer(db: Session, buyer_id: int, buyer_address_id: int):
     db.query(BuyerAddress).filter(BuyerAddress.buyer_id == buyer_id).update({"is_default": False})
-    db.query(BuyerAddress).filter(BuyerAddress.address_id == keep_id).update({"is_default": True})
+    db.query(BuyerAddress).filter(BuyerAddress.buyer_address_id == buyer_address_id).update({"is_default": True})
     db.commit()
 
 # Setting dia chi mac dinh cho seller, chi co 1 dia chi mac dinh
-def set_single_default_address_for_seller(db: Session, seller_id: int, keep_id: int):
+def set_single_default_address_for_seller(db: Session, seller_id: int, seller_address_id: int):
     db.query(SellerAddress).filter(SellerAddress.seller_id == seller_id).update({"is_default": False})
-    db.query(SellerAddress).filter(SellerAddress.address_id == keep_id).update({"is_default": True})
+    db.query(SellerAddress).filter(SellerAddress.seller_address_id == seller_address_id).update({"is_default": True})
     db.commit()
 
 # DUNG CHUNG
@@ -133,7 +134,7 @@ def buyer_update_address_fields(db: Session, buyer_id: int, buyer_address_id: in
 def buyer_set_default(db: Session, buyer_id: int, buyer_address_id: int):
     link = db.query(BuyerAddress).filter(BuyerAddress.buyer_address_id == buyer_address_id).first()
     ensure_owner_link(link, buyer_id, "buyer")
-    set_single_default_address_for_buyer(link)
+    set_single_default_address_for_buyer(link, buyer_id, buyer_address_id)
     db.refresh(link)
 
     return link
@@ -245,7 +246,7 @@ def seller_set_default(db: Session, seller_id: int, seller_address_id: int):
 
 # xoa dia chi cua seller
 def seller_delete_address(db: Session, seller_id: int, seller_address_id: int):
-    link = db.query(SellerAddress).filter(SellerAddress.address_id == seller_address_id).first()
+    link = db.query(SellerAddress).filter(SellerAddress.seller_address_id == seller_address_id).first()
     ensure_owner_link(link, seller_id, "seller")
     address_id = link.address_id
     db.delete(link)
