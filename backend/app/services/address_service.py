@@ -131,7 +131,7 @@ def buyer_update_address_fields(db: Session, buyer_id: int, buyer_address_id: in
     return update_address(db, link.address_id, payload)
 
 
-def buyer_set_default(db: Session, buyer_id: int, buyer_address_id: int):
+def buyer_set_default_address(db: Session, buyer_id: int, buyer_address_id: int):
     link = db.query(BuyerAddress).filter(BuyerAddress.buyer_address_id == buyer_address_id).first()
     ensure_owner_link(link, buyer_id, "buyer")
     set_single_default_address_for_buyer(link, buyer_id, buyer_address_id)
