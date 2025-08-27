@@ -18,7 +18,7 @@ router = APIRouter(
     tags=["buyer_addresses"]
 )
 
-# Chuyen doi 1 doi tuong BuyerAddress thanh 1 response duoc tra ve
+# Chuyen doi 1 doi tuong Buyer Address thanh 1 response duoc tra ve
 def to_buyer_link_response(link):
     return BuyerAddressResponse(
         buyer_address_id=link.buyer_address_id,

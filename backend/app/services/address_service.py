@@ -41,8 +41,19 @@ def update_address(db: Session, address_id: int, payload: AddressUpdate):
     address = db.query(Address).filter(Address.address_id == address_id).first()
     if not address:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Address not found")
-    for k, v in payload.model_dump(exclude_unset=True).items():
-        setattr(address, k, v)
+
+    # Loai bo None va unset value
+    update_data = payload.model_dump(exclude_none=True, exclude_unset=True)
+
+    # Chi update nhung field thuc su thay doi
+    for field, new_value in update_data.items():
+        if new_value == "string":
+            continue
+
+        current_value = getattr(address, field)
+        if current_value != new_value and new_value.strip() != "":
+            setattr(address, field, new_value)
+
     db.commit()
     db.refresh(address)
 
@@ -128,13 +139,15 @@ def buyer_update_address_fields(db: Session, buyer_id: int, buyer_address_id: in
         .first()
 
     ensure_owner_link(link, buyer_id, "buyer")
-    return update_address(db, link.address_id, payload)
+    update_address(db, link.address_id, payload)
+    db.refresh(link)
+    return link
 
 
 def buyer_set_default_address(db: Session, buyer_id: int, buyer_address_id: int):
     link = db.query(BuyerAddress).filter(BuyerAddress.buyer_address_id == buyer_address_id).first()
     ensure_owner_link(link, buyer_id, "buyer")
-    set_single_default_address_for_buyer(link, buyer_id, buyer_address_id)
+    set_single_default_address_for_buyer(db, buyer_id, buyer_address_id)
     db.refresh(link)
 
     return link
