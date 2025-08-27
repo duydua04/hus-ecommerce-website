@@ -99,7 +99,7 @@ def buyer_link_address_existing(db: Session, buyer_id: int, address_id: int,
 def buyer_create_and_link_address(db: Session, buyer_id: int, address: AddressCreate,
                           is_default: bool | None, label: BuyerAddressLabel | None):
     address = create_address(db, address)
-    buyer_link_address_existing(db, buyer_id, address.address_id, is_default, label)
+    return buyer_link_address_existing(db, buyer_id, address.address_id, is_default, label)
 
 # Cap nhat thong tin lien ket dia chi cua nguoi mua
 def buyer_update_link_address(db: Session, buyer_id: int, buyer_address_id: int, payload: BuyerAddressUpdate):

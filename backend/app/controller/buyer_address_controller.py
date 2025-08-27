@@ -2,15 +2,15 @@ from fastapi import HTTPException, status
 from typing import List
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from backend.app.config.db import get_db
-from backend.app.middleware.auth import require_buyer
-from backend.app.schemas.address import (
+from ..config.db import get_db
+from ..middleware.auth import require_buyer
+from ..schemas.address import (
     AddressCreate, AddressUpdate,
     BuyerAddressCreate, BuyerAddressUpdate,
     BuyerAddressResponse, AddressResponse
 )
-from backend.app.services import address_service
-from backend.app.models.address import BuyerAddress
+from ..services import address_service
+from ..models.address import BuyerAddress
 from ..schemas.common import BuyerAddressLabel
 
 router = APIRouter(
@@ -19,7 +19,7 @@ router = APIRouter(
 )
 
 # Chuyen doi 1 doi tuong BuyerAddress thanh 1 response duoc tra ve
-def to_buyer_link_response(link: BuyerAddress):
+def to_buyer_link_response(link):
     return BuyerAddressResponse(
         buyer_address_id=link.buyer_address_id,
         buyer_id=link.buyer_id,
@@ -55,6 +55,7 @@ def link_address_existing(body: BuyerAddressCreate, info = Depends(require_buyer
 
     return to_buyer_link_response(link)
 
+# Update lien ket dia chi voi buyer
 @router.patch("/{buyer_address_id}", response_model=BuyerAddressResponse)
 def update_link(buyer_address_id: int, payload: BuyerAddressUpdate,
                 info = Depends(require_buyer), db: Session = Depends(get_db)):
