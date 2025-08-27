@@ -10,7 +10,6 @@ from ..schemas.address import (
     BuyerAddressResponse, AddressResponse
 )
 from ..services import address_service
-from ..models.address import BuyerAddress
 from ..schemas.common import BuyerAddressLabel
 
 router = APIRouter(
