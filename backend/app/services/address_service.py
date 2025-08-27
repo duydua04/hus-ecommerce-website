@@ -249,7 +249,7 @@ def seller_update_address_fields(db: Session, seller_id: int, seller_address_id:
     return update_address(db, link.address_id, payload)
 
 # Set dia chi mac dinh cho seller
-def seller_set_default(db: Session, seller_id: int, seller_address_id: int):
+def seller_set_default_address(db: Session, seller_id: int, seller_address_id: int):
     link = db.query(SellerAddress).filter(SellerAddress.seller_address_id == seller_address_id).first()
     ensure_owner_link(link, seller_id, "seller")
     set_single_default_address_for_seller(db, seller_id, seller_address_id)

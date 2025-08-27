@@ -53,7 +53,7 @@ def link_address_existing(body: BuyerAddressCreate, info = Depends(require_buyer
 
     return to_buyer_link_response(link)
 
-# Update lien ket dia chi voi buyer
+# Update lien ket dia chi voi buyer (is_default, label)
 @router.patch("/{buyer_address_id}", response_model=BuyerAddressResponse)
 def update_link(buyer_address_id: int, payload: BuyerAddressUpdate,
                 info = Depends(require_buyer), db: Session = Depends(get_db)):
