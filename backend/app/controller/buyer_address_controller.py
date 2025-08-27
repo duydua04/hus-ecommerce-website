@@ -1,6 +1,5 @@
-from fastapi import HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List
-from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from ..config.db import get_db
 from ..middleware.auth import require_buyer
