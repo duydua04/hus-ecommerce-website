@@ -2,7 +2,7 @@ from __future__ import annotations
 from datetime import datetime, date
 from decimal import Decimal
 from enum import Enum
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict
 
 # Tạo các enum phù hợp với các Enum đã có trong cơ sở dữ liệu và model
 
@@ -85,8 +85,7 @@ class PaymentStatus(str, Enum):
 
 class ORMBase(BaseModel):
     """Bật chế độ ORM → có thể .from_orm() (Pydantic v2: from_attributes=True)."""
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class TimestampedOut(ORMBase):
     created_at: datetime | None = None
