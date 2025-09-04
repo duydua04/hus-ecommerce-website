@@ -4,7 +4,7 @@ from .common import ORMBase, TimestampedOut, BuyerTier, SellerTier
 
 # Respone từ server trả về thông tin admin
 class AdminResponse(TimestampedOut):
-    admin_id: str
+    admin_id: int
     email: EmailStr
     phone: str
     fname: str
@@ -23,7 +23,7 @@ class BuyerCreate(BaseModel):
 
 # Request toi server thong tin update cua Buyer
 class BuyerUpdate(BaseModel):
-    phone: str | None = Field(None, max_length=20)
+    phone: str | None = Field(None, max_length=15)
     fname: str | None = None
     lname: str | None = None
     avt_url: str | None = None

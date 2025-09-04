@@ -75,4 +75,3 @@ def login_seller(db: Session, payload: Login):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email or password")
 
     return issue_token(seller.email, role="seller")
-
