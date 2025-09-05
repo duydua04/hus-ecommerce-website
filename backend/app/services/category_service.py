@@ -63,10 +63,11 @@ def update_category(db: Session, category_id: int, payload: CategoryUpdate):
         ).first()
         if duplicate:
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Category name already exists")
+        cat.category_name = name
 
     db.add(cat)
     db.commit()
-    db.refresh()
+    db.refresh(cat)
 
     return CategoryResponse.model_validate(cat)
 
