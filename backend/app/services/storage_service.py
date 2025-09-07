@@ -41,7 +41,7 @@ def validate_content_type(ct: str):
 # Ham upload file Minio
 async def upload_via_backend(folder: Literal['avatars', 'products', 'reviews'],
                              file: UploadFile,
-                             max_size_mb: int = 50):
+                             max_size_mb: int = 10):
     # Neu file khong co ten thi bao loi
     if not file.filename:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='File name is required')
@@ -148,7 +148,7 @@ def extract_object_key(url_or_key: str):
 
 async def upload_many_via_backend(folder: Literal['avatars', 'products', 'reviews'],
                                   files: List[UploadFile],
-                                  max_size_mb: int = 50):
+                                  max_size_mb: int = 10):
     """
         Upload nhiều file qua backend (tuần tự).
         Trả về list kết quả giống upload_via_backend ở phía bên trên
