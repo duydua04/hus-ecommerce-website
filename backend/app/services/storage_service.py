@@ -160,4 +160,5 @@ async def upload_many_via_backend(folder: Literal['avatars', 'products', 'review
     for f in files:
         res = await upload_via_backend(folder, f, max_size_mb=max_size_mb)
         results.append(res)
+
     return results
