@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Literal, IO
+from typing import Literal, IO, List
 from fastapi import HTTPException, UploadFile, status
 from botocore.client import Config
 from botocore.exceptions import ClientError
@@ -145,3 +145,19 @@ def extract_object_key(url_or_key: str):
         return path[len(bucket) + 1:]
 
     return path
+
+async def upload_many_via_backend(folder: Literal['avatars', 'products', 'reviews'],
+                                  files: List[UploadFile],
+                                  max_size_mb: int = 50):
+    """
+        Upload nhiều file qua backend (tuần tự).
+        Trả về list kết quả giống upload_via_backend ở phía bên trên
+    """
+    if not files:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No files provided")
+
+    results = []
+    for f in files:
+        res = await upload_via_backend(folder, f, max_size_mb=max_size_mb)
+        results.append(res)
+    return results
