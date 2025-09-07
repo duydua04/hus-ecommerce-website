@@ -58,5 +58,5 @@ def public_url(object_key: str) -> str:
 
     MinIO: http://<endpoint>/<bucket>/<key>
     """
-    base = settings.S3_ENDPOINT.rstrip("/")
+    base = settings.S3_PUBLIC_ENDPOINT.rstrip("/")
     return f"{base}/{settings.S3_BUCKET}/{object_key}"
