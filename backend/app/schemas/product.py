@@ -90,6 +90,3 @@ class ProductImageResponse(ORMBase):
     product_id: int
     image_url: str
     is_primary: bool
-    public_url: str | None = None          # dev: bucket public
-    presigned_get_url: str | None = None   # prod: bucket private
-
