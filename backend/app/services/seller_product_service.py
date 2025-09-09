@@ -3,8 +3,6 @@ from fastapi import HTTPException, UploadFile, status
 from sqlalchemy.orm import Session
 from typing import List
 
-from sqlalchemy.testing import uses_deprecated
-
 from ..models.order import OrderItem
 from ..models.catalog import Product, ProductSize, ProductVariant, ProductImage
 
@@ -16,7 +14,7 @@ from ..schemas.product import (
 )
 from ..schemas.common import Page, PageMeta
 from ..services.storage_service import upload_many_via_backend, upload_via_backend, delete_object
-from ..config.s3 import public_url, presign_get
+from ..config.s3 import public_url
 
 
 def ensure_owner(db: Session, seller_id: int, product_id: int):
@@ -50,9 +48,13 @@ def seller_create_product(db: Session, seller_id: int, payload: ProductCreate):
 
     return ProductResponse.model_validate(prod)
 
-# Update thong tin san pham
+
 def seller_update_product(db: Session, seller_id: int, product_id: int, payload: ProductUpdate):
-    prod = ensure_owner(db, product_id, seller_id)
+    """
+    Update thong tin san pham
+    """
+
+    prod = ensure_owner(db, seller_id, product_id)
     if payload.name is not None:
         prod.name = payload.name
     if payload.base_price is not None:
@@ -73,8 +75,11 @@ def seller_update_product(db: Session, seller_id: int, product_id: int, payload:
     db.refresh(prod)
     return ProductResponse.model_validate(prod)
 
-# Ham list san pham o phia seller
 def seller_list_products(db: Session, seller_id: int, q: str | None, active_only: bool, limit: int, offset: int):
+    """
+    Ham list san pham o phia seller
+    """
+
     # query co ban lay tat ca san pham cua seller
     query = db.query(Product).filter(Product.seller_id == seller_id)
     # Neu co tu khoa tim kiem thi thuc hien truy van
@@ -91,8 +96,18 @@ def seller_list_products(db: Session, seller_id: int, q: str | None, active_only
 
     return Page(meta=PageMeta(total=total, limit=limit, offset=offset), data=data)
 
-# Xoa mem san pham - de du lai lich su don hang
+def seller_product_detail(db: Session, seller_id: int, product_id: int):
+    prod = ensure_owner(db, seller_id, product_id)
+    if not prod:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
+
+    return ProductResponse.model_validate(prod)
+
 def seller_soft_delete_product(db: Session, seller_id: int, product_id: int):
+    """
+    # Xoa mem san pham - de du lai lich su don hang
+    """
+
     prod = ensure_owner(db, seller_id, product_id)
 
     prod.is_active = False
@@ -127,7 +142,7 @@ async def seller_upload_image_backend(db: Session, seller_id: int, product_id: i
         is_primary=img.is_primary
     )
 
-async def seller_upload_many_image_backend(db: Session, seller_id: int, product_id: int,
+async def seller_upload_many_images_backend(db: Session, seller_id: int, product_id: int,
                                            files: List[UploadFile], primary_index: int | None):
     ensure_owner(db, seller_id, product_id)
     results = await upload_many_via_backend('products', files, max_size_mb=5)
@@ -154,9 +169,9 @@ async def seller_upload_many_image_backend(db: Session, seller_id: int, product_
             public_image_url=public_url(img.image_url),
             is_primary=img.is_primary,
         ))
-        db.commit()
 
-        return outs
+    db.commit()
+    return outs
 
 def seller_set_primary_image(db: Session, seller_id: int, product_id: int, product_image_id: int):
     ensure_owner(db, seller_id, product_id)
@@ -334,7 +349,7 @@ def seller_delete_size(db: Session, seller_id: int, size_id: int):
     if not size:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Size not found")
 
-    variant = db.query(ProductVariant).filter(ProductVariant.variant_id == size.variant_id)
+    variant = db.query(ProductVariant).filter(ProductVariant.variant_id == size.variant_id).first()
     prod = ensure_owner(db, seller_id, variant.product_id)
 
     """ 
