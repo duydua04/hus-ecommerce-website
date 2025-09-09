@@ -105,7 +105,8 @@ async def seller_upload_image_backend(db: Session, seller_id: int, product_id: i
     # Upload anh len storage
     result = await upload_via_backend('products', file, max_size_mb=5)
     object_key = result['object_key']
-    image_url = public_url(object_key)
+    image_url = object_key
+    public_image_url = public_url(image_url)
     # Neu anh upload duoc chon la primary
     if is_primary:
         db.query(ProductImage).filter(ProductImage.product_id == product_id).update({'is_primary': False})
@@ -119,6 +120,7 @@ async def seller_upload_image_backend(db: Session, seller_id: int, product_id: i
         product_image_id=img.product_image_id,
         product_id=img.product_id,
         image_url=img.image_url,
+        public_image_url=public_image_url,
         is_primary=img.is_primary
     )
 
@@ -137,15 +139,16 @@ async def seller_upload_many_image_backend(db: Session, seller_id: int, product_
     """
     outs: list[ProductImageResponse] = []
     for index, res in enumerate(results):
-        obj_key = res["object_key"]
+        image_url = res["object_key"]
         is_primary = (primary_index is not None and index == primary_index)
-        img = ProductImage(product_id=product_id, image_url=public_url(obj_key), is_primary=is_primary)
+        img = ProductImage(product_id=product_id, image_url=image_url, is_primary=is_primary)
         db.add(img)
         db.flush()
         outs.append(ProductImageResponse(
             product_image_id=img.product_image_id,
             product_id=img.product_id,
             image_url=img.image_url,
+            public_image_url=public_url(img.image_url),
             is_primary=img.is_primary,
         ))
         db.commit()
@@ -190,6 +193,7 @@ def seller_list_images_of_product(db: Session, seller_id: int, product_id: int):
             product_image_id=img.product_image_id,
             product_id=img.product_id,
             image_url=img.image_url,
+            public_image_url=public_url(img.image_url),
             is_primary=img.is_primary,
         ))
 
@@ -204,7 +208,7 @@ def seller_delete_image_of_product(db: Session, seller_id: int, product_id: int,
            .first()
     )
 
-    delete_object(extract_object_key(img.image_url))
+    delete_object(img.image_url)
     db.delete(img)
     db.commit()
 

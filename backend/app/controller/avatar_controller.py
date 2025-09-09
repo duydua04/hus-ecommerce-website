@@ -20,17 +20,18 @@ async def upload_my_avatar(file: UploadFile, db: Session = Depends(get_db), info
 
     # Upload len minio
     stored = await upload_via_backend("avatars", file, max_size_mb=10)
-    url = public_url(stored["object_key"])
+    avt_url_database = stored["object_key"]
+    avt_url = public_url(avt_url_database)
 
     user = info["user"]
-    user.avt_url = url
+    user.avt_url = avt_url_database
     db.commit()
     db.refresh(user)
 
     return {
         "role": info["role"],
         "email": user.email,
-        "avt_url": url,
+        "public_url": avt_url,
         "object_key": stored["object_key"],
         "size": stored["size"],
         "content_type": stored["content_type"]

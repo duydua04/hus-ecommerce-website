@@ -89,4 +89,5 @@ class ProductImageResponse(ORMBase):
     product_image_id: int
     product_id: int
     image_url: str
+    public_image_url: str
     is_primary: bool
