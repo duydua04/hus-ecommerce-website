@@ -211,4 +211,37 @@ def seller_delete_image_of_product(db: Session, seller_id: int, product_id: int,
     return {"deleted": True}
 
 
-# -----VARIANT -----
+# -----VARIANT------
+# Ham tao bien the moi cho san phan
+def seller_create_variant(db: Session, seller_id: int, product_id: int, payload: ProductVariantCreate):
+    product = ensure_owner(db, seller_id, product_id)
+    variant = ProductVariant(
+        product_id=product_id,
+        variant_name=payload.variant_name,
+        price_adjustment=payload.price_adjustment or 0
+    )
+
+    db.add(variant)
+    db.commit()
+    db.refresh(variant)
+
+    return ProductVariantResponse.model_validate(variant)
+
+def seller_update_variant(db: Session, seller_id: int, variant_id: int, payload: ProductVariantUpdate):
+    variant = db.query(ProductVariant).filter(ProductVariant.variant_id == variant_id).first()
+    if not variant:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Variant not found")
+
+    ensure_owner(db, seller_id, variant.product_id)
+
+    if payload.variant_name is not None:
+        variant.variant_name = payload.variant_name
+
+    if payload.price_adjustment is not None:
+        variant.price_adjustment = payload.price_adjustment
+
+    db.add(variant)
+    db.commit()
+    db.refresh(variant)
+
+    return ProductVariantResponse.model_validate(variant)
