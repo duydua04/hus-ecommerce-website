@@ -2,6 +2,9 @@ from __future__ import annotations
 from fastapi import HTTPException, UploadFile, status
 from sqlalchemy.orm import Session
 from typing import List
+
+from sqlalchemy.testing import uses_deprecated
+
 from ..models.order import OrderItem
 from ..models.catalog import Product, ProductSize, ProductVariant, ProductImage
 
@@ -12,7 +15,7 @@ from ..schemas.product import (
     ProductImageResponse
 )
 from ..schemas.common import Page, PageMeta
-from ..services.storage_service import upload_many_via_backend, upload_via_backend, delete_object, extract_object_key
+from ..services.storage_service import upload_many_via_backend, upload_via_backend, delete_object
 from ..config.s3 import public_url, presign_get
 
 
@@ -180,7 +183,6 @@ def seller_set_primary_image(db: Session, seller_id: int, product_id: int, produ
 def seller_list_images_of_product(db: Session, seller_id: int, product_id: int):
     ensure_owner(db, seller_id, product_id)
 
-    #
     imgs = (db.query(ProductImage)
             .filter(ProductImage.product_id == product_id)
             .order_by(ProductImage.is_primary.desc(), ProductImage.product_image_id.asc())
@@ -218,7 +220,7 @@ def seller_delete_image_of_product(db: Session, seller_id: int, product_id: int,
 # -----VARIANT------
 # Ham tao bien the moi cho san phan
 def seller_create_variant(db: Session, seller_id: int, product_id: int, payload: ProductVariantCreate):
-    product = ensure_owner(db, seller_id, product_id)
+    prod = ensure_owner(db, seller_id, product_id)
     variant = ProductVariant(
         product_id=product_id,
         variant_name=payload.variant_name,
@@ -249,3 +251,105 @@ def seller_update_variant(db: Session, seller_id: int, variant_id: int, payload:
     db.refresh(variant)
 
     return ProductVariantResponse.model_validate(variant)
+
+def seller_delete_variant(db: Session, seller_id: int, variant_id: int):
+    # Truy van tim bien the cua san pham
+    variant = db.query(ProductVariant).filter(ProductVariant.variant_id == variant_id).first()
+    if variant:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Variant not found")
+
+    prod = ensure_owner(db, seller_id, variant.product_id)
+
+    """
+    Kiem tra xem bien the hien tai da co don hang nao hay chua,
+    Neu da co bao loi khong xoa duoc
+    """
+    used = db.query(OrderItem.order_item_id) \
+            .filter((OrderItem.product_id == prod.product_id) & (OrderItem.variant_id == variant_id)) \
+            .first()
+
+    if used:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Cannot delete variant because it's already used in orders")
+
+    # Xoa cac size con cua bien the duoc yeu cau xoa
+    size = db.query(ProductSize).filter(ProductSize.variant_id == variant_id).delete(synchronize_session=False)
+    db.delete(variant)
+    db.commit()
+    return {"deleted": True}
+
+#-----SIZE-----
+def seller_create_size(db: Session, seller_id: int, payload: ProductSizeCreate):
+    # Kiem tra xem co variant tuong ung voi size khong, khong co thi bao loi
+    variant = db.query(ProductVariant).filter(ProductVariant.variant_id == payload.variant_id).first()
+    if not variant:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Variant not found")
+
+    # Kiem tra va them size cho bien the
+    ensure_owner(db, seller_id, variant.product_id)
+    size = ProductSize(
+        variant_id=variant.variant_id,
+        size_name=payload.size_name,
+        available_units=payload.available_units or 0,
+        in_stock=payload.in_stock if payload.in_stock is not None else (payload.available_units or 0) > 0
+    )
+
+    db.add(size)
+    db.commit()
+    db.refresh(size)
+
+    return ProductSizeResponse.model_validate(size)
+
+def seller_update_size(db: Session, seller_id: int, size_id: int, payload: ProductSizeUpdate):
+    size = db.query(ProductSize).filter(ProductSize.size_id == size_id).first()
+    if not size:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Size not found")
+
+    variant = db.query(ProductVariant).filter(ProductVariant.variant_id == size.variant_id).first()
+    ensure_owner(db, seller_id, variant.product_id)
+
+    if payload.size_name is not None:
+        size.size_name = payload.size_name
+
+    # Neu so luong ton kho set ve 0 thi thay doi ca ton kho
+    if payload.available_units is not None:
+        size.available_units = payload.available_units
+        if payload.in_stock is None:
+            size.in_stock = payload.available_units > 0
+
+    # Neu ton kho = false thi doi so ca so luong ton kho ve 0
+    if payload.in_stock is not None:
+        if not payload.in_stock:
+            size.available_units = 0
+
+        size.in_stock = payload.in_stock
+
+    db.add(size)
+    db.commit()
+    db.refresh(size)
+
+    return ProductSizeResponse.model_validate(size)
+
+def seller_delete_size(db: Session, seller_id: int, size_id: int):
+    size = db.query(ProductSize).filter(ProductSize.size_id == size_id).first()
+    if not size:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Size not found")
+
+    variant = db.query(ProductVariant).filter(ProductVariant.variant_id == size.variant_id)
+    prod = ensure_owner(db, seller_id, variant.product_id)
+
+    """ 
+    Kiem tra xem co don hang nao voi size nay chua
+    Neu co bao loi khong the xoa
+    """
+    used = db.query(OrderItem.order_item_id) \
+        .filter((OrderItem.product_id == prod.product_id) &
+                (OrderItem.variant_id == variant.variant_id) &
+                (OrderItem.size_id == size.size_id)
+        ).first()
+    if used:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Cannot delete size because it's already used in orders")
+
+    db.delete(size)
+    db.commit()
+
+    return {"deleted": True}
