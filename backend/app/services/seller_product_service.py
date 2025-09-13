@@ -1,39 +1,244 @@
 from __future__ import annotations
+from typing import List, Optional
+
 from fastapi import HTTPException, UploadFile, status
-from sqlalchemy.orm import Session
-from typing import List
+from sqlalchemy.orm import Session, joinedload
 
-from ..models.order import OrderItem
-from ..models.catalog import Product, ProductSize, ProductVariant, ProductImage
-
-from ..schemas.product import (
-    ProductCreate, ProductUpdate, ProductResponse,
-    ProductVariantCreate, ProductVariantUpdate, ProductVariantResponse,
-    ProductSizeCreate, ProductSizeUpdate, ProductSizeResponse,
-    ProductImageResponse
-)
-from ..schemas.common import Page, PageMeta
-from ..services.storage_service import upload_many_via_backend, upload_via_backend, delete_object
 from ..config.s3 import public_url
+from ..models.catalog import Category, Product, ProductImage, ProductSize, ProductVariant
+from ..models.order import OrderItem
+from ..schemas.common import Page, PageMeta
+from ..schemas.product import (
+    ProductCreate,
+    ProductDetail,
+    ProductImageResponse,
+    ProductList,
+    ProductResponse,
+    ProductSizeCreate,
+    ProductSizeResponse,
+    ProductSizeUpdate,
+    ProductUpdate,
+    ProductVariantCreate,
+    ProductVariantResponse,
+    ProductVariantUpdate,
+    ProductVariantWithSizesResponse,
+)
+from ..services.storage_service import delete_object, upload_many_via_backend, upload_via_backend
+
+# VALIDATION HELPERS
+def ensure_product_ownership(db: Session, seller_id: int, product_id: int):
+    """
+    Kiem tra san pham co thuoc seller duoc dua vao khong
+    """
+    product = db.query(Product).filter(
+        Product.product_id == product_id,
+        Product.seller_id == seller_id
+    ).first()
+
+    if not product:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Product not found"
+        )
+
+    return product
 
 
-def ensure_owner(db: Session, seller_id: int, product_id: int):
-    # Kiem tra xem co product ung voi seller khong
-    prod = db.query(Product).filter(Product.product_id == product_id, Product.seller_id == seller_id).first()
-    if not prod:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
+def ensure_variant_ownership(db: Session, product_id: int, variant_id: int):
+    """
+    Kiem tra variant co phai cua san pham hien tai khong
+    """
+    variant = db.query(ProductVariant).filter(
+        ProductVariant.variant_id == variant_id,
+        ProductVariant.product_id == product_id
+    ).first()
 
-    return prod
+    if not variant:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Variant not found or doesn't belong to this product"
+        )
 
-# Kiem tra xem san pham hien tai dang co don hang nao khong
-def has_order_item(db: Session, product_id: int):
-    return db.query(OrderItem.order_item_id).filter(OrderItem.product_id == product_id).first() is not None
+    return variant
 
-def seller_create_product(db: Session, seller_id: int, payload: ProductCreate):
-    # Ham cho seller tao san pham moi
-    prod = Product(
+
+def ensure_size_ownership(db: Session, variant_id: int, size_id: int):
+    """
+    Kiem tra size co thuoc variant hien tai khong
+    """
+    size = db.query(ProductSize).filter(
+        ProductSize.size_id == size_id,
+        ProductSize.variant_id == variant_id
+    ).first()
+
+    if not size:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Size not found or doesn't belong to this variant"
+        )
+
+    return size
+
+# ORDER CHECKING
+def product_has_orders(db: Session, product_id: int):
+    """Kiem tra san pham co order chua"""
+    return db.query(OrderItem.order_item_id).filter(
+        OrderItem.product_id == product_id
+    ).first() is not None
+
+
+def variant_has_orders(db: Session, variant_id: int) -> bool:
+    """Kiem tra variant co don hang chua"""
+    return db.query(OrderItem.order_item_id).filter(
+        OrderItem.variant_id == variant_id
+    ).first() is not None
+
+
+def size_has_orders(db: Session, size_id: int) -> bool:
+    """Kiem tra size co don hang chua"""
+    return db.query(OrderItem.order_item_id).filter(
+        OrderItem.size_id == size_id
+    ).first() is not None
+
+# CAC THAO TAC VE SAN PHAM
+def get_seller_products(db: Session,
+                        seller_id: int,
+                        search_query: Optional[str] = None,
+                        active_only: bool = False,
+                        limit: int = 10,
+                        offset: int = 0
+):
+    """
+    Lay danh sach san pham cua seller co phan trang va tim kiem.
+
+    Bien:
+        db: Database session
+        seller_id: ID cua seller
+        search_query: Tu khoa tim kiem cho ten san pham (tuy chon)
+        active_only: Neu True, chi tra ve san pham dang hoat dong
+        limit: So san pham toi da tra ve
+        offset: So san pham bo qua
+
+    Tra ve:
+        Page: Phan hoi co phan trang voi danh sach san pham
+    """
+    # Tao query co ban
+    query = db.query(Product).options(joinedload(Product.category)).filter(
+        Product.seller_id == seller_id
+    )
+
+    # Ap dung bo loc tim kiem
+    if search_query and search_query.strip():
+        query = query.filter(Product.name.ilike(f"%{search_query.strip()}%"))
+
+    # Ap dung bo loc hoat dong
+    if active_only:
+        query = query.filter(Product.is_active.is_(True))
+
+    # Lay tong so ban ghi
+    total = query.count()
+
+    # Lay ket qua co phan trang
+    products = (
+        query.order_by(Product.product_id.desc())
+        .limit(limit)
+        .offset(offset)
+        .all()
+    )
+
+    # Lay anh chinh cho cac san pham
+    product_ids = [p.product_id for p in products]
+    primary_image_map = get_primary_images_map(db, product_ids)
+
+    # Tao du lieu phan hoi
+    data = []
+    for product in products:
+        base_product = ProductResponse.model_validate(product)
+        data.append(ProductList(
+            **base_product.model_dump(),
+            category_name=product.category.category_name if product.category else None,
+            public_primary_image_url=public_url(primary_image_map.get(product.product_id))
+        ))
+
+    return Page(
+        meta=PageMeta(total=total, limit=limit, offset=offset),
+        data=data
+    )
+
+
+def get_seller_product_detail(db: Session, seller_id: int, product_id: int):
+    """
+    Lay thong tin chi tiet ve san pham cua seller.
+    """
+    product = ensure_product_ownership(db, seller_id, product_id)
+
+    # Lay hinh anh san pham
+    images = db.query(ProductImage).filter(
+        ProductImage.product_id == product_id
+    ).order_by(
+        ProductImage.is_primary.desc(),
+        ProductImage.product_image_id.asc()
+    ).all()
+
+    image_responses = [
+        ProductImageResponse(
+            product_image_id=img.product_image_id,
+            product_id=img.product_id,
+            image_url=img.image_url,
+            public_image_url=public_url(img.image_url),
+            is_primary=img.is_primary
+        )
+        for img in images
+    ]
+
+    # Lay bien the va cac sizes
+    variants = db.query(ProductVariant).options(
+        joinedload(ProductVariant.sizes)
+    ).filter(
+        ProductVariant.product_id == product_id
+    ).order_by(ProductVariant.variant_id.asc()).all()
+
+    variant_responses = []
+    for variant in variants:
+        sorted_sizes = sorted(variant.sizes or [], key=lambda x: x.size_id)
+        variant_responses.append(ProductVariantWithSizesResponse(
+            variant_id=variant.variant_id,
+            product_id=variant.product_id,
+            variant_name=variant.variant_name,
+            price_adjustment=variant.price_adjustment,
+            sizes=[ProductSizeResponse.model_validate(size) for size in sorted_sizes]
+        ))
+
+    # Lay ten danh muc
+    category_name = None
+    if product.category_id:
+        category_name = db.query(Category.category_name).filter(
+            Category.category_id == product.category_id
+        ).scalar()
+
+    return ProductDetail(
+        product_id=product.product_id,
+        name=product.name,
+        base_price=product.base_price,
+        category_id=product.category_id,
+        category_name=category_name,
+        description=product.description,
+        discount_percent=product.discount_percent,
+        weight=product.weight,
+        is_active=product.is_active,
+        created_at=product.created_at.isoformat() if product.created_at else None,
+        images=image_responses,
+        variants=variant_responses
+    )
+
+
+def create_seller_product(db: Session, seller_id: int, payload: ProductCreate):
+    """
+    Tao san pham moi cho seller.
+    """
+    product = Product(
         name=payload.name,
-        seller_id=payload.seller_id,
+        seller_id=seller_id,
         base_price=payload.base_price,
         category_id=payload.category_id,
         description=payload.description,
@@ -42,200 +247,81 @@ def seller_create_product(db: Session, seller_id: int, payload: ProductCreate):
         is_active=True
     )
 
-    db.add(prod)
+    db.add(product)
     db.commit()
-    db.refresh(prod)
+    db.refresh(product)
 
-    return ProductResponse.model_validate(prod)
+    return ProductResponse.model_validate(product)
 
-
-def seller_update_product(db: Session, seller_id: int, product_id: int, payload: ProductUpdate):
+def update_seller_product(db: Session,
+                          seller_id: int,
+                          product_id: int,
+                          payload: ProductUpdate):
     """
-    Update thong tin san pham
+    Cap nhat san pham hien co.
     """
+    product = ensure_product_ownership(db, seller_id, product_id)
 
-    prod = ensure_owner(db, seller_id, product_id)
-    if payload.name is not None:
-        prod.name = payload.name
-    if payload.base_price is not None:
-        prod.base_price = payload.base_price
-    if payload.category_id is not None:
-        prod.category_id = payload.category_id
-    if payload.description is not None:
-        prod.description = payload.description
-    if payload.discount_percent is not None:
-        prod.discount_percent = payload.discount_percent
-    if payload.weight is not None:
-        prod.weight = payload.weight
-    if payload.is_active is not None:
-        prod.is_active = payload.is_active
+    # Chi cap nhat cac truong duoc cung cap
+    update_fields = {
+        'name': payload.name,
+        'base_price': payload.base_price,
+        'category_id': payload.category_id,
+        'description': payload.description,
+        'discount_percent': payload.discount_percent,
+        'weight': payload.weight,
+        'is_active': payload.is_active
+    }
 
-    db.add(prod)
-    db.commit()
-    db.refresh(prod)
-    return ProductResponse.model_validate(prod)
-
-def seller_list_products(db: Session, seller_id: int, q: str | None, active_only: bool, limit: int, offset: int):
-    """
-    Ham list san pham o phia seller
-    """
-
-    # query co ban lay tat ca san pham cua seller
-    query = db.query(Product).filter(Product.seller_id == seller_id)
-    # Neu co tu khoa tim kiem thi thuc hien truy van
-    if q:
-        query = query.filter(Product.name.like(f"%{q.strip()}%"))
-    # Neu san pham active thi thuc hien truy van
-    if active_only:
-        query = query.filter(Product.is_active.is_(True))
-
-    # Dem tong so ban ghi, lay du lieu voi phan trang va chuyen doi ve response de tra ve
-    total = query.count()
-    prods = query.order_by(Product.product_id.desc()).limit(limit).offset(offset).all()
-    data = [ProductResponse.model_validate(prod) for prod in prods]
-
-    return Page(meta=PageMeta(total=total, limit=limit, offset=offset), data=data)
-
-def seller_product_detail(db: Session, seller_id: int, product_id: int):
-    prod = ensure_owner(db, seller_id, product_id)
-    if not prod:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
-
-    return ProductResponse.model_validate(prod)
-
-def seller_soft_delete_product(db: Session, seller_id: int, product_id: int):
-    """
-    # Xoa mem san pham - de du lai lich su don hang
-    """
-
-    prod = ensure_owner(db, seller_id, product_id)
-
-    prod.is_active = False
-    db.add(prod)
-    db.commit()
-
-    return {"deleted": True, "product_id": prod.product_id, "mode": "soft"}
-
-# ---IMAGE---
-async def seller_upload_image_backend(db: Session, seller_id: int, product_id: int,
-                                      file: UploadFile, is_primary: bool | None):
-    ensure_owner(db, seller_id, product_id)
-    # Upload anh len storage
-    result = await upload_via_backend('products', file, max_size_mb=5)
-    object_key = result['object_key']
-    image_url = object_key
-    public_image_url = public_url(image_url)
-    # Neu anh upload duoc chon la primary
-    if is_primary:
-        db.query(ProductImage).filter(ProductImage.product_id == product_id).update({'is_primary': False})
-
-    img = ProductImage(product_id=product_id, image_url=image_url, is_primary=bool(is_primary))
-    db.add(img)
-    db.commit()
-    db.refresh(img)
-
-    return ProductImageResponse(
-        product_image_id=img.product_image_id,
-        product_id=img.product_id,
-        image_url=img.image_url,
-        public_image_url=public_image_url,
-        is_primary=img.is_primary
-    )
-
-async def seller_upload_many_images_backend(db: Session, seller_id: int, product_id: int,
-                                           files: List[UploadFile], primary_index: int | None):
-    ensure_owner(db, seller_id, product_id)
-    results = await upload_many_via_backend('products', files, max_size_mb=5)
-
-    # Neu co primary_index thi xoa anh primary truoc do
-    if primary_index is not None and 0 <= primary_index < len(results):
-        db.query(ProductImage).filter(ProductImage.product_id == product_id).update({"is_primary": False})
-
-    """
-    Tao danh sach rong, vong lap upload ket qua
-    lay thong tin va set vao database      
-    """
-    outs: list[ProductImageResponse] = []
-    for index, res in enumerate(results):
-        image_url = res["object_key"]
-        is_primary = (primary_index is not None and index == primary_index)
-        img = ProductImage(product_id=product_id, image_url=image_url, is_primary=is_primary)
-        db.add(img)
-        db.flush()
-        outs.append(ProductImageResponse(
-            product_image_id=img.product_image_id,
-            product_id=img.product_id,
-            image_url=img.image_url,
-            public_image_url=public_url(img.image_url),
-            is_primary=img.is_primary,
-        ))
+    for field, value in update_fields.items():
+        if value is not None:
+            setattr(product, field, value)
 
     db.commit()
-    return outs
+    db.refresh(product)
 
-def seller_set_primary_image(db: Session, seller_id: int, product_id: int, product_image_id: int):
-    ensure_owner(db, seller_id, product_id)
+    return ProductResponse.model_validate(product)
 
-    # Truy van trong database tim anh
-    img = db.query(ProductImage).filter(
-        ProductImage.product_image_id == product_image_id,
-        ProductImage.product_id == product_id
-    ).first()
 
-    # Tra ve loi neu khong tim thay
-    if not img:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Image not found")
+def delete_seller_product(db: Session, seller_id: int, product_id: int):
+    """
+    Xoa mem san pham. Neu san pham co don hang thi vo hieu hoa, nguoc lai xoa hoan toan.
+    """
+    product = ensure_product_ownership(db, seller_id, product_id)
 
-    # Set tat ca ve is_primary la False sau do chuyen sang True
-    db.query(ProductImage).filter(ProductImage.product_id == product_id).update({'is_primary': False})
-    img.is_primary = True
-    db.add(img)
+    if product_has_orders(db, product_id):
+        # Xoa mem - vo hieu hoa san pham de bao ton lich su don hang
+        if product.is_active:
+            product.is_active = False
+            db.commit()
+        return {
+            "deleted": False,
+            "soft_deleted": True,
+            "product_id": product_id
+        }
+
+    # Xoa cung - san pham khong co don hang
+    db.delete(product)
     db.commit()
 
-    return {"primary_set": True}
+    return {
+        "deleted": True,
+        "soft_deleted": False,
+        "product_id": product_id
+    }
 
-# Ham tra ve tat ca anh cua san pham
-def seller_list_images_of_product(db: Session, seller_id: int, product_id: int):
-    ensure_owner(db, seller_id, product_id)
+# VARIANT OPERATIONS
+def create_product_variant(
+        db: Session,
+        seller_id: int,
+        product_id: int,
+        payload: ProductVariantCreate
+):
+    """
+    Tao variant moi cho san pham
+    """
+    ensure_product_ownership(db, seller_id, product_id)
 
-    imgs = (db.query(ProductImage)
-            .filter(ProductImage.product_id == product_id)
-            .order_by(ProductImage.is_primary.desc(), ProductImage.product_image_id.asc())
-            .all()
-    )
-
-    out: list[ProductImageResponse] = []
-    for img in imgs:
-        out.append(ProductImageResponse(
-            product_image_id=img.product_image_id,
-            product_id=img.product_id,
-            image_url=img.image_url,
-            public_image_url=public_url(img.image_url),
-            is_primary=img.is_primary,
-        ))
-
-    return out
-
-# Xoa anh cua san pham
-def seller_delete_image_of_product(db: Session, seller_id: int, product_id: int, product_image_id):
-    ensure_owner(db, seller_id, product_id)
-    img = (db.query(ProductImage)
-           .filter(ProductImage.product_image_id == product_image_id,
-                   ProductImage.product_id == product_id)
-           .first()
-    )
-
-    delete_object(img.image_url)
-    db.delete(img)
-    db.commit()
-
-    return {"deleted": True}
-
-
-# -----VARIANT------
-# Ham tao bien the moi cho san phan
-def seller_create_variant(db: Session, seller_id: int, product_id: int, payload: ProductVariantCreate):
-    prod = ensure_owner(db, seller_id, product_id)
     variant = ProductVariant(
         product_id=product_id,
         variant_name=payload.variant_name,
@@ -248,12 +334,17 @@ def seller_create_variant(db: Session, seller_id: int, product_id: int, payload:
 
     return ProductVariantResponse.model_validate(variant)
 
-def seller_update_variant(db: Session, seller_id: int, variant_id: int, payload: ProductVariantUpdate):
-    variant = db.query(ProductVariant).filter(ProductVariant.variant_id == variant_id).first()
-    if not variant:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Variant not found")
 
-    ensure_owner(db, seller_id, variant.product_id)
+def update_product_variant(db: Session,
+                           seller_id: int,
+                           product_id: int,
+                           variant_id: int,
+                           payload: ProductVariantUpdate):
+    """
+    Update variant dang ton tai cua product.
+    """
+    ensure_product_ownership(db, seller_id, product_id)
+    variant = ensure_variant_ownership(db, product_id, variant_id)
 
     if payload.variant_name is not None:
         variant.variant_name = payload.variant_name
@@ -261,51 +352,64 @@ def seller_update_variant(db: Session, seller_id: int, variant_id: int, payload:
     if payload.price_adjustment is not None:
         variant.price_adjustment = payload.price_adjustment
 
-    db.add(variant)
     db.commit()
     db.refresh(variant)
 
     return ProductVariantResponse.model_validate(variant)
 
-def seller_delete_variant(db: Session, seller_id: int, variant_id: int):
-    # Truy van tim bien the cua san pham
-    variant = db.query(ProductVariant).filter(ProductVariant.variant_id == variant_id).first()
-    if variant:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Variant not found")
 
-    prod = ensure_owner(db, seller_id, variant.product_id)
-
+def delete_product_variant(
+        db: Session,
+        seller_id: int,
+        product_id: int,
+        variant_id: int
+):
     """
-    Kiem tra xem bien the hien tai da co don hang nao hay chua,
-    Neu da co bao loi khong xoa duoc
+    Xoa 1 product variant va tat ca size con cua no.
     """
-    used = db.query(OrderItem.order_item_id) \
-            .filter((OrderItem.product_id == prod.product_id) & (OrderItem.variant_id == variant_id)) \
-            .first()
+    ensure_product_ownership(db, seller_id, product_id)
+    variant = ensure_variant_ownership(db, product_id, variant_id)
 
-    if used:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Cannot delete variant because it's already used in orders")
+    if variant_has_orders(db, variant_id):
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Cannot delete variant that is used in orders"
+        )
 
-    # Xoa cac size con cua bien the duoc yeu cau xoa
-    size = db.query(ProductSize).filter(ProductSize.variant_id == variant_id).delete(synchronize_session=False)
+    # xoa tat ca size con
+    db.query(ProductSize).filter(
+        ProductSize.variant_id == variant_id
+    ).delete(synchronize_session=False)
+
+    # Delete the variant
     db.delete(variant)
     db.commit()
-    return {"deleted": True}
 
-#-----SIZE-----
-def seller_create_size(db: Session, seller_id: int, payload: ProductSizeCreate):
-    # Kiem tra xem co variant tuong ung voi size khong, khong co thi bao loi
-    variant = db.query(ProductVariant).filter(ProductVariant.variant_id == payload.variant_id).first()
-    if not variant:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Variant not found")
+    return {"deleted": True, "variant_id": variant_id}
 
-    # Kiem tra va them size cho bien the
-    ensure_owner(db, seller_id, variant.product_id)
+# SIZE OPERATIONS
+def create_variant_size(
+        db: Session,
+        seller_id: int,
+        product_id: int,
+        variant_id: int,
+        payload: ProductSizeCreate
+):
+    """
+    Tao moi size moi.
+    """
+    ensure_product_ownership(db, seller_id, product_id)
+    ensure_variant_ownership(db, product_id, variant_id)
+
+    # Determine stock status
+    available_units = payload.available_units or 0
+    in_stock = payload.in_stock if payload.in_stock is not None else available_units > 0
+
     size = ProductSize(
-        variant_id=variant.variant_id,
+        variant_id=variant_id,
         size_name=payload.size_name,
-        available_units=payload.available_units or 0,
-        in_stock=payload.in_stock if payload.in_stock is not None else (payload.available_units or 0) > 0
+        available_units=available_units,
+        in_stock=in_stock
     )
 
     db.add(size)
@@ -314,57 +418,298 @@ def seller_create_size(db: Session, seller_id: int, payload: ProductSizeCreate):
 
     return ProductSizeResponse.model_validate(size)
 
-def seller_update_size(db: Session, seller_id: int, size_id: int, payload: ProductSizeUpdate):
-    size = db.query(ProductSize).filter(ProductSize.size_id == size_id).first()
-    if not size:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Size not found")
 
-    variant = db.query(ProductVariant).filter(ProductVariant.variant_id == size.variant_id).first()
-    ensure_owner(db, seller_id, variant.product_id)
+def update_variant_size(
+        db: Session,
+        seller_id: int,
+        product_id: int,
+        variant_id: int,
+        size_id: int,
+        payload: ProductSizeUpdate
+):
+    """
+    Cap nhat size
+    """
+    ensure_product_ownership(db, seller_id, product_id)
+    ensure_variant_ownership(db, product_id, variant_id)
+    size = ensure_size_ownership(db, variant_id, size_id)
 
     if payload.size_name is not None:
         size.size_name = payload.size_name
 
-    # Neu so luong ton kho set ve 0 thi thay doi ca ton kho
+    # Kiem soat so luong ton kho khi update
     if payload.available_units is not None:
         size.available_units = payload.available_units
         if payload.in_stock is None:
             size.in_stock = payload.available_units > 0
 
-    # Neu ton kho = false thi doi so ca so luong ton kho ve 0
+    # Kiem soat trang thai ton kho khi update
     if payload.in_stock is not None:
+        size.in_stock = payload.in_stock
         if not payload.in_stock:
             size.available_units = 0
 
-        size.in_stock = payload.in_stock
-
-    db.add(size)
     db.commit()
     db.refresh(size)
 
     return ProductSizeResponse.model_validate(size)
 
-def seller_delete_size(db: Session, seller_id: int, size_id: int):
-    size = db.query(ProductSize).filter(ProductSize.size_id == size_id).first()
-    if not size:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Size not found")
 
-    variant = db.query(ProductVariant).filter(ProductVariant.variant_id == size.variant_id).first()
-    prod = ensure_owner(db, seller_id, variant.product_id)
-
-    """ 
-    Kiem tra xem co don hang nao voi size nay chua
-    Neu co bao loi khong the xoa
+def delete_variant_size(
+        db: Session,
+        seller_id: int,
+        product_id: int,
+        variant_id: int,
+        size_id: int
+):
     """
-    used = db.query(OrderItem.order_item_id) \
-        .filter((OrderItem.product_id == prod.product_id) &
-                (OrderItem.variant_id == variant.variant_id) &
-                (OrderItem.size_id == size.size_id)
-        ).first()
-    if used:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Cannot delete size because it's already used in orders")
+    Ham xoa size.
+    """
+    ensure_product_ownership(db, seller_id, product_id)
+    ensure_variant_ownership(db, product_id, variant_id)
+    size = ensure_size_ownership(db, variant_id, size_id)
+
+    if size_has_orders(db, size_id):
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Cannot delete size that is used in orders"
+        )
 
     db.delete(size)
     db.commit()
 
     return {"deleted": True}
+
+
+def get_variant_sizes(
+        db: Session,
+        seller_id: int,
+        product_id: int,
+        variant_id: int
+) -> List[ProductSizeResponse]:
+    """
+    Tra ve tat ca size cua variant
+    """
+    ensure_product_ownership(db, seller_id, product_id)
+    ensure_variant_ownership(db, product_id, variant_id)
+
+    sizes = db.query(ProductSize).filter(
+        ProductSize.variant_id == variant_id
+    ).all()
+
+    return [ProductSizeResponse.model_validate(size) for size in sizes]
+
+# IMAGE
+async def upload_product_image(
+        db: Session,
+        seller_id: int,
+        product_id: int,
+        file: UploadFile,
+        is_primary: bool = False
+):
+    """
+    Upload 1 anh.
+    """
+    ensure_product_ownership(db, seller_id, product_id)
+
+    upload_result = await upload_via_backend('products', file, max_size_mb=5)
+    image_url = upload_result['object_key']
+
+    # Chinh sua primary neu anh tai len duoc chon lam anh chinh
+    if is_primary:
+        db.query(ProductImage).filter(
+            ProductImage.product_id == product_id
+        ).update({'is_primary': False})
+
+    image = ProductImage(
+        product_id=product_id,
+        image_url=image_url,
+        is_primary=is_primary
+    )
+
+    db.add(image)
+    db.commit()
+    db.refresh(image)
+
+    return ProductImageResponse(
+        product_image_id=image.product_image_id,
+        product_id=image.product_id,
+        image_url=image.image_url,
+        public_image_url=public_url(image.image_url),
+        is_primary=image.is_primary
+    )
+
+
+async def upload_multiple_product_images(
+        db: Session,
+        seller_id: int,
+        product_id: int,
+        files: List[UploadFile],
+        primary_index: Optional[int] = None
+):
+    """
+    Upload nhieu anh.
+    """
+    ensure_product_ownership(db, seller_id, product_id)
+
+    # Upload all images to storage
+    upload_results = await upload_many_via_backend('products', files, max_size_mb=5)
+
+    # If setting a primary image, unset current primary
+    if primary_index is not None and 0 <= primary_index < len(upload_results):
+        db.query(ProductImage).filter(
+            ProductImage.product_id == product_id
+        ).update({"is_primary": False})
+
+    # Create image records
+    image_responses = []
+    for index, result in enumerate(upload_results):
+        image_url = result["object_key"]
+        is_primary = primary_index is not None and index == primary_index
+
+        image = ProductImage(
+            product_id=product_id,
+            image_url=image_url,
+            is_primary=is_primary
+        )
+
+        db.add(image)
+        db.flush()
+
+        image_responses.append(ProductImageResponse(
+            product_image_id=image.product_image_id,
+            product_id=image.product_id,
+            image_url=image.image_url,
+            public_image_url=public_url(image.image_url),
+            is_primary=image.is_primary
+        ))
+
+    db.commit()
+    return image_responses
+
+
+def set_primary_product_image(
+        db: Session,
+        seller_id: int,
+        product_id: int,
+        image_id: int
+):
+    """
+    Chon 1 anh lam anh chinh.
+    """
+    ensure_product_ownership(db, seller_id, product_id)
+
+    image = db.query(ProductImage).filter(
+        ProductImage.product_image_id == image_id,
+        ProductImage.product_id == product_id
+    ).first()
+
+    if not image:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Image not found"
+        )
+
+    # Bo set anh chinh cu
+    db.query(ProductImage).filter(
+        ProductImage.product_id == product_id,
+        ProductImage.is_primary.is_(True)
+    ).update({ProductImage.is_primary: False})
+
+    # Set anh chinh hien tai
+    image.is_primary = True
+    db.commit()
+    db.refresh(image)
+
+    return ProductImageResponse(
+        product_image_id=image.product_image_id,
+        product_id=image.product_id,
+        image_url=image.image_url,
+        public_image_url=public_url(image.image_url),
+        is_primary=True
+    )
+
+
+def delete_product_image(
+        db: Session,
+        seller_id: int,
+        product_id: int,
+        image_id: int
+):
+    """
+    Xoa anh.
+    """
+    ensure_product_ownership(db, seller_id, product_id)
+
+    image = db.query(ProductImage).filter(
+        ProductImage.product_image_id == image_id,
+        ProductImage.product_id == product_id
+    ).first()
+
+    if not image:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Image not found"
+        )
+
+    was_primary = bool(image.is_primary)
+
+    # Xoa o phia minio
+    try:
+        delete_object(image.image_url)
+    except Exception:
+        pass
+
+    db.delete(image)
+    db.commit()
+
+    # neu xoa anh chinh, set anh khac lam anh chinh
+    if was_primary:
+        next_image = db.query(ProductImage).filter(
+            ProductImage.product_id == product_id
+        ).order_by(ProductImage.product_image_id.asc()).first()
+
+        if next_image:
+            next_image.is_primary = True
+            db.commit()
+
+    return {
+        "deleted": True,
+        "product_id": product_id,
+        "product_image_id": image_id
+    }
+
+def get_primary_images_map(db: Session, product_ids: List[int]):
+    """
+    Map product id voi image url.
+    """
+    if not product_ids:
+        return {}
+
+    # Get primary images
+    primary_images = db.query(
+        ProductImage.product_id,
+        ProductImage.image_url
+    ).filter(
+        ProductImage.product_id.in_(product_ids),
+        ProductImage.is_primary.is_(True)
+    ).all()
+
+    primary_map = {product_id: image_url for product_id, image_url in primary_images}
+
+    # Neu san pham khong co anh chinh, chon anh dau tien
+    missing_product_ids = [pid for pid in product_ids if pid not in primary_map]
+
+    if missing_product_ids:
+        fallback_images = db.query(ProductImage).filter(
+            ProductImage.product_id.in_(missing_product_ids)
+        ).order_by(
+            ProductImage.product_id.asc(),
+            ProductImage.product_image_id.asc()
+        ).all()
+
+        for image in fallback_images:
+            if image.product_id not in primary_map:
+                primary_map[image.product_id] = image.image_url
+
+    return primary_map

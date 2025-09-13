@@ -1,5 +1,7 @@
 from __future__ import annotations
 from decimal import Decimal
+from typing import List
+
 from pydantic import BaseModel, Field
 from .common import ORMBase, TimestampedOut
 
@@ -37,6 +39,26 @@ class ProductResponse(TimestampedOut):
     discount_percent: Decimal
     weight: Decimal | None = None
     is_active: bool
+
+class ProductList(ProductResponse):
+    category_name: str | None = None
+    public_primary_image_url: str | None = None
+
+class ProductDetail(BaseModel):
+    product_id: int
+    name: str
+    base_price: Decimal
+    category_id: int | None = None
+    category_name: str | None = None
+    description: str | None = None
+    discount_percent: Decimal
+    weight: Decimal | None = None
+    is_active: bool
+    created_at: str | None = None
+
+    images: List[ProductImageResponse]
+    variants: List[ProductVariantWithSizesResponse]
+
 
 # ===== Variant =====
 # (Request)
@@ -91,3 +113,6 @@ class ProductImageResponse(ORMBase):
     image_url: str
     public_image_url: str
     is_primary: bool
+
+class ProductVariantWithSizesResponse(ProductVariantResponse):
+    sizes: List[ProductSizeResponse] = []
