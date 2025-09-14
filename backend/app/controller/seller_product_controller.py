@@ -94,7 +94,7 @@ def create_product(payload: ProductCreate, seller_info=Depends(require_seller), 
         payload=payload
     )
 
-@router.put("/{product_id}", response_model=ProductResponse)
+@router.patch("/{product_id}", response_model=ProductResponse)
 def update_product(product_id: int,
     payload: ProductUpdate,
     seller_info=Depends(require_seller),
@@ -135,7 +135,7 @@ def create_variant(
     )
 
 
-@router.put("/{product_id}/variants/{variant_id}", response_model=ProductVariantResponse)
+@router.patch("/{product_id}/variants/{variant_id}", response_model=ProductVariantResponse)
 def update_variant(
     product_id: int,
     variant_id: int,
@@ -204,7 +204,7 @@ def create_size(
     )
 
 
-@router.put("/{product_id}/variants/{variant_id}/sizes/{size_id}", response_model=ProductSizeResponse)
+@router.patch("/{product_id}/variants/{variant_id}/sizes/{size_id}", response_model=ProductSizeResponse)
 def update_size(
     product_id: int,
     variant_id: int,
