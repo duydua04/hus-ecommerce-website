@@ -7,8 +7,8 @@ from ..schemas.category import CategoryCreate, CategoryUpdate, CategoryResponse
 from ..services.category_service import create_category, list_categories, get_category, update_category, delete_category
 
 router = APIRouter(
-    prefix="/categories",
-    tags=["categories"]
+    prefix="/admin/categories",
+    tags=["admin-categories"]
 )
 
 @router.get("/", response_model=Page, dependencies=[Depends(require_admin)])

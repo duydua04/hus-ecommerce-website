@@ -76,7 +76,7 @@ def get_product_details(
     product_id: int,
     seller_info=Depends(require_seller),
     db: Session = Depends(get_db)
-) -> ProductDetail:
+):
     """Tra ve thong tin san pham chi tiet"""
     return get_seller_product_detail(
         db=db,
@@ -94,7 +94,7 @@ def create_product(payload: ProductCreate, seller_info=Depends(require_seller), 
         payload=payload
     )
 
-@router.patch("/{product_id}", response_model=ProductResponse)
+@router.put("/{product_id}", response_model=ProductResponse)
 def update_product(product_id: int,
     payload: ProductUpdate,
     seller_info=Depends(require_seller),
@@ -135,7 +135,7 @@ def create_variant(
     )
 
 
-@router.patch("/{product_id}/variants/{variant_id}", response_model=ProductVariantResponse)
+@router.put("/{product_id}/variants/{variant_id}", response_model=ProductVariantResponse)
 def update_variant(
     product_id: int,
     variant_id: int,
@@ -204,7 +204,7 @@ def create_size(
     )
 
 
-@router.patch("/{product_id}/variants/{variant_id}/sizes/{size_id}", response_model=ProductSizeResponse)
+@router.put("/{product_id}/variants/{variant_id}/sizes/{size_id}", response_model=ProductSizeResponse)
 def update_size(
     product_id: int,
     variant_id: int,

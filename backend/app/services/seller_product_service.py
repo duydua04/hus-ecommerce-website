@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import List, Optional
 
 from fastapi import HTTPException, UploadFile, status
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload
 
 from ..config.s3 import public_url
@@ -24,6 +25,7 @@ from ..schemas.product import (
     ProductVariantWithSizesResponse,
 )
 from ..services.storage_service import delete_object, upload_many_via_backend, upload_via_backend
+from sqlalchemy import func
 
 # VALIDATION HELPERS
 def ensure_product_ownership(db: Session, seller_id: int, product_id: int):
@@ -322,6 +324,18 @@ def create_product_variant(
     """
     ensure_product_ownership(db, seller_id, product_id)
 
+    name = (payload.variant_name or "").strip()
+    if not name:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="variant_name is required")
+
+    # chặn trùng (không phân biệt hoa/thường)
+    exists = db.query(ProductVariant).filter(
+        ProductVariant.product_id == product_id,
+        func.lower(ProductVariant.variant_name) == name.lower()
+    ).first()
+    if exists:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Variant name already exists for this product")
+
     variant = ProductVariant(
         product_id=product_id,
         variant_name=payload.variant_name,
@@ -347,14 +361,41 @@ def update_product_variant(db: Session,
     variant = ensure_variant_ownership(db, product_id, variant_id)
 
     if payload.variant_name is not None:
-        variant.variant_name = payload.variant_name
+        name = (payload.variant_name or "").strip()
+        if not name:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="variant_name cannot be empty"
+            )
 
+        # Kiểm tra trùng cùng product, loại trừ chính nó
+        duplicate = db.query(ProductVariant).filter(
+            ProductVariant.product_id == product_id,
+            func.lower(ProductVariant.variant_name) == name.lower(),
+            ProductVariant.variant_id != variant.variant_id,
+        ).first()
+        if duplicate:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Variant name already exists for this product"
+            )
+        variant.variant_name = name
+
+     # Cập nhật price_adjustment (schema đã ge=0 nên không cần check âm)
     if payload.price_adjustment is not None:
         variant.price_adjustment = payload.price_adjustment
 
-    db.commit()
-    db.refresh(variant)
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        # Phòng khi đụng unique index ở DB (case-insensitive)
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Variant name already exists for this product"
+        )
 
+    db.refresh(variant)
     return ProductVariantResponse.model_validate(variant)
 
 
@@ -401,6 +442,18 @@ def create_variant_size(
     ensure_product_ownership(db, seller_id, product_id)
     ensure_variant_ownership(db, product_id, variant_id)
 
+    name = (payload.size_name or "").strip()
+    if not name:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="size_name is required")
+
+    # Check trùng (case-insensitive)
+    exists = db.query(ProductSize).filter(
+        ProductSize.variant_id == variant_id,
+        func.lower(ProductSize.size_name) == name.lower()
+    ).first()
+    if exists:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Size already exists for this variant")
+
     # Determine stock status
     available_units = payload.available_units or 0
     in_stock = payload.in_stock if payload.in_stock is not None else available_units > 0
@@ -413,9 +466,13 @@ def create_variant_size(
     )
 
     db.add(size)
-    db.commit()
-    db.refresh(size)
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Size already exists for this variant")
 
+    db.refresh(size)
     return ProductSizeResponse.model_validate(size)
 
 
@@ -435,23 +492,46 @@ def update_variant_size(
     size = ensure_size_ownership(db, variant_id, size_id)
 
     if payload.size_name is not None:
-        size.size_name = payload.size_name
+        name = (payload.size_name or "").strip()
+        if not name:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="size_name cannot be empty"
+            )
 
-    # Kiem soat so luong ton kho khi update
+        # Kiem tra trung lap size
+        dup = db.query(ProductSize).filter(
+            ProductSize.variant_id == variant_id,
+            func.lower(ProductSize.size_name) == name.lower(),
+            ProductSize.size_id != size.size_id
+        ).first()
+        if dup:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Size already exists for this variant"
+            )
+        size.size_name = name
+
     if payload.available_units is not None:
+        if payload.available_units == 0:
+            size.in_stock = False
         size.available_units = payload.available_units
-        if payload.in_stock is None:
-            size.in_stock = payload.available_units > 0
 
-    # Kiem soat trang thai ton kho khi update
     if payload.in_stock is not None:
-        size.in_stock = payload.in_stock
-        if not payload.in_stock:
+        if payload.in_stock == 0:
             size.available_units = 0
+        size.in_stock = payload.in_stock
 
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Size already exists for this variant"
+        )
+
     db.refresh(size)
-
     return ProductSizeResponse.model_validate(size)
 
 
