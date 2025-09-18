@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, UploadFile, HTTPException, status
 from sqlalchemy.orm import Session
-from ..config.db import get_db
-from ..config.s3 import public_url
-from ..middleware.auth import get_current_user
-from ..services.storage_service import upload_via_backend, delete_object, extract_object_key
+from backend.app.config.db import get_db
+from backend.app.config.s3 import public_url
+from backend.app.middleware.auth import get_current_user
+from backend.app.services.common.storage_service import upload_via_backend, delete_object, extract_object_key
 
 router = APIRouter(
     prefix="/avatars",

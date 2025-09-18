@@ -1,8 +1,8 @@
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session, selectinload
-from ..models.address import Address, BuyerAddress, SellerAddress
-from ..schemas.address import AddressCreate, AddressUpdate, BuyerAddressUpdate, SellerAddressUpdate
-from ..schemas.common import BuyerAddressLabel, SellerAddressLabel
+from backend.app.models.address import Address, BuyerAddress, SellerAddress
+from backend.app.schemas.address import AddressCreate, AddressUpdate, BuyerAddressUpdate, SellerAddressUpdate
+from backend.app.schemas.common import BuyerAddressLabel, SellerAddressLabel
 
 # Xac minh quyen so huu cua mot dia chi link, dam bao rang nguoi dung hien tai co quyen truy cap vao link do
 def ensure_owner_link(link, user_id: int, role: str):

@@ -1,10 +1,10 @@
 from fastapi import  HTTPException, status
 from sqlalchemy.orm import Session
-from ..config.settings import settings
-from ..models.users import Admin, Seller, Buyer
-from ..schemas.auth import RegisterBuyer, RegisterSeller, Login, Token
-from ..schemas.user import BuyerResponse, SellerResponse
-from ..utils.security import hash_password, verify_password, create_access_token
+from backend.app.config.settings import settings
+from backend.app.models.users import Admin, Seller, Buyer
+from backend.app.schemas.auth import RegisterBuyer, RegisterSeller, Login, Token
+from backend.app.schemas.user import BuyerResponse, SellerResponse
+from backend.app.utils.security import hash_password, verify_password, create_access_token
 
 def email_or_phone_taken(db: Session, model, email: str, phone: str):
     return db.query(model).filter((model.email == email) | (model.phone == phone)).first() is not None

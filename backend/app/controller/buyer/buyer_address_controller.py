@@ -1,15 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List
 from sqlalchemy.orm import Session
-from ..config.db import get_db
-from ..middleware.auth import require_buyer
-from ..schemas.address import (
+from backend.app.config.db import get_db
+from backend.app.middleware.auth import require_buyer
+from backend.app.schemas.address import (
     AddressCreate, AddressUpdate,
     BuyerAddressCreate, BuyerAddressUpdate,
     BuyerAddressResponse, AddressResponse
 )
-from ..services import address_service
-from ..schemas.common import BuyerAddressLabel
+from backend.app.services.common import address_service
+from backend.app.schemas.common import BuyerAddressLabel
 
 router = APIRouter(
     prefix="/buyer/addresses",

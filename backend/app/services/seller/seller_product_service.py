@@ -5,11 +5,11 @@ from fastapi import HTTPException, UploadFile, status
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload
 
-from ..config.s3 import public_url
-from ..models.catalog import Category, Product, ProductImage, ProductSize, ProductVariant
-from ..models.order import OrderItem
-from ..schemas.common import Page, PageMeta
-from ..schemas.product import (
+from backend.app.config.s3 import public_url
+from backend.app.models.catalog import Category, Product, ProductImage, ProductSize, ProductVariant
+from backend.app.models.order import OrderItem
+from backend.app.schemas.common import Page, PageMeta
+from backend.app.schemas.product import (
     ProductCreate,
     ProductDetail,
     ProductImageResponse,
@@ -24,7 +24,7 @@ from ..schemas.product import (
     ProductVariantUpdate,
     ProductVariantWithSizesResponse,
 )
-from ..services.storage_service import delete_object, upload_many_via_backend, upload_via_backend
+from backend.app.services.common.storage_service import delete_object, upload_many_via_backend, upload_via_backend
 from sqlalchemy import func
 
 # VALIDATION HELPERS
