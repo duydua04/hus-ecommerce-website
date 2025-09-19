@@ -16,9 +16,10 @@ class Settings(BaseSettings):
     S3_BUCKET: str
     S3_REGION: str = "us-east-1"
 
-    JWT_SECRET: str
-    JWT_ALG: str = "HS256"
-    JWT_EXPIRE_MIN: int = 60
+    OAUTH2_SECRET_KEY: str
+    OAUTH2_ALGORITHM: str = "HS256"
+    OAUTH2_ACCESS_TOKEN_EXPIRE_MINUTES: int = 180
+    OAUTH2_REFRESH_TOKEN_EXPIRE_DAYS: int = 30
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 

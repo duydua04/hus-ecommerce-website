@@ -1,26 +1,41 @@
 from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.security import OAuth2PasswordBearer
 from jwt import ExpiredSignatureError, InvalidTokenError
 from sqlalchemy.orm import Session
 from ..config.db import get_db
-from ..utils.security import decode_token
+from ..utils.security import decode_token, verify_access_token
 from ..models.users import Admin, Buyer, Seller
 
-bearer = HTTPBearer(auto_error=False)
+oauth2_scheme = OAuth2PasswordBearer(
+    tokenUrl="auth/token",  # URL endpoint để lấy token
+    auto_error=False
+)
 
-def get_current_user(cred: HTTPAuthorizationCredentials = Depends(bearer),
-                     db: Session = Depends(get_db)):
+def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     """
     Kiem tra va tra ve nguoi dung hient ai dang truy cap
     """
-    if cred is None:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing token")
+    if token is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Missing access token",
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+
     try:
-        payload = decode_token(cred.credentials)
+        payload = verify_access_token(token)
     except ExpiredSignatureError:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token expired")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Access token expired",
+            headers={"WWW-Authenticate": "Bearer"}
+        )
     except InvalidTokenError:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid access token",
+            headers={"WWW-Authenticate": "Bearer"}
+        )
 
     user = None
     role = payload.get('role')
@@ -36,22 +51,37 @@ def get_current_user(cred: HTTPAuthorizationCredentials = Depends(bearer),
         user = None
 
     if user is None:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not found",
+            headers={"WWW-Authenticate": "Bearer"})
 
     return {"role": role, "sub": sub, "user": user}
 
 # Các hàm dùng làm depends router cần giới hạn quyền, code 403 may chu tu choi xac thuc
 def require_admin(info = Depends(get_current_user)):
     if info["role"] != "admin":
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin only")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin only"
+        )
+
     return info
 
 def require_buyer(info = Depends(get_current_user)):
     if info["role"] != 'buyer':
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Buyer only")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Buyer only"
+        )
+
     return info
 
 def require_seller(info = Depends(get_current_user)):
     if info["role"] != 'seller':
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Seller only")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Seller only"
+        )
+
     return info

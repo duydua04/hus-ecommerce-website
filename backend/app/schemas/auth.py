@@ -22,7 +22,16 @@ class Login(BaseModel):
     email: EmailStr
     password: str
 
-class Token(BaseModel):
+class OAuth2Token(BaseModel):
     access_token: str
-    token_type: str
-    expires_in: int
+    refresh_token: str
+    token_type: str = "bearer"
+    expires_in: int  # seconds
+    scope: str
+
+class RefreshTokenRequest(BaseModel):
+    refresh_token: str
+
+class TokenData(BaseModel):
+    email: str | None = None
+    role: str | None = None
