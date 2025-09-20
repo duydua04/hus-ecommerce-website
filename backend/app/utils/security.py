@@ -33,11 +33,12 @@ def create_access_token(sub: str, role: str, expires_minutes: int | None = None,
         "role": role,
         "iat": int(now.timestamp()),
         "exp": int((now + timedelta(minutes=expires_minutes)).timestamp()),
+        "type": "access_token",
     }
     if extra:
         payload.update(extra)
 
-    token = jwt.encode(payload, settings.JWT_SECRET, algorithm=settings.JWT_ALG)
+    token = jwt.encode(payload, settings.OAUTH2_SECRET_KEY, algorithm=settings.OAUTH2_ALGORITHM)
     return token
 
 

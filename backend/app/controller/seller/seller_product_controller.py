@@ -10,10 +10,10 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, File, Query, UploadFile, status
 from sqlalchemy.orm import Session
 
-from backend.app.config.db import get_db
-from backend.app.middleware.auth import require_seller
-from backend.app.schemas.common import Page
-from backend.app.schemas.product import (
+from ...config.db import get_db
+from ...middleware.auth import require_seller
+from ...schemas.common import Page
+from ...schemas.product import (
     ProductCreate,
     ProductDetail,
     ProductImageResponse,
@@ -26,7 +26,7 @@ from backend.app.schemas.product import (
     ProductVariantResponse,
     ProductVariantUpdate,
 )
-from backend.app.services.seller.seller_product_service import (
+from ...services.seller.seller_product_service import (
     create_product_variant,
     create_seller_product,
     create_variant_size,

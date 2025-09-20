@@ -1,10 +1,9 @@
 from __future__ import annotations
 from typing import Literal, IO, List
 from fastapi import HTTPException, UploadFile, status
-from botocore.client import Config
 from botocore.exceptions import ClientError
-from backend.app.config.settings import settings
-from backend.app.config.s3 import get_s3_client
+from ...config.settings import settings
+from ...config.s3 import get_s3_client
 import time, uuid, mimetypes, boto3
 from urllib.parse import urlparse
 

@@ -1,10 +1,10 @@
 from fastapi import  HTTPException, status
 from sqlalchemy.orm import Session
-from backend.app.config.settings import settings
-from backend.app.models.users import Admin, Seller, Buyer
-from backend.app.schemas.auth import RegisterBuyer, RegisterSeller, Login, OAuth2Token
-from backend.app.schemas.user import BuyerResponse, SellerResponse
-from backend.app.utils.security import (
+from ...config.settings import settings
+from ...models.users import Admin, Seller, Buyer
+from ...schemas.auth import RegisterBuyer, RegisterSeller, Login, OAuth2Token
+from ...schemas.user import BuyerResponse, SellerResponse
+from ...utils.security import (
     hash_password, verify_password, create_access_token,
     create_refresh_token, verify_refresh_token
 )
@@ -126,6 +126,7 @@ def refresh_access_token(db: Session, refresh_token: str):
     email = payload.get("sub")
     role = payload.get("role")
 
+    # Kiem tra user con ton tai
     user = None
     if role == 'admin':
         user = db.query(Admin).filter(Admin.email == email).first()

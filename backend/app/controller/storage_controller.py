@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Header, Query
 from fastapi.responses import StreamingResponse
 from typing import Optional, Literal
 from ..middleware.auth import get_current_user, require_admin
-from backend.app.services.common.storage_service import get_object_range, delete_object, gen_key, validate_content_type
+from ...services.common.storage_service import get_object_range, delete_object, gen_key, validate_content_type
 from ..config.s3 import presign_get, presign_put, public_url
 
 router = APIRouter(

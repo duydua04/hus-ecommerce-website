@@ -2,9 +2,9 @@ from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
-from backend.app.models.catalog import Category
-from backend.app.schemas.category import CategoryCreate, CategoryUpdate, CategoryResponse
-from backend.app.schemas.common import Page, PageMeta
+from ...models.catalog import Category
+from ...schemas.category import CategoryCreate, CategoryUpdate, CategoryResponse
+from ...schemas.common import Page, PageMeta
 
 # Ham tao danh muc san pham
 def create_category(db: Session, payload: CategoryCreate):
