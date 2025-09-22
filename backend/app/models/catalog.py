@@ -45,6 +45,7 @@ class Product(Base):
     base_price = Column(Numeric(10, 2), nullable=False)
     rating = Column(Numeric(2, 1), nullable=False, default=0)
     review_count = Column(Integer, nullable=False, default=0)
+    sold_quantity = Column(Integer, nullable=False, default=0)
     category_id = Column(Integer, ForeignKey("category.category_id"))
     description = Column(Text)
     discount_percent = Column(Numeric(4, 2), nullable=False, default=0)
