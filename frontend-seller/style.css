@@ -1,0 +1,130 @@
+@import url("https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Poppins:wght@400;500;600;700&display=swap");
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+a {
+  text-decoration: none;
+}
+
+li {
+  list-style: none;
+}
+
+:root {
+  --poppins: "Poppins", sans-serif;
+  --lato: "Lato", sans-serif;
+
+  --light: #f9f9f9;
+  --blue: #3c91e6;
+  --light-blue: #cfe8ff;
+  --grey: #eee;
+  --dark-grey: #aaaaaa;
+  --dark: #342e37;
+  --red: #db504a;
+  --yellow: #ffce26;
+  --light-yellow: #fff2c6;
+  --orange: #fd7238;
+  --light-orange: #ffe0d3;
+}
+
+body {
+  background: var(--grey);
+  font-family: var(--lato);
+  display: flex;
+}
+
+/*SIDEBAR*/
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 280px;
+  height: 100%;
+  background: var(--light);
+  z-index: 1000;
+}
+
+.sidebar__brand {
+  font-size: 24px;
+  font-weight: 700;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  color: var(--blue);
+}
+
+.sidebar__brand-icon {
+  min-width: 60px;
+  display: flex;
+  justify-content: center;
+}
+
+.sidebar__menu {
+  width: 100%;
+  margin-top: 48px;
+}
+
+.sidebar__item {
+  height: 48px;
+  background: transparent;
+  margin-left: 6px;
+  border-radius: 40px 0 0 40px;
+  padding: 4px;
+}
+
+.sidebar__item--active {
+  background: var(--grey);
+  position: relative;
+  z-index: 100;
+}
+
+.sidebar__item--active::before,
+.sidebar__item--active::after {
+  content: "";
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  right: 0;
+  z-index: -1;
+}
+
+.sidebar__item--active::before {
+  top: -40px;
+  box-shadow: 20px 20px 0 var(--grey);
+}
+
+.sidebar__item--active::after {
+  bottom: -40px;
+  box-shadow: 20px -20px 0 var(--grey);
+}
+
+.sidebar__link {
+  width: 100%;
+  height: 100%;
+  background-color: var(--light);
+  display: flex;
+  align-items: center;
+  border-radius: 48px;
+  font-size: 16px;
+  color: var(--dark);
+}
+
+.sidebar__link:hover {
+  color: var(--blue);
+}
+
+.sidebar__icon {
+  min-width: calc(60px - ((4px + 6px) * 2));
+  display: flex;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.sidebar__text {
+  font-size: 16px;
+}
