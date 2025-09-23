@@ -119,3 +119,31 @@ def list_sellers(db: Session,
         ),
         data=data
     )
+
+def soft_delete_buyer(db: Session, buyer_id: int):
+    buyer = db.query(Buyer).get(buyer_id)
+    if not buyer:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Buyer not found"
+        )
+
+    buyer.is_active = False
+    db.commit()
+    db.refresh(buyer)
+
+    return {"deleted": True, "mode": "soft_delete"}
+
+def soft_delete_seller(db: Session, seller_id: int):
+    seller = db.query(Seller).get(seller_id)
+    if not seller:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Seller not found"
+        )
+
+    seller.is_active = False
+    db.commit()
+    db.refresh(seller)
+
+    return {"deleted": True, "mode": "soft_deleted"}
