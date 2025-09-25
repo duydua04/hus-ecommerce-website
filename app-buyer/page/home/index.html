@@ -1,0 +1,1725 @@
+<!DOCTYPE html>
+<html lang = "vi">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+        <meta name="description" content="The largest e-commerce site in Vietnam">
+        <title>My Website</title>
+        <style>
+            :root {
+                /*color*/
+                --neutral-0: #fff;
+                --neutral-50: #f8fafc;
+                --neutral-100: #f1f5f9;
+                --neutral-200: #e2e8f0;
+                --neutral-300: #cbd5e1;
+                --neutral-400: #A3B0C2;
+                --neutral-500: #6B7C94;
+                --neutral-600: #52637A;
+                --neutral-700: #334155;
+                --neutral-800: #1e293b;
+                --neutral-900: #0f172a;
+                --neutral-1000: #000;
+                --primary-100: #e0e7ff;
+                --primary-200: #c7d2fe;
+                --primary-300: #a5b4fc;
+                --primary-400: #818cf8;
+                --primary-500: #6163fe;
+                --primary-600: #4f46e5;
+                --primary-700: #4338ca;
+                --primary-800: #3730a3;
+                --primary-900: #312e81;
+                --blue-100: #dbeafe;
+                --blue-200: #bfdbfe;
+                --blue-300: #93c5fd;
+                --blue-400: #60a5fa;
+                --blue-500: #3780f6;
+                --blue-600: #2563eb;
+                --blue-700: #1d4ed8;
+                --blue-800: #1e40af;
+                --blue-900: #112a6e;
+                --red-100: #fee2e2;
+                --red-200: #fecaca;
+                --red-300: #fca5a5;
+                --red-400: #f87171;
+                --red-500: #ef3232;
+                --red-600: #d11616;
+                --red-700: #b91c1c;
+                --red-800: #991b1b;
+                --red-900: #671010;
+                --green-100: #DBFFE1;
+                --green-200: #bbf7d0;
+                --green-300: #86efac;
+                --green-400: #4ade80;
+                --green-500: #0dab47;
+                --green-600: #0d923e;
+                --green-700: #15803d;
+                --green-800: #166534;
+                --green-900: #0a4321;
+                --orange-100: #ffedd5;
+                --orange-200: #fed7aa;
+                --orange-300: #fdba74;
+                --orange-400: #fb923c;
+                --orange-500: #f97316;
+                --orange-600: #d14f09;
+                --orange-700: #b13606;
+                --orange-800: #87290a;
+                --orange-900: #5e1a04;
+                --yellow-100: #fff6a5;
+                --yellow-200: #ffed4a;
+                --yellow-300: #ffe11e;
+                --yellow-400: #fed507;
+                --yellow-500: #E5B800;
+                --yellow-600: #D6A400;
+                --yellow-700: #B88700;
+                --yellow-800: #996B00;
+                --yellow-900: #855800;
+                --purple-100: #f3e8ff;
+                --purple-200: #e9d5ff;
+                --purple-300: #d8b4fe;
+                --purple-400: #c084fc;
+                --purple-500: #a855f7;
+                --purple-600: #9333ea;
+                --purple-700: #7e22ce;
+                --purple-800: #6b21a8;
+                --purple-900: #3f0b68;
+                --teal-100: #ccfbf1;
+                --teal-200: #99f6e4;
+                --teal-300: #5eead4;
+                --teal-400: #2dd4bf;
+                --teal-500: #14b8a6;
+                --teal-600: #0d9488;
+                --teal-700: #0f766e;
+                --teal-800: #115e59;
+                --teal-900: #0c4844;
+                --alpha-1: rgba(0,20,60,.06);
+                --alpha-2: rgba(0,20,60,.10);
+                --alpha-3: rgba(0,20,60,.15);
+                --alpha-4: rgba(0,20,60,.2);
+                --alpha-5: rgba(0,20,60,.3);
+                --alpha-6: rgba(0,20,60,.4);
+                --alpha-7: rgba(0,20,60,.5);
+                --alpha-8: rgba(0,20,60,.6);
+                --alpha-9: rgba(0,20,60,.7);
+        
+                /*color main*/
+                --main-color: #226480;
+                --font-family: Calibri, sans-serif;
+                --bg-color-base: #fff;
+                --bg-color-secondary: var(--blue-200);
+                --border-color-default: var(--blue-300);
+                --text-link-color: var(--blue-600);
+                --text-color-base: #000;
+                --text-color-secondary: var(--neutral-500);
+                --text-color-muted: var(--neutral-400);
+
+                /*boder-radius*/
+                --border-radius-base: 8px;
+                --border-radius-sm: 4px;
+                --border-radius-lg: 12px;
+                --border-radius-xl: 16px;
+
+                /*font text and size*/
+                --font-family-base: system-ui, -apple-system, "Helvetica Neue", "Segoe UI", Roboto, "Noto Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+                --font-size-default: 15px;
+                --font-size-sm: 0.9rem;
+                --line-height-base: 1.4;
+                --line-height-sm: 1.25;
+                --line-height-lg: 1.8;
+            }
+
+            *{
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: var(--font-family-base);
+                font-weight: normal;
+                font-optical-sizing: auto;
+                line-height: 1.4;
+                -webkit-text-size-adjust: 100%;
+                background-color: white;
+                color: black;
+            }
+            
+            @media (max-width: 640px) {
+                html, body {
+                    font-size: 16px;
+                    font-weight: 500;
+                }
+            }
+
+            .header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                flex-wrap: wrap;
+                padding: 10px 20px;
+            }
+            .header-left {
+                display: flex;
+                align-items: center;
+                gap: 20px;
+                margin-left: 90px;
+            }
+            .header-right {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                margin-right: 90px;
+            }
+            .header-center {
+                flex: 1;
+                min-width: 150px;
+                margin: 10px 10px;
+            }
+
+            html {
+                scroll-behavior: smooth;
+                font-size: var(--font-size-default, 15px);
+            }
+
+            hr {
+                margin: 1rem 0;
+                color: inherit;
+                border: 0;
+                border-top: 1px solid #85858a;
+                opacity: 0.25;
+                width: 100%;
+                }
+
+        
+            /*-----Dropdown-----*/
+            .dropdown {
+                position: relative;
+            }
+            .dropdown button {
+                background-color: var(--blue-400);
+                border: none;
+                padding: 8px 12px;
+                border-radius: 5px;
+                cursor: pointer;
+                color: black;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                font-size: 1em;
+            }
+            .dropdown-content {
+                display: none;
+                position: absolute;
+                top: 35px;
+                left: 0;
+                background-color: var(--blue-300);
+                min-width: 150px;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+                border-radius: 5px;
+                z-index: 10;
+            }
+            .dropdown-content a {
+                display: block;
+                padding: 8px 12px;
+                text-decoration: none;
+                color: black;
+            }
+            .dropdown-content a:hover {
+                background-color: var(--blue-500);
+            }
+            .dropdown:hover .dropdown-content {display: block;}
+            .dropdown button:hover {
+                background-color: var(--blue-700);
+                color: #fff;
+            }
+
+            /*------Navbar--------*/
+            .navbar {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: 10px;
+            }
+
+            /*------Brand------*/
+            .brand {
+                display: flex;
+                align-items: center;
+            }
+            .brand-link {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                text-decoration: none;
+                color: var(--main-color);
+                font-family: var(--font-family);
+                font-size: 1.25rem;
+                font-weight: 700;
+            }
+            .brand-logo {
+                width: 60px;
+                height: 60px;
+                object-fit: cover;
+                border-radius: 50%;
+            }
+            .brand-link:hover {
+                opacity: 0.85;
+            }
+
+            @media (max-width: 600px) {
+                .brand-name {
+                    display: none;
+                }
+            }
+
+            /*------All Catalog-------*/
+            .dropdown-catalog {
+                position: relative;
+                display: inline-block;
+            }
+            .catalog-button {
+                background-color: var(--blue-300);
+                border: 2px solid var(--blue-300);
+                padding: 8px 14px;
+                border-radius: 6px;
+                cursor: pointer;
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                color: black;
+                font-weight: 600;
+                font-family: var(--font-family);
+                box-sizing: border-box;
+                height: 42px;
+            }
+            .catalog-button:hover,
+            .dropdown-catalog:focus-within .catalog-button {
+                background-color: var(--blue-700);
+                color: #fff;
+            }
+            .catalog-menu {
+                display: none;
+                position: absolute;
+                top: calc(100% + 8px);
+                left: 0;
+                background-color: var(--blue-200);
+                min-width: 160px;
+                box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+                border-radius: 6px;
+                padding: 6px 0;
+                z-index: 20;
+            }
+            .catalog-menu a {
+                display: block;
+                padding: 8px 12px;
+                text-decoration: none;
+                color: var(--neutral-900);
+                font-family: var(--font-family);
+            }
+            .catalog-menu a:hover {
+                background-color: var(--blue-400);
+            }
+            .dropdown-catalog:hover .catalog-menu,
+            .dropdown-catalog:focus-within .catalog-menu {
+                display: block;
+            }
+
+            @media (max-width: 600px) {
+                .catalog-text {
+                    display: none;
+                }
+            }
+            
+            /*------Search bar------*/
+            .search-form {
+                display:flex;
+                align-items: center;
+                gap: 8px;
+                border: 2px solid var(--neutral-300);
+                border-radius: 10px;
+                overflow: hidden;
+                width: 100%;
+                flex: 1;
+                background-color: var(--neutral-0);
+                padding: 2px;
+            }
+            .search-input {
+                flex: 1;
+                padding: 8px 10px;
+                border: none;
+                outline: none;
+                font-size: var(--font-size-sm);
+                font-family: var(--font-family);
+                min-width: 150px;
+            }
+            .search-button {
+                width: 32px;
+                height: 32px;
+                border-radius: 50%;
+                border: none;
+                background-color: var(--blue-300);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+            }
+            .search-button:hover {
+                background-color: var(--blue-700);
+                color: white;
+            }
+
+            /*-----Sign in-----*/
+            .sign-in-button {
+                display: inline-block;
+                align-items: center;
+                justify-content: center;
+                padding: 8px 14px;
+                border-radius: 6px;
+                background-color: var(--blue-300);
+                color: #000;
+                text-decoration: none;
+                font-weight: 700;
+                border: 2px solid var(--blue-300);
+                font-family: var(--font-family);
+            }
+            .sign-in-button:hover,
+            .sign-in-button:focus {
+                background-color: var(--blue-600);
+                color: white;
+            }
+
+            /*--------icon-group--------*/
+            .icon-group {
+                display: flex;
+                gap: 2px;
+                align-items: center;
+            }
+            .icon-button {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                background-color: var(--blue-300);
+                display: inline-flex;
+                justify-content: center;
+                align-items: center;
+                cursor: pointer;
+                color: #000;
+                position: relative;
+                transition: background-color 0.2s, transform 0.15s;
+            }
+            .icon-button svg {
+                width: 18px;
+                height: 18px;
+            }
+            .icon-button:hover,
+            .icon-button:focus {
+                background-color: var(--blue-600);
+                color: #fff;
+                transform: translateY(-2px);
+            }
+            .icon-button:after {
+                content: attr(data-tooltip);
+                position: absolute;
+                bottom: -34px;
+                left: 50%;
+                transform: translateX(-50%) scale(0);
+                background-color: var(--blue-600);
+                color: #fff;
+                padding: 6px 8px;
+                border-radius: 4px;
+                font-size: 0.78rem;
+                white-space: nowrap;
+                opacity: 0;
+                pointer-events: none;
+                transition: transform 0.12s ease, opacity 0.12s ease;
+            }
+            .icon-button:hover::after,
+            .icon-button:focus::after {
+                transform: translateX(-50%) scale(1);
+                opacity: 1;
+            }
+            .icon-button:focus {
+                outline: 3px solid rgba(50,168,82,0.18);
+                outline-offset: 3px;
+            }
+
+            @media (max-width: 948px) {
+                .header-left { 
+                    order: 1;
+                    margin-left: 10px;
+                }
+                .header-right { 
+                    order: 2; 
+                    margin-right: 10px;
+                }
+                .header-center {
+                    order: 3;
+                    flex: 1 1 90%;
+                }
+
+                .header-left .catalog-button {
+                    order: 0;
+                }
+                .header-left .brand {
+                    order: 1;
+                }
+
+                .catalog-text {
+                    display: none;
+                }
+            }
+
+            @media (max-width: 480px) {
+                .header-left,
+                .header-right {
+                    justify-content: flex-start;
+                    flex: 0 0 auto;
+                    margin-left: 0;
+                    gap: 10px;
+                }
+                .catalog-text {
+                    display: none;
+                }
+            }
+            /* ---------Navigation Bar-------- */
+            .extra-nav {
+                background-color: transparent;
+                padding: 8px 0 0;
+                font-family: var(--font-family);
+            }
+            .nav-list {
+                display: flex;
+                justify-content: center;
+                gap: 18px;
+                list-style: none;
+                margin: 0;
+                padding: 0;
+                flex-wrap: wrap;
+            }
+            .nav-link {
+                text-decoration: none;
+                color: black;
+                font-weight: 400;
+                padding: 6px 8px;
+                border-radius: 4px;
+                display: inline-block;
+            }
+            .nav-link:hover,
+            .nav-link:focus {
+                background-color: var(--blue-600);
+                color: #fff;
+            }
+            .nav-item.dropdown {
+                position: relative;
+            }
+            .nav-item.dropdown .dropdown-menu {
+                display: none;
+                position: absolute;
+                top: calc(100% + 8px);
+                left: 0;
+                background: white;
+                box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+                border-radius: 6px;
+                min-width: 160px;
+                padding: 6px 0;
+                z-index: 20;
+            }
+            .nav-item.dropdown:hover .dropdown-menu,
+            .nav-item.dropdown:focus-within .dropdown-menu {
+                display: block;
+            }
+            .nav-item.dropdown .dropdown-menu a {
+                display: block;
+                padding: 8px 12px;
+                color: black;
+                text-decoration: none;
+            }
+            .nav-item.dropdown .dropdown-menu a:hover {
+                background-color: #f0f0f0;
+            }
+            #menu-toggle {
+                display: none;
+            }
+            .menu-icon {
+                display: none;
+                font-size: 28px;
+                cursor: pointer;
+                padding: 8px;
+                background: var(--blue-200);
+                border-radius: 6px;
+            }
+            
+            @media (max-width: 768px) {
+                .extra-nav {
+                    text-align: center;
+                }
+                .nav-list {
+                    display: none;
+                    margin: 0 auto;
+                }
+
+                #menu-toggle:checked + .menu-icon + .nav-list {
+                    display: grid;
+                    grid-template-columns: repeat(2, 1fr);
+                    grid-auto-rows: auto;
+                    gap: 8px;
+                    background: white;
+                    text-align: center;
+                    padding: 16px 0;
+                    margin: 0 auto;
+                    border-radius: 6px;
+                    box-sizing: border-box;
+                    width: 85%;
+                    max-width: none;
+                }
+
+                .menu-icon {
+                    display: inline-block;
+                }
+            }
+
+            /* ---------Product Catalog-------- */
+            .catalog-header h2{
+                font-size: 2.0em;
+                color: black;
+                text-align: center;
+                margin-bottom: 15px;
+                font-weight: 700;
+            }
+            .catalog-circles {
+                padding: 20px 0;
+                background-color: white;
+                font-family: var(--font-family);
+            }
+            .catalog-row {
+                display: flex;
+                gap: 18px;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+            .catalog-item {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+                text-decoration: none;
+                color: #000;
+                width: 120px;
+            }
+            .catalog-item img {
+                width: 120px;
+                height: 120px;
+                object-fit: cover;
+                border-radius: 50%;
+                border: 4px solid var(--neutral-400);
+                background-color: var(--neutral-600);
+                transition: border-color 0.2s, transform 0.2s;
+            }
+            .catalog-item img:hover {
+                border-color: var(--blue-600);
+                transform: translateY(-5px);
+            }
+            .catalog-item p {
+                margin-top: 8px;
+                font-size: 0.95rem;
+                color: black;
+            }
+
+            /* ---------New trending-------- */
+            .new-trending {
+                margin: 20px 0
+            }
+            .container {
+                max-width: 1264px;
+                width: 100%;
+                margin: 0 auto;
+            }
+            .row {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 20px;
+                
+            }
+                    /*-----------Main banner-----------------*/
+            .banner-main {
+                flex: 2 1 0;
+                min-height: 0;
+            }
+            .banner-large {
+                position: relative;
+                border-radius: 8px;
+                overflow: hidden;
+                background-color: var(--blue-100);
+                height: 360px;
+            }
+            .banner-large img.banner-img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                border-radius: 8px;
+            }
+            .banner-content {
+                position: absolute;
+                top: 20%;
+                left: 40px;
+                text-align: center;
+                color: black;
+            }
+            .banner-content h2 {
+                font-family: 'Times New Roman', sans-serif;
+                font-size: 2.8rem;
+                font-weight: 500;
+                margin-bottom: 4px;
+            }
+            .banner-content p {
+                font-size: 1.12rem;
+                margin-bottom: 20px;
+                color: var(--blue-400);
+            }
+            .button-main {
+                display: inline-flex;
+                align-items: center;
+                padding: 12px 20px;
+                background-color: var(--blue-300);
+                color: #fff;
+                text-decoration: none;
+                border-radius: 999px;
+                font-size: 1rem;
+                font-weight: 600;
+                text-decoration: none;
+                transition: all 0.3s ease;
+            }
+
+            .button-main:hover {
+                background-color: var(--blue-700);
+                color: #fff;
+                transform: scale(1.05);
+            }
+
+
+
+                    /*-----------Small banner-----------------*/
+                .banner-small {
+                    flex: 1 1 0;
+                    min-width: 0;
+                    max-width: 300px;
+                    height: 360px;
+                    overflow: hidden;
+                }
+                .banner-small-inner {
+                    position: relative;
+                    border-radius: 8px;
+                    overflow: hidden;
+                    height: 100%;
+                }
+                .img-bg {
+                    position: absolute;
+                    top: 0; left: 0;
+                    width: 100%; height: 100%;
+                    object-fit: cover;
+                    z-index: 0;
+                }
+                .caption {
+                    position: absolute;
+                    bottom: 0;
+                    left: 0; right: 0;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: flex-end;
+                    align-items: center;
+                    text-align: center;
+                    gap: 12px;
+                    padding: 20px;
+                    color: #fff;
+                    z-index: 1;
+                    background: linear-gradient(to top, rgba(0,0,0,0.5), transparent);
+                }
+                .caption h5 {
+                    font-size: 1.5rem;
+                    font-weight: 400;
+                    margin-bottom: 20px;
+                    }
+                .button-outline {
+                    display: inline-block;
+                    align-items: center;
+                    padding: 8px 16px;
+                    border: 1px solid #fff;
+                    border-radius: 999px;
+                    color: #fff;
+                    text-decoration: none;
+                    background: transparent;
+                    transition: all 0.3s ease;
+                }
+                .button-outline:hover {
+                    border-color: var(--blue-600);
+                    color: var(--blue-600);
+                    transform: scale(1.05);
+                }
+
+                @media (max-width: 640px) {
+                    .banner-main {
+                        flex: 1 1 100%;
+                    }
+                    .banner-large {
+                        height: 280px;
+                    }
+                    .banner-content {
+                        top: 20%;
+                        left: 20px;
+                        text-align: left;
+                    }
+                    .banner-content h2 {
+                        font-size: 1.8rem;
+                    }
+                    .banner-content p {
+                        font-size: 1rem;
+                    }
+                    .banner-small {
+                        display: none;
+                    }
+                }
+            /* ---------Most popular categories-------- */
+            .popular-section {
+                background-color: #fff;
+                font-family: var(--font-family);
+                max-width: 1264px;
+                margin: 0 auto;
+            }
+            .popular-section h2 {
+                font-size: 2.0em;
+                color: black;
+                text-align: left;
+                margin-bottom: 15px;
+                font-weight: 700;
+            }
+            .popular-grid {
+                display: grid;
+                grid-template-columns: repeat(5, 240px);
+                gap: 12px;
+                justify-content: center;
+            }
+            .popular-header {
+                grid-column: 1 / -1;
+            }
+            .popular-card {
+                border: 2px solid white;
+                border-radius: 10px;
+                overflow: hidden;
+                background: white;
+                text-align: center;
+                padding: 0;
+                transition: border-color 0.2s, transform 0.15s;
+                cursor: pointer;
+            }
+            .popular-card img {
+                width: 100%;
+                height: 200px;
+                object-fit: cover;
+                display: block;
+                transition: transform 0.25s ease;
+            }
+            .popular-card:hover img {
+                transform: scale(1.05);
+                cursor: pointer;;
+            }
+            .popular-card p {
+                padding: 8px;
+                color: black;
+                font-weight: 400;
+            }
+            
+            /* ---------Today's big deals-------- */
+            .todays-deals {
+                background-color: #fff;
+                font-family: var(--font-family);
+                max-width: 1264px;
+                margin: 0 auto;
+            }
+            .todays-deals h2 {
+                font-size: 2.0em;
+                color: black;
+                text-align: left;
+                margin-bottom: 15px;
+                font-weight: 700;
+            }
+            .deals-grid {
+                display: grid;
+                grid-template-columns: repeat(5, 240px);
+                gap: 16px;
+                justify-content: center;
+            }
+            .deals-header {
+                grid-column: 1 / -1;
+            }
+            .product-card {
+                position: relative;
+                background: #fff;
+                border: 2px solid var(--neutral-400);
+                border-radius: 10px;
+                overflow: hidden;
+                padding-bottom: 10px;
+                transition: border-color 0.2s, transform 0.15s;
+            }
+           .product-card img {
+                width: 100%;
+                height: 150px;
+                object-fit: cover;
+                display: block;
+            }
+            .product-card .product-heart {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                position: absolute;
+                top: 8px;
+                right: 8px;
+                width: 36px;
+                height: 36px;
+                border-radius: 50%;
+                border: 2px solid transparent;
+                background: transparent;
+                color: transparent;
+                font-size: 26px;
+                line-height: 36px;
+                text-align: center;
+                cursor: pointer;
+                transition: all 0.5s ease;
+                pointer-events: none;
+            }
+            .product-card:hover .product-heart {
+                color: var(--blue-600);
+                background-color: transparent;
+                border-color: transparent;
+                transform: scale(1.1);
+                opacity: 1;
+            }
+            .product-card .product-heart {
+                transition: all 0.5s ease;
+            }
+
+            .product-card:not(:hover) .product-heart {
+                color: var(--blue-600);
+                background-color: transparent;
+                border-color: var(--blue-600);
+                transform: scale(0.9);
+                opacity: 0;
+            }
+            .product-info {
+                padding: 8px;
+            }
+            .product-name {
+                font-weight: 500;
+                color: black;
+                margin: 0 0 6px 0;
+                font-size: 1.08rem;
+            }
+            .product-price {
+                color: var(--orange-600);
+                margin: 0;
+                font-weight: 300;
+            }
+            .product-badge {
+                color: var(--green-600);
+                margin-top: 6px;
+                font-size: 0.9rem;
+            }
+            .product-card:hover {
+                border-color: var(--blue-600);
+                transform: translateY(-4px);
+            }
+
+            /*--------Show More----------*/
+            .deals-grid + .show-more {
+                display: block;
+                width: 100%;
+                max-width: 1264px;
+                margin: 20px auto 40px;
+                padding: 12px 0;
+                background-color: #b9bcbb;
+                color: black;
+                text-align: center;
+                border-radius: var(--border-radius-base);
+                font-weight: bold;
+                font-size: 16px;
+                font-family: var(--font-family);
+                cursor: pointer;
+                box-sizing: border-box;
+            }
+
+
+
+            .show-more:hover {
+                background-color: var(--blue-600); 
+                color: white;
+            }
+
+            /* ---------Video Reviews-------- */
+            .video-section {
+                margin: 20px 0;
+            }
+            
+            .container {
+                max-width: 1264px;
+                width: 100%;
+                margin: 20px auto;
+            }
+            
+            .video-grid {
+                display: grid;
+                gap: 16px;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+            
+            @media (min-width: 640px) {
+                .video-grid {
+                    grid-template-columns: repeat(3, minmax(0, 1fr));
+                }
+            }
+            
+            @media (min-width: 920px) {
+                .video-grid {
+                    grid-template-columns: repeat(4, minmax(0, 1fr));
+                }
+            }
+            
+            .editors-pick-container {
+                grid-column: 1 / 3;
+            }
+            
+            .card {
+                border-radius: var(--border-radius-base);
+                background-color: #fff;
+                overflow: hidden;
+            }
+            
+            .editors-pick-card {
+                background-color: var(--blue-300);
+                padding: 8px;
+                height: 100%;
+            }
+            
+            .card-body {
+                padding: 24px;
+            }
+            
+            .card-title {
+                font-size: 1.5rem;
+                margin-bottom: 8px;
+            }
+            
+            .card-description {
+                margin-bottom: 16px;
+            }
+            
+            .button {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                padding: 8px 12px;
+                border: 1px solid var(--blue-100);
+                background-color: var(--blue-100);
+                color: var(--blue-800);
+                text-decoration: none;
+                cursor: pointer;
+                border-radius: var(--border-radius-base);
+            }
+            .button:hover {
+                background-color: var(--blue-600);
+                color: #fff;
+                transform: scale(1.05);
+            }
+            
+            .video-thumbnail-card {
+                background-color: var(--neutral-200);
+                border: 1px solid var(--neutral-200);
+                border-radius: 8px;
+                position: relative;
+                aspect-ratio: 1 / 1;
+                overflow: hidden;
+            }
+            
+            .video-link {
+                display: block;
+                height: 100%;
+            }
+            
+            .video-link:hover {
+                opacity: 0.8;
+                transform: scale(1.05);
+            }
+            
+            .video-thumbnail {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+            
+            .play-button {
+                position: absolute;
+                bottom: 20px;
+                right: 20px;
+                width: 40px;
+                height: 40px;
+                border-radius: 10px;
+                font-size: 1.12rem;
+                background-color: var(--blue-100);
+                color: var(--blue-600);
+                border: 1px solid var(--blue-100);
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+                cursor: pointer;
+            }
+            
+            .play-button svg path {
+                fill: var(--blue-600);
+            }
+
+            /* ---------Footer-------- */
+            .site-footer {
+                background-color: var(--blue-200);
+                padding: 28px 20px;
+                color: black;
+                font-family: var(--font-family);
+            }
+            .footer-grid {
+                display: grid;
+                grid-template-columns: repeat(5, 1fr);
+                gap: 18px;
+            }
+            .footer-column h6 {
+                font-weight: 700;
+                font-size: 1.05rem;
+                margin-bottom: 10px;
+                color: black;
+            }
+            .footer-column ul {
+                list-style: none;
+                padding: 0;
+                margin: 0;
+            }
+            .footer-column li {
+                margin-bottom: 8px;
+            }
+            .footer-column a {
+                text-decoration: none;
+                color: black;
+            }
+            .footer-column a:hover {
+                color: var(--blue-700);
+            }
+            .footer-divider {
+                border: none;
+                height: 1px;
+                background-color: white;
+                margin: 18px 0;
+            }
+            .footer-bottom {
+                text-align: center;
+                font-size: 0.9rem;
+                color: black;
+            }
+
+            @media (max-width: 1264px) {
+                .popular-grid {
+                    grid-template-columns: repeat(4, minmax(150px, 1fr));
+                }
+                .deals-grid {
+                    grid-template-columns: repeat(4, minmax(150px, 1fr));
+                }
+            }
+            
+            @media (max-width: 768px) {
+                .footer-grid {
+                    grid-template-columns: repeat(4, 1fr);
+                }
+                .popular-grid {
+                    grid-template-columns: repeat(3, minmax(150px, 1fr));
+                }
+                .deals-grid {
+                    grid-template-columns: repeat(3, minmax(150px, 1fr));
+                }
+            }
+
+            @media (max-width: 600px) {
+                .footer-grid {
+                    grid-template-columns: repeat(3, 1fr);
+                }
+                .popular-grid {
+                    grid-template-columns: repeat(2, minmax(150px, 1fr));
+                }
+                .deals-grid {
+                    grid-template-columns: repeat(2, minmax(150px, 1fr));
+                }
+            }
+
+            @media (max-width: 480px) {
+                .footer-grid {
+                    grid-template-columns: repeat(2, minmax(180px, 1fr));
+                }
+            }
+
+        </style>
+    </head>
+    <body>
+        <!-----HEADER ROW---->
+
+        <header class="header">
+            <!--Brand name anh logo-->
+            <div class="header-left">
+                <div class="brand">
+                    <a href="#" class ="brand-link">
+                        <img src="access/logo.jpg" alt="Logo brand" class="brand-logo">
+                        <span class="brand-name">BrandName</span>
+                    </a>
+                </div>
+            
+            <!--All catalog-->
+                <div class="dropdown-catalog" tabindex="0">
+                    <button class="catalog-button" aria-haspopup="true" aria-expanded="false">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="4" y1="6" x2="20" y2="6"></line>
+                            <line x1="4" y1="12" x2="20" y2="12"></line>
+                            <line x1="4" y1="18" x2="20" y2="18"></line>
+                        </svg>
+                        <span class="catalog-text">All Catalog</span>
+                    </button>
+
+                    <div class="catalog-menu" role="menu" aria-hidden="true">
+                            <a href="#" role="menuitem">Category 1</a>
+                            <a href="#" role="menuitem">Category 2</a>
+                            <a href="#" role="menuitem">Category 3</a>
+                    </div>
+                </div>
+            </div>
+            <!--------Search bar-------->
+            <div class="header-center">
+                <form class="search-form" action="/search" method="get" role="search">
+                    <input class="search-input" type="search" name="q" placeholder="Search Product of e-commerce store" aria-label="Search products or e-commerce store">
+                    <button class="search-button" type="submit" aria-label="search">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"/>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        </svg>
+                    </button>
+                </form>
+            </div>
+
+            <div class="header-right">
+                <!---------Sign in-------->
+                <a href="#" class="sign-in-button" role="button">Sign In</a>
+
+                <!-----Icon group-------->
+                <div class="icon-group">
+                    <!---------Save Lists-------->
+                    <div class="icon-button" data-tooltip="Saved List" role="button" tabindex="0" aria-label="Saved List">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 20.5C12 20.5 2 14.5 2 8.7C2 5.8 4.1 3.5 7 3.5C8.5 3.5 10 4 12 6C14 4 15.5 3.5 17 3.5C19.9 3.5 22 5.8 22 8.7C22 14.5 12 20.5 12 20.5Z"/>
+                        </svg>
+                    </div>
+                    <!---------My Order-------->
+                    <div class="icon-button" data-tooltip="My Order" role="button" tabindex="0" aria-label="My Order">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20.198 3H3.802C3.05147 3 2.6762 3 2.41637 3.17726C2.28768 3.26505 2.18133 3.38109 2.10567 3.51627C1.9529 3.78921 1.99024 4.15793 2.06493 4.89537C2.18958 6.12624 2.2519 6.74168 2.57823 7.18168C2.74084 7.40095 2.94701 7.58519 3.18414 7.72315C3.65999 8 4.28635 8 5.53908 8H18.4609C19.7136 8 20.34 8 20.8159 7.72315C21.053 7.58519 21.2592 7.40095 21.4218 7.18168C21.7481 6.74168 21.8104 6.12624 21.9351 4.89537C22.0098 4.15793 22.0471 3.78921 21.8943 3.51627C21.8187 3.38109 21.7123 3.26505 21.5836 3.17726C21.3238 3 20.9485 3 20.198 3Z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                            <path d="M3 8L3 13.0408C3 16.7928 3 18.6688 4.17157 19.8344C5.34315 21 7.22876 21 11 21H13C16.7712 21 18.6569 21 19.8284 19.8344C21 18.6688 21 16.7928 21 13.0408V8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                            <path d="M10 11H14" stroke-width="1.5" stroke-linecap="round"></path>
+                        </svg>
+                    </div>
+                    <!---------My Cart-------->
+                    <div class="icon-button" data-tooltip="My Cart" role="button" tabindex="0" aria-label="My Cart">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M8 16L16.7201 15.2733C19.4486 15.046 20.0611 14.45 20.3635 11.7289L21 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+                            <path d="M6 6H22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+                            <circle cx="6" cy="20" r="2" stroke="currentColor" stroke-width="1.5"></circle>
+                            <circle cx="17" cy="20" r="2" stroke="currentColor" stroke-width="1.5"></circle>
+                            <path d="M8 20L15 20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+                            <path d="M2 2H2.966C3.91068 2 4.73414 2.62459 4.96326 3.51493L7.93852 15.0765C8.08887 15.6608 7.9602 16.2797 7.58824 16.7616L6.63213 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!---------Navigation Bar-------->
+        <nav class="extra-nav" aria-label="Main navigation">
+            <!----menu-icon----->
+            <input type="checkbox" id="menu-toggle" />
+            <label for="menu-toggle" class="menu-icon">&#9776;</label>
+            <!-----menu-items------>
+            <ul class="nav-list">
+                <li class="nav-item"><a class="nav-link" href="#">Hot offers</a></li>
+                <li class="nav-item"><a class="nav-link" href="#">Recommends</a></li>
+                <li class="nav-item"><a class="nav-link" href="#">New arrivals</a></li>
+                <li class="nav-item"><a class="nav-link" href="#">Bestsellers</a></li>
+                <li class="nav-item"><a class="nav-link" href="#">Blind boxes</a></li>
+                <li class="nav-item"><a class="nav-link" href="#">Articles</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link" href="#" aria-haspopup="true">Move &#9662;</a>
+                    <div class="dropdown-menu">
+                        <a href="#">Example link 1</a>
+                        <a href="#">Example link 2</a>
+                        <a href="#">Get Ecommerce UI</a>
+                    </div>
+                </li>
+            </ul>
+        </nav>
+        <hr>
+
+        <!---------Product Catalog-------->
+        <section class="catalog-circles" aria-label="Product categories">
+            <header class="catalog-header">
+                <h2>Product Catalog</h2>
+            </header>
+            <div class="catalog-row">
+                <a class="catalog-item" href="#">
+                    <img src="access/thoitrang.jpg" alt="Fashion" />
+                    <p>Fashion</p>
+                </a>
+
+                <a class="catalog-item" href="#">
+                    <img src="access/dogiadung.jpg" alt="Household Appliances" />
+                    <p>Household Appliances</p>
+                </a>
+
+                <a class="catalog-item" href="#">
+                    <img src="access/dientu.jpg" alt="Electronics" />
+                    <p>Electronics</p>
+                </a>
+
+                <a class="catalog-item" href="#">
+                    <img src="access/sach.jpg" alt="Books & Stationery" />
+                    <p>Books & Stationery</p>
+                </a>
+
+                <a class="catalog-item" href="#">
+                    <img src="access/mebe.jpg" alt="Mother & Baby" />
+                    <p>Mother & Baby</p>
+                </a>
+
+                <a class="catalog-item" href="#">
+                    <img src="access/noithat.png" alt="Interior" />
+                    <p>Interior</p>
+                </a>
+
+                <a class="catalog-item" href="#">
+                    <img src="access/sksd.png" alt="Health & Beauty" />
+                    <p>Health & Beauty</p>
+                </a>
+            </div>
+        </section>
+
+        <!---------New trending-------->
+        <section class="new-trending">
+            <div class="container">
+                <div class="row">
+                <!-- Banner chính -->
+                <main class="banner-main">
+                    <article class="banner-large relative rounded overflow-hidden">
+                    <div class="banner-content">
+                        <h2>New trending <br> Interior decorations</h2>
+                        <p>Hot summer discounts ending soon</p>
+                        <a href="#" class="button-main">Get Deals Now &gt;</a>
+                    </div>
+                    <img src="images/banners/main-interior.png" alt="Main banner" class="banner-img">
+                    </article>
+                </main>
+
+                <!-- Banner nhỏ -->
+                <aside class="banner-small">
+                    <article class="banner-small-inner">
+                    <img src="images/banners/small-interior.png" alt="Small banner" class="img-bg">
+                    <div class="caption">
+                        <h5>Custom interiors</h5>
+                        <a href="#" class="button-outline">Order Now</a>
+                    </div>
+                    </article>
+                </aside>
+                </div>
+            </div>
+            </section>
+
+
+        <!---------Most popular categories-------->
+        <section class="popular-section" aria-label="Most popular categories">
+            <div class="popular-grid">
+                <header class="popular-header">
+                    <h2>Most Popular Categories</h2>
+                </header>
+
+                <article class="popular-card">
+                <img src="access/sanpham1.png" alt="Popular 1">
+                <p>Category A</p>
+                </article>
+
+                <article class="popular-card">
+                <img src="access/sanpham2.png" alt="Popular 2">
+                <p>Category B</p>
+                </article>
+
+                <article class="popular-card">
+                <img src="access/sanpham3.png" alt="Popular 3">
+                <p>Category C</p>
+                </article>
+
+                <article class="popular-card">
+                <img src="access/sanpham4.png" alt="Popular 4">
+                <p>Category D</p>
+                </article>
+
+                <article class="popular-card">
+                <img src="access/sanpham5.png" alt="Popular 5">
+                <p>Category D</p>
+                </article>
+
+                <article class="popular-card">
+                <img src="access/sanpham6.png" alt="Popular 6">
+                <p>Category D</p>
+                </article>
+
+                <article class="popular-card">
+                <img src="access/sanpham7.png" alt="Popular 7">
+                <p>Category D</p>
+                </article>
+
+                <article class="popular-card">
+                <img src="access/sanpham8.png" alt="Popular 8">
+                <p>Category D</p>
+                </article>
+
+                <article class="popular-card">
+                <img src="access/sanpham9.png" alt="Popular 9">
+                <p>Category D</p>
+                </article>
+
+                <article class="popular-card">
+                <img src="access/sanpham10.png" alt="Popular 10">
+                <p>Category D</p>
+                </article>
+            </div>
+        </section>
+
+        <!---------Today's big deals-------->
+        <section class="todays-deals" aria-label="Today's big deals">
+            <div class="deals-grid">
+                <header class="deals-header" aria-label="Today's big deals">
+                    <h2>Today's big deals</h2>
+                </header>
+
+                <div class="product-card">
+                <img src="access/sanpham1.png" alt="Coffee and Tea Cup with Plate">
+                <button class="product-heart" aria-label="Add to wishlist">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 20.5C12 20.5 2 14.5 2 8.7C2 5.8 4.1 3.5 7 3.5C8.5 3.5 10 4 12 6C14 4 15.5 3.5 17 3.5C19.9 3.5 22 5.8 22 8.7C22 14.5 12 20.5 12 20.5Z"/>
+                    </svg>
+                </button>
+                <div class="product-info">
+                    <p class="product-name">Coffee and Tea Cup with Plate</p>
+                    <p class="product-price">$50.00</p>
+                    <p class="product-badge">freeship</p>
+                </div>
+                </div>
+
+                <div class="product-card">
+                <img src="access/sanpham2.png" alt="Product 2">
+                <button class="product-heart" aria-label="Add to wishlist">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 20.5C12 20.5 2 14.5 2 8.7C2 5.8 4.1 3.5 7 3.5C8.5 3.5 10 4 12 6C14 4 15.5 3.5 17 3.5C19.9 3.5 22 5.8 22 8.7C22 14.5 12 20.5 12 20.5Z"/>
+                    </svg>
+                </button>
+                <div class="product-info">
+                    <p class="product-name">Name of the product</p>
+                    <p class="product-price">$60.00</p>
+                    <p class="product-badge">freeship</p>
+                </div>
+                </div>
+
+                <div class="product-card">
+                <img src="access/sanpham3.png" alt="Product 3">
+                <button class="product-heart" aria-label="Add to wishlist">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 20.5C12 20.5 2 14.5 2 8.7C2 5.8 4.1 3.5 7 3.5C8.5 3.5 10 4 12 6C14 4 15.5 3.5 17 3.5C19.9 3.5 22 5.8 22 8.7C22 14.5 12 20.5 12 20.5Z"/>
+                    </svg>
+                </button>
+                <div class="product-info">
+                    <p class="product-name">Name of the product</p>
+                    <p class="product-price">$79.00</p>
+                    <p class="product-badge">freeship</p>
+                </div>
+                </div>
+
+                <div class="product-card">
+                <img src="access/sanpham4.png" alt="Product 4">
+                <button class="product-heart" aria-label="Add to wishlist">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 20.5C12 20.5 2 14.5 2 8.7C2 5.8 4.1 3.5 7 3.5C8.5 3.5 10 4 12 6C14 4 15.5 3.5 17 3.5C19.9 3.5 22 5.8 22 8.7C22 14.5 12 20.5 12 20.5Z"/>
+                    </svg>
+                </button>
+                <div class="product-info">
+                    <p class="product-name">Name of the product</p>
+                    <p class="product-price">$63.00</p>
+                    <p class="product-badge">freeship</p>
+                </div>
+                </div>
+
+                <div class="product-card">
+                <img src="access/sanpham5.png" alt="Product 5">
+                <button class="product-heart" aria-label="Add to wishlist">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 20.5C12 20.5 2 14.5 2 8.7C2 5.8 4.1 3.5 7 3.5C8.5 3.5 10 4 12 6C14 4 15.5 3.5 17 3.5C19.9 3.5 22 5.8 22 8.7C22 14.5 12 20.5 12 20.5Z"/>
+                    </svg>
+                </button>
+                <div class="product-info">
+                    <p class="product-name">Name of the product</p>
+                    <p class="product-price">$63.00</p>
+                    <p class="product-badge">freeship</p>
+                </div>
+                </div>
+
+                <div class="product-card">
+                <img src="access/sanpham6.png" alt="Product 6">
+                <button class="product-heart" aria-label="Add to wishlist">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 20.5C12 20.5 2 14.5 2 8.7C2 5.8 4.1 3.5 7 3.5C8.5 3.5 10 4 12 6C14 4 15.5 3.5 17 3.5C19.9 3.5 22 5.8 22 8.7C22 14.5 12 20.5 12 20.5Z"/>
+                    </svg>
+                </button>
+                <div class="product-info">
+                    <p class="product-name">Name of the product</p>
+                    <p class="product-price">$63.00</p>
+                    <p class="product-badge">freeship</p>
+                </div>
+                </div>
+
+                <div class="product-card">
+                <img src="access/sanpham7.png" alt="Product 7">
+                <button class="product-heart" aria-label="Add to wishlist">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 20.5C12 20.5 2 14.5 2 8.7C2 5.8 4.1 3.5 7 3.5C8.5 3.5 10 4 12 6C14 4 15.5 3.5 17 3.5C19.9 3.5 22 5.8 22 8.7C22 14.5 12 20.5 12 20.5Z"/>
+                    </svg>
+                </button>
+                <div class="product-info">
+                    <p class="product-name">Name of the product</p>
+                    <p class="product-price">$63.00</p>
+                    <p class="product-badge">freeship</p>
+                </div>
+                </div>
+
+                <div class="product-card">
+                <img src="access/sanpham8.png" alt="Product 8">
+                <button class="product-heart" aria-label="Add to wishlist">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 20.5C12 20.5 2 14.5 2 8.7C2 5.8 4.1 3.5 7 3.5C8.5 3.5 10 4 12 6C14 4 15.5 3.5 17 3.5C19.9 3.5 22 5.8 22 8.7C22 14.5 12 20.5 12 20.5Z"/>
+                    </svg>
+                </button>
+                <div class="product-info">
+                    <p class="product-name">Name of the product</p>
+                    <p class="product-price">$63.00</p>
+                    <p class="product-badge">freeship</p>
+                </div>
+                </div>
+
+                <div class="product-card">
+                <img src="access/sanpham9.png" alt="Product 9">
+                <button class="product-heart" aria-label="Add to wishlist">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 20.5C12 20.5 2 14.5 2 8.7C2 5.8 4.1 3.5 7 3.5C8.5 3.5 10 4 12 6C14 4 15.5 3.5 17 3.5C19.9 3.5 22 5.8 22 8.7C22 14.5 12 20.5 12 20.5Z"/>
+                    </svg>
+                </button>
+                <div class="product-info">
+                    <p class="product-name">Name of the product</p>
+                    <p class="product-price">$63.00</p>
+                    <p class="product-badge">freeship</p>
+                </div>
+                </div>
+
+                <div class="product-card">
+                <img src="access/sanpham10.png" alt="Product 10">
+                <button class="product-heart" aria-label="Add to wishlist">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 20.5C12 20.5 2 14.5 2 8.7C2 5.8 4.1 3.5 7 3.5C8.5 3.5 10 4 12 6C14 4 15.5 3.5 17 3.5C19.9 3.5 22 5.8 22 8.7C22 14.5 12 20.5 12 20.5Z"/>
+                    </svg>
+                </button>
+                <div class="product-info">
+                    <p class="product-name">Name of the product</p>
+                    <p class="product-price">$63.00</p>
+                    <p class="product-badge">freeship</p>
+                </div>
+                </div>
+            </div>
+            <!---Show More-->
+            <div class="show-more">
+                Show More Products
+            </div>
+        </section>
+
+
+        <!---------Video Reviews-------->
+        <section class="video-section">
+            <div class="container">
+                <div class="video-grid">
+                    <!-- Editors' Picks -->
+                    <div class="editors-pick-container">
+                        <article class="card editors-pick-card">
+                            <div class="card-body">
+                                <p class="card-text-primary">Editors’ Picks</p>
+                                <h3 class="card-title">Video Reviews</h3>
+                                <p class="card-description">
+                                    Want to add that personal touch? These sellers specialize in embroidery, engraving, illustrating, and more.
+                                </p>
+                                <a href="#" class="button">Shop these findings</a>
+                            </div>
+                        </article>
+                    </div>
+
+                    <!-- Video Cards -->
+                    <div>
+                        <article class="video-thumbnail-card">
+                            <a href="#" class="video-link">
+                                <img src="images/product-interior/review-1.png" class="video-thumbnail" alt="">
+                                <button class="play-button">
+                                    <svg width="15" height="20" viewBox="0 0 15 20">
+                                        <path d="M0 0V20L15 10L0 0Z" />
+                                    </svg>
+                                </button>
+                            </a>
+                        </article>
+                    </div>
+                    <div>
+                        <article class="video-thumbnail-card">
+                            <a href="#" class="video-link">
+                                <img src="images/product-interior/review-2.png" class="video-thumbnail" alt="">
+                                <button class="play-button">
+                                    <svg width="15" height="20" viewBox="0 0 15 20">
+                                        <path d="M0 0V20L15 10L0 0Z" />
+                                    </svg>
+                                </button>
+                            </a>
+                        </article>
+                    </div>
+                    <div>
+                        <article class="video-thumbnail-card">
+                            <a href="#" class="video-link">
+                                <img src="images/product-interior/review-3.png" class="video-thumbnail" alt="">
+                                <button class="play-button">
+                                    <svg width="15" height="20" viewBox="0 0 15 20">
+                                        <path d="M0 0V20L15 10L0 0Z" />
+                                    </svg>
+                                </button>
+                            </a>
+                        </article>
+                    </div>
+                    <div>
+                        <article class="video-thumbnail-card">
+                            <a href="#" class="video-link">
+                                <img src="images/product-interior/review-4.png" class="video-thumbnail" alt="">
+                                <button class="play-button">
+                                    <svg width="15" height="20" viewBox="0 0 15 20">
+                                        <path d="M0 0V20L15 10L0 0Z" />
+                                    </svg>
+                                </button>
+                            </a>
+                        </article>
+                    </div>
+                    <div>
+                        <article class="video-thumbnail-card">
+                            <a href="#" class="video-link">
+                                <img src="images/product-interior/review-5.png" class="video-thumbnail" alt="">
+                                <button class="play-button">
+                                    <svg width="15" height="20" viewBox="0 0 15 20">
+                                        <path d="M0 0V20L15 10L0 0Z" />
+                                    </svg>
+                                </button>
+                            </a>
+                        </article>
+                    </div>
+                    <div>
+                        <article class="video-thumbnail-card">
+                            <a href="#" class="video-link">
+                                <img src="images/product-interior/review-6.png" class="video-thumbnail" alt="">
+                                <button class="play-button">
+                                    <svg width="15" height="20" viewBox="0 0 15 20">
+                                        <path d="M0 0V20L15 10L0 0Z" />
+                                    </svg>
+                                </button>
+                            </a>
+                        </article>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!---------Footer-------->
+        <footer class="site-footer" role="contentinfo">
+            <div class="footer-grid">
+                <div class="footer-column">
+                <h6>Company</h6>
+                <ul>
+                    <li><a href="#">About Us</a></li>
+                    <li><a href="#">Investors</a></li>
+                    <li><a href="#">Careers</a></li>
+                    <li><a href="#">Blogs and news</a></li>
+                    <li><a href="#">Example</a></li>
+                </ul>
+                </div>
+
+                <div class="footer-column">
+                <h6>Buyers</h6>
+                <ul>
+                    <li><a href="#">Find store</a></li>
+                    <li><a href="#">Registration</a></li>
+                    <li><a href="#">Partnerships</a></li>
+                    <li><a href="#">Gift vouchers</a></li>
+                    <li><a href="#">Example</a></li>
+                </ul>
+                </div>
+
+                <div class="footer-column">
+                <h6>Help</h6>
+                <ul>
+                    <li><a href="#">Contact us</a></li>
+                    <li><a href="#">Live chat</a></li>
+                    <li><a href="#">Documentation</a></li>
+                    <li><a href="#">Download</a></li>
+                    <li><a href="#">Versions</a></li>
+                </ul>
+                </div>
+
+                <div class="footer-column">
+                <h6>Service</h6>
+                <ul>
+                    <li><a href="#">Safe purchase</a></li>
+                    <li><a href="#">Logistics service</a></li>
+                    <li><a href="#">Refund</a></li>
+                    <li><a href="#">Example link</a></li>
+                    <li><a href="#">Something</a></li>
+                </ul>
+                </div>
+
+                <div class="footer-column">
+                <h6>Language</h6>
+                <ul>
+                    <li><a href="#">Español</a></li>
+                    <li><a href="#">Português</a></li>
+                    <li><a href="#">Deutsch</a></li>
+                    <li><a href="#">日本語</a></li>
+                </ul>
+                </div>
+            </div>
+
+            <hr class="footer-divider">
+
+            <div class="footer-bottom">
+                <p>Copyright © 2025 - 2027 DTHN</p>
+            </div>
+            </footer>
+    </body>
+
+
+
+
+
+
+
+
+
+
+
