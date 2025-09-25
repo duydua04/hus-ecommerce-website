@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang = "vi">
     <head>
@@ -132,6 +133,7 @@
                 }
             }
 
+            /* Header Block */
             .header {
                 display: flex;
                 align-items: center;
@@ -139,19 +141,19 @@
                 flex-wrap: wrap;
                 padding: 10px 20px;
             }
-            .header-left {
+            .header__left {
                 display: flex;
                 align-items: center;
                 gap: 20px;
                 margin-left: 90px;
             }
-            .header-right {
+            .header__right {
                 display: flex;
                 align-items: center;
                 gap: 10px;
                 margin-right: 90px;
             }
-            .header-center {
+            .header__center {
                 flex: 1;
                 min-width: 150px;
                 margin: 10px 10px;
@@ -169,14 +171,13 @@
                 border-top: 1px solid #85858a;
                 opacity: 0.25;
                 width: 100%;
-                }
+            }
 
-        
-            /*-----Dropdown-----*/
+            /* Dropdown Block */
             .dropdown {
                 position: relative;
             }
-            .dropdown button {
+            .dropdown__button {
                 background-color: var(--blue-400);
                 border: none;
                 padding: 8px 12px;
@@ -188,7 +189,7 @@
                 gap: 6px;
                 font-size: 1em;
             }
-            .dropdown-content {
+            .dropdown__content {
                 display: none;
                 position: absolute;
                 top: 35px;
@@ -199,35 +200,27 @@
                 border-radius: 5px;
                 z-index: 10;
             }
-            .dropdown-content a {
+            .dropdown__item {
                 display: block;
                 padding: 8px 12px;
                 text-decoration: none;
                 color: black;
             }
-            .dropdown-content a:hover {
+            .dropdown__item:hover {
                 background-color: var(--blue-500);
             }
-            .dropdown:hover .dropdown-content {display: block;}
-            .dropdown button:hover {
+            .dropdown:hover .dropdown__content {display: block;}
+            .dropdown__button:hover {
                 background-color: var(--blue-700);
                 color: #fff;
             }
 
-            /*------Navbar--------*/
-            .navbar {
-                display: flex;
-                flex-wrap: wrap;
-                align-items: center;
-                gap: 10px;
-            }
-
-            /*------Brand------*/
+            /* Brand Block */
             .brand {
                 display: flex;
                 align-items: center;
             }
-            .brand-link {
+            .brand__link {
                 display: flex;
                 align-items: center;
                 gap: 8px;
@@ -237,28 +230,28 @@
                 font-size: 1.25rem;
                 font-weight: 700;
             }
-            .brand-logo {
+            .brand__logo {
                 width: 60px;
                 height: 60px;
                 object-fit: cover;
                 border-radius: 50%;
             }
-            .brand-link:hover {
+            .brand__link:hover {
                 opacity: 0.85;
             }
 
             @media (max-width: 600px) {
-                .brand-name {
+                .brand__name {
                     display: none;
                 }
             }
 
-            /*------All Catalog-------*/
-            .dropdown-catalog {
+            /* Catalog Block */
+            .catalog {
                 position: relative;
                 display: inline-block;
             }
-            .catalog-button {
+            .catalog__button {
                 background-color: var(--blue-300);
                 border: 2px solid var(--blue-300);
                 padding: 8px 14px;
@@ -273,12 +266,12 @@
                 box-sizing: border-box;
                 height: 42px;
             }
-            .catalog-button:hover,
-            .dropdown-catalog:focus-within .catalog-button {
+            .catalog__button:hover,
+            .catalog:focus-within .catalog__button {
                 background-color: var(--blue-700);
                 color: #fff;
             }
-            .catalog-menu {
+            .catalog__menu {
                 display: none;
                 position: absolute;
                 top: calc(100% + 8px);
@@ -290,29 +283,29 @@
                 padding: 6px 0;
                 z-index: 20;
             }
-            .catalog-menu a {
+            .catalog__menu-item {
                 display: block;
                 padding: 8px 12px;
                 text-decoration: none;
                 color: var(--neutral-900);
                 font-family: var(--font-family);
             }
-            .catalog-menu a:hover {
+            .catalog__menu-item:hover {
                 background-color: var(--blue-400);
             }
-            .dropdown-catalog:hover .catalog-menu,
-            .dropdown-catalog:focus-within .catalog-menu {
+            .catalog:hover .catalog__menu,
+            .catalog:focus-within .catalog__menu {
                 display: block;
             }
 
             @media (max-width: 600px) {
-                .catalog-text {
+                .catalog__text {
                     display: none;
                 }
             }
             
-            /*------Search bar------*/
-            .search-form {
+            /* Search Block */
+            .search {
                 display:flex;
                 align-items: center;
                 gap: 8px;
@@ -324,7 +317,7 @@
                 background-color: var(--neutral-0);
                 padding: 2px;
             }
-            .search-input {
+            .search__input {
                 flex: 1;
                 padding: 8px 10px;
                 border: none;
@@ -333,7 +326,7 @@
                 font-family: var(--font-family);
                 min-width: 150px;
             }
-            .search-button {
+            .search__button {
                 width: 32px;
                 height: 32px;
                 border-radius: 50%;
@@ -345,13 +338,13 @@
                 cursor: pointer;
                 transition: background-color 0.3s ease;
             }
-            .search-button:hover {
+            .search__button:hover {
                 background-color: var(--blue-700);
                 color: white;
             }
 
-            /*-----Sign in-----*/
-            .sign-in-button {
+            /* Auth Block */
+            .auth__signin {
                 display: inline-block;
                 align-items: center;
                 justify-content: center;
@@ -364,19 +357,19 @@
                 border: 2px solid var(--blue-300);
                 font-family: var(--font-family);
             }
-            .sign-in-button:hover,
-            .sign-in-button:focus {
+            .auth__signin:hover,
+            .auth__signin:focus {
                 background-color: var(--blue-600);
                 color: white;
             }
 
-            /*--------icon-group--------*/
+            /* Icon Group Block */
             .icon-group {
                 display: flex;
                 gap: 2px;
                 align-items: center;
             }
-            .icon-button {
+            .icon-group__button {
                 width: 40px;
                 height: 40px;
                 border-radius: 50%;
@@ -389,17 +382,17 @@
                 position: relative;
                 transition: background-color 0.2s, transform 0.15s;
             }
-            .icon-button svg {
+            .icon-group__button svg {
                 width: 18px;
                 height: 18px;
             }
-            .icon-button:hover,
-            .icon-button:focus {
+            .icon-group__button:hover,
+            .icon-group__button:focus {
                 background-color: var(--blue-600);
                 color: #fff;
                 transform: translateY(-2px);
             }
-            .icon-button:after {
+            .icon-group__button:after {
                 content: attr(data-tooltip);
                 position: absolute;
                 bottom: -34px;
@@ -415,61 +408,62 @@
                 pointer-events: none;
                 transition: transform 0.12s ease, opacity 0.12s ease;
             }
-            .icon-button:hover::after,
-            .icon-button:focus::after {
+            .icon-group__button:hover::after,
+            .icon-group__button:focus::after {
                 transform: translateX(-50%) scale(1);
                 opacity: 1;
             }
-            .icon-button:focus {
+            .icon-group__button:focus {
                 outline: 3px solid rgba(50,168,82,0.18);
                 outline-offset: 3px;
             }
 
             @media (max-width: 948px) {
-                .header-left { 
+                .header__left { 
                     order: 1;
                     margin-left: 10px;
                 }
-                .header-right { 
+                .header__right { 
                     order: 2; 
                     margin-right: 10px;
                 }
-                .header-center {
+                .header__center {
                     order: 3;
                     flex: 1 1 90%;
                 }
 
-                .header-left .catalog-button {
+                .header__left .catalog__button {
                     order: 0;
                 }
-                .header-left .brand {
+                .header__left .brand {
                     order: 1;
                 }
 
-                .catalog-text {
+                .catalog__text {
                     display: none;
                 }
             }
 
             @media (max-width: 480px) {
-                .header-left,
-                .header-right {
+                .header__left,
+                .header__right {
                     justify-content: flex-start;
                     flex: 0 0 auto;
                     margin-left: 0;
                     gap: 10px;
                 }
-                .catalog-text {
+                .catalog__text {
                     display: none;
                 }
             }
-            /* ---------Navigation Bar-------- */
-            .extra-nav {
+
+            /* Navigation Block */
+            .nav {
                 background-color: transparent;
                 padding: 8px 0 0;
                 font-family: var(--font-family);
             }
-            .nav-list {
+            .nav__list {
                 display: flex;
                 justify-content: center;
                 gap: 18px;
@@ -478,7 +472,7 @@
                 padding: 0;
                 flex-wrap: wrap;
             }
-            .nav-link {
+            .nav__link {
                 text-decoration: none;
                 color: black;
                 font-weight: 400;
@@ -486,15 +480,15 @@
                 border-radius: 4px;
                 display: inline-block;
             }
-            .nav-link:hover,
-            .nav-link:focus {
+            .nav__link:hover,
+            .nav__link:focus {
                 background-color: var(--blue-600);
                 color: #fff;
             }
-            .nav-item.dropdown {
+            .nav__item--dropdown {
                 position: relative;
             }
-            .nav-item.dropdown .dropdown-menu {
+            .nav__dropdown {
                 display: none;
                 position: absolute;
                 top: calc(100% + 8px);
@@ -506,23 +500,23 @@
                 padding: 6px 0;
                 z-index: 20;
             }
-            .nav-item.dropdown:hover .dropdown-menu,
-            .nav-item.dropdown:focus-within .dropdown-menu {
+            .nav__item--dropdown:hover .nav__dropdown,
+            .nav__item--dropdown:focus-within .nav__dropdown {
                 display: block;
             }
-            .nav-item.dropdown .dropdown-menu a {
+            .nav__dropdown-item {
                 display: block;
                 padding: 8px 12px;
                 color: black;
                 text-decoration: none;
             }
-            .nav-item.dropdown .dropdown-menu a:hover {
+            .nav__dropdown-item:hover {
                 background-color: #f0f0f0;
             }
-            #menu-toggle {
+            .nav__toggle {
                 display: none;
             }
-            .menu-icon {
+            .nav__menu-icon {
                 display: none;
                 font-size: 28px;
                 cursor: pointer;
@@ -532,15 +526,15 @@
             }
             
             @media (max-width: 768px) {
-                .extra-nav {
+                .nav {
                     text-align: center;
                 }
-                .nav-list {
+                .nav__list {
                     display: none;
                     margin: 0 auto;
                 }
 
-                #menu-toggle:checked + .menu-icon + .nav-list {
+                .nav__toggle:checked + .nav__menu-icon + .nav__list {
                     display: grid;
                     grid-template-columns: repeat(2, 1fr);
                     grid-auto-rows: auto;
@@ -555,31 +549,31 @@
                     max-width: none;
                 }
 
-                .menu-icon {
+                .nav__menu-icon {
                     display: inline-block;
                 }
             }
 
-            /* ---------Product Catalog-------- */
-            .catalog-header h2{
+            /* Product Catalog Block */
+            .product-catalog {
+                padding: 20px 0;
+                background-color: white;
+                font-family: var(--font-family);
+            }
+            .product-catalog__header h2 {
                 font-size: 2.0em;
                 color: black;
                 text-align: center;
                 margin-bottom: 15px;
                 font-weight: 700;
             }
-            .catalog-circles {
-                padding: 20px 0;
-                background-color: white;
-                font-family: var(--font-family);
-            }
-            .catalog-row {
+            .product-catalog__row {
                 display: flex;
                 gap: 18px;
                 justify-content: center;
                 flex-wrap: wrap;
             }
-            .catalog-item {
+            .product-catalog__item {
                 display: flex;
                 flex-direction: column;
                 align-items: center;
@@ -588,7 +582,7 @@
                 color: #000;
                 width: 120px;
             }
-            .catalog-item img {
+            .product-catalog__image {
                 width: 120px;
                 height: 120px;
                 object-fit: cover;
@@ -597,68 +591,66 @@
                 background-color: var(--neutral-600);
                 transition: border-color 0.2s, transform 0.2s;
             }
-            .catalog-item img:hover {
+            .product-catalog__image:hover {
                 border-color: var(--blue-600);
                 transform: translateY(-5px);
             }
-            .catalog-item p {
+            .product-catalog__label {
                 margin-top: 8px;
                 font-size: 0.95rem;
                 color: black;
             }
 
-            /* ---------New trending-------- */
-            .new-trending {
+            /* Banner Block */
+            .banner {
                 margin: 20px 0
             }
-            .container {
+            .banner__container {
                 max-width: 1264px;
                 width: 100%;
                 margin: 0 auto;
             }
-            .row {
+            .banner__row {
                 display: flex;
                 flex-wrap: wrap;
                 gap: 20px;
-                
             }
-                    /*-----------Main banner-----------------*/
-            .banner-main {
+            .banner__main {
                 flex: 2 1 0;
                 min-height: 0;
             }
-            .banner-large {
+            .banner__large {
                 position: relative;
                 border-radius: 8px;
                 overflow: hidden;
                 background-color: var(--blue-100);
                 height: 360px;
             }
-            .banner-large img.banner-img {
+            .banner__image {
                 width: 100%;
                 height: 100%;
                 object-fit: cover;
                 border-radius: 8px;
             }
-            .banner-content {
+            .banner__content {
                 position: absolute;
                 top: 20%;
                 left: 40px;
                 text-align: center;
                 color: black;
             }
-            .banner-content h2 {
+            .banner__title {
                 font-family: 'Times New Roman', sans-serif;
                 font-size: 2.8rem;
                 font-weight: 500;
                 margin-bottom: 4px;
             }
-            .banner-content p {
+            .banner__subtitle {
                 font-size: 1.12rem;
                 margin-bottom: 20px;
                 color: var(--blue-400);
             }
-            .button-main {
+            .banner__button {
                 display: inline-flex;
                 align-items: center;
                 padding: 12px 20px;
@@ -671,119 +663,115 @@
                 text-decoration: none;
                 transition: all 0.3s ease;
             }
-
-            .button-main:hover {
+            .banner__button:hover {
                 background-color: var(--blue-700);
                 color: #fff;
                 transform: scale(1.05);
             }
+            .banner__small {
+                flex: 1 1 0;
+                min-width: 0;
+                max-width: 300px;
+                height: 360px;
+                overflow: hidden;
+            }
+            .banner__small-inner {
+                position: relative;
+                border-radius: 8px;
+                overflow: hidden;
+                height: 100%;
+            }
+            .banner__bg-image {
+                position: absolute;
+                top: 0; left: 0;
+                width: 100%; height: 100%;
+                object-fit: cover;
+                z-index: 0;
+            }
+            .banner__caption {
+                position: absolute;
+                bottom: 0;
+                left: 0; right: 0;
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-end;
+                align-items: center;
+                text-align: center;
+                gap: 12px;
+                padding: 20px;
+                color: #fff;
+                z-index: 1;
+                background: linear-gradient(to top, rgba(0,0,0,0.5), transparent);
+            }
+            .banner__caption-title {
+                font-size: 1.5rem;
+                font-weight: 400;
+                margin-bottom: 20px;
+            }
+            .banner__outline-button {
+                display: inline-block;
+                align-items: center;
+                padding: 8px 16px;
+                border: 1px solid #fff;
+                border-radius: 999px;
+                color: #fff;
+                text-decoration: none;
+                background: transparent;
+                transition: all 0.3s ease;
+            }
+            .banner__outline-button:hover {
+                border-color: var(--blue-600);
+                color: var(--blue-600);
+                transform: scale(1.05);
+            }
 
+            @media (max-width: 640px) {
+                .banner__main {
+                    flex: 1 1 100%;
+                }
+                .banner__large {
+                    height: 280px;
+                }
+                .banner__content {
+                    top: 20%;
+                    left: 20px;
+                    text-align: left;
+                }
+                .banner__title {
+                    font-size: 1.8rem;
+                }
+                .banner__subtitle {
+                    font-size: 1rem;
+                }
+                .banner__small {
+                    display: none;
+                }
+            }
 
-
-                    /*-----------Small banner-----------------*/
-                .banner-small {
-                    flex: 1 1 0;
-                    min-width: 0;
-                    max-width: 300px;
-                    height: 360px;
-                    overflow: hidden;
-                }
-                .banner-small-inner {
-                    position: relative;
-                    border-radius: 8px;
-                    overflow: hidden;
-                    height: 100%;
-                }
-                .img-bg {
-                    position: absolute;
-                    top: 0; left: 0;
-                    width: 100%; height: 100%;
-                    object-fit: cover;
-                    z-index: 0;
-                }
-                .caption {
-                    position: absolute;
-                    bottom: 0;
-                    left: 0; right: 0;
-                    display: flex;
-                    flex-direction: column;
-                    justify-content: flex-end;
-                    align-items: center;
-                    text-align: center;
-                    gap: 12px;
-                    padding: 20px;
-                    color: #fff;
-                    z-index: 1;
-                    background: linear-gradient(to top, rgba(0,0,0,0.5), transparent);
-                }
-                .caption h5 {
-                    font-size: 1.5rem;
-                    font-weight: 400;
-                    margin-bottom: 20px;
-                    }
-                .button-outline {
-                    display: inline-block;
-                    align-items: center;
-                    padding: 8px 16px;
-                    border: 1px solid #fff;
-                    border-radius: 999px;
-                    color: #fff;
-                    text-decoration: none;
-                    background: transparent;
-                    transition: all 0.3s ease;
-                }
-                .button-outline:hover {
-                    border-color: var(--blue-600);
-                    color: var(--blue-600);
-                    transform: scale(1.05);
-                }
-
-                @media (max-width: 640px) {
-                    .banner-main {
-                        flex: 1 1 100%;
-                    }
-                    .banner-large {
-                        height: 280px;
-                    }
-                    .banner-content {
-                        top: 20%;
-                        left: 20px;
-                        text-align: left;
-                    }
-                    .banner-content h2 {
-                        font-size: 1.8rem;
-                    }
-                    .banner-content p {
-                        font-size: 1rem;
-                    }
-                    .banner-small {
-                        display: none;
-                    }
-                }
-            /* ---------Most popular categories-------- */
-            .popular-section {
+            /* Popular Section Block */
+            .popular {
                 background-color: #fff;
                 font-family: var(--font-family);
                 max-width: 1264px;
                 margin: 0 auto;
             }
-            .popular-section h2 {
+            .popular__title {
                 font-size: 2.0em;
                 color: black;
                 text-align: left;
                 margin-bottom: 15px;
                 font-weight: 700;
             }
-            .popular-grid {
+            .popular__grid {
                 display: grid;
                 grid-template-columns: repeat(5, 240px);
                 gap: 12px;
                 justify-content: center;
             }
-            .popular-header {
+            .popular__header {
                 grid-column: 1 / -1;
             }
-            .popular-card {
+            .popular__card {
                 border: 2px solid white;
                 border-radius: 10px;
                 overflow: hidden;
@@ -793,46 +781,48 @@
                 transition: border-color 0.2s, transform 0.15s;
                 cursor: pointer;
             }
-            .popular-card img {
+            .popular__image {
                 width: 100%;
                 height: 200px;
                 object-fit: cover;
                 display: block;
                 transition: transform 0.25s ease;
             }
-            .popular-card:hover img {
+            .popular__card:hover .popular__image {
                 transform: scale(1.05);
-                cursor: pointer;;
+                cursor: pointer;
             }
-            .popular-card p {
+            .popular__label {
                 padding: 8px;
                 color: black;
                 font-weight: 400;
             }
             
-            /* ---------Today's big deals-------- */
-            .todays-deals {
+            /* Today's Deals Block */
+            .deals {
                 background-color: #fff;
                 font-family: var(--font-family);
                 max-width: 1264px;
                 margin: 0 auto;
             }
-            .todays-deals h2 {
+            .deals__title {
                 font-size: 2.0em;
                 color: black;
                 text-align: left;
                 margin-bottom: 15px;
                 font-weight: 700;
             }
-            .deals-grid {
+            .deals__grid {
                 display: grid;
                 grid-template-columns: repeat(5, 240px);
                 gap: 16px;
                 justify-content: center;
             }
-            .deals-header {
+            .deals__header {
                 grid-column: 1 / -1;
             }
+
+            /* Product Card Block */
             .product-card {
                 position: relative;
                 background: #fff;
@@ -842,13 +832,13 @@
                 padding-bottom: 10px;
                 transition: border-color 0.2s, transform 0.15s;
             }
-           .product-card img {
+            .product-card__image {
                 width: 100%;
                 height: 150px;
                 object-fit: cover;
                 display: block;
             }
-            .product-card .product-heart {
+            .product-card__heart {
                 display: flex;
                 justify-content: center;
                 align-items: center;
@@ -868,39 +858,35 @@
                 transition: all 0.5s ease;
                 pointer-events: none;
             }
-            .product-card:hover .product-heart {
+            .product-card:hover .product-card__heart {
                 color: var(--blue-600);
                 background-color: transparent;
                 border-color: transparent;
                 transform: scale(1.1);
                 opacity: 1;
             }
-            .product-card .product-heart {
-                transition: all 0.5s ease;
-            }
-
-            .product-card:not(:hover) .product-heart {
+            .product-card:not(:hover) .product-card__heart {
                 color: var(--blue-600);
                 background-color: transparent;
                 border-color: var(--blue-600);
                 transform: scale(0.9);
                 opacity: 0;
             }
-            .product-info {
+            .product-card__info {
                 padding: 8px;
             }
-            .product-name {
+            .product-card__name {
                 font-weight: 500;
                 color: black;
                 margin: 0 0 6px 0;
                 font-size: 1.08rem;
             }
-            .product-price {
+            .product-card__price {
                 color: var(--orange-600);
                 margin: 0;
                 font-weight: 300;
             }
-            .product-badge {
+            .product-card__badge {
                 color: var(--green-600);
                 margin-top: 6px;
                 font-size: 0.9rem;
@@ -910,8 +896,8 @@
                 transform: translateY(-4px);
             }
 
-            /*--------Show More----------*/
-            .deals-grid + .show-more {
+            /* Show More Button */
+            .show-more {
                 display: block;
                 width: 100%;
                 max-width: 1264px;
@@ -927,73 +913,64 @@
                 cursor: pointer;
                 box-sizing: border-box;
             }
-
-
-
             .show-more:hover {
                 background-color: var(--blue-600); 
                 color: white;
             }
 
-            /* ---------Video Reviews-------- */
-            .video-section {
+            /* Video Reviews Block */
+            .video-reviews {
                 margin: 20px 0;
             }
-            
-            .container {
+            .video-reviews__container {
                 max-width: 1264px;
                 width: 100%;
                 margin: 20px auto;
             }
-            
-            .video-grid {
+            .video-reviews__grid {
                 display: grid;
                 gap: 16px;
                 grid-template-columns: repeat(2, minmax(0, 1fr));
             }
             
             @media (min-width: 640px) {
-                .video-grid {
+                .video-reviews__grid {
                     grid-template-columns: repeat(3, minmax(0, 1fr));
                 }
             }
             
             @media (min-width: 920px) {
-                .video-grid {
+                .video-reviews__grid {
                     grid-template-columns: repeat(4, minmax(0, 1fr));
                 }
             }
             
-            .editors-pick-container {
+            .video-reviews__editors-pick {
                 grid-column: 1 / 3;
             }
             
+            /* Card Block */
             .card {
                 border-radius: var(--border-radius-base);
                 background-color: #fff;
                 overflow: hidden;
             }
-            
-            .editors-pick-card {
+            .card--editors-pick {
                 background-color: var(--blue-300);
                 padding: 8px;
                 height: 100%;
             }
-            
-            .card-body {
+            .card__body {
                 padding: 24px;
             }
-            
-            .card-title {
+            .card__title {
                 font-size: 1.5rem;
                 margin-bottom: 8px;
             }
-            
-            .card-description {
+            .card__description {
                 margin-bottom: 16px;
             }
-            
-            .button {
+            .card__button {
                 display: inline-flex;
                 align-items: center;
                 justify-content: center;
@@ -1005,13 +982,14 @@
                 cursor: pointer;
                 border-radius: var(--border-radius-base);
             }
-            .button:hover {
+            .card__button:hover {
                 background-color: var(--blue-600);
                 color: #fff;
                 transform: scale(1.05);
             }
             
-            .video-thumbnail-card {
+            /* Video Thumbnail Block */
+            .video-thumbnail {
                 background-color: var(--neutral-200);
                 border: 1px solid var(--neutral-200);
                 border-radius: 8px;
@@ -1019,24 +997,20 @@
                 aspect-ratio: 1 / 1;
                 overflow: hidden;
             }
-            
-            .video-link {
+            .video-thumbnail__link {
                 display: block;
                 height: 100%;
             }
-            
-            .video-link:hover {
+            .video-thumbnail__link:hover {
                 opacity: 0.8;
                 transform: scale(1.05);
             }
-            
-            .video-thumbnail {
+            .video-thumbnail__image {
                 width: 100%;
                 height: 100%;
                 object-fit: cover;
             }
-            
-            .play-button {
+            .video-thumbnail__play-button {
                 position: absolute;
                 bottom: 20px;
                 right: 20px;
@@ -1050,91 +1024,90 @@
                 box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
                 cursor: pointer;
             }
-            
-            .play-button svg path {
+            .video-thumbnail__play-button svg path {
                 fill: var(--blue-600);
             }
 
-            /* ---------Footer-------- */
-            .site-footer {
+            /* Footer Block */
+            .footer {
                 background-color: var(--blue-200);
                 padding: 28px 20px;
                 color: black;
                 font-family: var(--font-family);
             }
-            .footer-grid {
+            .footer__grid {
                 display: grid;
                 grid-template-columns: repeat(5, 1fr);
                 gap: 18px;
             }
-            .footer-column h6 {
+            .footer__column-title {
                 font-weight: 700;
                 font-size: 1.05rem;
                 margin-bottom: 10px;
                 color: black;
             }
-            .footer-column ul {
+            .footer__list {
                 list-style: none;
                 padding: 0;
                 margin: 0;
             }
-            .footer-column li {
+            .footer__list-item {
                 margin-bottom: 8px;
             }
-            .footer-column a {
+            .footer__link {
                 text-decoration: none;
                 color: black;
             }
-            .footer-column a:hover {
+            .footer__link:hover {
                 color: var(--blue-700);
             }
-            .footer-divider {
+            .footer__divider {
                 border: none;
                 height: 1px;
                 background-color: white;
                 margin: 18px 0;
             }
-            .footer-bottom {
+            .footer__bottom {
                 text-align: center;
                 font-size: 0.9rem;
                 color: black;
             }
 
             @media (max-width: 1264px) {
-                .popular-grid {
+                .popular__grid {
                     grid-template-columns: repeat(4, minmax(150px, 1fr));
                 }
-                .deals-grid {
+                .deals__grid {
                     grid-template-columns: repeat(4, minmax(150px, 1fr));
                 }
             }
             
             @media (max-width: 768px) {
-                .footer-grid {
+                .footer__grid {
                     grid-template-columns: repeat(4, 1fr);
                 }
-                .popular-grid {
+                .popular__grid {
                     grid-template-columns: repeat(3, minmax(150px, 1fr));
                 }
-                .deals-grid {
+                .deals__grid {
                     grid-template-columns: repeat(3, minmax(150px, 1fr));
                 }
             }
 
             @media (max-width: 600px) {
-                .footer-grid {
+                .footer__grid {
                     grid-template-columns: repeat(3, 1fr);
                 }
-                .popular-grid {
+                .popular__grid {
                     grid-template-columns: repeat(2, minmax(150px, 1fr));
                 }
-                .deals-grid {
+                .deals__grid {
                     grid-template-columns: repeat(2, minmax(150px, 1fr));
                 }
             }
 
             @media (max-width: 480px) {
-                .footer-grid {
+                .footer__grid {
                     grid-template-columns: repeat(2, minmax(180px, 1fr));
                 }
             }
@@ -1146,37 +1119,37 @@
 
         <header class="header">
             <!--Brand name anh logo-->
-            <div class="header-left">
+            <div class="header__left">
                 <div class="brand">
-                    <a href="#" class ="brand-link">
-                        <img src="access/logo/logo.jpg" alt="Logo brand" class="brand-logo">
-                        <span class="brand-name">BrandName</span>
+                    <a href="#" class="brand__link">
+                        <img src="access/logo/logo.jpg" alt="Logo brand" class="brand__logo">
+                        <span class="brand__name">BrandName</span>
                     </a>
                 </div>
             
             <!--All catalog-->
-                <div class="dropdown-catalog" tabindex="0">
-                    <button class="catalog-button" aria-haspopup="true" aria-expanded="false">
+                <div class="catalog" tabindex="0">
+                    <button class="catalog__button" aria-haspopup="true" aria-expanded="false">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <line x1="4" y1="6" x2="20" y2="6"></line>
                             <line x1="4" y1="12" x2="20" y2="12"></line>
                             <line x1="4" y1="18" x2="20" y2="18"></line>
                         </svg>
-                        <span class="catalog-text">All Catalog</span>
+                        <span class="catalog__text">All Catalog</span>
                     </button>
 
-                    <div class="catalog-menu" role="menu" aria-hidden="true">
-                            <a href="#" role="menuitem">Category 1</a>
-                            <a href="#" role="menuitem">Category 2</a>
-                            <a href="#" role="menuitem">Category 3</a>
+                    <div class="catalog__menu" role="menu" aria-hidden="true">
+                            <a href="#" role="menuitem" class="catalog__menu-item">Category 1</a>
+                            <a href="#" role="menuitem" class="catalog__menu-item">Category 2</a>
+                            <a href="#" role="menuitem" class="catalog__menu-item">Category 3</a>
                     </div>
                 </div>
             </div>
             <!--------Search bar-------->
-            <div class="header-center">
-                <form class="search-form" action="/search" method="get" role="search">
-                    <input class="search-input" type="search" name="q" placeholder="Search Product of e-commerce store" aria-label="Search products or e-commerce store">
-                    <button class="search-button" type="submit" aria-label="search">
+            <div class="header__center">
+                <form class="search" action="/search" method="get" role="search">
+                    <input class="search__input" type="search" name="q" placeholder="Search Product of e-commerce store" aria-label="Search products or e-commerce store">
+                    <button class="search__button" type="submit" aria-label="search">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <circle cx="11" cy="11" r="8"/>
                             <line x1="21" y1="21" x2="16.65" y2="16.65"/>
@@ -1185,20 +1158,20 @@
                 </form>
             </div>
 
-            <div class="header-right">
+            <div class="header__right">
                 <!---------Sign in-------->
-                <a href="#" class="sign-in-button" role="button">Sign In</a>
+                <a href="#" class="auth__signin" role="button">Sign In</a>
 
                 <!-----Icon group-------->
                 <div class="icon-group">
                     <!---------Save Lists-------->
-                    <div class="icon-button" data-tooltip="Saved List" role="button" tabindex="0" aria-label="Saved List">
+                    <div class="icon-group__button" data-tooltip="Saved List" role="button" tabindex="0" aria-label="Saved List">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M12 20.5C12 20.5 2 14.5 2 8.7C2 5.8 4.1 3.5 7 3.5C8.5 3.5 10 4 12 6C14 4 15.5 3.5 17 3.5C19.9 3.5 22 5.8 22 8.7C22 14.5 12 20.5 12 20.5Z"/>
                         </svg>
                     </div>
                     <!---------My Order-------->
-                    <div class="icon-button" data-tooltip="My Order" role="button" tabindex="0" aria-label="My Order">
+                    <div class="icon-group__button" data-tooltip="My Order" role="button" tabindex="0" aria-label="My Order">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M20.198 3H3.802C3.05147 3 2.6762 3 2.41637 3.17726C2.28768 3.26505 2.18133 3.38109 2.10567 3.51627C1.9529 3.78921 1.99024 4.15793 2.06493 4.89537C2.18958 6.12624 2.2519 6.74168 2.57823 7.18168C2.74084 7.40095 2.94701 7.58519 3.18414 7.72315C3.65999 8 4.28635 8 5.53908 8H18.4609C19.7136 8 20.34 8 20.8159 7.72315C21.053 7.58519 21.2592 7.40095 21.4218 7.18168C21.7481 6.74168 21.8104 6.12624 21.9351 4.89537C22.0098 4.15793 22.0471 3.78921 21.8943 3.51627C21.8187 3.38109 21.7123 3.26505 21.5836 3.17726C21.3238 3 20.9485 3 20.198 3Z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
                             <path d="M3 8L3 13.0408C3 16.7928 3 18.6688 4.17157 19.8344C5.34315 21 7.22876 21 11 21H13C16.7712 21 18.6569 21 19.8284 19.8344C21 18.6688 21 16.7928 21 13.0408V8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
@@ -1206,7 +1179,7 @@
                         </svg>
                     </div>
                     <!---------My Cart-------->
-                    <div class="icon-button" data-tooltip="My Cart" role="button" tabindex="0" aria-label="My Cart">
+                    <div class="icon-group__button" data-tooltip="My Cart" role="button" tabindex="0" aria-label="My Cart">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M8 16L16.7201 15.2733C19.4486 15.046 20.0611 14.45 20.3635 11.7289L21 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
                             <path d="M6 6H22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
@@ -1221,24 +1194,24 @@
         </header>
 
         <!---------Navigation Bar-------->
-        <nav class="extra-nav" aria-label="Main navigation">
+        <nav class="nav" aria-label="Main navigation">
             <!----menu-icon----->
-            <input type="checkbox" id="menu-toggle" />
-            <label for="menu-toggle" class="menu-icon">&#9776;</label>
+            <input type="checkbox" id="menu-toggle" class="nav__toggle" />
+            <label for="menu-toggle" class="nav__menu-icon">&#9776;</label>
             <!-----menu-items------>
-            <ul class="nav-list">
-                <li class="nav-item"><a class="nav-link" href="#">Hot offers</a></li>
-                <li class="nav-item"><a class="nav-link" href="#">Recommends</a></li>
-                <li class="nav-item"><a class="nav-link" href="#">New arrivals</a></li>
-                <li class="nav-item"><a class="nav-link" href="#">Bestsellers</a></li>
-                <li class="nav-item"><a class="nav-link" href="#">Blind boxes</a></li>
-                <li class="nav-item"><a class="nav-link" href="#">Articles</a></li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link" href="#" aria-haspopup="true">Move &#9662;</a>
-                    <div class="dropdown-menu">
-                        <a href="#">Example link 1</a>
-                        <a href="#">Example link 2</a>
-                        <a href="#">Get Ecommerce UI</a>
+            <ul class="nav__list">
+                <li class="nav__item"><a class="nav__link" href="#">Hot offers</a></li>
+                <li class="nav__item"><a class="nav__link" href="#">Recommends</a></li>
+                <li class="nav__item"><a class="nav__link" href="#">New arrivals</a></li>
+                <li class="nav__item"><a class="nav__link" href="#">Bestsellers</a></li>
+                <li class="nav__item"><a class="nav__link" href="#">Blind boxes</a></li>
+                <li class="nav__item"><a class="nav__link" href="#">Articles</a></li>
+                <li class="nav__item nav__item--dropdown">
+                    <a class="nav__link" href="#" aria-haspopup="true">Move &#9662;</a>
+                    <div class="nav__dropdown">
+                        <a href="#" class="nav__dropdown-item">Example link 1</a>
+                        <a href="#" class="nav__dropdown-item">Example link 2</a>
+                        <a href="#" class="nav__dropdown-item">Get Ecommerce UI</a>
                     </div>
                 </li>
             </ul>
@@ -1246,71 +1219,71 @@
         <hr>
 
         <!---------Product Catalog-------->
-        <section class="catalog-circles" aria-label="Product categories">
-            <header class="catalog-header">
+        <section class="product-catalog" aria-label="Product categories">
+            <header class="product-catalog__header">
                 <h2>Product Catalog</h2>
             </header>
-            <div class="catalog-row">
-                <a class="catalog-item" href="#">
-                    <img src="access/product-catalog/fashion.jpg" alt="Fashion" />
-                    <p>Fashion</p>
+            <div class="product-catalog__row">
+                <a class="product-catalog__item" href="#">
+                    <img src="access/product-catalog/fashion.jpg" alt="Fashion" class="product-catalog__image" />
+                    <p class="product-catalog__label">Fashion</p>
                 </a>
 
-                <a class="catalog-item" href="#">
-                    <img src="access/product-catalog/household-appliances.jpg" alt="Household Appliances" />
-                    <p>Household Appliances</p>
+                <a class="product-catalog__item" href="#">
+                    <img src="access/product-catalog/household-appliances.jpg" alt="Household Appliances" class="product-catalog__image" />
+                    <p class="product-catalog__label">Household Appliances</p>
                 </a>
 
-                <a class="catalog-item" href="#">
-                    <img src="access/product-catalog/electronics.jpg" alt="Electronics" />
-                    <p>Electronics</p>
+                <a class="product-catalog__item" href="#">
+                    <img src="access/product-catalog/electronics.jpg" alt="Electronics" class="product-catalog__image" />
+                    <p class="product-catalog__label">Electronics</p>
                 </a>
 
-                <a class="catalog-item" href="#">
-                    <img src="access/product-catalog/books-stationery.jpg" alt="Books & Stationery" />
-                    <p>Books & Stationery</p>
+                <a class="product-catalog__item" href="#">
+                    <img src="access/product-catalog/books-stationery.jpg" alt="Books & Stationery" class="product-catalog__image" />
+                    <p class="product-catalog__label">Books & Stationery</p>
                 </a>
 
-                <a class="catalog-item" href="#">
-                    <img src="access/product-catalog/mother-baby.jpg" alt="Mother & Baby" />
-                    <p>Mother & Baby</p>
+                <a class="product-catalog__item" href="#">
+                    <img src="access/product-catalog/mother-baby.jpg" alt="Mother & Baby" class="product-catalog__image" />
+                    <p class="product-catalog__label">Mother & Baby</p>
                 </a>
 
-                <a class="catalog-item" href="#">
-                    <img src="access/product-catalog/interior.png" alt="Interior" />
-                    <p>Interior</p>
+                <a class="product-catalog__item" href="#">
+                    <img src="access/product-catalog/interior.png" alt="Interior" class="product-catalog__image" />
+                    <p class="product-catalog__label">Interior</p>
                 </a>
 
-                <a class="catalog-item" href="#">
-                    <img src="access/product-catalog/health-beauty.png" alt="Health & Beauty" />
-                    <p>Health & Beauty</p>
+                <a class="product-catalog__item" href="#">
+                    <img src="access/product-catalog/health-beauty.png" alt="Health & Beauty" class="product-catalog__image" />
+                    <p class="product-catalog__label">Health & Beauty</p>
                 </a>
             </div>
         </section>
 
         <!---------New trending-------->
-        <section class="new-trending">
-            <div class="container">
-                <div class="row">
+        <section class="banner">
+            <div class="banner__container">
+                <div class="banner__row">
                 <!-- Banner chính -->
-                <main class="banner-main">
-                    <article class="banner-large relative rounded overflow-hidden">
-                    <div class="banner-content">
-                        <h2>New trending <br> Interior decorations</h2>
-                        <p>Hot summer discounts ending soon</p>
-                        <a href="#" class="button-main">Get Deals Now &gt;</a>
+                <main class="banner__main">
+                    <article class="banner__large relative rounded overflow-hidden">
+                    <div class="banner__content">
+                        <h2 class="banner__title">New trending <br> Interior decorations</h2>
+                        <p class="banner__subtitle">Hot summer discounts ending soon</p>
+                        <a href="#" class="banner__button">Get Deals Now &gt;</a>
                     </div>
-                    <img src="access/banners/main-interior.png" alt="Main banner" class="banner-img">
+                    <img src="access/banners/main-interior.png" alt="Main banner" class="banner__image">
                     </article>
                 </main>
 
                 <!-- Banner nhỏ -->
-                <aside class="banner-small">
-                    <article class="banner-small-inner">
-                    <img src="access/banners/small-interior.png" alt="Small banner" class="img-bg">
-                    <div class="caption">
-                        <h5>Custom interiors</h5>
-                        <a href="#" class="button-outline">Order Now</a>
+                <aside class="banner__small">
+                    <article class="banner__small-inner">
+                    <img src="access/banners/small-interior.png" alt="Small banner" class="banner__bg-image">
+                    <div class="banner__caption">
+                        <h5 class="banner__caption-title">Custom interiors</h5>
+                        <a href="#" class="banner__outline-button">Order Now</a>
                     </div>
                     </article>
                 </aside>
@@ -1320,208 +1293,200 @@
 
 
         <!---------Most popular categories-------->
-        <section class="popular-section" aria-label="Most popular categories">
-            <div class="popular-grid">
-                <header class="popular-header">
-                    <h2>Most Popular Categories</h2>
+        <section class="popular" aria-label="Most popular categories">
+            <div class="popular__grid">
+                <header class="popular__header">
+                    <h2 class="popular__title">Most Popular Categories</h2>
                 </header>
 
-                <article class="popular-card">
-                <img src="access/categories/sanpham1.png" alt="Popular 1">
-                <p>Category A</p>
+                <article class="popular__card">
+                <img src="access/categories/sanpham1.png" alt="Popular 1" class="popular__image">
+                <p class="popular__label">Category A</p>
                 </article>
 
-                <article class="popular-card">
-                <img src="access/categories/sanpham2.png" alt="Popular 2">
-                <p>Category B</p>
+                <article class="popular__card">
+                <img src="access/categories/sanpham2.png" alt="Popular 2" class="popular__image">
+                <p class="popular__label">Category B</p>
                 </article>
 
-                <article class="popular-card">
-                <img src="access/categories/sanpham3.png" alt="Popular 3">
-                <p>Category C</p>
+                <article class="popular__card">
+                <img src="access/categories/sanpham3.png" alt="Popular 3" class="popular__image">
+                <p class="popular__label">Category C</p>
                 </article>
 
-                <article class="popular-card">
-                <img src="access/categories/sanpham4.png" alt="Popular 4">
-                <p>Category D</p>
+                <article class="popular__card">
+                <img src="access/categories/sanpham4.png" alt="Popular 4" class="popular__image">
+                <p class="popular__label">Category D</p>
                 </article>
 
-                <article class="popular-card">
-                <img src="access/categories/sanpham5.png" alt="Popular 5">
-                <p>Category D</p>
+                <article class="popular__card">
+                <img src="access/categories/sanpham5.png" alt="Popular 5" class="popular__image">
+                <p class="popular__label">Category D</p>
                 </article>
 
-                <article class="popular-card">
-                <img src="access/categories/sanpham6.png" alt="Popular 6">
-                <p>Category D</p>
+                <article class="popular__card">
+                <img src="access/categories/sanpham6.png" alt="Popular 6" class="popular__image">
+                <p class="popular__label">Category D</p>
                 </article>
 
-                <article class="popular-card">
-                <img src="access/categories/sanpham7.png" alt="Popular 7">
-                <p>Category D</p>
+                <article class="popular__card">
+                <img src="access/categories/sanpham7.png" alt="Popular 7" class="popular__image">
+                <p class="popular__label">Category D</p>
                 </article>
 
-                <article class="popular-card">
-                <img src="access/categories/sanpham8.png" alt="Popular 8">
-                <p>Category D</p>
+                <article class="popular__card">
+                <img src="access/categories/sanpham8.png" alt="Popular 8" class="popular__image">
+                <p class="popular__label">Category D</p>
                 </article>
 
-                <article class="popular-card">
-                <img src="access/categories/sanpham9.png" alt="Popular 9">
-                <p>Category D</p>
+                <article class="popular__card">
+                <img src="access/categories/sanpham9.png" alt="Popular 9" class="popular__image">
+                <p class="popular__label">Category D</p>
                 </article>
 
-                <article class="popular-card">
-                <img src="access/categories/sanpham10.png" alt="Popular 10">
-                <p>Category D</p>
+                <article class="popular__card">
+                <img src="access/categories/sanpham10.png" alt="Popular 10" class="popular__image">
+                <p class="popular__label">Category D</p>
                 </article>
             </div>
         </section>
 
         <!---------Today's big deals-------->
-        <section class="todays-deals" aria-label="Today's big deals">
-            <div class="deals-grid">
-                <header class="deals-header" aria-label="Today's big deals">
-                    <h2>Today's big deals</h2>
+        <section class="deals" aria-label="Today's big deals">
+            <div class="deals__grid">
+                <header class="deals__header" aria-label="Today's big deals">
+                    <h2 class="deals__title">Today's big deals</h2>
                 </header>
 
                 <div class="product-card">
-                <img src="access/bigdeals/sanpham1.png" alt="Coffee and Tea Cup with Plate">
-                <button class="product-heart" aria-label="Add to wishlist">
+                <img src="access/bigdeals/sanpham1.png" alt="Product 1" class="product-card__image">
+                <button class="product-card__heart" aria-label="Add to wishlist">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M12 20.5C12 20.5 2 14.5 2 8.7C2 5.8 4.1 3.5 7 3.5C8.5 3.5 10 4 12 6C14 4 15.5 3.5 17 3.5C19.9 3.5 22 5.8 22 8.7C22 14.5 12 20.5 12 20.5Z"/>
                     </svg>
                 </button>
-                <div class="product-info">
+                <div class="product-card__info">
                     <p class="product-name">Coffee and Tea Cup with Plate</p>
                     <p class="product-price">$50.00</p>
                     <p class="product-badge">freeship</p>
                 </div>
                 </div>
-
                 <div class="product-card">
-                <img src="access/bigdeals/sanpham2.png" alt="Product 2">
-                <button class="product-heart" aria-label="Add to wishlist">
+                <img src="access/bigdeals/sanpham2.png" alt="Product 2" class="product-card__image">
+                <button class="product-card__heart" aria-label="Add to wishlist">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M12 20.5C12 20.5 2 14.5 2 8.7C2 5.8 4.1 3.5 7 3.5C8.5 3.5 10 4 12 6C14 4 15.5 3.5 17 3.5C19.9 3.5 22 5.8 22 8.7C22 14.5 12 20.5 12 20.5Z"/>
                     </svg>
                 </button>
-                <div class="product-info">
+                <div class="product-card__info">
                     <p class="product-name">Name of the product</p>
                     <p class="product-price">$60.00</p>
                     <p class="product-badge">freeship</p>
                 </div>
                 </div>
-
                 <div class="product-card">
-                <img src="access/bigdeals/sanpham3.png" alt="Product 3">
-                <button class="product-heart" aria-label="Add to wishlist">
+                <img src="access/bigdeals/sanpham3.png" alt="Product 3" class="product-card__image">
+                <button class="product-card__heart" aria-label="Add to wishlist">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M12 20.5C12 20.5 2 14.5 2 8.7C2 5.8 4.1 3.5 7 3.5C8.5 3.5 10 4 12 6C14 4 15.5 3.5 17 3.5C19.9 3.5 22 5.8 22 8.7C22 14.5 12 20.5 12 20.5Z"/>
                     </svg>
                 </button>
-                <div class="product-info">
+                <div class="product-card__info">
                     <p class="product-name">Name of the product</p>
                     <p class="product-price">$79.00</p>
                     <p class="product-badge">freeship</p>
                 </div>
                 </div>
-
                 <div class="product-card">
-                <img src="access/bigdeals/sanpham4.png" alt="Product 4">
-                <button class="product-heart" aria-label="Add to wishlist">
+                <img src="access/bigdeals/sanpham4.png" alt="Product 4" class="product-card__image">
+                <button class="product-card__heart" aria-label="Add to wishlist">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M12 20.5C12 20.5 2 14.5 2 8.7C2 5.8 4.1 3.5 7 3.5C8.5 3.5 10 4 12 6C14 4 15.5 3.5 17 3.5C19.9 3.5 22 5.8 22 8.7C22 14.5 12 20.5 12 20.5Z"/>
                     </svg>
                 </button>
-                <div class="product-info">
-                    <p class="product-name">Name of the product</p>
-                    <p class="product-price">$63.00</p>
-                    <p class="product-badge">freeship</p>
+                <div class="product-card__info">
+                    <p class="product-card__name">Name of the product</p>
+                    <p class="product-card__price">$12.00</p>
+                    <p class="product-card__badge">freeship</p>
                 </div>
                 </div>
-
                 <div class="product-card">
-                <img src="access/bigdeals/sanpham5.png" alt="Product 5">
-                <button class="product-heart" aria-label="Add to wishlist">
+                <img src="access/bigdeals/sanpham5.png" alt="Product 5" class="product-card__image">
+                <button class="product-card__heart" aria-label="Add to wishlist">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M12 20.5C12 20.5 2 14.5 2 8.7C2 5.8 4.1 3.5 7 3.5C8.5 3.5 10 4 12 6C14 4 15.5 3.5 17 3.5C19.9 3.5 22 5.8 22 8.7C22 14.5 12 20.5 12 20.5Z"/>
                     </svg>
                 </button>
-                <div class="product-info">
-                    <p class="product-name">Name of the product</p>
-                    <p class="product-price">$63.00</p>
-                    <p class="product-badge">freeship</p>
+                <div class="product-card__info">
+                    <p class="product-card__name">Name of the product</p>
+                    <p class="product-card__price">$77.00</p>
+                    <p class="product-card__badge">freeship</p>
                 </div>
                 </div>
-
                 <div class="product-card">
-                <img src="access/bigdeals/sanpham6.png" alt="Product 6">
-                <button class="product-heart" aria-label="Add to wishlist">
+                <img src="access/bigdeals/sanpham6.png" alt="Product 6" class="product-card__image">
+                <button class="product-card__heart" aria-label="Add to wishlist">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M12 20.5C12 20.5 2 14.5 2 8.7C2 5.8 4.1 3.5 7 3.5C8.5 3.5 10 4 12 6C14 4 15.5 3.5 17 3.5C19.9 3.5 22 5.8 22 8.7C22 14.5 12 20.5 12 20.5Z"/>
                     </svg>
                 </button>
-                <div class="product-info">
-                    <p class="product-name">Name of the product</p>
-                    <p class="product-price">$63.00</p>
-                    <p class="product-badge">freeship</p>
+                <div class="product-card__info">
+                    <p class="product-card__name">Name of the product</p>
+                    <p class="product-card__price">$93.00</p>
+                    <p class="product-card__badge">freeship</p>
                 </div>
                 </div>
-
                 <div class="product-card">
-                <img src="access/bigdeals/sanpham7.png" alt="Product 7">
-                <button class="product-heart" aria-label="Add to wishlist">
+                <img src="access/bigdeals/sanpham7.png" alt="Product 7" class="product-card__image">
+                <button class="product-card__heart" aria-label="Add to wishlist">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M12 20.5C12 20.5 2 14.5 2 8.7C2 5.8 4.1 3.5 7 3.5C8.5 3.5 10 4 12 6C14 4 15.5 3.5 17 3.5C19.9 3.5 22 5.8 22 8.7C22 14.5 12 20.5 12 20.5Z"/>
                     </svg>
                 </button>
-                <div class="product-info">
-                    <p class="product-name">Name of the product</p>
-                    <p class="product-price">$63.00</p>
-                    <p class="product-badge">freeship</p>
+                <div class="product-card__info">
+                    <p class="product-card__name">Name of the product</p>
+                    <p class="product-card__price">$85.00</p>
+                    <p class="product-card__badge">freeship</p>
                 </div>
                 </div>
-
                 <div class="product-card">
-                <img src="access/bigdeals/sanpham8.png" alt="Product 8">
-                <button class="product-heart" aria-label="Add to wishlist">
+                <img src="access/bigdeals/sanpham8.png" alt="Product 8" class="product-card__image">
+                <button class="product-card__heart" aria-label="Add to wishlist">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M12 20.5C12 20.5 2 14.5 2 8.7C2 5.8 4.1 3.5 7 3.5C8.5 3.5 10 4 12 6C14 4 15.5 3.5 17 3.5C19.9 3.5 22 5.8 22 8.7C22 14.5 12 20.5 12 20.5Z"/>
                     </svg>
                 </button>
-                <div class="product-info">
-                    <p class="product-name">Name of the product</p>
-                    <p class="product-price">$63.00</p>
-                    <p class="product-badge">freeship</p>
+                <div class="product-card__info">
+                    <p class="product-card__name">Name of the product</p>
+                    <p class="product-card__price">$7.00</p>
+                    <p class="product-card__badge">freeship</p>
                 </div>
                 </div>
-
                 <div class="product-card">
-                <img src="access/bigdeals/sanpham9.png" alt="Product 9">
-                <button class="product-heart" aria-label="Add to wishlist">
+                <img src="access/bigdeals/sanpham9.png" alt="Product 9" class="product-card__image">
+                <button class="product-card__heart" aria-label="Add to wishlist">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M12 20.5C12 20.5 2 14.5 2 8.7C2 5.8 4.1 3.5 7 3.5C8.5 3.5 10 4 12 6C14 4 15.5 3.5 17 3.5C19.9 3.5 22 5.8 22 8.7C22 14.5 12 20.5 12 20.5Z"/>
                     </svg>
                 </button>
-                <div class="product-info">
-                    <p class="product-name">Name of the product</p>
-                    <p class="product-price">$63.00</p>
-                    <p class="product-badge">freeship</p>
+                <div class="product-card__info">
+                    <p class="product-card__name">Name of the product</p>
+                    <p class="product-card__price">$63.00</p>
+                    <p class="product-card__badge">freeship</p>
                 </div>
                 </div>
 
                 <div class="product-card">
-                <img src="access/bigdeals/sanpham10.png" alt="Product 10">
-                <button class="product-heart" aria-label="Add to wishlist">
+                <img src="access/bigdeals/sanpham10.png" alt="Product 10" class="product-card__image">
+                <button class="product-card__heart" aria-label="Add to wishlist">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M12 20.5C12 20.5 2 14.5 2 8.7C2 5.8 4.1 3.5 7 3.5C8.5 3.5 10 4 12 6C14 4 15.5 3.5 17 3.5C19.9 3.5 22 5.8 22 8.7C22 14.5 12 20.5 12 20.5Z"/>
                     </svg>
                 </button>
-                <div class="product-info">
-                    <p class="product-name">Name of the product</p>
-                    <p class="product-price">$63.00</p>
-                    <p class="product-badge">freeship</p>
+                <div class="product-card__info">
+                    <p class="product-card__name">Name of the product</p>
+                    <p class="product-card__price">$63.00</p>
+                    <p class="product-card__badge">freeship</p>
                 </div>
                 </div>
             </div>
@@ -1533,29 +1498,29 @@
 
 
         <!---------Video Reviews-------->
-        <section class="video-section">
-            <div class="container">
-                <div class="video-grid">
+        <section class="video-reviews">
+            <div class="video-reviews__container">
+                <div class="video-reviews__grid">
                     <!-- Editors' Picks -->
-                    <div class="editors-pick-container">
-                        <article class="card editors-pick-card">
-                            <div class="card-body">
-                                <p class="card-text-primary">Editors’ Picks</p>
-                                <h3 class="card-title">Video Reviews</h3>
-                                <p class="card-description">
+                    <div class="video-reviews__editors-pick">
+                        <article class="card card--editors-pick">
+                            <div class="card__body">
+                                <p class="card__text-primary">Editors' Picks</p>
+                                <h3 class="card__title">Video Reviews</h3>
+                                <p class="card__description">
                                     Want to add that personal touch? These sellers specialize in embroidery, engraving, illustrating, and more.
                                 </p>
-                                <a href="#" class="button">Shop these findings</a>
+                                <a href="#" class="card__button">Shop these findings</a>
                             </div>
                         </article>
                     </div>
 
                     <!-- Video Cards -->
                     <div>
-                        <article class="video-thumbnail-card">
-                            <a href="#" class="video-link">
-                                <img src="access/product-interior/review-1.png" class="video-thumbnail" alt="">
-                                <button class="play-button">
+                        <article class="video-thumbnail">
+                            <a href="#" class="video-thumbnail__link">
+                                <img src="access/product-interior/review-1.png" class="video-thumbnail__image" alt="">
+                                <button class="video-thumbnail__play-button">
                                     <svg width="15" height="20" viewBox="0 0 15 20">
                                         <path d="M0 0V20L15 10L0 0Z" />
                                     </svg>
@@ -1564,10 +1529,10 @@
                         </article>
                     </div>
                     <div>
-                        <article class="video-thumbnail-card">
-                            <a href="#" class="video-link">
-                                <img src="access/product-interior/review-2.png" class="video-thumbnail" alt="">
-                                <button class="play-button">
+                        <article class="video-thumbnail">
+                            <a href="#" class="video-thumbnail__link">
+                                <img src="access/product-interior/review-2.png" class="video-thumbnail__image" alt="">
+                                <button class="video-thumbnail__play-button">
                                     <svg width="15" height="20" viewBox="0 0 15 20">
                                         <path d="M0 0V20L15 10L0 0Z" />
                                     </svg>
@@ -1576,10 +1541,10 @@
                         </article>
                     </div>
                     <div>
-                        <article class="video-thumbnail-card">
-                            <a href="#" class="video-link">
-                                <img src="access/product-interior/review-3.png" class="video-thumbnail" alt="">
-                                <button class="play-button">
+                        <article class="video-thumbnail">
+                            <a href="#" class="video-thumbnail__link">
+                                <img src="access/product-interior/review-3.png" class="video-thumbnail__image" alt="">
+                                <button class="video-thumbnail__play-button">
                                     <svg width="15" height="20" viewBox="0 0 15 20">
                                         <path d="M0 0V20L15 10L0 0Z" />
                                     </svg>
@@ -1588,10 +1553,10 @@
                         </article>
                     </div>
                     <div>
-                        <article class="video-thumbnail-card">
-                            <a href="#" class="video-link">
-                                <img src="access/product-interior/review-4.png" class="video-thumbnail" alt="">
-                                <button class="play-button">
+                        <article class="video-thumbnail">
+                            <a href="#" class="video-thumbnail__link">
+                                <img src="access/product-interior/review-4.png" class="video-thumbnail__image" alt="">
+                                <button class="video-thumbnail__play-button">
                                     <svg width="15" height="20" viewBox="0 0 15 20">
                                         <path d="M0 0V20L15 10L0 0Z" />
                                     </svg>
@@ -1600,10 +1565,10 @@
                         </article>
                     </div>
                     <div>
-                        <article class="video-thumbnail-card">
-                            <a href="#" class="video-link">
-                                <img src="access/product-interior/review-5.png" class="video-thumbnail" alt="">
-                                <button class="play-button">
+                        <article class="video-thumbnail">
+                            <a href="#" class="video-thumbnail__link">
+                                <img src="access/product-interior/review-5.png" class="video-thumbnail__image" alt="">
+                                <button class="video-thumbnail__play-button">
                                     <svg width="15" height="20" viewBox="0 0 15 20">
                                         <path d="M0 0V20L15 10L0 0Z" />
                                     </svg>
@@ -1612,10 +1577,10 @@
                         </article>
                     </div>
                     <div>
-                        <article class="video-thumbnail-card">
-                            <a href="#" class="video-link">
-                                <img src="access/product-interior/review-6.png" class="video-thumbnail" alt="">
-                                <button class="play-button">
+                        <article class="video-thumbnail">
+                            <a href="#" class="video-thumbnail__link">
+                                <img src="access/product-interior/review-6.png" class="video-thumbnail__image" alt="">
+                                <button class="video-thumbnail__play-button">
                                     <svg width="15" height="20" viewBox="0 0 15 20">
                                         <path d="M0 0V20L15 10L0 0Z" />
                                     </svg>
@@ -1629,78 +1594,68 @@
 
 
         <!---------Footer-------->
-        <footer class="site-footer" role="contentinfo">
-            <div class="footer-grid">
-                <div class="footer-column">
-                <h6>Company</h6>
-                <ul>
-                    <li><a href="#">About Us</a></li>
-                    <li><a href="#">Investors</a></li>
-                    <li><a href="#">Careers</a></li>
-                    <li><a href="#">Blogs and news</a></li>
-                    <li><a href="#">Example</a></li>
+        <footer class="footer" role="contentinfo">
+            <div class="footer__grid">
+                <div class="footer__column">
+                <h6 class="footer__column-title">Company</h6>
+                <ul class="footer__list">
+                    <li class="footer__list-item"><a href="#" class="footer__link">About Us</a></li>
+                    <li class="footer__list-item"><a href="#" class="footer__link">Investors</a></li>
+                    <li class="footer__list-item"><a href="#" class="footer__link">Careers</a></li>
+                    <li class="footer__list-item"><a href="#" class="footer__link">Blogs and news</a></li>
+                    <li class="footer__list-item"><a href="#" class="footer__link">Example</a></li>
                 </ul>
                 </div>
 
-                <div class="footer-column">
-                <h6>Buyers</h6>
-                <ul>
-                    <li><a href="#">Find store</a></li>
-                    <li><a href="#">Registration</a></li>
-                    <li><a href="#">Partnerships</a></li>
-                    <li><a href="#">Gift vouchers</a></li>
-                    <li><a href="#">Example</a></li>
+                <div class="footer__column">
+                <h6 class="footer__column-title">Buyers</h6>
+                <ul class="footer__list">
+                    <li class="footer__list-item"><a href="#" class="footer__link">Find store</a></li>
+                    <li class="footer__list-item"><a href="#" class="footer__link">Registration</a></li>
+                    <li class="footer__list-item"><a href="#" class="footer__link">Partnerships</a></li>
+                    <li class="footer__list-item"><a href="#" class="footer__link">Gift vouchers</a></li>
+                    <li class="footer__list-item"><a href="#" class="footer__link">Example</a></li>
                 </ul>
                 </div>
 
-                <div class="footer-column">
-                <h6>Help</h6>
-                <ul>
-                    <li><a href="#">Contact us</a></li>
-                    <li><a href="#">Live chat</a></li>
-                    <li><a href="#">Documentation</a></li>
-                    <li><a href="#">Download</a></li>
-                    <li><a href="#">Versions</a></li>
+                <div class="footer__column">
+                <h6 class="footer__column-title">Help</h6>
+                <ul class="footer__list">
+                    <li class="footer__list-item"><a href="#" class="footer__link">Contact us</a></li>
+                    <li class="footer__list-item"><a href="#" class="footer__link">Live chat</a></li>
+                    <li class="footer__list-item"><a href="#" class="footer__link">Documentation</a></li>
+                    <li class="footer__list-item"><a href="#" class="footer__link">Download</a></li>
+                    <li class="footer__list-item"><a href="#" class="footer__link">Versions</a></li>
                 </ul>
                 </div>
 
-                <div class="footer-column">
-                <h6>Service</h6>
-                <ul>
-                    <li><a href="#">Safe purchase</a></li>
-                    <li><a href="#">Logistics service</a></li>
-                    <li><a href="#">Refund</a></li>
-                    <li><a href="#">Example link</a></li>
-                    <li><a href="#">Something</a></li>
+                <div class="footer__column">
+                <h6 class="footer__column-title">Service</h6>
+                <ul class="footer__list">
+                    <li class="footer__list-item"><a href="#" class="footer__link">Safe purchase</a></li>
+                    <li class="footer__list-item"><a href="#" class="footer__link">Logistics service</a></li>
+                    <li class="footer__list-item"><a href="#" class="footer__link">Refund</a></li>
+                    <li class="footer__list-item"><a href="#" class="footer__link">Example link</a></li>
+                    <li class="footer__list-item"><a href="#" class="footer__link">Something</a></li>
                 </ul>
                 </div>
 
-                <div class="footer-column">
-                <h6>Language</h6>
-                <ul>
-                    <li><a href="#">Español</a></li>
-                    <li><a href="#">Português</a></li>
-                    <li><a href="#">Deutsch</a></li>
-                    <li><a href="#">日本語</a></li>
+                <div class="footer__column">
+                <h6 class="footer__column-title">Language</h6>
+                <ul class="footer__list">
+                    <li class="footer__list-item"><a href="#" class="footer__link">Español</a></li>
+                    <li class="footer__list-item"><a href="#" class="footer__link">Português</a></li>
+                    <li class="footer__list-item"><a href="#" class="footer__link">Deutsch</a></li>
+                    <li class="footer__list-item"><a href="#" class="footer__link">日本語</a></li>
                 </ul>
                 </div>
             </div>
 
-            <hr class="footer-divider">
+            <hr class="footer__divider">
 
-            <div class="footer-bottom">
+            <div class="footer__bottom">
                 <p>Copyright © 2025 - 2027 DTHN</p>
             </div>
             </footer>
     </body>
-
-
-
-
-
-
-
-
-
-
-
+</html>
