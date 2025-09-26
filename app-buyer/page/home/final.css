@@ -131,18 +131,19 @@ body {
     justify-content: space-between;
     flex-wrap: wrap;
     padding: 10px 20px;
+    width: 100%;
+    max-width: 1264px;
+    margin: 0 auto;
 }
 .header__left {
     display: flex;
     align-items: center;
     gap: 20px;
-    margin-left: 90px;
 }
 .header__right {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-right: 90px;
 }
 .header__center {
     flex: 1;
@@ -252,7 +253,8 @@ hr {
     align-items: center;
     gap: 8px;
     color: black;
-    font-weight: 600;
+    font-size: 1rem;
+    font-weight: 400;
     font-family: var(--font-family);
     box-sizing: border-box;
     height: 42px;
@@ -412,15 +414,13 @@ hr {
 @media (max-width: 948px) {
     .header__left { 
         order: 1;
-        margin-left: 10px;
     }
     .header__right { 
-        order: 2; 
-        margin-right: 10px;
+        order: 2;
     }
     .header__center {
         order: 3;
-        flex: 1 1 90%;
+        flex: 1 1 100%;
     }
 
     .header__left .catalog__button {
@@ -578,7 +578,7 @@ hr {
     height: 120px;
     object-fit: cover;
     border-radius: 50%;
-    border: 4px solid var(--neutral-400);
+    border: 4px solid var(--neutral-300);
     background-color: var(--neutral-600);
     transition: border-color 0.2s, transform 0.2s;
 }
@@ -817,7 +817,7 @@ hr {
 .product-card {
     position: relative;
     background: #fff;
-    border: 2px solid var(--neutral-400);
+    border: 2px solid var(--neutral-300);
     border-radius: 10px;
     overflow: hidden;
     padding-bottom: 10px;
@@ -947,7 +947,7 @@ hr {
     overflow: hidden;
 }
 .card--editors-pick {
-    background-color: var(--blue-300);
+    background-color: var(--blue-200);
     padding: 8px;
     height: 100%;
 }
@@ -966,7 +966,6 @@ hr {
     align-items: center;
     justify-content: center;
     padding: 8px 12px;
-    border: 1px solid var(--blue-100);
     background-color: var(--blue-100);
     color: var(--blue-800);
     text-decoration: none;
@@ -1025,6 +1024,10 @@ hr {
     padding: 28px 20px;
     color: black;
     font-family: var(--font-family);
+}
+.footer__container {
+    margin: 0 auto;
+    max-width: 1264px;
 }
 .footer__grid {
     display: grid;
