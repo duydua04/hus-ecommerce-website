@@ -130,10 +130,12 @@ body {
     align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
-    padding: 10px 20px;
+    padding: 10px 0;
     width: 90%;
     max-width: 1264px;
     margin: 0 auto;
+    gap: 20px;
+    box-sizing: border-box;
 }
 .header__left {
     display: flex;
@@ -148,7 +150,7 @@ body {
 .header__center {
     flex: 1;
     min-width: 150px;
-    margin: 10px 10px;
+    margin: 10px 0;
 }
 
 html {
