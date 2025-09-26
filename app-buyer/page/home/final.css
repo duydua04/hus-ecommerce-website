@@ -131,7 +131,7 @@ body {
     justify-content: space-between;
     flex-wrap: wrap;
     padding: 10px 20px;
-    width: 100%;
+    width: 90%;
     max-width: 1264px;
     margin: 0 auto;
 }
@@ -244,8 +244,8 @@ hr {
     display: inline-block;
 }
 .catalog__button {
-    background-color: var(--blue-300);
-    border: 2px solid var(--blue-300);
+    background-color: var(--blue-200);
+    border: none;
     padding: 8px 14px;
     border-radius: 6px;
     cursor: pointer;
@@ -324,7 +324,7 @@ hr {
     height: 32px;
     border-radius: 50%;
     border: none;
-    background-color: var(--blue-300);
+    background-color: var(--blue-200);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -343,11 +343,10 @@ hr {
     justify-content: center;
     padding: 8px 14px;
     border-radius: 6px;
-    background-color: var(--blue-300);
+    background-color: var(--blue-200);
     color: #000;
     text-decoration: none;
     font-weight: 700;
-    border: 2px solid var(--blue-300);
     font-family: var(--font-family);
 }
 .auth__signin:hover,
@@ -366,7 +365,7 @@ hr {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background-color: var(--blue-300);
+    background-color: var(--blue-200);
     display: inline-flex;
     justify-content: center;
     align-items: center;
@@ -509,11 +508,22 @@ hr {
 }
 .nav__menu-icon {
     display: none;
-    font-size: 28px;
+    font-size: 16px;
     cursor: pointer;
-    padding: 8px;
+    padding: 12px;
     background: var(--blue-200);
     border-radius: 6px;
+    border: none;
+    color: black;
+    width: 100%;
+    text-align: center;
+    box-sizing: border-box;
+    transition: all 0.3s ease;
+}
+.nav__menu-icon:hover {
+    background: var(--blue-600);
+    color: white;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
 @media (max-width: 768px) {
@@ -541,7 +551,9 @@ hr {
     }
 
     .nav__menu-icon {
-        display: inline-block;
+        display: block;
+        margin: 0 auto;
+        width: 90%;
     }
 }
 
@@ -550,6 +562,9 @@ hr {
     padding: 20px 0;
     background-color: white;
     font-family: var(--font-family);
+    width: 90%;
+    max-width: 1264px;
+    margin: 0 auto;
 }
 .product-catalog__header h2 {
     font-size: 2.0em;
@@ -598,7 +613,7 @@ hr {
 }
 .banner__container {
     max-width: 1264px;
-    width: 100%;
+    width: 90%;
     margin: 0 auto;
 }
 .banner__row {
@@ -744,6 +759,7 @@ hr {
     background-color: #fff;
     font-family: var(--font-family);
     max-width: 1264px;
+    width: 90%;
     margin: 0 auto;
 }
 .popular__title {
@@ -794,6 +810,7 @@ hr {
     background-color: #fff;
     font-family: var(--font-family);
     max-width: 1264px;
+    width: 90%;
     margin: 0 auto;
 }
 .deals__title {
@@ -915,7 +932,7 @@ hr {
 }
 .video-reviews__container {
     max-width: 1264px;
-    width: 100%;
+    width: 90%;
     margin: 20px auto;
 }
 .video-reviews__grid {
@@ -966,7 +983,7 @@ hr {
     align-items: center;
     justify-content: center;
     padding: 8px 12px;
-    background-color: var(--blue-100);
+    background-color: var(--blue-300);
     color: var(--blue-800);
     text-decoration: none;
     cursor: pointer;
