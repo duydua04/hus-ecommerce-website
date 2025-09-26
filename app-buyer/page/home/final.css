@@ -897,6 +897,12 @@ hr {
     margin: 0;
     font-weight: 300;
 }
+.product-card__originalprice {
+    color: var(--neutral-500);
+    margin: 0;
+    font-weight: 300;
+    text-decoration: line-through;
+}
 .product-card__badge {
     color: var(--green-600);
     margin-top: 6px;
