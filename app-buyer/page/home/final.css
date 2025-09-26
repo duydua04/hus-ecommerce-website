@@ -269,7 +269,7 @@ hr {
 .catalog__menu {
     display: none;
     position: absolute;
-    top: calc(100% + 8px);
+    top: calc(100% + 2px);
     left: 0;
     background-color: var(--blue-200);
     min-width: 160px;
@@ -483,9 +483,9 @@ hr {
 .nav__dropdown {
     display: none;
     position: absolute;
-    top: calc(100% + 8px);
+    top: calc(100% + 2px);
     left: 0;
-    background: white;
+    background: var(--blue-200);
     box-shadow: 0 8px 20px rgba(0,0,0,0.12);
     border-radius: 6px;
     min-width: 160px;
@@ -503,7 +503,8 @@ hr {
     text-decoration: none;
 }
 .nav__dropdown-item:hover {
-    background-color: #f0f0f0;
+    background-color: var(--blue-600);
+    color: #fff;
 }
 .nav__toggle {
     display: none;
