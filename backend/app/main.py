@@ -38,7 +38,7 @@ from .controller.common.public_category_controller import router as public_categ
 
 # IMPORT BUYER CONTROLLER
 from .controller.buyer.buyer_address_controller import router as buyer_address_router
-
+from .controller.buyer.buyer_product_filter_controller import router as buyer_product_filter_router
 
 
 
@@ -108,5 +108,7 @@ app.include_router(public_category_router)
 
 
 
+
 # APP INCLUDE BUYER ROUTER
 app.include_router(buyer_address_router)
+app.include_router(buyer_product_filter_router)
