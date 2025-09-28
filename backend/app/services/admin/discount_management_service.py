@@ -99,7 +99,7 @@ def set_discount_status(db: Session, discount_id: int, is_active: bool):
     if not this_discount:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Discount_not_found"
+            detail="Discount not found"
         )
 
     this_discount.is_active = bool(is_active)
