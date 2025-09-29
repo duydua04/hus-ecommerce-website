@@ -1,12 +1,13 @@
-from fastapi import APIRouter, Depends, Query
-from typing import List, Optional
+from fastapi import APIRouter, Depends, Query, HTTPException
+from typing import List, Optional, Dict, Any
 from sqlalchemy.orm import Session, Query as SAQuery
 from ...config.db import get_db
 from ...services.buyer import buyer_product_service
-from ...models.catalog import Product
+from ...models.catalog import Product, ProductImage, ProductSize, ProductVariant
 from ...services.buyer.buyer_product_service import RatingFilter, paginate_simple
 from pydantic import BaseModel
 from decimal import Decimal
+from sqlalchemy.orm import selectinload
 
 class ProductSummary(BaseModel):
     name: str
@@ -46,3 +47,57 @@ def get_filtered_product(
 
     products = paginate_simple(query, page, page_size=12) # trả về danh sách tất cả theo trang
     return products
+
+# Đưa ra thông tin chi tiết sản phẩm
+@router.get("/{product_id}", response_model=Dict[str, Any])
+def get_product_detail(product_id: int, db: Session = Depends(get_db)):
+    product = (
+    db.query(Product)
+    .filter(Product.product_id == product_id, Product.is_active == True)
+    .options(
+        selectinload(Product.images),
+        selectinload(Product.variants).selectinload(ProductVariant.sizes)  # <-- sửa ở đây
+    )
+    .first()
+    )
+    
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    
+    # Sắp xếp images: primary đứng đầu
+    images = sorted(product.images, key=lambda x: not x.is_primary)
+    image_urls = [img.image_url for img in images]
+
+    # Biến thể + size
+    variants = [
+        {
+            "variant_id": v.variant_id,
+            "variant_name": v.variant_name,
+            "price_adjustment": float(v.price_adjustment),
+            "sizes": [
+                {
+                    "size_id": s.size_id,
+                    "size_name": s.size_name,
+                    "available_units": s.available_units,
+                    "in_stock": s.in_stock
+                }
+                for s in v.sizes
+            ]
+        }
+        for v in product.variants
+    ]
+
+    return {
+        "product_id": product.product_id,
+        "name": product.name,
+        "base_price": float(product.base_price),
+        "discount_percent": float(product.discount_percent),
+        "price_after_discount": float(product.base_price - product.base_price * product.discount_percent / 100),
+        "rating": float(product.rating),
+        "review_count": product.review_count,
+        "sold_quantity": product.sold_quantity,
+        "description": product.description,
+        "weight": float(product.weight) if product.weight else None,
+        "images": image_urls,
+        "variants": variants
+    }
