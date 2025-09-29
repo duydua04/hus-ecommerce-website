@@ -60,3 +60,8 @@ def filter_by_rating_option(query: Query, rating_filter: Optional[RatingFilter])
     else:
         query = query.filter(Product.rating == 5) 
     return query
+
+# Phân trang
+def paginate_simple(query, page: int = 1, page_size: int = 12):
+    offset = (page - 1) * page_size # offset là tính số sản phẩm đã được phân trang trước đó để bỏ qua khi ở trang mới
+    return query.offset(offset).limit(page_size).all() # phương thức offset là bỏ qua sản phẩm ban đầu
