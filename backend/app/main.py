@@ -112,3 +112,4 @@ app.include_router(public_category_router)
 # APP INCLUDE BUYER ROUTER
 app.include_router(buyer_address_router)
 app.include_router(buyer_product_filter_router)
+
