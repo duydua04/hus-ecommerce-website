@@ -155,7 +155,7 @@ def get_seller_products(db: Session,
     # Tao du lieu phan hoi
     data = []
     for product in products:
-        base_product = ProductResponse.model_validate(product)
+        base_product = product.model_validate(product)
         data.append(ProductList(
             **base_product.model_dump(),
             category_name=product.category.category_name if product.category else None,
@@ -253,7 +253,7 @@ def create_seller_product(db: Session, seller_id: int, payload: ProductCreate):
     db.commit()
     db.refresh(product)
 
-    return ProductResponse.model_validate(product)
+    return product.model_validate(product)
 
 def update_seller_product(db: Session,
                           seller_id: int,
@@ -282,7 +282,7 @@ def update_seller_product(db: Session,
     db.commit()
     db.refresh(product)
 
-    return ProductResponse.model_validate(product)
+    return product.model_validate(product)
 
 
 def delete_seller_product(db: Session, seller_id: int, product_id: int):
