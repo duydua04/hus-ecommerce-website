@@ -53,7 +53,7 @@ __all__ = [
     "CarrierCreate", "CarrierUpdate", "CarrierOut",
 
     # product
-    "ProductCreate", "ProductUpdate", "ProductResponse",
+    "ProductCreate", "ProductUpdate", "Product",
     "ProductVariantCreate", "ProductVariantUpdate", "ProductVariantResponse",
     "ProductSizeCreate", "ProductSizeUpdate", "ProductSizeResponse",
     "ProductImageCreate", "ProductImageResponse",

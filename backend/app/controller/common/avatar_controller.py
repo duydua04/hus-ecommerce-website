@@ -37,6 +37,7 @@ async def upload_my_avatar(file: UploadFile, db: Session = Depends(get_db), info
         "content_type": stored["content_type"]
     }
 
+# Xóa avarta
 @router.delete("/me")
 def delete_my_avatar(db: Session = Depends(get_db), info = Depends(get_current_user)):
     user = info["user"]
