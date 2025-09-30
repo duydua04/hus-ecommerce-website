@@ -52,9 +52,10 @@ def get_carrier_or_404(db: Session, carrier_id: int):
     return carr
 
 def carrier_has_order(db: Session, carrier_id: int):
+    """Kiem tra nha van chuyen nay co don hang nao khong"""
     return (db.query(Order.order_id)
             .filter(Order.carrier_id == carrier_id)
-    ) is not None
+    ).first() is not None
 
 def list_active_carrier(db: Session, q: str | None = None):
     """List ra danh sach cac don vi van chuyen dang duoc hoat dong"""
@@ -62,7 +63,7 @@ def list_active_carrier(db: Session, q: str | None = None):
     if q:
         query = query.filter(Carrier.carrier_name.ilike(f"%{q.strip()}%"))
 
-    carriers = query.order_by(Carrier.carrier_name.asc().all())
+    carriers = query.order_by(Carrier.carrier_name.asc()).all()
     return [carrier_to_out_public(carrier) for carrier in carriers]
 
 async def create_carrier(
@@ -151,7 +152,7 @@ def delete_carrier(db: Session, carrier_id: int):
     carrier = get_carrier_or_404(db, carrier_id)
 
     if carrier_has_order(db, carrier_id):
-        carrier.is_active.is_(False)
+        carrier.is_active = False
         db.commit()
         return {
             "deleted": True,

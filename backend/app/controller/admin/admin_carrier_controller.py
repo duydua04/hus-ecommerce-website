@@ -15,7 +15,7 @@ router = APIRouter(
     dependencies=[Depends(require_admin)]
 )
 
-@router.get("/{carrier_id}", response_model=list[CarrierOut])
+@router.get("/", response_model=list[CarrierOut])
 def admin_list_active_carriers(q: str | None = Query(None), db: Session = Depends(get_db)):
     """Router list ra danh sach don vi van chuyen"""
     return list_active_carrier(db, q)
