@@ -1,13 +1,11 @@
 from __future__ import annotations
 
 from dateutil.utils import today
-from fastapi import Depends, HTTPException, Query, status
+from fastapi import HTTPException, status
 from sqlalchemy import update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from ...config.db import get_db
-from ...middleware.auth import require_admin
 from ...schemas.discount import *
 from ...schemas.common import Page, PageMeta
 from ...models.catalog import Discount
