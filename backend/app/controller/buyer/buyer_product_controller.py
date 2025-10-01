@@ -55,8 +55,9 @@ def get_product_detail(product_id: int, db: Session = Depends(get_db)):
     db.query(Product)
     .filter(Product.product_id == product_id, Product.is_active == True)
     .options(
+         # tải sẵn ảnh, variants, sizes
         selectinload(Product.images),
-        selectinload(Product.variants).selectinload(ProductVariant.sizes)  # <-- sửa ở đây
+        selectinload(Product.variants).selectinload(ProductVariant.sizes)  
     )
     .first()
     )
@@ -68,7 +69,7 @@ def get_product_detail(product_id: int, db: Session = Depends(get_db)):
     images = sorted(product.images, key=lambda x: not x.is_primary)
     image_urls = [img.image_url for img in images]
 
-    # Biến thể + size
+    # Phân loại + size
     variants = [
         {
             "variant_id": v.variant_id,
