@@ -117,7 +117,7 @@ def update_carrier(db: Session, carrier_id: int, payload: CarrierUpdate):
                 detail="Carrier name cannot be empty"
             )
         # Kiem tra ten update co trung voi ten da ton tai ko
-        if new_name.lower != carrier.carrier_name.lower():
+        if new_name.lower() != carrier.carrier_name.lower():
            ensure_unique_name(db, new_name, exclude_id=carrier.carrier_id)
            carrier.carrier_name = new_name
 
