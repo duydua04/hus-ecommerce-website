@@ -8,6 +8,8 @@ from ...services.buyer.buyer_product_service import RatingFilter, paginate_simpl
 from pydantic import BaseModel
 from decimal import Decimal
 from sqlalchemy.orm import selectinload
+from datetime import datetime
+
 
 class ProductSummary(BaseModel):
     name: str
@@ -23,7 +25,7 @@ router = APIRouter(
     tags=["products"]
 )
 
-# Lấy danh sách sản phẩm có filter
+#  === LẤY DANH SÁCH SẢN PHẨM CÓ FILTER ===
 @router.get("", response_model=List[ProductSummary])
 def get_filtered_product(
     keyword: Optional[str] = Query(None),
@@ -48,7 +50,9 @@ def get_filtered_product(
     products = paginate_simple(query, page, page_size=12) # trả về danh sách tất cả theo trang
     return products
 
-# Đưa ra thông tin chi tiết sản phẩm
+
+
+# === ĐƯA RA THÔNG TIN CHI TIẾT SẢN PHẨM ===
 @router.get("/{product_id}", response_model=Dict[str, Any])
 def get_product_detail(product_id: int, db: Session = Depends(get_db)):
     product = (
@@ -102,3 +106,62 @@ def get_product_detail(product_id: int, db: Session = Depends(get_db)):
         "images": image_urls,
         "variants": variants
     }
+
+
+# === LẤY RA THÔNG TIN ĐỂ NGƯỜI DÙNG CHỌN PHÂN LOẠI TRƯỚC KHI THÊM VÀO GIỎ HÀNG ===
+@router.get("/{product_id}/options")
+def get_product_options(product_id: int, db: Session = Depends(get_db)):
+    """
+    Lấy danh sách phân loại (variant), size, và số lượng tồn kho
+    """
+    product = db.query(Product).filter(Product.product_id == product_id).first()
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+
+    variant_list = []
+    for v in product.variants:  # lặp qua variant
+        sizes_list = [
+            {"size_id": s.size_id, "label": s.size_name, "stock": s.available_units, "in_stock": s.in_stock}
+            for s in v.sizes  # lấy size theo variant
+        ]
+        variant_list.append({
+            "variant_id": v.variant_id,
+            "name": v.variant_name,
+            "sizes": sizes_list
+        })
+
+    return {
+        "product_id": product.product_id,
+        "product_name": product.name,
+        "variants": variant_list
+    }
+
+
+# === THÊM SẢN PHẨM VÀO GIỎ HÀNG ====
+# Request schema
+class AddToCartRequest(BaseModel):
+    buyer_id: int
+    product_id: int
+    variant_id: Optional[int] = None
+    size_id: Optional[int] = None
+    quantity: int = 1
+
+@router.post("/addToCart")
+def add_to_cart(payload: AddToCartRequest, db: Session = Depends(get_db)):
+    try:
+        cart = buyer_product_service.add_to_cart(
+            session=db,
+            buyer_id=payload.buyer_id,
+            product_id=payload.product_id,
+            variant_id=payload.variant_id,
+            size_id=payload.size_id,
+            quantity=payload.quantity,
+        )
+        return {
+            "message": f"✅ Thêm {payload.quantity} sản phẩm vào giỏ hàng thành công",
+            "cart_id": cart.shopping_cart_id,
+            "total_items": len(cart.items),
+        }
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
