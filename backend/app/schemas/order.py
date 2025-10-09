@@ -49,3 +49,16 @@ class OrderItemResponse(ORMBase):
     quantity: int
     unit_price: Decimal
     total_price: Decimal
+
+
+from .address import AddressResponse
+from typing import List
+class SellerOrderDetail(ORMBase):
+    """
+    DTO chi tiết đơn cho seller: gom gọn OrderResponse + địa chỉ + các item của seller.
+    """
+    order: OrderResponse
+    shipping_address: AddressResponse | None = None
+    items: List[OrderItemResponse] = []
+    buyer_display_name: str | None = None  # "Hoàng D." (mask nhẹ nếu muốn)
+    buyer_phone: str | None = None

@@ -12,7 +12,7 @@ from ...schemas.common import Page, PageMeta
 from ...schemas.review import (
     ReviewResponse, ReviewImageResponse, ReviewReplyResponse
 )
-from ...config.s3 import public_url as s3_public_url, presign_get as s3_presign_get
+from ...config.s3 import public_url as s3_public_url
 
 
 def page(total: int, limit: int, offset: int, data: list):
@@ -27,7 +27,6 @@ def image_to_response(img: ReviewImage):
     resp = ReviewImageResponse.model_validate(img)
     # Có thể tắt 1 trong 2 dòng nếu bucket private/public theo môi trường thực tế của bạn
     resp.public_url = s3_public_url(img.image_url)
-    resp.presigned_get_url = s3_presign_get(img.image_url)
     return resp
 
 
@@ -58,7 +57,7 @@ def ensure_order_delivered_contains_product(
         buyer_id: int,
         product_id: int
 ):
-    """Kiểm tra đơn thuộc buyer, đã giao (delivered) và có chứa product."""
+    """Kiểm tra đơn thuộc buyer, delivered và có chứa product."""
     ok = (
         db.query(Order.order_id)
         .filter(

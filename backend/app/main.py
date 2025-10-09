@@ -9,6 +9,8 @@ from .controller.common.public_category_controller import router as public_categ
 from .controller.admin.user_management_controller import router as admin_manage_user_router
 from .controller.admin.admin_discount_controller import router as admin_manage_discount_router
 from .controller.admin.admin_carrier_controller import router as admin_manage_carrier_router
+from .controller.seller.seller_review_controller import router as seller_review_router
+from .controller.seller.seller_order_controller import router as seller_order_router
 app = FastAPI(title="Ecommerce Website")
 app.include_router(auth_router)
 app.include_router(avatar_router)
@@ -20,3 +22,5 @@ app.include_router(seller_product_router)
 app.include_router(admin_manage_user_router)
 app.include_router(admin_manage_discount_router)
 app.include_router(admin_manage_carrier_router)
+app.include_router(seller_review_router)
+app.include_router(seller_order_router)

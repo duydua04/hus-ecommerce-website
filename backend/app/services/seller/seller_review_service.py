@@ -19,25 +19,33 @@ from ...services.common.review_common_service import (
 def list_reviews_for_seller(
     db: Session,
     seller: Seller,
-    product_id: Optional[int] = None,
+    product_name: Optional[str] = None,
     rating_min: Optional[Decimal] = None,
     rating_max: Optional[Decimal] = None,
     delivered_only: bool = True,
     limit: int = 10,
     offset: int = 0,
 ) :
+
+    """
+    Lay danh sach danh gia san pham cho seller kem theo bo loc
+    """
     q = (
         db.query(Review)
         .join(Product, Product.product_id == Review.product_id)
         .filter(Product.seller_id == seller.seller_id)
     )
 
-    if product_id:
-        q = q.filter(Review.product_id == product_id)
+    if product_name:
+        s = product_name.strip()
+        q = q.filter(Product.name.ilike(f"%{s}%"))
+
     if rating_min is not None:
         q = q.filter(Review.rating >= rating_min)
+
     if rating_max is not None:
         q = q.filter(Review.rating <= rating_max)
+
     if delivered_only:
         q = q.join(Order, Order.order_id == Review.order_id).filter(Order.order_status == "delivered")
 
@@ -52,13 +60,20 @@ def list_reviews_for_seller(
 
 
 def create_reply_for_review(db: Session, payload: ReviewReplyCreate, seller: Seller):
+    """Tao phan hoi cua seller cho 1 reiview cua san pham cua minh"""
     review = db.query(Review).filter(Review.review_id == payload.review_id).first()
     if not review:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Review not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Review not found."
+        )
 
     prod = db.query(Product).filter(Product.product_id == review.product_id).first()
     if not prod or prod.seller_id != seller.seller_id:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You can only reply to reviews of your products.")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You can only reply to reviews of your products."
+        )
 
     reply = ReviewReply(
         review_id=review.review_id,
@@ -74,5 +89,6 @@ def create_reply_for_review(db: Session, payload: ReviewReplyCreate, seller: Sel
 
 
 def list_replies(db: Session, review_id: int):
+    """Lay danh sach tat ca phan hoi cua review"""
     reps = db.query(ReviewReply).filter(ReviewReply.review_id == review_id).order_by(ReviewReply.reply_date.asc()).all()
     return [reply_to_response(r) for r in reps]

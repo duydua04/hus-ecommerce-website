@@ -15,13 +15,12 @@ from ...services.seller import seller_review_service
 router = APIRouter(
     prefix="/seller/reviews",
     tags=["seller-reviews"],
-    dependencies=Depends(require_seller)
 )
 
 
 @router.get("", response_model=Page)
 def list_reviews_for_seller(
-    product_id: Optional[int] = Query(None),
+    product_name: Optional[str] = Query(None),
     rating_min: Optional[Decimal] = Query(None, ge=0, le=5),
     rating_max: Optional[Decimal] = Query(None, ge=0, le=5),
     delivered_only: bool = Query(True),
@@ -30,11 +29,13 @@ def list_reviews_for_seller(
     db: Session = Depends(get_db),
     auth = Depends(require_seller),
 ):
+
+    """Router tra ve danh sach danh gia cac san pham cua seller"""
     seller: Seller = auth["user"]
     return seller_review_service.list_reviews_for_seller(
         db=db,
         seller=seller,
-        product_id=product_id,
+        product_name=product_name,
         rating_min=rating_min,
         rating_max=rating_max,
         delivered_only=delivered_only,
@@ -50,6 +51,7 @@ def reply_review(
     db: Session = Depends(get_db),
     auth = Depends(require_seller),
 ):
+    """Router tao phan hoi """
     seller: Seller = auth["user"]
     payload = ReviewReplyCreate(review_id=review_id, seller_id=seller.seller_id, reply_text=body.reply_text)
     return seller_review_service.create_reply_for_review(db, payload, seller)
@@ -60,4 +62,5 @@ def list_replies(
     review_id: int = Path(..., ge=1),
     db: Session = Depends(get_db),
 ):
+    """Tra ve danh sach phan hoi cho san pham"""
     return seller_review_service.list_replies(db, review_id)
