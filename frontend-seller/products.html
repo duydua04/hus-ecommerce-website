@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!--Boxicons-->
+    <link
+      href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
+      rel="stylesheet"
+    />
+    <!--My css-->
+    <link rel="stylesheet" href="style.css" />
+
+    <title>SellerHub</title>
+  </head>
+  <body>
+    <!--SIDEBAR-->
+    <section id="sidebar">
+      <a href="#" class="brand">
+        <i class="bx bx-wink-smile"></i>
+        <span class="text">SellerHub</span>
+      </a>
+      <ul class="side-menu top">
+        <li>
+          <a href="#">
+            <i class="bx bx-grid-alt"></i>
+            <span class="text">Thống kê</span>
+          </a>
+        </li>
+        <li class="active">
+          <a href="#">
+            <i class="bx bx-box"></i>
+            <span class="text">Sản phẩm</span>
+          </a>
+        </li>
+        <li>
+          <a href="#">
+            <i class="bx bx-car"></i>
+            <span class="text">Đơn hàng</span>
+          </a>
+        </li>
+        <li>
+          <a href="#">
+            <i class="bx bx-receipt"></i>
+            <span class="text">Hóa đơn</span>
+          </a>
+        </li>
+        <li>
+          <a href="#">
+            <i class="bx bx-user-circle"></i>
+            <span class="text">Hồ sơ</span>
+          </a>
+        </li>
+        <li>
+          <a href="#">
+            <i class="bx bx-like"></i>
+            <span class="text">Đánh giá</span>
+          </a>
+        </li>
+      </ul>
+    </section>
+
+    <!--CONTENT-->
+    <section id="content">
+      <!--NAVBAR-->
+      <nav>
+        <div class="nav-left">
+          <i class="bx bx-menu"></i>
+          <form action="#">
+            <div class="form-input">
+              <input type="search" placeholder="Search or type command..." />
+              <button type="submit" class="search-btn">
+                <i class="bx bx-search-alt"></i>
+              </button>
+            </div>
+          </form>
+        </div>
+        <div class="nag-right">
+          <a href="#" class="notification">
+            <i class="bx bx-bell"></i>
+            <span class="num">98</span>
+          </a>
+          <a href="#" class="profile">
+            <img src="img/balloon-sky.webp" />
+          </a>
+        </div>
+      </nav>
+      <!--MAIN-->
+      <main>
+        <div class="head-title">
+          <h1>Danh sách sản phẩm</h1>
+          <ul class="breadcrumb">
+            <li>
+              <a href="#">Trang chủ</a>
+            </li>
+            <li>
+              <i class="bx bx-chevron-right"></i>
+            </li>
+            <li><a class="active" href="#">Danh sách sản phẩm</a></li>
+          </ul>
+        </div>
+        <div class="toolbar">
+          <div class="toolbar-title">
+            <ul class="toolbar-title-left">
+              <h3>Danh sách sản phẩm</h3>
+              <p>Theo dõi tiến độ của cửa hàng để tăng doanh số bán hàng</p>
+            </ul>
+            <ul class="toolbar-title-right">
+              <li>
+                <button class="btn add">
+                  <i class="bx bx-plus"></i> Thêm sản phẩm
+                </button>
+              </li>
+            </ul>
+          </div>
+          <div class="toolbar-bottom">
+            <div class="search-box">
+              <i class="bx bx-search"></i>
+              <input type="text" placeholder="Search..." />
+            </div>
+            <button class="filter"><i class="bx bx-filter"></i>Lọc</button>
+          </div>
+          <div class="table-data">
+            <table>
+              <thead>
+                <tr>
+                  <th><input type="checkbox" /></th>
+                  <th>Hình ảnh</th>
+                  <th>Tên sản phẩm</th>
+                  <th>Danh mục</th>
+                  <th>Đánh giá</th>
+                  <th>Giá</th>
+                  <th>Cân nặng</th>
+                </tr>
+              </thead>
+              <tbody id="product-table-body">
+                <tr>
+                  <td><input type="checkbox" /></td>
+                  <td>
+                    <img
+                      src="img/asus-rog-gaming-laptop.png"
+                      alt="ASUS Laptop"
+                    />
+                  </td>
+                  <td>ASUS ROG Gaming Laptop</td>
+                  <td>Laptop</td>
+                  <td>⭐⭐⭐⭐☆</td>
+                  <td>$2,199</td>
+                  <td>2.5kg</td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" /></td>
+                  <td>
+                    <img src="img/airpods-pro-2nd-gen.jpg" alt="Airpods" />
+                  </td>
+                  <td>Airpods Pro 2nd Gen</td>
+                  <td>Accessories</td>
+                  <td>⭐⭐⭐⭐⭐</td>
+                  <td>$839</td>
+                  <td>200g</td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" /></td>
+                  <td>
+                    <img src="img/apple-watch-ultra.png" alt="Apple Watch" />
+                  </td>
+                  <td>Apple Watch Ultra</td>
+                  <td>Watch</td>
+                  <td>⭐⭐⭐⭐☆</td>
+                  <td>$1,579</td>
+                  <td>80g</td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" /></td>
+                  <td>
+                    <img
+                      src="img/bose-quietcomfort-earbuds.webp"
+                      alt="Bose Earbuds"
+                    />
+                  </td>
+                  <td>Bose QuietComfort Earbuds</td>
+                  <td>Audio</td>
+                  <td>⭐⭐⭐⭐☆</td>
+                  <td>$279</td>
+                  <td>250g</td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" /></td>
+                  <td>
+                    <img
+                      src="img/camera-canon-eos-r5.jpeg"
+                      alt="Canon EOS R5"
+                    />
+                  </td>
+                  <td>Canon EOS R5 Camera</td>
+                  <td>Camera</td>
+                  <td>⭐⭐⭐⭐⭐</td>
+                  <td>$3,899</td>
+                  <td>1.6kg</td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" /></td>
+                  <td>
+                    <img src="img/dell-xps-15.jpg" alt="Dell XPS" />
+                  </td>
+                  <td>Dell XPS 15</td>
+                  <td>Laptop</td>
+                  <td>⭐⭐⭐⭐☆</td>
+                  <td>$1,899</td>
+                  <td>2.1kg</td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" /></td>
+                  <td>
+                    <img
+                      src="img/samsung-galaxy-s23-ultra.png"
+                      alt="Samsung Galaxy"
+                    />
+                  </td>
+                  <td>Samsung Galaxy S23 Ultra</td>
+                  <td>Phone</td>
+                  <td>⭐⭐⭐⭐⭐</td>
+                  <td>$1,299</td>
+                  <td>210g</td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" /></td>
+                  <td>
+                    <img src="img/sony-wh-1000xm5.jpg" alt="Sony WH-1000XM5" />
+                  </td>
+                  <td>Sony WH-1000XM5</td>
+                  <td>Audio</td>
+                  <td>⭐⭐⭐⭐⭐</td>
+                  <td>$399</td>
+                  <td>250g</td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" /></td>
+                  <td>
+                    <img src="img/gopro-hero-11.jpg" alt="GoPro" />
+                  </td>
+                  <td>GoPro Hero 11</td>
+                  <td>Camera</td>
+                  <td>⭐⭐⭐⭐☆</td>
+                  <td>$499</td>
+                  <td>150g</td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" /></td>
+                  <td>
+                    <img src="img/macbook-pro-16.jpg" alt="MacBook Pro" />
+                  </td>
+                  <td>MacBook Pro 16"</td>
+                  <td>Laptop</td>
+                  <td>⭐⭐⭐⭐⭐</td>
+                  <td>$2,499</td>
+                  <td>2.2kg</td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" /></td>
+                  <td>
+                    <img
+                      src="img/nintendo-switch-oled.webp"
+                      alt="Nintendo Switch"
+                    />
+                  </td>
+                  <td>Nintendo Switch OLED</td>
+                  <td>Gaming</td>
+                  <td>⭐⭐⭐⭐☆</td>
+                  <td>$349</td>
+                  <td>420g</td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" /></td>
+                  <td>
+                    <img src="img/son-playstation-5.jpg" alt="PlayStation 5" />
+                  </td>
+                  <td>Sony PlayStation 5</td>
+                  <td>Gaming</td>
+                  <td>⭐⭐⭐⭐⭐</td>
+                  <td>$499</td>
+                  <td>4.5kg</td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" /></td>
+                  <td>
+                    <img src="img/xbox-series-x.webp" alt="Xbox Series X" />
+                  </td>
+                  <td>Xbox Series X</td>
+                  <td>Gaming</td>
+                  <td>⭐⭐⭐⭐☆</td>
+                  <td>$499</td>
+                  <td>4.4kg</td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" /></td>
+                  <td>
+                    <img src="img/samsung-65-4k-tv.webp" alt="Samsung TV" />
+                  </td>
+                  <td>Samsung 65" 4K TV</td>
+                  <td>Electronics</td>
+                  <td>⭐⭐⭐⭐☆</td>
+                  <td>$1,099</td>
+                  <td>18kg</td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" /></td>
+                  <td>
+                    <img
+                      src="img/dyson-v15-detect-vacuum.jpg"
+                      alt="Dyson Vacuum"
+                    />
+                  </td>
+                  <td>Dyson V15 Detect Vacuum</td>
+                  <td>Home</td>
+                  <td>⭐⭐⭐⭐⭐</td>
+                  <td>$699</td>
+                  <td>3.2kg</td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" /></td>
+                  <td>
+                    <img src="img/amazon-kindle-paperwhite.jpg" alt="Kindle" />
+                  </td>
+                  <td>Amazon Kindle Paperwhite</td>
+                  <td>Electronics</td>
+                  <td>⭐⭐⭐⭐☆</td>
+                  <td>$129</td>
+                  <td>180g</td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" /></td>
+                  <td>
+                    <img src="img/fitbit-charge-6.jpg" alt="Fitbit" />
+                  </td>
+                  <td>Fitbit Charge 6</td>
+                  <td>Wearable</td>
+                  <td>⭐⭐⭐⭐☆</td>
+                  <td>$179</td>
+                  <td>35g</td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" /></td>
+                  <td>
+                    <img src="img/dji-mini-3-pro.webp" alt="DJI Drone" />
+                  </td>
+                  <td>DJI Mini 3 Pro</td>
+                  <td>Drone</td>
+                  <td>⭐⭐⭐⭐⭐</td>
+                  <td>$899</td>
+                  <td>249g</td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" /></td>
+                  <td>
+                    <img src="img/hp-laserjet-pro.jpg" alt="HP Printer" />
+                  </td>
+                  <td>HP LaserJet Pro</td>
+                  <td>Printer</td>
+                  <td>⭐⭐⭐☆☆</td>
+                  <td>$299</td>
+                  <td>6.8kg</td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" /></td>
+                  <td>
+                    <img
+                      src="img/logitech-mx-master-3s.jpg"
+                      alt="Logitech Mouse"
+                    />
+                  </td>
+                  <td>Logitech MX Master 3S</td>
+                  <td>Accessories</td>
+                  <td>⭐⭐⭐⭐⭐</td>
+                  <td>$99</td>
+                  <td>120g</td>
+                </tr>
+              </tbody>
+            </table>
+            <ul class="pagination">
+              <li class="item">
+                <a href="" class="link">
+                  <i class="bx bx-chevron-left"></i>
+                </a>
+              </li>
+              <li class="item active">
+                <a href="" class="link">1</a>
+              </li>
+              <li class="item">
+                <a href="" class="link">2</a>
+              </li>
+              <li class="item">
+                <a href="" class="link">3</a>
+              </li>
+              <li class="item">
+                <a href="" class="link">4</a>
+              </li>
+              <li class="item">
+                <a href="" class="link">...</a>
+              </li>
+              <li class="item">
+                <a href="" class="link">10</a>
+              </li>
+              <li class="item">
+                <a href="" class="link">
+                  <i class="bx bx-chevron-right"></i>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </main>
+    </section>
+    <script src="script.js"></script>
+  </body>
+</html>
