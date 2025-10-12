@@ -1,26 +1,35 @@
+/*Import front chữ Lato và Poppins từ Google Fronts*/
 @import url("https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Poppins:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap");
 
+/*
+Reset CSS:bỏ margin, padding mặc định, dùng border-box để tính kích thước theo border + padding
+*/
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
+/*bỏ gạch chân mặc định của link*/
 a {
   text-decoration: none;
 }
 
+/*bỏ dấu chấm/số của danh sách*/
 li {
   list-style: none;
 }
 
+/*CSS variable để tái sử dụng màu và font*/
 :root {
+  --roboto: "Roboto", sans-serif;
   --poppins: "Poppins", sans-serif;
   --lato: "Lato", sans-serif;
   --light: #f9f9f9;
-  --blue: #3c91e6;
-  --light-blue: #a2c5e6fa;
-  --grey: #eeeeeed6;
+  --blue: #2563eb;
+  --light-blue: #cfe8ff;
+  --grey: #eee;
   --dark-grey: #aaaaaa;
   --dark: #342e37;
   --red: #db504a;
@@ -28,16 +37,19 @@ li {
   --light-yellow: #fff2c6;
   --orange: #fd7238;
   --light-orange: #ffe0d3;
+  --blue-background: #d4e5fb;
 }
 
+/*Nền toàn trang => màu xám nhạt => sau này có thể đổi*/
 body {
   background: var(--grey);
   font-family: var(--lato);
-  display: flex;
 }
 
 /*SIDEBAR*/
-.sidebar {
+
+/*Cố định side bar bên trái, rộng 280px, chiếm toàn bộ chiều cao, nền sáng*/
+#sidebar {
   position: fixed;
   top: 0;
   left: 0;
@@ -45,9 +57,17 @@ body {
   height: 100%;
   background: var(--light);
   z-index: 1000;
+  font-family: var(--lato);
+  transition: 0.3s ease;
+  overflow-x: hidden;
 }
 
-.sidebar__brand {
+#sidebar.hide {
+  width: 60px;
+}
+
+/*Logo trong sidebar, thay đổi màu và phóng to, in đậm*/
+#sidebar .brand {
   font-size: 24px;
   font-weight: 700;
   height: 56px;
@@ -56,18 +76,19 @@ body {
   color: var(--blue);
 }
 
-.sidebar__brand-icon {
+#sidebar .brand .bx {
   min-width: 60px;
   display: flex;
   justify-content: center;
 }
 
-.sidebar__menu {
+#sidebar .side-menu {
   width: 100%;
   margin-top: 48px;
 }
 
-.sidebar__item {
+/*Mỗi item trong side có chiều cao 40px, bo góc trái*/
+#sidebar .side-menu li {
   height: 48px;
   background: transparent;
   margin-left: 6px;
@@ -75,13 +96,14 @@ body {
   padding: 4px;
 }
 
-.sidebar__item--active {
+/*Item nào active thì có nền xám nhạt*/
+#sidebar .side-menu li.active {
   background: var(--grey);
   position: relative;
   z-index: 100;
 }
 
-.sidebar__item--active::before {
+#sidebar .side-menu li.active::before {
   content: "";
   position: absolute;
   width: 40px;
@@ -92,8 +114,7 @@ body {
   box-shadow: 20px 20px 0 var(--grey);
   z-index: -1;
 }
-
-.sidebar__item--active::after {
+#sidebar .side-menu li.active::after {
   content: "";
   position: absolute;
   width: 40px;
@@ -104,8 +125,7 @@ body {
   box-shadow: 20px -20px 0 var(--grey);
   z-index: -1;
 }
-
-.sidebar__link {
+#sidebar .side-menu li a {
   width: 100%;
   height: 100%;
   background-color: var(--light);
@@ -114,13 +134,23 @@ body {
   border-radius: 48px;
   font-size: 16px;
   color: var(--dark);
+  white-space: nowrap;
+  overflow-x: hidden;
 }
 
-.sidebar__link:hover {
+#sidebar.hide .side-menu li.active a {
   color: var(--blue);
 }
 
-.sidebar__icon {
+#sidebar.hide .side-menu li a {
+  width: calc(48px - (4px * 2));
+  transition: width 0.3s ease;
+}
+
+#sidebar .side-menu li a:hover {
+  color: var(--blue);
+}
+#sidebar .side-menu.top li a .bx {
   min-width: calc(60px - ((4px + 6px) * 2));
   display: flex;
   justify-content: center;
@@ -128,68 +158,95 @@ body {
 }
 
 /*CONTENT*/
-
-.content {
+/*Phần content chiếm phần còn lại bên phải*/
+/*
+#content {
   position: relative;
   width: calc(100% - 280px);
   left: 280px;
+  transition: 0.3s ease;
 }
 
-/*NAVBAR*/
+#sidebar.hide ~ #content {
+  width: calc(100% - 60px);
+  left: 60px;
+}
+*/
 
-.navbar {
+#content {
+  margin-left: 280px;
+  width: calc(100% - 280px);
+  transition: margin-left 0.3s ease, width 0.3s ease;
+}
+
+#sidebar.hide ~ #content {
+  margin-left: 60px;
+  width: calc(100% - 60px);
+}
+
+/*NAGBAR*/
+#content nav {
   height: 56px;
   background: var(--light);
   padding: 0 24px;
   display: flex;
   align-items: center;
+  grid-gap: 24px;
   font-family: var(--lato);
   justify-content: space-between;
 }
 
-.navbar__left {
+#content nav .nav-left {
   display: flex;
   align-items: center;
   gap: 24px;
 }
 
-.navbar__right {
+#content nav .nag-right {
   display: flex;
   align-items: center;
   gap: 24px;
 }
-
-.navbar a {
+#content nav a {
   color: var(--dark);
 }
 
-.navbar__toggle {
+#content nav .bx.bx-menu {
   cursor: pointer;
   font-size: 24px;
 }
 
-.navbar__form {
+#content nav .nav-link {
+  font-size: 16px;
+  transition: 0.3s ease;
+}
+
+#content nav .nav-link:hover {
+  color: var(--blue);
+}
+
+#content nav form {
   max-width: 400px;
   width: 100%;
 }
 
-.navbar__form-input {
+#content nav form .form-input {
   display: flex;
   align-items: center;
   height: 36px;
 }
 
-.navbar__search {
+#content nav form .form-input input {
   flex-grow: 1;
   padding: 0 16px;
   height: 100%;
-  border: 1px solid var(--dark-grey);
+  border: none;
   background: var(--grey);
   border-radius: 36px 0 0 36px;
   outline: none;
 }
 
-.navbar__search-btn {
+#content nav form .form-input button {
   width: 36px;
   height: 100%;
   display: flex;
@@ -204,12 +261,12 @@ body {
   cursor: pointer;
 }
 
-.navbar__notification {
+#content nav .notification {
   font-size: 20px;
   position: relative;
 }
 
-.navbar__notification-num {
+#content nav .notification .num {
   position: absolute;
   top: -6px;
   right: -6px;
@@ -226,7 +283,7 @@ body {
   align-items: center;
 }
 
-.navbar__profile img {
+#content nav .profile img {
   width: 36px;
   height: 36px;
   object-fit: cover;
@@ -234,23 +291,25 @@ body {
 }
 
 /*MAIN*/
-.main {
+
+#content main {
   width: 100%;
   padding: 36px 24px;
   font-family: var(--lato);
   font-weight: normal;
 }
 
-.main button {
+#content main button {
   border: 1px solid var(--dark-grey);
-  border-radius: 8px;
-  padding: 8px 16px;
+  border-radius: 8px; /* bo tròn góc */
+  padding: 8px 16px; /* khoảng cách trong */
   font-size: 14px;
   cursor: pointer;
   transition: 0.3s ease;
 }
 
-.main__head-title {
+/*HEAD TITLE*/
+#content main .head-title {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -258,33 +317,33 @@ body {
   flex-wrap: wrap;
 }
 
-.breadcrumb {
+#content main .head-title .breadcrumb {
   display: flex;
   align-items: center;
   grid-gap: 10px;
 }
 
-.breadcrumb__item a {
+#content main .head-title .breadcrumb li a {
   color: var(--dark-grey);
   pointer-events: none;
 }
 
-.breadcrumb__item--active a {
+#content main .head-title .breadcrumb li a.active {
   color: var(--blue);
   pointer-events: unset;
 }
 
-/*TOOLBAR*/
-.toolbar {
-  border: 1px solid var(--dark-grey);
-  border-radius: 8px;
-  overflow: hidden;
+/*TOOL BAR*/
+#content main .toolbar {
+  border: 1px solid var(--grey); /* viền xám nhạt */
+  border-radius: 8px; /* bo góc mềm*/
+  overflow: hidden; /* tránh viền bị lệch */
   margin-top: 24px;
   background: var(--light);
   width: 100%;
 }
 
-.toolbar__title {
+#content main .toolbar .toolbar-title {
   display: flex;
   justify-content: space-between;
   grid-gap: 16px;
@@ -293,14 +352,19 @@ body {
   border-bottom: 1px solid var(--grey);
 }
 
-.toolbar__title-right {
+#content main .toolbar .toolbar-title .toolbar-title-left P {
+  color: var(--dark-grey);
+}
+
+#content main .toolbar .toolbar-title .toolbar-title-right {
   display: flex;
   align-items: center;
   grid-gap: 10px;
 }
 
-.toolbar__bottom {
+#content main .toolbar .toolbar-bottom {
   display: flex;
+  align-items: center;
   justify-content: space-between;
   grid-gap: 16px;
   flex-wrap: wrap;
@@ -308,15 +372,30 @@ body {
   border-bottom: 1px solid var(--grey);
 }
 
-.toolbar__search-box {
+#content main .toolbar .toolbar-bottom .search-box {
   display: flex;
   align-items: center;
-  gap: 8px;
+  border: 1px solid var(--dark-grey);
+  border-radius: 8px; /* bo tròn */
+  padding: 6px 12px;
+  background: var(--light);
+  width: 250px; /* chiều rộng khung search */
 }
 
-/*TABLE*/
+#content main .toolbar .toolbar-bottom .search-box i {
+  margin-right: 6px;
+  font-size: 18px;
+  color: var(--dark-grey);
+}
 
-.table-data {
+#content main .toolbar .toolbar-bottom .search-box input {
+  border: none;
+  outline: none;
+  width: 100%;
+  font-size: 14px;
+  background: var(--light);
+}
+#content main .toolbar .table-data {
   display: flex;
   justify-content: space-between;
   grid-gap: 16px;
@@ -325,20 +404,110 @@ body {
   width: 100%;
   border-collapse: collapse;
   table-layout: fixed;
+}
+
+#content main .toolbar .table-data {
   overflow: hidden;
 }
 
-.table-infomation {
+#content main .toolbar .table-data table {
   width: 100%;
   border-collapse: collapse;
-  table-layout: fixed;
+  table-layout: fixed; /* ép cột chia theo width */
 }
 
-.table__head th {
+#content main .toolbar .table-data th,
+#content main .toolbar .table-data td {
   border-bottom: 1px solid var(--grey);
   padding: 12px 16px;
   text-align: left;
   font-size: 14px;
-  word-wrap: break-word;
+  word-wrap: break-word; /* chữ dài sẽ xuống dòng */
   font-weight: normal;
+}
+
+/* Checkbox tròn */
+.table-data table th input[type="checkbox"],
+.table-data table td input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--dark-grey); /* màu viền xám nhạt */
+  border-radius: 4px; /* bo tròn */
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease-in-out;
+}
+
+/* Khi hover */
+.table-data table th input[type="checkbox"]:hover,
+.table-data table td input[type="checkbox"]:hover {
+  border-color: var(--blue); /* viền xanh khi hover */
+}
+
+/* Khi được tick */
+.table-data table th input[type="checkbox"]:checked,
+.table-data table td input[type="checkbox"]:checked {
+  background-color: var(--blue); /* nền xanh */
+  border-color: var(--blue);
+  color: var(--light);
+}
+
+/* Vẽ dấu check */
+.table-data table th input[type="checkbox"]:checked::after,
+.table-data table td input[type="checkbox"]:checked::after {
+  content: "✔";
+  font-size: 12px;
+  color: var(--light);
+}
+
+#content main .toolbar .table-data td img {
+  width: 70px;
+  height: 60px;
+  border-radius: 8px;
+}
+
+/*pagination*/
+#content main .toolbar .table-data .pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  list-style: none;
+  margin: 28px 0 20px 0;
+  width: 100%;
+}
+
+#content main .toolbar .table-data .pagination .item {
+  margin: 0 12px;
+}
+
+#content main .toolbar .table-data .pagination .active .link {
+  background-color: var(--orange);
+  color: var(--light);
+}
+
+#content main .toolbar .table-data .pagination .active .link:hover {
+  background-color: var(--blue);
+}
+
+#content main .toolbar .table-data .pagination .item .link {
+  display: block;
+  font-size: 10pt;
+  color: var(--dark);
+  min-width: 40px;
+  height: 30px;
+  line-height: 30px;
+  text-align: center;
+  border-radius: 5px;
+}
+
+#content main .toolbar .table-data .pagination .item .bx {
+  font-size: 30px; /* bằng chiều cao nút */
+  line-height: 30px; /* canh giữa dọc */
+  vertical-align: middle;
 }
