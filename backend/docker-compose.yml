@@ -16,20 +16,6 @@ services:
       timeout: 5s
       retries: 10
 
-  redis:
-    image: redis:7
-    container_name: website_redis
-    ports:
-      - "6379:6379"
-    command: ["redis-server", "--appendonly", "yes"]
-    volumes:
-      - redis-data:/data
-    healthcheck:
-      test: [ "CMD", "redis-cli", "ping" ]
-      interval: 5s
-      timeout: 5s
-      retries: 20
-
   minio:
     image: minio/minio:latest
     container_name: ecom_minio
@@ -77,21 +63,6 @@ services:
       - "8000:8000"
     volumes:
       - ./app:/app/app  # hot reload khi dev
-
-  celery-worker:
-    build: .
-    container_name: website_celery_worker
-    env_file:
-      - .env
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    volumes:
-      - ./app:/app/app
-    command: >
-      celery -A app.celery_app.celery_app worker --loglevel=INFO -Q default
 
 volumes:
   pgdata:
