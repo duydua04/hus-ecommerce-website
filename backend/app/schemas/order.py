@@ -62,3 +62,5 @@ class SellerOrderDetail(ORMBase):
     items: List[OrderItemResponse] = []
     buyer_display_name: str | None = None  # "Hoàng D." (mask nhẹ nếu muốn)
     buyer_phone: str | None = None
+    carrier_name: str | None = None
+    carrier_avt_url: str | None = None

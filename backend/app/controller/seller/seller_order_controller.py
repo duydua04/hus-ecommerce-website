@@ -18,7 +18,7 @@ router = APIRouter(
     dependencies=[Depends(require_seller)]
 )
 
-def current_seller(auth = Depends(require_seller)) -> Seller:
+def current_seller(auth = Depends(require_seller)):
     return auth["user"]
 
 @router.get("", response_model=Page)
@@ -33,6 +33,7 @@ def list_orders(
     db: Session = Depends(get_db),
     seller: Seller = Depends(current_seller),
 ):
+    """Router list ra danh sach order cho seller"""
     df = datetime.fromisoformat(date_from) if date_from else None
     dt = datetime.fromisoformat(date_to) if date_to else None
     return svc.list_orders_for_seller(
@@ -53,6 +54,7 @@ def get_order_detail(
     db: Session = Depends(get_db),
     seller: Seller = Depends(current_seller),
 ):
+    """Router xem chi tiet don dat hang o phia seller"""
     return svc.get_order_detail_for_seller(db, seller.seller_id, order_id)
 
 @router.post("/{order_id}/confirm", status_code=status.HTTP_204_NO_CONTENT)
@@ -61,6 +63,7 @@ def confirm_order(
     db: Session = Depends(get_db),
     seller: Seller = Depends(current_seller),
 ):
+    """Router danh dau xac nhan don hang khi co don hang duoc tao"""
     svc.confirm_order(db, seller.seller_id, order_id)
     return None
 
@@ -70,6 +73,7 @@ def mark_shipped(
     db: Session = Depends(get_db),
     seller: Seller = Depends(current_seller),
 ):
+    """Router danh dau da giao cho don vi van chuyen"""
     svc.mark_shipped(db, seller.seller_id, order_id)
     return None
 
