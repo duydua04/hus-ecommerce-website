@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!--Boxicons-->
+    <link
+      href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
+      rel="stylesheet"
+    />
+    <!--My css-->
+    <link rel="stylesheet" href="../style.css" />
+
+    <title>SellerHub</title>
+  </head>
+  <body>
+    <!--SIDEBAR-->
+    <section id="sidebar">
+      <a href="#" class="brand">
+        <i class="bx bx-wink-smile"></i>
+        <span class="text">SellerHub</span>
+      </a>
+      <ul class="side-menu top">
+        <li>
+          <a href="#">
+            <i class="bx bx-grid-alt"></i>
+            <span class="text">Dashboard</span>
+          </a>
+        </li>
+        <li class="active">
+          <a href="#">
+            <i class="bx bx-box"></i>
+            <span class="text">Sản phẩm</span>
+          </a>
+        </li>
+        <li>
+          <a href="#">
+            <i class="bx bx-car"></i>
+            <span class="text">Đơn hàng</span>
+          </a>
+        </li>
+        <li>
+          <a href="#">
+            <i class="bx bx-receipt"></i>
+            <span class="text">Hóa đơn</span>
+          </a>
+        </li>
+        <li>
+          <a href="#">
+            <i class="bx bx-user-circle"></i>
+            <span class="text">Hồ sơ</span>
+          </a>
+        </li>
+        <li>
+          <a href="#">
+            <i class="bx bx-like"></i>
+            <span class="text">Đánh giá</span>
+          </a>
+        </li>
+      </ul>
+    </section>
+
+    <!--CONTENT-->
+    <section id="content">
+      <!--NAVBAR-->
+      <nav>
+        <div class="nav-left">
+          <i class="bx bx-menu"></i>
+          <div class="search-box">
+            <i class="bx bx-search"></i>
+            <input type="text" placeholder="Search..." />
+          </div>
+        </div>
+        <div class="nav-right">
+          <a href="#" class="notification">
+            <i class="bx bx-bell"></i>
+            <span class="num">98</span>
+          </a>
+          <a href="#" class="profile">
+            <img src="../img/balloon-sky.webp" />
+          </a>
+        </div>
+      </nav>
+      <!--MAIN-->
+      <main>
+        <div class="head-title">
+          <h1>Đơn hàng</h1>
+          <ul class="breadcrumb">
+            <li>
+              <a href="#">Trang chủ</a>
+            </li>
+            <li>
+              <i class="bx bx-chevron-right"></i>
+            </li>
+            <li><a class="active" href="#">Đơn hàng</a></li>
+          </ul>
+        </div>
+        <div class="toolbar">
+          <div class="toolbar-title">
+            <ul class="toolbar-title-left">
+              <h3>Danh sách đơn hàng</h3>
+              <p>Theo dõi tiến độ của cửa hàng để tăng doanh số</p>
+            </ul>
+            <ul class="toolbar-title-right">
+              <li>
+                <button class="btn add">
+                  <i class="bx bx-plus"></i> Tạo đơn hàng
+                </button>
+              </li>
+            </ul>
+          </div>
+          <div class="toolbar-bottom">
+            <div class="search-box">
+              <i class="bx bx-search"></i>
+              <input type="text" placeholder="Search by orders..." />
+            </div>
+            <button class="filter"><i class="bx bx-filter"></i>Lọc</button>
+          </div>
+          <div class="table-data">
+            <table>
+              <thead>
+                <tr>
+                  <!--Order ID, Date, Order by, Status,Total sum, Action-->
+                  <th>Order ID</th>
+                  <th>Date</th>
+                  <th>Order by</th>
+                  <th>Status</th>
+                  <th>Total sum</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><a href="#">#192001</a></td>
+                  <td>July 12, 2024</td>
+                  <td>Alex John</td>
+                  <td><span class="status completed">Completed</span></td>
+                  <td>USD 312,231.00</td>
+                  <td><button class="btn-detail">View detail</button></td>
+                </tr>
+
+                <tr>
+                  <td><a href="#">#234232</a></td>
+                  <td>July 12, 2024</td>
+                  <td>Alex John</td>
+                  <td><span class="status pending">Pending</span></td>
+                  <td>USD 1,912,902.99</td>
+                  <td><button class="btn-detail">View detail</button></td>
+                </tr>
+
+                <tr>
+                  <td><a href="#">#092001</a></td>
+                  <td>July 12, 2024</td>
+                  <td>Michael George</td>
+                  <td><span class="status pending">Pending</span></td>
+                  <td>USD 12,450.00</td>
+                  <td><button class="btn-detail">View detail</button></td>
+                </tr>
+
+                <tr>
+                  <td><a href="#">#192009</a></td>
+                  <td>July 12, 2024</td>
+                  <td>Alex John</td>
+                  <td><span class="status rejected">Rejected</span></td>
+                  <td>USD 12,450.00</td>
+                  <td><button class="btn-detail">View detail</button></td>
+                </tr>
+
+                <tr>
+                  <td><a href="#">#66201</a></td>
+                  <td>July 12, 2024</td>
+                  <td>Alex John</td>
+                  <td><span class="status draft">Draft</span></td>
+                  <td>USD 350.90</td>
+                  <td><button class="btn-detail">View detail</button></td>
+                </tr>
+              </tbody>
+            </table>
+            <ul class="pagination">
+              <li class="item">
+                <a href="" class="link">
+                  <i class="bx bx-chevron-left"></i>
+                </a>
+              </li>
+              <li class="item active">
+                <a href="" class="link">1</a>
+              </li>
+              <li class="item">
+                <a href="" class="link">2</a>
+              </li>
+              <li class="item">
+                <a href="" class="link">3</a>
+              </li>
+              <li class="item">
+                <a href="" class="link">4</a>
+              </li>
+              <li class="item">
+                <a href="" class="link">...</a>
+              </li>
+              <li class="item">
+                <a href="" class="link">10</a>
+              </li>
+              <li class="item">
+                <a href="" class="link">
+                  <i class="bx bx-chevron-right"></i>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </main>
+    </section>
+    <script src="../script.js"></script>
+  </body>
+</html>

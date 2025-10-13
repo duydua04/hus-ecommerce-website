@@ -202,63 +202,47 @@ body {
   gap: 24px;
 }
 
-#content nav .nag-right {
+#content nav .nav-left .bx.bx-menu {
+  cursor: pointer;
+  font-size: 24px;
+  border: 1px solid var(--dark-grey);
+  border-radius: 8px;
+  padding: 4px; /* Tạo khoảng cách giữa icon và khung */
+  transition: all 0.3s ease;
+}
+
+#content nav .nav-left .search-box {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--dark-grey);
+  border-radius: 8px; /* bo tròn */
+  padding: 6px 12px;
+  background: var(--light);
+  width: 250px; /* chiều rộng khung search */
+}
+
+#content nav .nav-left .search-box i {
+  margin-right: 6px;
+  font-size: 18px;
+  color: var(--dark-grey);
+}
+
+#content nav .nav-left .search-box input {
+  border: none;
+  outline: none;
+  width: 100%;
+  font-size: 14px;
+  background: var(--light);
+}
+
+#content nav .nav-right {
   display: flex;
   align-items: center;
   gap: 24px;
 }
-#content nav a {
+
+#content nav .nav-right a {
   color: var(--dark);
-}
-
-#content nav .bx.bx-menu {
-  cursor: pointer;
-  font-size: 24px;
-}
-
-#content nav .nav-link {
-  font-size: 16px;
-  transition: 0.3s ease;
-}
-
-#content nav .nav-link:hover {
-  color: var(--blue);
-}
-
-#content nav form {
-  max-width: 400px;
-  width: 100%;
-}
-
-#content nav form .form-input {
-  display: flex;
-  align-items: center;
-  height: 36px;
-}
-
-#content nav form .form-input input {
-  flex-grow: 1;
-  padding: 0 16px;
-  height: 100%;
-  border: none;
-  background: var(--grey);
-  border-radius: 36px 0 0 36px;
-  outline: none;
-}
-
-#content nav form .form-input button {
-  width: 36px;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: var(--blue);
-  color: var(--light);
-  font-size: 18px;
-  border: none;
-  outline: none;
-  border-radius: 0 36px 36px 0;
-  cursor: pointer;
 }
 
 #content nav .notification {
@@ -266,7 +250,7 @@ body {
   position: relative;
 }
 
-#content nav .notification .num {
+#content nav .nav-right .notification .num {
   position: absolute;
   top: -6px;
   right: -6px;
@@ -283,7 +267,7 @@ body {
   align-items: center;
 }
 
-#content nav .profile img {
+#content nav .nav-right .profile img {
   width: 36px;
   height: 36px;
   object-fit: cover;
@@ -306,6 +290,7 @@ body {
   font-size: 14px;
   cursor: pointer;
   transition: 0.3s ease;
+  background: var(--light);
 }
 
 /*HEAD TITLE*/
@@ -315,6 +300,10 @@ body {
   justify-content: space-between;
   grid-gap: 16px;
   flex-wrap: wrap;
+}
+
+#content main .head-title h1 {
+  font-size: 30px;
 }
 
 #content main .head-title .breadcrumb {
@@ -341,6 +330,7 @@ body {
   margin-top: 24px;
   background: var(--light);
   width: 100%;
+  font-family: var(--lato);
 }
 
 #content main .toolbar .toolbar-title {
@@ -352,8 +342,14 @@ body {
   border-bottom: 1px solid var(--grey);
 }
 
-#content main .toolbar .toolbar-title .toolbar-title-left P {
+#content main .toolbar .toolbar-title .toolbar-title-left h3 {
+  color: var(--dark);
+  font-size: 20px;
+}
+
+#content main .toolbar .toolbar-title .toolbar-title-left p {
   color: var(--dark-grey);
+  font-size: 14px;
 }
 
 #content main .toolbar .toolbar-title .toolbar-title-right {
@@ -395,6 +391,7 @@ body {
   font-size: 14px;
   background: var(--light);
 }
+
 #content main .toolbar .table-data {
   display: flex;
   justify-content: space-between;
@@ -467,7 +464,7 @@ body {
 }
 
 #content main .toolbar .table-data td img {
-  width: 70px;
+  width: 60px;
   height: 60px;
   border-radius: 8px;
 }
