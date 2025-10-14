@@ -13,11 +13,11 @@ def recompute_one_buyer_tier(db: Session, buyer_id: int):
     # Truy van tim va loc ra so don hoan thanh va tong so tien chi trong 30 ngay gan nhat
     kpi = db.execute(text("""
         SELECT 
-            COUNT("*") AS orders_delivered, 
+            COUNT(*) AS orders_delivered, 
             COALESCE(SUM(o.total_price), 0) as gmv
         FROM "order" AS o
         WHERE o.buyer_id = :buyer_id
-            AND o.order_status = "delivered"
+            AND o.order_status = 'delivered'
             AND o.order_date = NOW() - INTERVAL '30 days'
     """), {"buyer_id": buyer_id}).fetchone()
 
