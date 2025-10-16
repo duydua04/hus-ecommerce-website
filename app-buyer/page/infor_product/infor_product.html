@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Details infomation</title>
+
+    <link rel="stylesheet" href="../web_framework/variables.css">
+    <link rel="stylesheet" href="infor_product.css">
+
+</head>
+<body>
+    <header class="header">
+            <!--Brand name anh logo-->
+            <div class="header__left">
+                <div class="brand">
+                    <a href="#" class="brand__link">
+                        <img src="../../accets/logo/logo.jpg" alt="Logo brand" class="brand__logo">
+                        <span class="brand__name">BrandName</span>
+                    </a>
+                </div>
+            </div>
+            <!--------Search bar-------->
+            <div class="header__center">
+                <form class="search" action="/search" method="get" role="search">
+                    <input class="search__input" type="search" name="q" placeholder="Search Product of e-commerce store" aria-label="Search products or e-commerce store">
+                    <button class="search__button" type="submit" aria-label="search">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"/>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        </svg>
+                    </button>
+                </form>
+            </div>
+
+            <div class="header__right">
+
+                <!-----Icon group-------->
+                <div class="icon-group">
+                    <!---------Save Lists-------->
+                    <div class="icon-group__button" data-tooltip="Saved List" role="button" tabindex="0" aria-label="Saved List">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 20.5C12 20.5 2 14.5 2 8.7C2 5.8 4.1 3.5 7 3.5C8.5 3.5 10 4 12 6C14 4 15.5 3.5 17 3.5C19.9 3.5 22 5.8 22 8.7C22 14.5 12 20.5 12 20.5Z"/>
+                        </svg>
+                    </div>
+                    <!---------My Order-------->
+                    <div class="icon-group__button" data-tooltip="My Order" role="button" tabindex="0" aria-label="My Order">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20.198 3H3.802C3.05147 3 2.6762 3 2.41637 3.17726C2.28768 3.26505 2.18133 3.38109 2.10567 3.51627C1.9529 3.78921 1.99024 4.15793 2.06493 4.89537C2.18958 6.12624 2.2519 6.74168 2.57823 7.18168C2.74084 7.40095 2.94701 7.58519 3.18414 7.72315C3.65999 8 4.28635 8 5.53908 8H18.4609C19.7136 8 20.34 8 20.8159 7.72315C21.053 7.58519 21.2592 7.40095 21.4218 7.18168C21.7481 6.74168 21.8104 6.12624 21.9351 4.89537C22.0098 4.15793 22.0471 3.78921 21.8943 3.51627C21.8187 3.38109 21.7123 3.26505 21.5836 3.17726C21.3238 3 20.9485 3 20.198 3Z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                            <path d="M3 8L3 13.0408C3 16.7928 3 18.6688 4.17157 19.8344C5.34315 21 7.22876 21 11 21H13C16.7712 21 18.6569 21 19.8284 19.8344C21 18.6688 21 16.7928 21 13.0408V8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                            <path d="M10 11H14" stroke-width="1.5" stroke-linecap="round"></path>
+                        </svg>
+                    </div>
+                    <!---------My Cart-------->
+                    <div class="icon-group__button" data-tooltip="My Cart" role="button" tabindex="0" aria-label="My Cart">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M8 16L16.7201 15.2733C19.4486 15.046 20.0611 14.45 20.3635 11.7289L21 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+                            <path d="M6 6H22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+                            <circle cx="6" cy="20" r="2" stroke="currentColor" stroke-width="1.5"></circle>
+                            <circle cx="17" cy="20" r="2" stroke="currentColor" stroke-width="1.5"></circle>
+                            <path d="M8 20L15 20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+                            <path d="M2 2H2.966C3.91068 2 4.73414 2.62459 4.96326 3.51493L7.93852 15.0765C8.08887 15.6608 7.9602 16.2797 7.58824 16.7616L6.63213 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+                        </svg>
+                    </div>
+                </div>
+
+                <!---------Sign in-------->
+                <div class="icon-group__button" data-tooltip="Sign In" role="button" tabindex="0" aria-label="Sign In">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z" stroke="currentColor" stroke-width="1.5" />
+                        <path d="M15 10C15 11.6569 13.6569 13 12 13C10.3431 13 9 11.6569 9 10C9 8.34315 10.3431 7 12 7C13.6569 7 15 8.34315 15 10Z" stroke="currentColor" stroke-width="1.5" />
+                        <path d="M5.49994 19.0001L6.06034 18.0194C6.95055 16.4616 8.60727 15.5001 10.4016 15.5001H13.5983C15.3926 15.5001 17.0493 16.4616 17.9395 18.0194L18.4999 19.0001" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" stroke-linejoin="round" />
+                    </svg>
+                </div>
+            </div>
+        </header>
+    <hr>
+
+    <!-- Product Detail -->
+    <main class="product">
+        <div class="product__container">
+            <!-- Product Gallery -->
+            <div class="product__gallery">
+                <div class="gallery">
+                    <div class="gallery__main">🪑</div>
+                    <div class="gallery__thumbnails">
+                        <input type="radio" name="gallery" id="thumb-1" class="gallery__input" checked>
+                        <label for="thumb-1" class="gallery__thumbnail">🪑</label>
+
+                        <input type="radio" name="gallery" id="thumb-2" class="gallery__input">
+                        <label for="thumb-2" class="gallery__thumbnail">🪑</label>
+
+                        <input type="radio" name="gallery" id="thumb-3" class="gallery__input">
+                        <label for="thumb-3" class="gallery__thumbnail">🪑</label>
+
+                        <input type="radio" name="gallery" id="thumb-4" class="gallery__input">
+                        <label for="thumb-4" class="gallery__thumbnail">🪑</label>
+
+                        <input type="radio" name="gallery" id="thumb-5" class="gallery__input">
+                        <label for="thumb-5" class="gallery__thumbnail">🪑</label>
+
+                        <input type="radio" name="gallery" id="thumb-6" class="gallery__input">
+                        <label for="thumb-6" class="gallery__thumbnail">🪑</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product Info -->
+            <div class="product__info">
+                <div class="product-info">
+                    <h1 class="product-info__title">Simple Modern Minimalist Nordic Dining Chair for Home or Kitchen</h1>
+
+                    <div class="product-info__rating">
+                        <div class="rating">
+                            <span class="rating__stars">★★★★★</span>
+                            <span class="rating__score">4.5</span>
+                            <span class="rating__reviews">52 reviews</span>
+                            <span class="rating__orders">15,154 orders</span>
+                        </div>
+                    </div>
+
+                    <div class="product-info__stock">
+                        <span class="stock stock--available">In stock</span>
+                    </div>
+
+                    <ul class="product-info__features">
+                        <li class="product-info__feature">Material: Leather</li>
+                        <li class="product-info__feature">Color: Brown</li>
+                        <li class="product-info__feature">Size: 23 inch x 31 inch</li>
+                        <li class="product-info__feature">Weight: 1500 gr</li>
+                    </ul>
+
+                    <div class="product-info__options">
+                        <div class="product-option">
+                            <label class="product-option__label">Color:</label>
+                            <select class="product-option__select">
+                                <option>Choose...</option>
+                                <option>Brown</option>
+                                <option>Black</option>
+                                <option>White</option>
+                            </select>
+                        </div>
+
+                        <div class="product-option">
+                            <label class="product-option__label">Size:</label>
+                            <div class="product-option__buttons">
+                                <input type="radio" name="size" id="size-large" class="product-option__input" checked>
+                                <label for="size-large" class="product-option__button">Large</label>
+
+                                <input type="radio" name="size" id="size-medium" class="product-option__input">
+                                <label for="size-medium" class="product-option__button">Medium</label>
+
+                                <input type="radio" name="size" id="size-small" class="product-option__input">
+                                <label for="size-small" class="product-option__button">Small</label>
+
+                                <input type="radio" name="size" id="size-tiny" class="product-option__input">
+                                <label for="size-tiny" class="product-option__button">Tiny</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product Purchase -->
+            <div class="product__purchase">
+                <div class="purchase">
+                    <div class="purchase__price">
+                        <span class="purchase__current-price">$98.00</span>
+                        <span class="purchase__original-price">$128.00</span>
+                    </div>
+                    <p class="purchase__tax">Price per kg. Includes VAT</p>
+
+                    <div class="purchase__quantity">
+                        <input type="number" class="purchase__quantity-input" value="1" min="1">
+                    </div>
+
+                    <button class="purchase__add-to-cart">
+                        🛒 Add to cart
+                    </button>
+
+                    <button class="purchase__buy-now">Buy now</button>
+
+                    <button class="purchase__wishlist">Add to wishlist</button>
+
+                    <div class="purchase__features">
+                        <div class="purchase__feature">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                            </svg>
+                            <span>Worldwide shipping</span>
+                        </div>
+                        <div class="purchase__feature">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                            </svg>
+                            <span>Secure payment</span>
+                        </div>
+                        <div class="purchase__feature">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                            </svg>
+                            <span>2 years full warranty</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product Details and Reviews Grid -->
+        <div class="product-details-grid">
+            <!-- Detailed Information Section -->
+            <section class="detail-info">
+                <div class="detail-info__container">
+                    <h2 class="detail-info__title">Detailed information</h2>
+
+                    <div class="detail-info__description">
+                        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+                        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+                    </div>
+
+                    <table class="detail-info__specs">
+                        <tr>
+                            <td class="detail-info__spec-name">Memory size</td>
+                            <td class="detail-info__spec-value">128 GB</td>
+                        </tr>
+                        <tr>
+                            <td class="detail-info__spec-name">Material type</td>
+                            <td class="detail-info__spec-value">Plastic and metall</td>
+                        </tr>
+                        <tr>
+                            <td class="detail-info__spec-name">Screen resolution</td>
+                            <td class="detail-info__spec-value">12.5 inch</td>
+                        </tr>
+                        <tr>
+                            <td class="detail-info__spec-name">Power source</td>
+                            <td class="detail-info__spec-value">Electricity</td>
+                        </tr>
+                        <tr>
+                            <td class="detail-info__spec-name">Compatibility</td>
+                            <td class="detail-info__spec-value">Android OS, Windows</td>
+                        </tr>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Reviews Section -->
+            <section class="reviews">
+                <div class="reviews__container">
+                    <h2 class="reviews__title">Reviews</h2>
+
+                    <div class="reviews__list">
+                        <div class="review">
+                            <div class="review__header">
+                                <div class="review__avatar">MJ</div>
+                                <div class="review__user-info">
+                                    <h3 class="review__name">Michael Jonathan</h3>
+                                    <div class="review__rating">
+                                        <span class="review__stars">★★★★★</span>
+                                        <span class="review__score">4.5</span>
+                                        <span class="review__badge">Verified Buyer</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="review__text">It's a very good item. But it misprinted. Some chapters have issues with the starting lines on pages (not printed).</p>
+
+                            <div class="review__photos">
+                                <div class="review__photo">📷</div>
+                                <div class="review__photo">📷</div>
+                                <div class="review__photo review__photo--more">
+                                    📷
+                                    <div class="review__photo-overlay">+3</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="review">
+                            <div class="review__header">
+                                <div class="review__avatar">AK</div>
+                                <div class="review__user-info">
+                                    <h3 class="review__name">Alex K.</h3>
+                                    <div class="review__rating">
+                                        <span class="review__stars">★★★★★</span>
+                                        <span class="review__score">4.1</span>
+                                        <span class="review__badge">Verified buyer</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="review__text">Really impressed with its quality. I liked it and started using it. Thanks Finalia.</p>
+
+                            <div class="review__photos">
+                                <div class="review__photo">📷</div>
+                                <div class="review__photo">📷</div>
+                                <div class="review__photo review__photo--more">
+                                    📷
+                                    <div class="review__photo-overlay">+3</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="reviews__view-all">View all 22 comments</button>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!---------Footer-------->
+        <footer class="footer" role="contentinfo">
+            <div class="footer__container">
+                <div class="footer__grid">
+                    <div class="footer__column">
+                    <h6 class="footer__column-title">Company</h6>
+                    <ul class="footer__list">
+                        <li class="footer__list-item"><a href="#" class="footer__link">About Us</a></li>
+                        <li class="footer__list-item"><a href="#" class="footer__link">Investors</a></li>
+                        <li class="footer__list-item"><a href="#" class="footer__link">Careers</a></li>
+                        <li class="footer__list-item"><a href="#" class="footer__link">Blogs and news</a></li>
+                        <li class="footer__list-item"><a href="#" class="footer__link">Example</a></li>
+                    </ul>
+                    </div>
+
+                    <div class="footer__column">
+                    <h6 class="footer__column-title">Buyers</h6>
+                    <ul class="footer__list">
+                        <li class="footer__list-item"><a href="#" class="footer__link">Find store</a></li>
+                        <li class="footer__list-item"><a href="#" class="footer__link">Registration</a></li>
+                        <li class="footer__list-item"><a href="#" class="footer__link">Partnerships</a></li>
+                        <li class="footer__list-item"><a href="#" class="footer__link">Gift vouchers</a></li>
+                        <li class="footer__list-item"><a href="#" class="footer__link">Example</a></li>
+                    </ul>
+                    </div>
+
+                    <div class="footer__column">
+                    <h6 class="footer__column-title">Help</h6>
+                    <ul class="footer__list">
+                        <li class="footer__list-item"><a href="#" class="footer__link">Contact us</a></li>
+                        <li class="footer__list-item"><a href="#" class="footer__link">Live chat</a></li>
+                        <li class="footer__list-item"><a href="#" class="footer__link">Documentation</a></li>
+                        <li class="footer__list-item"><a href="#" class="footer__link">Download</a></li>
+                        <li class="footer__list-item"><a href="#" class="footer__link">Versions</a></li>
+                    </ul>
+                    </div>
+
+                    <div class="footer__column">
+                    <h6 class="footer__column-title">Service</h6>
+                    <ul class="footer__list">
+                        <li class="footer__list-item"><a href="#" class="footer__link">Safe purchase</a></li>
+                        <li class="footer__list-item"><a href="#" class="footer__link">Logistics service</a></li>
+                        <li class="footer__list-item"><a href="#" class="footer__link">Refund</a></li>
+                        <li class="footer__list-item"><a href="#" class="footer__link">Example link</a></li>
+                        <li class="footer__list-item"><a href="#" class="footer__link">Something</a></li>
+                    </ul>
+                    </div>
+
+                    <div class="footer__column">
+                    <h6 class="footer__column-title">Language</h6>
+                    <ul class="footer__list">
+                        <li class="footer__list-item"><a href="#" class="footer__link">Español</a></li>
+                        <li class="footer__list-item"><a href="#" class="footer__link">Português</a></li>
+                        <li class="footer__list-item"><a href="#" class="footer__link">Deutsch</a></li>
+                        <li class="footer__list-item"><a href="#" class="footer__link">日本語</a></li>
+                    </ul>
+                    </div>
+                </div>
+
+                <hr class="footer__divider">
+
+                <div class="footer__bottom">
+                    <p>Copyright © 2025 - 2027 DTHN</p>
+                </div>
+            </div>
+        </footer>
+
+    <script>
+        // Tab switching functionality
+        function showTab(index) {
+            const tabs = document.querySelectorAll('.product-details__tab');
+            const panels = document.querySelectorAll('.product-details__panel');
+
+            tabs.forEach((tab, i) => {
+                if (i === index) {
+                    tab.classList.add('product-details__tab--active');
+                } else {
+                    tab.classList.remove('product-details__tab--active');
+                }
+            });
+
+            panels.forEach((panel, i) => {
+                if (i === index) {
+                    panel.classList.add('product-details__panel--active');
+                } else {
+                    panel.classList.remove('product-details__panel--active');
+                }
+            });
+        }
+
+        // Quantity buttons
+        document.querySelectorAll('.purchase__quantity-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const input = this.parentElement.querySelector('.purchase__quantity-input');
+                const currentValue = parseInt(input.value);
+
+                if (this.textContent === '+') {
+                    input.value = currentValue + 1;
+                } else if (this.textContent === '-' && currentValue > 1) {
+                    input.value = currentValue - 1;
+                }
+            });
+        });
+
+        // Size button selection
+        document.querySelectorAll('.product-option__button').forEach(btn => {
+            btn.addEventListener('click', function() {
+                this.parentElement.querySelectorAll('.product-option__button').forEach(b => {
+                    b.classList.remove('product-option__button--active');
+                });
+                this.classList.add('product-option__button--active');
+            });
+        });
+
+        // Gallery thumbnail selection
+        document.querySelectorAll('.gallery__thumbnail').forEach(thumb => {
+            thumb.addEventListener('click', function() {
+                document.querySelectorAll('.gallery__thumbnail').forEach(t => {
+                    t.classList.remove('gallery__thumbnail--active');
+                });
+                this.classList.add('gallery__thumbnail--active');
+            });
+        });
+    </script>
+</body>
+</html>
