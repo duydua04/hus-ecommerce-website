@@ -250,42 +250,48 @@ def add_to_cart(db: Session, buyer_id: int, product_id: int, variant_id=None, si
 
 # === HIỂN THỊ GIỎ HÀNG CỦA NGƯỜI DÙNG ===
 def get_buyer_cart(buyer_id: int, db: Session):
-    # Lấy tất cả cart_item của user
-    cart = db.query(ShoppingCart).filter(ShoppingCart.buyer_id == buyer_id).first()
+    cart = db.query(ShoppingCart).filter_by(buyer_id=buyer_id).first()
     if not cart:
         return []
+
     items = (
         db.query(ShoppingCartItem)
-        .filter(ShoppingCartItem.shopping_cart_id == cart.shopping_cart_id)
+        .join(Product)
+        .join(ProductVariant, ShoppingCartItem.variant_id == ProductVariant.variant_id)
+        .join(ProductSize, ShoppingCartItem.size_id == ProductSize.size_id)
         .options(
-            joinedload(ShoppingCartItem.product).joinedload(Product.images), # Load Product liên quan đến mỗi CartItem, Load luôn danh sách ảnh của Product
+            joinedload(ShoppingCartItem.product).joinedload(Product.images),
             joinedload(ShoppingCartItem.product).joinedload(Product.seller),
-            joinedload(ShoppingCartItem.product).joinedload(Product.variants).joinedload(ProductVariant.sizes)
         )
+        .filter(ShoppingCartItem.shopping_cart_id == cart.shopping_cart_id)
         .all()
     )
-    
-    # Gom nhóm theo seller
-    grouped = defaultdict(list)  # nếu key mới, giá trị mặc định là list()
+
+    grouped = defaultdict(list)
     for item in items:
-        if item.product.seller:
-            seller_name = item.product.seller.shop_name
-        else:
-            seller_name = "Unknown Seller"
-        for variant in item.product.variants:
-            for size in variant.sizes:
-                grouped[seller_name].append({
-                    "product_id": item.product.product_id,
-                    "name": item.product.name,
-                    "variant_id": variant.variant_id,
-                    "variant_name": variant.variant_name,
-                    "size_id": size.size_id,
-                    "size_name": size.size_name,
-                    "quantity": item.quantity,
-                    "price": float(item.product.base_price + variant.price_adjustment),
-                    "image_url": item.product.images[0].image_url if item.product.images else None
-                })
+        seller_name = item.product.seller.shop_name if item.product.seller else "Unknown Seller"
 
-    result = [{"seller": k, "products": v} for k, v in grouped.items()]
-    return result
+        # Ảnh public của sản phẩm
+        image_url = None
+        if item.product.images and len(item.product.images) > 0:
+            image_url = public_url(item.product.images[0].image_url)
 
+        # Lấy đúng variant và size đã chọn trong giỏ hàng
+        variant = next((v for v in item.product.variants if v.variant_id == item.variant_id), None)
+        size = None
+        if variant:
+            size = next((s for s in variant.sizes if s.size_id == item.size_id), None)
+
+        grouped[seller_name].append({
+            "product_id": item.product.product_id,
+            "name": item.product.name,
+            "variant_id": variant.variant_id if variant else None,
+            "variant_name": variant.variant_name if variant else None,
+            "size_id": size.size_id if size else None,
+            "size_name": size.size_name if size else None,
+            "quantity": item.quantity,
+            "price": float(item.product.base_price + (variant.price_adjustment if variant else 0)),
+            "public_image_url": image_url
+        })
+
+    return [{"seller": k, "products": v} for k, v in grouped.items()]
