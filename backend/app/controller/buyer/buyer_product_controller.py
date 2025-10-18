@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session, Query as SAQuery
 from ...config.db import get_db
 from ...services.buyer import buyer_product_service
 from ...models.catalog import Product, ProductImage, ProductSize, ProductVariant
-from ...services.buyer.buyer_product_service import RatingFilter, paginate_simple
+from ...services.buyer.buyer_product_service import RatingFilter, paginate_simple, get_buyer_product_detail
 from pydantic import BaseModel
 from decimal import Decimal
 from sqlalchemy.orm import selectinload
@@ -54,87 +54,15 @@ def get_filtered_product(
 
 # === ĐƯA RA THÔNG TIN CHI TIẾT SẢN PHẨM ===
 @router.get("/{product_id}", response_model=Dict[str, Any])
-def get_product_detail(product_id: int, db: Session = Depends(get_db)):
-    product = (
-    db.query(Product)
-    .filter(Product.product_id == product_id, Product.is_active == True)
-    .options(
-         # tải sẵn ảnh, variants, sizes
-        selectinload(Product.images),
-        selectinload(Product.variants).selectinload(ProductVariant.sizes)  
-    )
-    .first()
-    )
-    
-    if not product:
-        raise HTTPException(status_code=404, detail="Product not found")
-    
-    # Sắp xếp images: primary đứng đầu
-    images = sorted(product.images, key=lambda x: not x.is_primary)
-    image_urls = [img.image_url for img in images]
-
-    # Phân loại + size
-    variants = [
-        {
-            "variant_id": v.variant_id,
-            "variant_name": v.variant_name,
-            "price_adjustment": float(v.price_adjustment),
-            "sizes": [
-                {
-                    "size_id": s.size_id,
-                    "size_name": s.size_name,
-                    "available_units": s.available_units,
-                    "in_stock": s.in_stock
-                }
-                for s in v.sizes
-            ]
-        }
-        for v in product.variants
-    ]
-
-    return {
-        "product_id": product.product_id,
-        "name": product.name,
-        "base_price": float(product.base_price),
-        "discount_percent": float(product.discount_percent),
-        "price_after_discount": float(product.base_price - product.base_price * product.discount_percent / 100),
-        "rating": float(product.rating),
-        "review_count": product.review_count,
-        "sold_quantity": product.sold_quantity,
-        "description": product.description,
-        "weight": float(product.weight) if product.weight else None,
-        "images": image_urls,
-        "variants": variants
-    }
+def get_buyer_product_detail(product_id: int, db: Session = Depends(get_db)):
+  
+    return buyer_product_service.get_buyer_product_detail(product_id, db)
 
 
 # === LẤY RA THÔNG TIN ĐỂ NGƯỜI DÙNG CHỌN PHÂN LOẠI TRƯỚC KHI THÊM VÀO GIỎ HÀNG ===
 @router.get("/{product_id}/options")
 def get_product_options(product_id: int, db: Session = Depends(get_db)):
-    """
-    Lấy danh sách phân loại (variant), size, và số lượng tồn kho
-    """
-    product = db.query(Product).filter(Product.product_id == product_id).first()
-    if not product:
-        raise HTTPException(status_code=404, detail="Product not found")
-
-    variant_list = []
-    for v in product.variants:  # lặp qua variant
-        sizes_list = [
-            {"size_id": s.size_id, "label": s.size_name, "stock": s.available_units, "in_stock": s.in_stock}
-            for s in v.sizes  # lấy size theo variant
-        ]
-        variant_list.append({
-            "variant_id": v.variant_id,
-            "name": v.variant_name,
-            "sizes": sizes_list
-        })
-
-    return {
-        "product_id": product.product_id,
-        "product_name": product.name,
-        "variants": variant_list
-    }
+    return buyer_product_service.get_product_options(product_id, db)
 
 
 # === THÊM SẢN PHẨM VÀO GIỎ HÀNG ====
@@ -150,7 +78,7 @@ class AddToCartRequest(BaseModel):
 def add_to_cart(payload: AddToCartRequest, db: Session = Depends(get_db)):
     try:
         cart = buyer_product_service.add_to_cart(
-            session=db,
+            db=db,
             buyer_id=payload.buyer_id,
             product_id=payload.product_id,
             variant_id=payload.variant_id,
@@ -165,3 +93,7 @@ def add_to_cart(payload: AddToCartRequest, db: Session = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+# === HIỂN THỊ GIỎ HÀNG CỦA NGƯỜI DÙNG ===
+@router.get('/showCart/{buyer_id}')
+def get_buyer_cart(buyer_id : int, db: Session = Depends(get_db)):
+    return buyer_product_service.get_buyer_cart(buyer_id, db)
