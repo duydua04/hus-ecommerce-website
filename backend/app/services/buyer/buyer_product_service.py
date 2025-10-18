@@ -7,7 +7,24 @@ from typing import Optional
 from enum import Enum
 from ...models.cart import ShoppingCart, ShoppingCartItem
 from datetime import datetime
-
+from ...schemas.product import (
+    ProductCreate,
+    ProductDetail,
+    ProductImageResponse,
+    ProductList,
+    ProductResponse,
+    ProductSizeCreate,
+    ProductSizeResponse,
+    ProductSizeUpdate,
+    ProductUpdate,
+    ProductVariantCreate,
+    ProductVariantResponse,
+    ProductVariantUpdate,
+    ProductVariantWithSizesResponse,
+)
+from ...config.s3 import public_url
+from sqlalchemy.orm import joinedload
+from collections import defaultdict
 
 
 class RatingFilter(str, Enum):
@@ -70,38 +87,136 @@ def paginate_simple(query, page: int = 1, page_size: int = 12):
     offset = (page - 1) * page_size # offset là tính số sản phẩm đã được phân trang trước đó để bỏ qua khi ở trang mới
     return query.offset(offset).limit(page_size).all() # phương thức offset là bỏ qua sản phẩm ban đầu
 
+# === ĐƯA RA THÔNG TIN CHI TIẾT SẢN PHẨM ===
+def get_buyer_product_detail(product_id: int, db: Session ):
+    product = (
+    db.query(Product)
+    .filter(Product.product_id == product_id, Product.is_active == True)
+    # .options(
+    #      # tải sẵn ảnh, variants, sizes
+    #     selectinload(Product.images),
+    #     selectinload(Product.variants).selectinload(ProductVariant.sizes)  
+    # )
+    .first()
+    )
+    
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    
+    # Sắp xếp images: primary đứng đầu
+    # Lay hinh anh san pham
+    images = db.query(ProductImage).filter(
+        ProductImage.product_id == product_id
+    ).order_by(
+        ProductImage.is_primary.desc(),
+        ProductImage.product_image_id.asc()
+    ).all()
+
+    image_responses = [
+        ProductImageResponse(
+            product_image_id=img.product_image_id,
+            product_id=img.product_id,
+            image_url=img.image_url,
+            public_image_url=public_url(img.image_url),
+            is_primary=img.is_primary
+        )
+        for img in images
+    ]
+
+    # Phân loại + size
+    variants = [
+        {
+            "variant_id": v.variant_id,
+            "variant_name": v.variant_name,
+            "price_adjustment": float(v.price_adjustment),
+            "sizes": [
+                {
+                    "size_id": s.size_id,
+                     "size_name": s.size_name,
+                    "available_units": s.available_units,
+                    "in_stock": s.in_stock
+                }
+                for s in v.sizes
+            ]
+        }
+        for v in product.variants
+    ]
+
+    return {
+        "product_id": product.product_id,
+        "name": product.name,
+        "base_price": float(product.base_price),
+        "discount_percent": float(product.discount_percent),
+        "price_after_discount": float(product.base_price - product.base_price * product.discount_percent / 100),
+        "rating": float(product.rating),
+        "review_count": product.review_count,
+        "sold_quantity": product.sold_quantity,
+        "description": product.description,
+        "weight": float(product.weight) if product.weight else None,
+        "images": image_responses ,
+        "variants": variants
+    }
+
+
+
+# === LẤY RA THÔNG TIN ĐỂ NGƯỜI DÙNG CHỌN PHÂN LOẠI TRƯỚC KHI THÊM VÀO GIỎ HÀNG ===
+def get_product_options(product_id: int, db: Session):
+    """
+    Lấy danh sách phân loại (variant), size, và số lượng tồn kho
+    """
+    product = db.query(Product).filter(Product.product_id == product_id).first()
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+
+    variant_list = []
+    for v in product.variants:  # lặp qua variant
+        sizes_list = [
+            {"size_id": s.size_id, "label": s.size_name, "stock": s.available_units, "in_stock": s.in_stock}
+            for s in v.sizes  # lấy size theo variant
+        ]
+        variant_list.append({
+            "variant_id": v.variant_id,
+            "name": v.variant_name,
+            "sizes": sizes_list
+        })
+
+    return {
+        "product_id": product.product_id,
+        "product_name": product.name,
+        "variants": variant_list
+    }
 
 # === THÊM SẢN PHẨM VÀO GIỎ HÀNG ====
-def add_to_cart(session: Session, buyer_id: int, product_id: int, variant_id=None, size_id=None, quantity=1):
+def add_to_cart(db: Session, buyer_id: int, product_id: int, variant_id=None, size_id=None, quantity=1):
     """ 
     Thêm sản phẩm vào giỏ hàng. 
     Nếu giỏ hàng hoặc item chưa có thì tạo mới. 
     Nếu item đã tồn tại thì tăng số lượng. 
     """
 
-    cart = session.query(ShoppingCart).filter_by(buyer_id=buyer_id).first()
+    cart = db.query(ShoppingCart).filter_by(buyer_id=buyer_id).first()
     if not cart:
         cart = ShoppingCart(buyer_id=buyer_id)
-        session.add(cart)
-        session.flush()  # shopping_cart_id đã có
+        db.add(cart)
+        db.flush()  # shopping_cart_id đã có
 
     # Kiểm tra variant/size và tồn kho
     size = None
     if size_id:
-        size = session.query(ProductSize).filter_by(size_id=size_id).first()
+        size = db.query(ProductSize).filter_by(size_id=size_id).first()
         if not size:
             raise Exception("Size không tồn tại")
         if not size.in_stock or size.available_units < quantity:
             raise Exception("Số lượng vượt quá tồn kho")
 
     if variant_id:
-        variant = session.query(ProductVariant).filter_by(variant_id=variant_id).first()
+        variant = db.query(ProductVariant).filter_by(variant_id=variant_id).first()
         if not variant:
             raise Exception("Variant không tồn tại")
 
     # Kiểm tra item trong giỏ
     existing_item = (
-        session.query(ShoppingCartItem)
+        db.query(ShoppingCartItem)
         .filter_by(
             shopping_cart_id=cart.shopping_cart_id,
             product_id=product_id,
@@ -124,12 +239,53 @@ def add_to_cart(session: Session, buyer_id: int, product_id: int, variant_id=Non
             size_id=size_id,
             quantity=quantity,
         )
-        session.add(new_item)
+        db.add(new_item)
 
     cart.updated_at = datetime.utcnow()
-    session.commit()
-    session.refresh(cart)
+    db.commit()
+    db.refresh(cart)
     return cart
 
 
+
+# === HIỂN THỊ GIỎ HÀNG CỦA NGƯỜI DÙNG ===
+def get_buyer_cart(buyer_id: int, db: Session):
+    # Lấy tất cả cart_item của user
+    cart = db.query(ShoppingCart).filter(ShoppingCart.buyer_id == buyer_id).first()
+    if not cart:
+        return []
+    items = (
+        db.query(ShoppingCartItem)
+        .filter(ShoppingCartItem.shopping_cart_id == cart.shopping_cart_id)
+        .options(
+            joinedload(ShoppingCartItem.product).joinedload(Product.images), # Load Product liên quan đến mỗi CartItem, Load luôn danh sách ảnh của Product
+            joinedload(ShoppingCartItem.product).joinedload(Product.seller),
+            joinedload(ShoppingCartItem.product).joinedload(Product.variants).joinedload(ProductVariant.sizes)
+        )
+        .all()
+    )
+    
+    # Gom nhóm theo seller
+    grouped = defaultdict(list)  # nếu key mới, giá trị mặc định là list()
+    for item in items:
+        if item.product.seller:
+            seller_name = item.product.seller.shop_name
+        else:
+            seller_name = "Unknown Seller"
+        for variant in item.product.variants:
+            for size in variant.sizes:
+                grouped[seller_name].append({
+                    "product_id": item.product.product_id,
+                    "name": item.product.name,
+                    "variant_id": variant.variant_id,
+                    "variant_name": variant.variant_name,
+                    "size_id": size.size_id,
+                    "size_name": size.size_name,
+                    "quantity": item.quantity,
+                    "price": float(item.product.base_price + variant.price_adjustment),
+                    "image_url": item.product.images[0].image_url if item.product.images else None
+                })
+
+    result = [{"seller": k, "products": v} for k, v in grouped.items()]
+    return result
 
