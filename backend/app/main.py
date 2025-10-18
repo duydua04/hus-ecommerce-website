@@ -24,3 +24,5 @@ app.include_router(admin_manage_discount_router)
 app.include_router(admin_manage_carrier_router)
 app.include_router(seller_review_router)
 app.include_router(seller_order_router)
+from .controller.buyer.buyer_product_controller import router as buyer_product_filter_router
+app.include_router(buyer_product_filter_router)
