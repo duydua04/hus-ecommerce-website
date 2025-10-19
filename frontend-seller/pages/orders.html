@@ -14,198 +14,288 @@
     <title>SellerHub</title>
   </head>
   <body>
-    <!--SIDEBAR-->
-    <section id="sidebar">
-      <a href="#" class="brand">
-        <i class="bx bx-wink-smile"></i>
-        <span class="text">SellerHub</span>
+    <!--SIDEBAR - Block: sidebar-->
+    <section class="sidebar sidebar--collapsed">
+      <a href="#" class="sidebar__brand">
+        <i class="bx bx-store sidebar__brand-icon"></i>
+        <span class="sidebar__brand-text">SellerHub</span>
       </a>
-      <ul class="side-menu top">
-        <li>
-          <a href="#">
-            <i class="bx bx-grid-alt"></i>
-            <span class="text">Dashboard</span>
+      <ul class="sidebar__menu">
+        <li class="sidebar__menu-item">
+          <a href="dashboard.html" class="sidebar__menu-link">
+            <i class="bx bx-grid-alt sidebar__menu-icon"></i>
+            <span class="sidebar__menu-text">Dashboard</span>
           </a>
         </li>
-        <li class="active">
-          <a href="#">
-            <i class="bx bx-box"></i>
-            <span class="text">Sản phẩm</span>
+        <li class="sidebar__menu-item">
+          <a href="products.html" class="sidebar__menu-link">
+            <i class="bx bx-box sidebar__menu-icon"></i>
+            <span class="sidebar__menu-text">Sản phẩm</span>
           </a>
         </li>
-        <li>
-          <a href="#">
-            <i class="bx bx-car"></i>
-            <span class="text">Đơn hàng</span>
+        <li class="sidebar__menu-item sidebar__menu-item--active">
+          <a href="orders.html" class="sidebar__menu-link">
+            <i class="bx bx-shopping-bag sidebar__menu-icon"></i>
+            <span class="sidebar__menu-text">Đơn hàng</span>
           </a>
         </li>
-        <li>
-          <a href="#">
-            <i class="bx bx-receipt"></i>
-            <span class="text">Hóa đơn</span>
+        <li class="sidebar__menu-item">
+          <a href="locations.html" class="sidebar__menu-link">
+            <i class="bx bx-map sidebar__menu-icon"></i>
+            <span class="sidebar__menu-text">Địa chỉ</span>
           </a>
         </li>
-        <li>
-          <a href="#">
-            <i class="bx bx-user-circle"></i>
-            <span class="text">Hồ sơ</span>
+        <li class="sidebar__menu-item">
+          <a href="profile.html" class="sidebar__menu-link">
+            <i class="bx bx-user-circle sidebar__menu-icon"></i>
+            <span class="sidebar__menu-text">Hồ sơ</span>
           </a>
         </li>
-        <li>
-          <a href="#">
-            <i class="bx bx-like"></i>
-            <span class="text">Đánh giá</span>
+        <li class="sidebar__menu-item">
+          <a href="reviews.html" class="sidebar__menu-link">
+            <i class="bx bx-star sidebar__menu-icon"></i>
+            <span class="sidebar__menu-text">Đánh giá</span>
           </a>
         </li>
       </ul>
     </section>
 
-    <!--CONTENT-->
-    <section id="content">
-      <!--NAVBAR-->
-      <nav>
-        <div class="nav-left">
-          <i class="bx bx-menu"></i>
-          <div class="search-box">
-            <i class="bx bx-search"></i>
-            <input type="text" placeholder="Search..." />
+    <!--CONTENT - Block: content-->
+    <section class="content">
+      <!--NAVBAR - Block: navbar-->
+      <nav class="navbar">
+        <div class="navbar__left">
+          <i class="bx bx-menu navbar__menu-icon"></i>
+          <div class="navbar__search">
+            <i class="bx bx-search navbar__search-icon"></i>
+            <input
+              type="text"
+              class="navbar__search-input"
+              placeholder="Tìm kiếm..."
+            />
           </div>
         </div>
-        <div class="nav-right">
-          <a href="#" class="notification">
-            <i class="bx bx-bell"></i>
-            <span class="num">98</span>
+        <div class="navbar__right">
+          <a href="#" class="navbar__notification">
+            <i class="bx bx-bell navbar__notification-icon"></i>
+            <span class="navbar__notification-badge">87</span>
           </a>
-          <a href="#" class="profile">
-            <img src="../img/balloon-sky.webp" />
+          <a href="#" class="navbar__profile">
+            <img
+              src="../img/balloon-sky.webp"
+              alt="Profile"
+              class="navbar__profile-img"
+            />
           </a>
         </div>
       </nav>
-      <!--MAIN-->
-      <main>
-        <div class="head-title">
-          <h1>Đơn hàng</h1>
-          <ul class="breadcrumb">
-            <li>
-              <a href="#">Trang chủ</a>
+
+      <!--MAIN - Block: main-->
+      <main class="main">
+        <!-- Block: page-header -->
+        <div class="page-header">
+          <h1 class="page-header__title">Đơn hàng</h1>
+          <ul class="page-header__breadcrumb breadcrumb">
+            <li class="breadcrumb__item">
+              <a href="dashboard.html" class="breadcrumb__link">Trang chủ</a>
             </li>
-            <li>
-              <i class="bx bx-chevron-right"></i>
+            <li class="breadcrumb__item">
+              <i class="bx bx-chevron-right breadcrumb__separator"></i>
             </li>
-            <li><a class="active" href="#">Đơn hàng</a></li>
+            <li class="breadcrumb__item">
+              <a
+                href="orders.html"
+                class="breadcrumb__link breadcrumb__link--active"
+                >Đơn hàng</a
+              >
+            </li>
           </ul>
         </div>
+
+        <!-- Block: toolbar -->
         <div class="toolbar">
-          <div class="toolbar-title">
-            <ul class="toolbar-title-left">
-              <h3>Danh sách đơn hàng</h3>
-              <p>Theo dõi tiến độ của cửa hàng để tăng doanh số</p>
-            </ul>
-            <ul class="toolbar-title-right">
-              <li>
-                <button class="btn add">
-                  <i class="bx bx-plus"></i> Tạo đơn hàng
-                </button>
-              </li>
-            </ul>
-          </div>
-          <div class="toolbar-bottom">
-            <div class="search-box">
-              <i class="bx bx-search"></i>
-              <input type="text" placeholder="Search by orders..." />
+          <!-- Element: toolbar__header -->
+          <div class="toolbar__header">
+            <div class="toolbar__title">
+              <h3 class="toolbar__title-text">Danh sách đơn hàng</h3>
+              <p class="toolbar__title-desc">
+                Quản lý và theo dõi sản phẩm của cửa hàng
+              </p>
             </div>
-            <button class="filter"><i class="bx bx-filter"></i>Lọc</button>
+            <button class="toolbar__btn-add btn btn--primary">
+              <i class="bx bx-plus btn__icon"></i>
+              <span class="btn__text">Thêm đơn hàng</span>
+            </button>
           </div>
-          <div class="table-data">
-            <table>
-              <thead>
-                <tr>
-                  <!--Order ID, Date, Order by, Status,Total sum, Action-->
-                  <th>Order ID</th>
-                  <th>Date</th>
-                  <th>Order by</th>
-                  <th>Status</th>
-                  <th>Total sum</th>
-                  <th>Action</th>
+
+          <!-- Element: toolbar__actions -->
+          <div class="toolbar__actions">
+            <div class="toolbar__search search-box">
+              <i class="bx bx-search search-box__icon"></i>
+              <input
+                type="text"
+                class="search-box__input"
+                placeholder="Tìm kiếm đơn hàng..."
+              />
+            </div>
+            <button class="toolbar__btn-filter btn btn--secondary">
+              <i class="bx bx-filter btn__icon"></i>
+              <span class="btn__text">Lọc</span>
+            </button>
+          </div>
+
+          <!-- Element: toolbar__table -->
+          <div class="toolbar__table">
+            <table class="table">
+              <thead class="table__head">
+                <tr class="table__row">
+                  <th class="table__header">Đơn hàng</th>
+                  <th class="table__header">Ngày đặt hàng</th>
+                  <th class="table__header table__header--hide-mobile">
+                    Khách hàng
+                  </th>
+                  <th class="table__header table__header--hide-mobile">
+                    Trạng thái
+                  </th>
+                  <th class="table__header">Tổng giá</th>
+                  <th class="table__header table__header--actions">
+                    Hành động
+                  </th>
                 </tr>
               </thead>
-              <tbody>
-                <tr>
-                  <td><a href="#">#192001</a></td>
-                  <td>July 12, 2024</td>
-                  <td>Alex John</td>
-                  <td><span class="status completed">Completed</span></td>
-                  <td>USD 312,231.00</td>
-                  <td><button class="btn-detail">View detail</button></td>
+              <tbody class="table__body">
+                <tr class="table__row">
+                  <td class="table__cell">#ORD-001</td>
+                  <td class="table__cell">15/10/2025</td>
+                  <td class="table__cell table__cell--hide-mobile">
+                    Nguyễn Văn A
+                  </td>
+                  <td class="table__cell table__cell--hide-mobile">
+                    Đang giao
+                  </td>
+                  <td class="table__cell table__cell--price">1.250.000đ</td>
+                  <td class="table__cell table__cell--actions">
+                    <button class="action-btn action-btn--view" title="Xem">
+                      <i class="bx bx-show action-btn__icon"></i>
+                    </button>
+                    <button class="action-btn action-btn--edit" title="Sửa">
+                      <i class="bx bx-edit action-btn__icon"></i>
+                    </button>
+                    <button class="action-btn action-btn--delete" title="Xóa">
+                      <i class="bx bx-trash action-btn__icon"></i>
+                    </button>
+                  </td>
                 </tr>
-
-                <tr>
-                  <td><a href="#">#234232</a></td>
-                  <td>July 12, 2024</td>
-                  <td>Alex John</td>
-                  <td><span class="status pending">Pending</span></td>
-                  <td>USD 1,912,902.99</td>
-                  <td><button class="btn-detail">View detail</button></td>
+                <tr class="table__row">
+                  <td class="table__cell">#ORD-002</td>
+                  <td class="table__cell">15/10/2025</td>
+                  <td class="table__cell table__cell--hide-mobile">
+                    Nguyễn Văn B
+                  </td>
+                  <td class="table__cell table__cell--hide-mobile">
+                    Hoàn thành
+                  </td>
+                  <td class="table__cell table__cell--price">850.000đ</td>
+                  <td class="table__cell table__cell--actions">
+                    <button class="action-btn action-btn--view" title="Xem">
+                      <i class="bx bx-show action-btn__icon"></i>
+                    </button>
+                    <button class="action-btn action-btn--edit" title="Sửa">
+                      <i class="bx bx-edit action-btn__icon"></i>
+                    </button>
+                    <button class="action-btn action-btn--delete" title="Xóa">
+                      <i class="bx bx-trash action-btn__icon"></i>
+                    </button>
+                  </td>
                 </tr>
-
-                <tr>
-                  <td><a href="#">#092001</a></td>
-                  <td>July 12, 2024</td>
-                  <td>Michael George</td>
-                  <td><span class="status pending">Pending</span></td>
-                  <td>USD 12,450.00</td>
-                  <td><button class="btn-detail">View detail</button></td>
+                <tr class="table__row">
+                  <td class="table__cell">#ORD-003</td>
+                  <td class="table__cell">15/10/2025</td>
+                  <td class="table__cell table__cell--hide-mobile">
+                    Lê Minh C
+                  </td>
+                  <td class="table__cell table__cell--hide-mobile">
+                    Chờ xử lý
+                  </td>
+                  <td class="table__cell table__cell--price">2.100.000đ</td>
+                  <td class="table__cell table__cell--actions">
+                    <button class="action-btn action-btn--view" title="Xem">
+                      <i class="bx bx-show action-btn__icon"></i>
+                    </button>
+                    <button class="action-btn action-btn--edit" title="Sửa">
+                      <i class="bx bx-edit action-btn__icon"></i>
+                    </button>
+                    <button class="action-btn action-btn--delete" title="Xóa">
+                      <i class="bx bx-trash action-btn__icon"></i>
+                    </button>
+                  </td>
                 </tr>
-
-                <tr>
-                  <td><a href="#">#192009</a></td>
-                  <td>July 12, 2024</td>
-                  <td>Alex John</td>
-                  <td><span class="status rejected">Rejected</span></td>
-                  <td>USD 12,450.00</td>
-                  <td><button class="btn-detail">View detail</button></td>
+                <tr class="table__row">
+                  <td class="table__cell">#ORD-004</td>
+                  <td class="table__cell">15/10/2025</td>
+                  <td class="table__cell table__cell--hide-mobile">
+                    Phạm Thị D
+                  </td>
+                  <td class="table__cell table__cell--hide-mobile">Đã hủy</td>
+                  <td class="table__cell table__cell--price">450.000đ</td>
+                  <td class="table__cell table__cell--actions">
+                    <button class="action-btn action-btn--view" title="Xem">
+                      <i class="bx bx-show action-btn__icon"></i>
+                    </button>
+                    <button class="action-btn action-btn--edit" title="Sửa">
+                      <i class="bx bx-edit action-btn__icon"></i>
+                    </button>
+                    <button class="action-btn action-btn--delete" title="Xóa">
+                      <i class="bx bx-trash action-btn__icon"></i>
+                    </button>
+                  </td>
                 </tr>
-
-                <tr>
-                  <td><a href="#">#66201</a></td>
-                  <td>July 12, 2024</td>
-                  <td>Alex John</td>
-                  <td><span class="status draft">Draft</span></td>
-                  <td>USD 350.90</td>
-                  <td><button class="btn-detail">View detail</button></td>
+                <tr class="table__row">
+                  <td class="table__cell">#ORD-005</td>
+                  <td class="table__cell">15/10/2025</td>
+                  <td class="table__cell table__cell--hide-mobile">
+                    Hoàng Văn E
+                  </td>
+                  <td class="table__cell table__cell--hide-mobile">
+                    Hoàn thành
+                  </td>
+                  <td class="table__cell table__cell--price">3.500.000đ</td>
+                  <td class="table__cell table__cell--actions">
+                    <button class="action-btn action-btn--view" title="Xem">
+                      <i class="bx bx-show action-btn__icon"></i>
+                    </button>
+                    <button class="action-btn action-btn--edit" title="Sửa">
+                      <i class="bx bx-edit action-btn__icon"></i>
+                    </button>
+                    <button class="action-btn action-btn--delete" title="Xóa">
+                      <i class="bx bx-trash action-btn__icon"></i>
+                    </button>
+                  </td>
                 </tr>
               </tbody>
             </table>
-            <ul class="pagination">
-              <li class="item">
-                <a href="" class="link">
-                  <i class="bx bx-chevron-left"></i>
-                </a>
-              </li>
-              <li class="item active">
-                <a href="" class="link">1</a>
-              </li>
-              <li class="item">
-                <a href="" class="link">2</a>
-              </li>
-              <li class="item">
-                <a href="" class="link">3</a>
-              </li>
-              <li class="item">
-                <a href="" class="link">4</a>
-              </li>
-              <li class="item">
-                <a href="" class="link">...</a>
-              </li>
-              <li class="item">
-                <a href="" class="link">10</a>
-              </li>
-              <li class="item">
-                <a href="" class="link">
-                  <i class="bx bx-chevron-right"></i>
-                </a>
-              </li>
-            </ul>
+          </div>
+
+          <!-- Element: toolbar__pagination -->
+          <div class="toolbar__pagination pagination">
+            <button class="pagination__btn">
+              <i class="bx bx-chevron-left pagination__icon"></i>
+            </button>
+            <button class="pagination__btn pagination__btn--active">1</button>
+            <button class="pagination__btn">2</button>
+            <button class="pagination__btn">3</button>
+            <button class="pagination__btn pagination__btn--hide-mobile">
+              4
+            </button>
+            <span class="pagination__dots pagination__dots--hide-mobile"
+              >...</span
+            >
+            <button class="pagination__btn pagination__btn--hide-mobile">
+              10
+            </button>
+            <button class="pagination__btn">
+              <i class="bx bx-chevron-right pagination__icon"></i>
+            </button>
           </div>
         </div>
       </main>
