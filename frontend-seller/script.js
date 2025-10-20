@@ -122,60 +122,11 @@ deleteBtns.forEach((btn) => {
   });
 });
 
-// phân trang
-const paginationBtns = document.querySelectorAll(".pagination__btn");
-
-paginationBtns.forEach((btn) => {
-  btn.addEventListener("click", () => {
-    const icon = btn.querySelector(".pagination__icon");
-
-    if (!icon) {
-      // Nếu là số trang
-      paginationBtns.forEach((b) =>
-        b.classList.remove("pagination__btn--active")
-      );
-      btn.classList.add("pagination__btn--active");
-      console.log(`Chuyển sang trang ${btn.textContent}`);
-    } else {
-      // Nếu là nút mũi tên (prev/next)
-      const isNext = icon.classList.contains("bx-chevron-right");
-      console.log(isNext ? "Trang tiếp theo" : "Trang trước");
-    }
-  });
-});
-
 // xem thông báo
 const notification = document.querySelector(".navbar__notification");
 notification.addEventListener("click", (e) => {
   e.preventDefault();
   alert("Bạn có 8 thông báo mới!");
-});
-
-// sắp xếp theo giá
-const priceHeader = document.querySelectorAll(".table__header")[4];
-let ascending = true;
-
-priceHeader.style.cursor = "pointer";
-priceHeader.title = "Click để sắp xếp theo giá";
-
-priceHeader.addEventListener("click", () => {
-  const tbody = document.querySelector(".table__body");
-  const rows = Array.from(tableRows);
-
-  rows.sort((a, b) => {
-    const priceA = parseFloat(
-      a.cells[4].textContent.replace("$", "").replace(",", "")
-    );
-    const priceB = parseFloat(
-      b.cells[4].textContent.replace("$", "").replace(",", "")
-    );
-    return ascending ? priceA - priceB : priceB - priceA;
-  });
-
-  ascending = !ascending;
-  rows.forEach((row) => tbody.appendChild(row));
-
-  console.log(`Đã sắp xếp theo giá ${ascending ? "tăng dần" : "giảm dần"}`);
 });
 
 // console
