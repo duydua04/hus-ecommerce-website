@@ -526,9 +526,10 @@ body {
 }
 
 /* MODIFIER: table__cell--actions - Cột hành động */
+
 .table__cell--actions {
-  display: flex;
-  gap: 8px;
+  text-align: center;
+  vertical-align: middle;
 }
 
 /* MODIFIER: table__header--actions - Header cột actions */
@@ -540,14 +541,15 @@ body {
 .action-btn {
   width: 36px;
   height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   border: 1px solid var(--border-color);
   border-radius: 6px;
   background: var(--bg-white);
   cursor: pointer;
   transition: var(--transition);
+  display: inline-flex; /* Giữ icon giữa nút */
+  align-items: center;
+  justify-content: center;
+  margin: 0 4px;
 }
 
 .action-btn__icon {
