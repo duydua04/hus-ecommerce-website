@@ -14,164 +14,100 @@
     <title>AdminHub</title>
   </head>
   <body>
-    <!--SIDEBAR-->
-    <section id="sidebar">
-      <a href="#" class="brand">
-        <i class="bx bx-cube-alt"></i>
-        <span class="text">AdminHub</span>
+    <!--SIDEBAR - Block: sidebar-->
+    <section class="sidebar">
+      <a href="#" class="sidebar__brand">
+        <i class="bx bx-cube-alt sidebar__brand-icon"></i>
+        <span class="sidebar__brand-text">AdminHub</span>
       </a>
-      <ul class="side-menu top">
-        <li>
-          <a href="#">
-            <i class="bx bx-bar-chart-alt-2"></i>
-            <span class="text">Dashboard</span>
+      <ul class="sidebar__menu">
+        <li class="sidebar__menu-item">
+          <a href="dashboard.html" class="sidebar__menu-link">
+            <i class="bx bx-bar-chart sidebar__menu-icon"></i>
+            <span class="sidebar__menu-text">Dashboard</span>
           </a>
         </li>
-        <li class="active">
-          <a href="#">
-            <i class="bx bx-category"></i>
-            <span class="text">Danh mục</span>
+        <li class="sidebar__menu-item sidebar__menu-item--active">
+          <a href="category.html" class="sidebar__menu-link">
+            <i class="bx bx-category sidebar__menu-icon"></i>
+            <span class="sidebar__menu-text">Danh mục</span>
           </a>
         </li>
-        <li>
-          <a href="#">
-            <i class="bx bx-user"></i>
-            <span class="text">Người dùng</span>
+        <li class="sidebar__menu-item">
+          <a href="user.html" class="sidebar__menu-link">
+            <i class="bx bx-user sidebar__menu-icon"></i>
+            <span class="sidebar__menu-text">Người dùng</span>
           </a>
         </li>
-        <li>
-          <a href="#">
-            <i class="bx bx-purchase-tag-alt"></i>
-            <span class="text">Giảm giá</span>
+        <li class="sidebar__menu-item">
+          <a href="discount.html" class="sidebar__menu-link">
+            <i class="bx bx-purchase-tag-alt sidebar__menu-icon"></i>
+            <span class="sidebar__menu-text">Giảm giá</span>
           </a>
         </li>
-        <li>
-          <a href="#">
-            <i class="bx bx-purchase-tag-alt"></i>
-            <span class="text">Vận chuyển</span>
+        <li class="sidebar__menu-item">
+          <a href="transport.html" class="sidebar__menu-link">
+            <i class="bx bxs-truck sidebar__menu-icon"></i>
+            <span class="sidebar__menu-text">Vận chuyển</span>
           </a>
         </li>
       </ul>
     </section>
 
-    <!--CONTENT-->
-    <section id="content">
-      <!--NAVBAR-->
-      <nav>
-        <div class="nav-left">
-          <i class="bx bx-menu"></i>
-          <div class="search-box">
-            <i class="bx bx-search"></i>
-            <input type="text" placeholder="Search..." />
+    <!--CONTENT - Block: content-->
+    <section class="content">
+      <!--NAVBAR - Block: navbar-->
+      <nav class="navbar">
+        <div class="navbar__left">
+          <i class="bx bx-menu navbar__menu-icon"></i>
+          <div class="navbar__search">
+            <i class="bx bx-search navbar__search-icon"></i>
+            <input
+              type="text"
+              class="navbar__search-input"
+              placeholder="Tìm kiếm..."
+            />
           </div>
         </div>
-        <div class="nav-right">
-          <a href="#" class="notification">
-            <i class="bx bx-bell"></i>
-            <span class="num">98</span>
+        <div class="navbar__right">
+          <a href="#" class="navbar__notification">
+            <i class="bx bx-bell navbar__notification-icon"></i>
+            <span class="navbar__notification-badge">55</span>
           </a>
-          <a href="#" class="profile">
-            <img src="../img/admin-profile.png" />
+          <a href="#" class="navbar__profile">
+            <img
+              src="../img/camera-canon-eos-r5.jpeg"
+              alt="Profile"
+              class="navbar__profile-img"
+            />
           </a>
         </div>
       </nav>
-      <!--MAIN-->
-      <main>
-        <div class="head-title">
-          <h1>Danh mục</h1>
-          <ul class="breadcrumb">
-            <li>
-              <a href="#">Trang chủ</a>
+
+      <!--MAIN - Block: main-->
+      <main class="main">
+        <!-- Block: page-header -->
+        <div class="page-header">
+          <h1 class="page-header__title">Danh mục</h1>
+          <ul class="page-header__breadcrumb breadcrumb">
+            <li class="breadcrumb__item">
+              <a href="dashboard.html" class="breadcrumb__link">Trang chủ</a>
             </li>
-            <li>
-              <i class="bx bx-chevron-right"></i>
+            <li class="breadcrumb__item">
+              <i class="bx bx-chevron-right breadcrumb__separator"></i>
             </li>
-            <li><a class="active" href="#">Danh mục</a></li>
+            <li class="breadcrumb__item">
+              <a
+                href="category.html"
+                class="breadcrumb__link breadcrumb__link--active"
+                >Danh mục</a
+              >
+            </li>
           </ul>
         </div>
-        <div class="toolbar">
-          <div class="toolbar-title">
-            <ul class="toolbar-title-left">
-              <h3>Danh mục sản phẩm</h3>
-              <p>Theo dõi tiến độ của cửa hàng để tăng doanh số</p>
-            </ul>
-            <ul class="toolbar-title-right">
-              <li>
-                <button class="btn add">
-                  <i class="bx bx-plus"></i> Thêm danh mục
-                </button>
-              </li>
-            </ul>
-          </div>
-          <div class="toolbar-bottom">
-            <div class="search-box">
-              <i class="bx bx-search"></i>
-              <input type="text" placeholder="Search by category..." />
-            </div>
-            <button class="filter"><i class="bx bx-filter"></i>Lọc</button>
-          </div>
-          <div class="table-data">
-            <table>
-              <thead>
-                <tr>
-                  <th><input type="checkbox" /></th>
-                  <th>Category</th>
-                  <th>Name</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody id="product-table-body">
-                <tr>
-                  <td><input type="checkbox" /></td>
-                  <td>
-                    <img
-                      src="../img/camera-canon-eos-r5.jpeg"
-                      alt="Camera Cannon EOS"
-                    />
-                  </td>
-                  <td>Camera</td>
-                  <td class="action-cate">
-                    <a href="#" class="btn btn-default">Details</a>
-                    <a href="#" class="btn btn-default">Edit</a>
-                    <a href="" class="btn btn-default text-red btn-icon"
-                      >Delete</a
-                    >
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-            <ul class="pagination">
-              <li class="item">
-                <a href="" class="link">
-                  <i class="bx bx-chevron-left"></i>
-                </a>
-              </li>
-              <li class="item active">
-                <a href="" class="link">1</a>
-              </li>
-              <li class="item">
-                <a href="" class="link">2</a>
-              </li>
-              <li class="item">
-                <a href="" class="link">3</a>
-              </li>
-              <li class="item">
-                <a href="" class="link">4</a>
-              </li>
-              <li class="item">
-                <a href="" class="link">...</a>
-              </li>
-              <li class="item">
-                <a href="" class="link">10</a>
-              </li>
-              <li class="item">
-                <a href="" class="link">
-                  <i class="bx bx-chevron-right"></i>
-                </a>
-              </li>
-            </ul>
-          </div>
-        </div>
+
+        <!-- Block: toolbar -->
+        <div class="toolbar"></div>
       </main>
     </section>
     <script src="../script.js"></script>

@@ -15,7 +15,6 @@ sidebarMenuLinks.forEach((link) => {
 });
 
 /*SIDEBAR TOGGLE: Xử lý thu gọn, mở rộng sidebar*/
-
 const menuToggleIcon = document.querySelector(".navbar__menu-icon");
 const sidebar = document.querySelector(".sidebar");
 
