@@ -528,7 +528,7 @@ body {
 /* MODIFIER: table__cell--actions - Cột hành động */
 
 .table__cell--actions {
-  text-align: center;
+  text-align: left;
   vertical-align: middle;
 }
 
