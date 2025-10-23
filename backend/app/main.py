@@ -16,5 +16,7 @@ app.include_router(admin_category_router)
 app.include_router(public_category_router)
 app.include_router(seller_product_router)
 app.include_router(admin_management_user_router)
-from .controller.buyer.buyer_product_controller import router as buyer_product_filter_router
-app.include_router(buyer_product_filter_router)
+from .controller.buyer.buyer_product_controller import router as buyer_product_router
+app.include_router(buyer_product_router)
+from .controller.buyer.buyer_cart_controller import router as buyer_cart_router
+app.include_router(buyer_cart_router)
