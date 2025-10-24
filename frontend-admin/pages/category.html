@@ -107,7 +107,75 @@
         </div>
 
         <!-- Block: toolbar -->
-        <div class="toolbar"></div>
+        <div class="toolbar">
+          <!-- Element: toolbar__header -->
+          <div class="toolbar__header">
+            <div class="toolbar__title">
+              <h3 class="toolbar__title-text">Danh sách danh mục</h3>
+              <p class="toolbar__title-desc">
+                Quản lý và theo dõi sản phẩm của cửa hàng
+              </p>
+            </div>
+            <button class="toolbar__btn-add btn btn--primary">
+              <i class="bx bx-plus btn__icon"></i>
+              <span class="btn__text">Thêm danh mục</span>
+            </button>
+          </div>
+
+          <!-- Element: toolbar__actions -->
+          <div class="toolbar__actions">
+            <div class="toolbar__search search-box">
+              <i class="bx bx-search search-box__icon"></i>
+              <input
+                type="text"
+                class="search-box__input"
+                placeholder="Tìm kiếm danh mục..."
+              />
+            </div>
+            <button class="toolbar__btn-filter btn btn--secondary">
+              <i class="bx bx-filter btn__icon"></i>
+              <span class="btn__text">Lọc</span>
+            </button>
+          </div>
+
+          <!-- Element: toolbar__table -->
+          <div class="toolbar__table">
+            <table class="table">
+              <thead class="table__head">
+                <tr class="table__row">
+                  <th class="table__header">ID</th>
+                  <th class="table__header">Tên danh mục</th>
+                  <th class="table__header table__header--actions">
+                    Hành động
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="table__body"></tbody>
+            </table>
+          </div>
+
+          <!-- Element: toolbar__pagination -->
+          <div class="toolbar__pagination pagination">
+            <button class="pagination__btn">
+              <i class="bx bx-chevron-left pagination__icon"></i>
+            </button>
+            <button class="pagination__btn pagination__btn--active">1</button>
+            <button class="pagination__btn">2</button>
+            <button class="pagination__btn">3</button>
+            <button class="pagination__btn pagination__btn--hide-mobile">
+              4
+            </button>
+            <span class="pagination__dots pagination__dots--hide-mobile"
+              >...</span
+            >
+            <button class="pagination__btn pagination__btn--hide-mobile">
+              10
+            </button>
+            <button class="pagination__btn">
+              <i class="bx bx-chevron-right pagination__icon"></i>
+            </button>
+          </div>
+        </div>
       </main>
     </section>
     <script src="../script.js"></script>

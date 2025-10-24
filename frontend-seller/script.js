@@ -117,11 +117,8 @@ deleteBtns.forEach((btn) => {
 
     //nếu người dùng đồng ý, tạp hiệu ứng mờ dần với thời gian là 300ms
     if (confirm(`Bạn chắc chắn xóa "${nameProduct}"?`)) {
-      row.style.opacity = "0";
-      setTimeout(() => {
-        row.remove();
-        alert("Đã xóa sản phẩm thành công!");
-      }, 300);
+      row.remove();
+      alert("Đã xóa sản phẩm thành công!");
     }
   });
 });
