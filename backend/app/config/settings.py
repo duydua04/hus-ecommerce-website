@@ -16,6 +16,10 @@ class Settings(BaseSettings):
     S3_BUCKET: str
     S3_REGION: str = "us-east-1"
 
+    REDIS_URL: str | None = None
+    CELERY_BROKER_URL: str | None = None
+    CELERY_RESULT_BACKEND: str | None = None
+
     OAUTH2_SECRET_KEY: str
     OAUTH2_ALGORITHM: str = "HS256"
     OAUTH2_ACCESS_TOKEN_EXPIRE_MINUTES: int = 180
