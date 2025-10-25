@@ -25,6 +25,12 @@ class Settings(BaseSettings):
     OAUTH2_ACCESS_TOKEN_EXPIRE_MINUTES: int = 180
     OAUTH2_REFRESH_TOKEN_EXPIRE_DAYS: int = 30
 
+    GOOGLE_CLIENT_ID: str
+    GOOGLE_CLIENT_SECRET: str
+    GOOGLE_REDIRECT_URI: str
+
+    SECRET_KEY: str
+
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
 settings = Settings()

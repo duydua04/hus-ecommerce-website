@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from ...config.db import get_db
@@ -6,7 +6,7 @@ from ...middleware.auth import get_current_user
 from ...schemas import RefreshTokenRequest
 from ...schemas.auth import RegisterBuyer, RegisterSeller, Login, OAuth2Token
 from ...schemas.user import BuyerResponse, SellerResponse
-from ...services.common import auth_service
+from ...services.common import auth_service, gg_auth_service
 from ...models.users import Admin, Seller, Buyer
 from ...utils.security import verify_password
 
@@ -88,3 +88,18 @@ def oauth2_password(form: OAuth2PasswordRequestForm = Depends(), db: Session = D
 @router.post("/refresh", response_model=OAuth2Token)
 def refresh(payload: RefreshTokenRequest, db: Session = Depends(get_db)):
     return auth_service.refresh_access_token(db, payload.refresh_token)
+
+# Google Login — router riêng
+@router.get("/google/login/buyer")
+async def google_login_buyer(request: Request):
+    """Dang nhap bang gg cho buyer"""
+    return await gg_auth_service.google_login_start(request, role="buyer")
+
+@router.get("/google/login/seller")
+async def google_login_seller(request: Request):
+    """Router dang nhap bang gg cho seller"""
+    return await gg_auth_service.google_login_start(request, role="seller")
+
+@router.get("/google/callback")
+async def google_callback(request: Request, db: Session = Depends(get_db)):
+    return await gg_auth_service.google_login_callback(request, db)
