@@ -12,7 +12,7 @@ from ...schemas.user import SellerResponse, BuyerResponse
 
 def list_buyers(db: Session,
                search_query: Optional[str] | None,
-               active_only: bool = False,
+               active_only: bool = True,
                limit: int = 10,
                offset: int = 10):
 

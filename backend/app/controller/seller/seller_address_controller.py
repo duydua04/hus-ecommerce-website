@@ -29,7 +29,7 @@ def to_seller_link_response(link):
 # Tra ve tat ca danh sach
 @router.get("", response_model=List[SellerAddressResponse])
 def get_list_seller_address(info=Depends(require_seller), db: Session = Depends(get_db)):
-    addresses = address_service.seller_address_list(db, info["user"].sellerr_id)
+    addresses = address_service.seller_address_list(db, info["user"].seller_id)
     return [to_seller_link_response(address) for address in addresses]
 
 # Tao moi va lien ket dia chi voi seller
