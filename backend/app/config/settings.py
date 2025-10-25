@@ -9,16 +9,11 @@ class Settings(BaseSettings):
     DATABASE_URL: str
 
     # Object storage (MinIO or S3-compatible)
-    S3_ENDPOINT: str
     S3_PUBLIC_ENDPOINT: str | None = None
     S3_ACCESS_KEY: str
     S3_SECRET_KEY: str
     S3_BUCKET: str
-    S3_REGION: str = "us-east-1"
-
-    REDIS_URL: str | None = None
-    CELERY_BROKER_URL: str | None = None
-    CELERY_RESULT_BACKEND: str | None = None
+    S3_REGION: str = "ap-southeast-1"
 
     OAUTH2_SECRET_KEY: str
     OAUTH2_ALGORITHM: str = "HS256"

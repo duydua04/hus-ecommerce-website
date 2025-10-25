@@ -31,6 +31,7 @@ def presign_put(object_key: str, content_type: str, expires: int = 900):
                "Bucket": settings.S3_BUCKET,
                "Key": object_key,
                "ContentType": content_type,
+               "CacheControl": "public, max-age=31536000, immutable",
            },
            ExpiresIn=expires,
        )
