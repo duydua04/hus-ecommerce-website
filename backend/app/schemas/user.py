@@ -51,7 +51,6 @@ class SellerCreate(BaseModel):
     shop_name: str
     seller_tier: SellerTier | None = None
     avt_url: str | None = None
-    description: str | None = None
 
 # Request toi server update thong tin nguoi ban
 class SellerUpdate(BaseModel):
@@ -61,7 +60,6 @@ class SellerUpdate(BaseModel):
     shop_name: str | None = None
     seller_tier: SellerTier | None = None
     avt_url: str | None = None
-    description: str | None = None
     is_verified: bool | None = None
     is_active: bool | None = None
 
@@ -75,7 +73,6 @@ class SellerResponse(TimestampedOut):
     shop_name: str
     seller_tier: SellerTier
     avt_url: str | None = None
-    description: str | None = None
     average_rating: float
     rating_count: int
     is_verified: bool

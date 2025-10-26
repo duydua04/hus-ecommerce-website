@@ -50,7 +50,6 @@ class Seller(Base):
     shop_name = Column(String(255), nullable=False)
     seller_tier = Column(SellerTierEnum, nullable=False, default="regular")
     avt_url = Column(String(255))
-    description = Column(String(255))
     average_rating = Column(Numeric(2, 1), nullable=False, default=0)
     rating_count = Column(Integer, nullable=False, default=0)
     is_verified = Column(Boolean, nullable=False, default=False)

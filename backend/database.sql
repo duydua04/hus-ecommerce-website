@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict mo8EvYGdvvnWUfaKzdUux7Ntt1exjYXS7jXYtfFnyX7XeiqIaZCw2AaKN6infH5
+\restrict 30AcBz9dfVsKof3QHox2QrYzhU7hZO8DthkCYFPf3ezukhKvBMAEXBlU7ulj9Pm
 
 -- Dumped from database version 16.10 (Debian 16.10-1.pgdg13+1)
 -- Dumped by pg_dump version 16.10 (Debian 16.10-1.pgdg13+1)
@@ -682,7 +682,6 @@ CREATE TABLE public.seller (
     shop_name character varying(255) NOT NULL,
     seller_tier public.seller_tier DEFAULT 'regular'::public.seller_tier NOT NULL,
     avt_url character varying(255),
-    description character varying(255),
     average_rating numeric(2,1) DEFAULT 0 NOT NULL,
     rating_count integer DEFAULT 0 NOT NULL,
     is_verified boolean DEFAULT false NOT NULL,
@@ -904,49 +903,46 @@ COPY public.order_item (order_item_id, order_id, product_id, variant_id, size_id
 --
 
 COPY public.product (product_id, name, seller_id, base_price, rating, review_count, category_id, description, discount_percent, weight, is_active, created_at, sold_quantity) FROM stdin;
-1	Áo sơ mi đũi nam cổ trụ 2 túi cúc áo sơ mi cổ tàu ZUTEE	1	250000.00	0.0	0	1	THÔNG TIN SẢN PHẨM SƠ MI CỔ TÀU NAM CAO CẤP	41.00	0.20	t	2025-09-14 02:47:17.04049	0
-3	Áo Polo Nam YODY– Vải Cotton Mắt Chim Co Giãn – Thoáng Mát, Chống Nhăn – Áo Thun Có Cổ Nam Thời Trang APM7459	1	300000.00	0.0	0	1	👕 ÁO POLO NAM YODY APM7459 – THOÁNG MÁT, LỊCH LÃM, CHỐNG NHĂN	40.00	0.20	t	2025-09-14 02:51:36.861411	0
-4	Áo phông oversize	2	100000.00	0.0	0	1	Áo phông cho genz nam nữ	0.00	0.20	t	2025-10-19 08:44:11.161886	0
-36	Áo sơ mi nữ trung niên cổ tròn tay lỡ, Áo kiểu thêu hoa, Áo nữ bigsize NeSa Shop chất liệu cao cấp mềm nhẹ mát SMH.61	5	165000.00	0.0	0	2	Áo sơ mi nữ trung niên cổ tròn tay lỡ bigsize NeSa Shop chất liệu cao cấp mềm nhẹ mát\n   THÔNG TIN SẢN PHẨM\n   1.Tên sản phẩm: Áo sơ mi nữ, áo kiểu nữ trung niên Chảnh 24h\n   2. Đặc điểm:...	12.00	\N	t	2025-10-24 03:16:10.047303	51
-37	Áo len mongtoghi nữ hàng Quảng Châu, chất vải mềm mịn, co dãn 4 chiều, Áo len tay ngắn nhiều mẫu đẹp Nesa Shop	5	71000.00	0.0	0	2	Áo len mongtoghi nữ, chất vải mềm mịn, co dãn 4 chiều, Áo len tay ngắn nhiều mẫu đẹp Nesa ShopTHÔNG TIN SẢN PHẨM1. Tên sản phẩm: Áo kiểu nữ, áo len nữ tay ngắn co giãn, thấm hút mồ hôi, vải mềm mịn...	0.00	\N	t	2025-10-24 03:16:10.047303	54
-38	Bộ quần áo nam, set đồ nam Houston thời trang, chất thun cotton cao cấp - FORMEN SHOP- FMPS222	4	239000.00	5.0	15	1	Bộ quần áo nam, set đồ nam Houston thời trang, chất thun cotton cao cấp - FORMEN SHOP- FMPS222\nSet nam Houston nổi bật với đặc tính chất dày mịn, giúp bạn luôn cảm thấy thoáng mát và thoải mái...	0.00	\N	t	2025-10-24 03:18:06.916946	400
-39	Áo thun nam cổ tròn tay ngắn, chất thun mè mềm mại, co giãn thoải mái – FORMEN SHOP – FMARD002	4	210000.00	4.6	19	1	THÔNG TIN SẢN PHẨM\n- Chất liệu: Chất vải caro mè- Màu sắc: Trắng, Đen, Xanh dương- Kích cỡ: M [50-58 Kg], L [58-65 Kg]. XL [65-75 Kg], XXL [75-85 Kg]\nHÌNH ẢNH SẢN PHẨM	77.00	\N	t	2025-10-24 03:18:06.916946	407
-40	Áo chống nắng nam cao cấp, thông hơi, chống nắng, chống tia UV, chống bám bụi – FORMEN SHOP – FMTHT024	4	215000.00	4.7	357	1	CHI TIẾT SẢN PHẨM\nÁO KHOÁC NAM CHỐNG NẮNG, CHỐNG TIA UV\n- Chất liệu Aris lỗ thoáng Nhật 100% \n- Có 3 size: M &lt;60kg , L &lt;68kg , XL &lt;76kg\n- Có 4 màu: Đen - Xanh đen - Xám nhạt - Xám đậm\nHÌNH...	54.00	\N	t	2025-10-24 03:18:06.916946	406
-41	Áo thun nam cổ tròn tay ngắn, chất thun lạnh mềm mại, co giãn thoải mái – FORMEN SHOP – FMPS134	4	189000.00	4.5	11	1	- Màu sắc: Xanh bích, Trắng, Cam- Chất liệu : poly co dãn 4 chiều- Form áo : form suông VN với 4 size M, L, XL, XXL dành cho người từ 50-85kg- Size: M&lt; 58KG, L&lt; 68KG , XL&lt; 76KG, XXL&lt; 85KG...	58.00	\N	t	2025-10-24 03:18:06.916946	401
-32	Áo sơ mi nữ form rộng dài tay NeSa Shop, Chất liệu Đũi mềm mịn, thoáng mát, áo kiểu nữ form rộng SMH.038	5	132000.00	0.0	0	2	Áo sơ mi kiểu tay lỡ cổ đức, áo kiểu nữ dễ thương, chất liệu Đũi tơ mềm mát, thấm hút mồ hôi NeSa Shop\n   THÔNG TIN VỀ SẢN PHẨM:\n   1. Tên sản phẩm: Áo sơ mi kiểu tay lỡ cổ đức, áo kiểu nữ dễ...	10.00	\N	t	2025-10-24 03:16:10.047303	59
-33	Áo lụa trung niên cao cấp tặng mẹ form rộng tay lỡ cổ sơ mi cách điệu, áo kiểu nữ đẹp NeSa Shop SMH.59	5	155000.00	0.0	0	2	THÔNG TIN SẢN PHẨM\n   2. Đặc điểm: Áo được thiết kế dạng chui đầu rất dễ mặc và tôn dáng\n   - Có thể phối áo sơ mi nữ cùng với quần jean, quần kaki, quần tây, chân váy rất xinh\n   - Áo...	6.00	\N	t	2025-10-24 03:16:10.047303	60
-34	Đồ bộ trung niên tay ngắn cho Bà cho Mẹ, chất liệu Đũi mát mẻ, thấm hút mồ hôi, đồ bộ mặc nhà NeSa Shop ĐBH.27	5	199000.00	5.0	2	2	Đồ bộ trung niên Tay cộc cho Bà cho Mẹ, chất liệu Đũi mát mẻ, thấm hút mồ hôi, đồ bộ mặc nhà.\n   THÔNG TIN SẢN PHẨM\n   1. Tên sản phẩm: Đồ bộ trung niên tay ngắn cho Bà cho Mẹ, chất liệu...	27.00	\N	t	2025-10-24 03:16:10.047303	55
-35	Quần kiểu nữ ống suông, dài, chất liệu Tăm thái mát, vải mềm mịn, quần nữ form rộng, thoải mái, QNH.58	5	65000.00	4.0	2	2	Quần kiểu nữ ống suông, dài, chất liệu Đũi mát, vải mềm mịn, quần nữ form rộng, thoải mái.THÔNG TIN SẢN PHẨM1 Tên sản phẩm: Quần kiểu nữ ống suông, dài, chất liệu tăm thái mát, vải mềm mịn, quần nữ...	0.00	\N	t	2025-10-24 03:16:10.047303	58
-42	Quần short nam FM NEWBASIC, chất thun Pique cao cấp, thời trang năng động - FORMEN SHOP - FMPS229	4	169000.00	4.8	4	1	Quần đùi nam, chất thun Pique cao cấp, 4 màu\nTủ đô của bạn chắc chắn không thể thiếu chiếc quần lưng chun thời trang này\nThông tin sản phẩm:\n– Chất thun Pique bền đẹp, thấm hút, co dãn tốt\n– Có big...	0.00	\N	t	2025-10-24 03:18:06.916946	407
-43	Áo khoác dù nam, áo gió nam cao cấp, chống nắng, chống bám bụi – FORMEN SHOP – FMHN005	4	209000.00	4.6	20	1	THÔNG TIN SẢN PHẨM\nNếu mặc áo khoác vải Kaki sợ phai màu thì áo khoác dù là lựa chọn cực kì hợp lý ạ!Vải may 2 lớp chắc chắn, áo chống nước nhẹ, giặt nhanh khô nữa!Áo thiết kế hiện đại, có in chữ...	62.00	\N	t	2025-10-24 03:18:06.916946	406
-44	Áo thun polo nam Cavalry chất thun cotton muối cao cấp - FORMEN SHOP - FMPS258	4	180000.00	5.0	1	1	Polo Cavalry\n—\nChất liệu: Cotton muối 100% cotton\nMàu sắc: Xanh đen, xám, rêu\nSize L: Dành cho nam từ 55kg đến 65kg\nSize XL: Dành cho nam từ 65kg đến 75kg\nSize XXL: Dành cho nam từ 75kg đến...	0.00	\N	t	2025-10-24 03:18:06.916946	403
-45	Combo siêu tiết kiệm 3 áo thun thể thao nam, chất thun lạnh co giãn tốt, thoáng mát thoải mái vận động - FORMEN SHOP - FMCB3TY002	4	189000.00	4.8	5	1	Combo siêu tiết kiệm 3 áo thun thể thao nam, chất thun lạnh co giãn tốt, thoáng mát thoải mái vận động - FORMEN SHOP - FMCB3TY002\nÁo cổ tròn thể thao của FORMEN SHOP là 1 chiếc áo thun nam thể thao...	0.00	\N	t	2025-10-24 03:18:06.916946	404
-46	Áo polo ngắn tay thời trang nam phối màu nhiều kiểu, chất thun cá sấu xịn - FORMEN SHOP - FMHK002	4	59000.00	0.0	0	1	Áo thun polo nam cổ bẻ thun cá sấu cao cấp, thiết kế đơn giản trơn basic - FORMEN SHOP - FMHK001\nÁo thun polo nam có bo cổ polo phối sọc cách điệu của FORMEN SHOP là 1 chiếc áo thun nam polo...	0.00	\N	t	2025-10-24 03:18:06.916946	402
-47	Áo polo ngắn tay nam, chất thun poly mềm mịn co giãn 4 chiều, họa tiết phối màu trẻ trung - FORMEN SHOP - FMPS195	4	89000.00	0.0	0	1	Áo polo ngắn tay nam, chất thun poly mềm mịn co giãn 4 chiều, họa tiết phối màu trẻ trung - FORMEN SHOP - FMPS195\nÁo thun polo nam có bo cổ polo phối sọc cách điệu của FORMEN SHOP là 1 chiếc áo thun...	0.00	\N	t	2025-10-24 03:18:06.916946	410
-48	Điện Thoại Oppo A3 6GB/128GB - Hàng Chính Hãng	6	3989000.00	0.0	0	11	Điện Thoại Oppo A3 6GB/128GB - Hàng Chính Hãng\nBộ sản phẩm bao gồm: Thân máy, sạc, cáp USB, dụng cụ lấy sim, vỏ bảo vệ, sách hướng dẫn.\n\nMàn hình sắc nét\n- Sở hữu màn hình IPS LCD kích thước 6.67...	0.00	\N	t	2025-10-24 04:23:41.347605	20
-49	Điện Thoại Oppo A38 4GB/128GB - Hàng Chính Hãng	6	3139000.00	0.0	0	11	Điện Thoại Oppo A38 4GB/128GB - Hàng Chính Hãng\nBộ sản phẩm bao gồm: Thân máy, sạc, cáp USB, dụng cụ lấy sim, vỏ bảo vệ, sách hướng dẫn.\n\nNâng cao trải nghiệm với màn hình lớn\n- Trang bị cho điện...	0.00	\N	t	2025-10-24 04:23:41.347605	10
-50	Điện Thoại Realme Note 60x 3GB/64GB - Hàng Chính Hãng	6	2069000.00	0.0	0	11	Điện Thoại Realme Note 60x 3GB/64GB - Hàng Chính Hãng\nBộ sản phẩm bao gồm: Thân máy, sạc, cáp USB, dụng cụ lấy sim, vỏ bảo vệ, sách hướng dẫn sử dụng.\n\nSắc nét, mượt mà và dịu nhẹ cho đôi mắt\n- Trang...	0.00	\N	t	2025-10-24 04:23:41.347605	13
-51	Điện Thoại Oppo A18 4GB/64GB - Hàng Chính Hãng	6	2589000.00	5.0	9	11	Điện Thoại Oppo A18 4GB/64GB - Hàng Chính Hãng\nBộ sản phẩm bao gồm: Thân máy, sạc, cáp USB, dụng cụ lấy sim, sách hướng dẫn, vỏ bảo vệ.\n\nHiển thị chi tiết hình ảnh\n- Với màn hình IPS LCD rộng 6.56...	0.00	\N	t	2025-10-24 04:23:41.347605	14
-52	Điện Thoại Samsung Galaxy A06 4GB/64GB - Hàng Chính Hãng	6	3190000.00	4.8	4	11	Điện Thoại Samsung A06 4GB/64GB - Hàng Chính Hãng\nBộ sản phẩm bao gồm: Thân máy, cáp dữ liệu, tài liệu hướng dẫn, dụng cụ lấy sim.\n\nMàn hình to rộng 6.7". Trải nghiệm xem phim cực đã\n- Tối đa tầm...	0.00	\N	t	2025-10-24 04:23:41.347605	18
-53	Điện Thoại Samsung Galaxy A36 5G 8GB/128GB - Hàng Chính Hãng	6	6519000.00	5.0	3	11	Điện Thoại Samsung A36 5G 8GB/128GB - Hàng Chính Hãng\nBộ sản phẩm bao gồm: Thân máy, cáp sạc, dụng cụ lấy sim, sách hướng dẫn.\n\nMàn hình Super AMOLED 6,7 inch ấn tượng\n- Trang bị màn hình kích thước...	0.00	\N	t	2025-10-24 04:23:41.347605	10
-54	Điện Thoại Samsung Galaxy A26 5G 8GB/128GB - Hàng Chính Hãng	6	5489000.00	0.0	0	11	Điện Thoại Samsung A26 5G 8GB/128GB - Hàng Chính Hãng\nBộ sản phẩm bao gồm: Thân máy, cáp dữ liệu, tài liệu hướng dẫn, dụng cụ lấy sim.\n\nMàn hình 120 Hz mượt mà, trải nghiệm cực đã\n- Trang bị tấm nền...	0.00	\N	t	2025-10-24 04:23:41.347605	16
-55	Kem Mờ Sẹo Gentacin của Nhật 10g - Hỗ trợ trị sẹo lồi sẹo lõm	7	170000.00	4.5	396	15	Sẹo là điều khó có thể tránh khỏi sau khi da bị tổn thương. Không kể đến việc ảnh hưởng đến chức năng, việc có sẹo đã gây ra ảnh hưởng rất lớn đến thẩm mỹ và tâm lý. Đặc biệt là vết sẹo bị tối màu ở...	68.00	\N	t	2025-10-24 04:46:46.432736	1238
-56	SON GIÓ FRAN WILSON MOODMATCHER Giữ Ẩm Cho Môi USA	7	119000.00	4.6	104	15	Thông tin nổi bật\n\nSon Gió FRAN WILSON MOODMATCHER Giữ Ẩm Cho Môi USA\nFRAN WILSON là hãng mỹ phẩm xuất hiện hơn 30 năm tại mỹ, đặc biệt dòng son gió của hãng được khách hàng tin dùng. sản phẩm được...	0.00	\N	t	2025-10-24 04:46:46.432736	1348
-57	BỘ 10 MẶT NẠ 3W CLINIC FRESH POMEGRANATE MASK SHEET + TẶNG KÈM 01 MẶT NẠ CÙNG LOẠI	7	120000.00	0.0	0	15	Mặt nạ dưỡng trắng da chống lão hóa chiết xuất lựu 3W Clinic Fresh Pomegranate Mask Sheet 23ml\nThương hiệu: 3w Clinic\nXuất xứ: Hàn Quốc\nDung tích: 23ml/miếng\nLoại da: Mọi loại da.\n\n3W Clinic là một...	46.00	\N	t	2025-10-24 04:46:46.432736	1320
-58	Tẩy Tế bào Chết 3W Clinic 180ml Hàn Quốc	7	75000.00	0.0	0	15	Tẩy Tế bào Chết 3W Clinic 180ml Hàn Quốc\n\nHiện có:\n1. CAFE\n2. GẠO\n3. ỐC SÊN\n4. TRÀ XANH\n5. NHAU THAI CỪU\nTẩy Tế bào Chết 3W Clinic 180ml Hàn Quốc\n- Dung tích: 180ml\n- Xuất xứ: Hàn Quốc\n- Thương hiệu:...	0.00	\N	t	2025-10-24 04:46:46.432736	1331
-59	Bộ 10 gói mặt nạ dưỡng ẩm da chiết xuất nha đam 3W Clinic Fresh Aloe Mask Sheet 23ml X 10	7	150000.00	4.5	227	15	Thương hiệu: 3W CLinic\nXuất xứ: Hàn Quốc\nQuy cách: 1 miếng/gói 23ml\nMột làn da đẹp không chỉ là làn da trắng trẻo, láng mịn được hỗ trợ bởi các loại kem dưỡng da. Da đẹp phải là da khỏe, săn chắc từ...	57.00	\N	t	2025-10-24 04:46:46.432736	1445
-60	Mặt Nạ Vàng 3W Clinic Collagen Luxury Gold Peel Off Pack 100g	7	250000.00	4.6	101	15	Mặt Nạ Vàng Collagen Luxury Gold Peel Off Pack 100g\nXuất xứ: Hàn Quốc\nDung tích: 100ml\nLoại da: Mọi loại da.\n3W Clinic là một trong những thương hiệu mỹ phẩm Hàn Quốc được phái đẹp tin dùng tại nhiều...	44.00	\N	t	2025-10-24 04:46:46.432736	1098
-61	Kem tan mỡ Missha Hot Burning Perfect Body Gel Hàn Quốc	7	350000.00	4.5	187	15	Kem tan mỡ Missha Hot Burning Perfect Body Gel Hàn QuốcXuất xứ: Hàn QuốcThương hiệu: MisshaThể tích: 200 ml\n\n- Kem tan mỡ Missha Hot Burning Perfect Body Gel còn nuôi dưỡng da mềm mại, mịn màng, xóa...	55.00	\N	t	2025-10-24 04:46:46.432736	1295
-62	Bình nước thủy tinh Elmich EL-8350T041 EL-8350T052 EL-8350T110, Hàng chính hãng, nhiều dung tích, có đồ lọc trà - JoyMall	8	187000.00	0.0	0	10	Bình nước thủy tinh Elmich EL-8350T041 EL-8350T052 EL-8350T110, Hàng chính hãng, nhiều dung tích, có đồ lọc trà-JoyMall\n \nTHÔNG TIN SẢN PHẨM\n1. EL-8350T041\nDung tích 415ml\nChất liệu Thủy tinh cao...	0.00	\N	t	2025-10-24 05:26:08.193601	9
-63	Bình giữ nhiệt inox 316 Elmich EL8315 480ml, Hàng chính hãng, nắp dùng làm cốc, có lưới lọc -JoyMall	8	499000.00	0.0	0	10	Bình giữ nhiệt inox 316 Elmich EL8315 480ml, Hàng chính hãng, nắp có thể dùng làm cốc nước, có lưới lọc trà - JoyMall\n\nTHÔNG TIN SẢN PHẨM\nMàu sắc : Xanh đậm/ Xanh nhạt\nDung tích : 480 ml\nCông dụng:...	0.00	\N	t	2025-10-24 05:26:08.193601	9
-64	Máy xay tỏi ớt dùng pin sạc Elmich PBE-8659 250ml 50w, Hàng chính hãng, bảo hành 24 tháng - JoyMall	8	276000.00	0.0	0	10	Máy xay tỏi ớt cầm tay Elmich PBE-8659 250ml 50w không dây , dùng pin sạc, Hàng chính hãng, bảo hành 24 tháng - JoyMall\nThông số kỹ thuật\nDung lượng pin : 1800mAh\nCông suất : 50W\nĐiện áp :...	0.00	\N	t	2025-10-24 05:26:08.193601	10
-65	Bình giữ nhiệt 900ml Elmich EL8299, Hàng chính hãng, inox 304, có lõi lọc pha trà, cà phê - JoyMall	8	389000.00	0.0	0	10	Bình giữ nhiệt 900ml Elmich EL8299, Hàng chính hãng, inox 304, có tay cầm, dùng gia đình, nắp có khóa an toàn - JoyMall\n\nTHÔNG TIN SẢN PHẨM\nMàu sắc: Màu sữa\nDung tích : 900ml\nCông dụng : Giữ nhiệt...	0.00	\N	t	2025-10-24 05:26:08.193601	7
-66	Bộ Dụng Cụ Chế Biến Ăn Dặm Cho Bé Elmich BabyCare EL0774, Hàng Chính Hãng, Nhựa PP An Toàn - JoyMall	8	135000.00	0.0	0	10	Bộ Dụng Cụ Chế Biến Ăn Dặm Cho Bé Elmich BabyCare EL0774, Hàng Chính Hãng, Nhựa PP An Toàn - JoyMall\n\n \nThông số kỹ thuật\nMàu sắc : Be\nKhối lượng sản phẩm : 300g\nChất liệu : Nhựa PP\nThông tin từng bộ...	0.00	\N	t	2025-10-24 05:26:08.193601	10
-67	Máy vắt cam Elmich CJE-3921OL 700ml , Hàng chính hãng, bảo hành 24 tháng - JoyMall	8	322000.00	0.0	0	10	Máy vắt cam Elmich CJE-3921OL 700ml 40w, Hàng chính hãng, xoay ép 2 chiều vắt kiệt nước, dễ tháo lắp, vệ sinh - JoyMall\n\nTHÔNG TIN SẢN PHẨM\nCông suất 40W\nDung tích 0.7 Lít\nChất liệu nhựa ABS, AS\nCó 2...	0.00	\N	t	2025-10-24 05:26:08.193601	7
-68	Bình giữ nhiệt gia đình 1.9L inox 304 Elmich EL8352, Hàng chính hãng, có tay cầm, nắp chống tràn - JoyMall	8	505000.00	0.0	0	10	Bình giữ nhiệt gia đình 1.9L inox 304 Elmich EL8352, Hàng chính hãng, có tay cầm, nắp chống tràn - JoyMall\n \nTHÔNG TIN SẢN PHẨM\nMàu sắc Đỏ\nDung tích 1.9L\nCông dụng Giữ nhiệt nóng, lạnh\nChất liệu Inox...	0.00	\N	t	2025-10-24 05:26:08.193601	7
-69	Ly giữ nhiệt inox 304 Elmich EL8345 480ml, Hàng chính hãng, lớp silicone chống trượt - JoyMall	8	200000.00	4.0	1	10	Cốc giữ nhiệt inox 304 Elmich EL8345 dung tích 480ml, Hàng chính hãng, lớp silicone chống trượt - JoyMall\n\n \n\nĐẶC ĐIỂM NỔI BẬT:\n– Chất liệu inox 304 bền bỉ và an toàn: Thân cốc được làm từ inox 304,...	0.00	\N	t	2025-10-24 05:26:08.193601	6
-70	Ly giữ nhiệt inox Elmich EL8309 900ml, Hàng chính hãng, giữ nhiệt tốt, nắp bật, kèm ống hút -JoyMall	8	322000.00	5.0	1	10	Ly giữ nhiệt Elmich EL8309 900ml, Hàng chính hãng, inox 304, giữ nóng lạnh, nắp bật, đi kèm ống hút - JoyMall\n\n\nTHÔNG TIN SẢN PHẨM\nMàu sắc : Xanh mint / Xanh navy\nDung tích : 900ml\nCông dụng : Giữ...	0.00	\N	t	2025-10-24 05:26:08.193601	6
-71	Ấm Đun Nước Inox 304 Elmich EL-3373 3L, Hàng Chính Hãng, Đun Sôi Nhanh, Dùng Được Nhiều Bếp-JoyMall	8	738000.00	0.0	0	10	Ấm đun nước inox 304 Elmich EL-3373 3L, Hàng chính hãng, đun sôi nhanh, dùng được nhiều bếp-JoyMall\n\nThông tin sản phẩm\n– Chất liệu được làm bằng Inox 304 có độ bóng cao, tuyệt đối an toàn cho sức...	0.00	\N	t	2025-10-24 05:26:08.193601	8
+38	Bộ quần áo nam, set đồ nam Houston thời trang, chất thun cotton cao cấp - FORMEN SHOP- FMPS222	4	239000.00	0.0	0	1	Bộ quần áo nam, set đồ nam Houston thời trang, chất thun cotton cao cấp - FORMEN SHOP- FMPS222\nSet nam Houston nổi bật với đặc tính chất dày mịn, giúp bạn luôn cảm thấy thoáng mát và thoải mái...	0.00	0.72	t	2025-10-24 03:18:06.916946	0
+39	Áo thun nam cổ tròn tay ngắn, chất thun mè mềm mại, co giãn thoải mái – FORMEN SHOP – FMARD002	4	210000.00	0.0	0	1	THÔNG TIN SẢN PHẨM\n- Chất liệu: Chất vải caro mè- Màu sắc: Trắng, Đen, Xanh dương- Kích cỡ: M [50-58 Kg], L [58-65 Kg]. XL [65-75 Kg], XXL [75-85 Kg]\nHÌNH ẢNH SẢN PHẨM	77.00	0.44	t	2025-10-24 03:18:06.916946	0
+40	Áo chống nắng nam cao cấp, thông hơi, chống nắng, chống tia UV, chống bám bụi – FORMEN SHOP – FMTHT024	4	215000.00	0.0	0	1	CHI TIẾT SẢN PHẨM\nÁO KHOÁC NAM CHỐNG NẮNG, CHỐNG TIA UV\n- Chất liệu Aris lỗ thoáng Nhật 100% \n- Có 3 size: M &lt;60kg , L &lt;68kg , XL &lt;76kg\n- Có 4 màu: Đen - Xanh đen - Xám nhạt - Xám đậm\nHÌNH...	54.00	1.00	t	2025-10-24 03:18:06.916946	0
+41	Áo thun nam cổ tròn tay ngắn, chất thun lạnh mềm mại, co giãn thoải mái – FORMEN SHOP – FMPS134	4	189000.00	0.0	0	1	- Màu sắc: Xanh bích, Trắng, Cam- Chất liệu : poly co dãn 4 chiều- Form áo : form suông VN với 4 size M, L, XL, XXL dành cho người từ 50-85kg- Size: M&lt; 58KG, L&lt; 68KG , XL&lt; 76KG, XXL&lt; 85KG...	58.00	0.33	t	2025-10-24 03:18:06.916946	0
+36	Áo sơ mi nữ trung niên cổ tròn tay lỡ, Áo kiểu thêu hoa, Áo nữ bigsize NeSa Shop chất liệu cao cấp mềm nhẹ mát SMH.61	5	165000.00	0.0	0	2	Áo sơ mi nữ trung niên cổ tròn tay lỡ bigsize NeSa Shop chất liệu cao cấp mềm nhẹ mát\n   THÔNG TIN SẢN PHẨM\n   1.Tên sản phẩm: Áo sơ mi nữ, áo kiểu nữ trung niên Chảnh 24h\n   2. Đặc điểm:...	12.00	0.14	t	2025-10-24 03:16:10.047303	0
+37	Áo len mongtoghi nữ hàng Quảng Châu, chất vải mềm mịn, co dãn 4 chiều, Áo len tay ngắn nhiều mẫu đẹp Nesa Shop	5	71000.00	0.0	0	2	Áo len mongtoghi nữ, chất vải mềm mịn, co dãn 4 chiều, Áo len tay ngắn nhiều mẫu đẹp Nesa ShopTHÔNG TIN SẢN PHẨM1. Tên sản phẩm: Áo kiểu nữ, áo len nữ tay ngắn co giãn, thấm hút mồ hôi, vải mềm mịn...	0.00	0.71	t	2025-10-24 03:16:10.047303	0
+48	Điện Thoại Oppo A3 6GB/128GB - Hàng Chính Hãng	6	3989000.00	0.0	0	11	Điện Thoại Oppo A3 6GB/128GB - Hàng Chính Hãng\nBộ sản phẩm bao gồm: Thân máy, sạc, cáp USB, dụng cụ lấy sim, vỏ bảo vệ, sách hướng dẫn.\n\nMàn hình sắc nét\n- Sở hữu màn hình IPS LCD kích thước 6.67...	0.00	0.15	t	2025-10-24 04:23:41.347605	0
+49	Điện Thoại Oppo A38 4GB/128GB - Hàng Chính Hãng	6	3139000.00	0.0	0	11	Điện Thoại Oppo A38 4GB/128GB - Hàng Chính Hãng\nBộ sản phẩm bao gồm: Thân máy, sạc, cáp USB, dụng cụ lấy sim, vỏ bảo vệ, sách hướng dẫn.\n\nNâng cao trải nghiệm với màn hình lớn\n- Trang bị cho điện...	0.00	0.17	t	2025-10-24 04:23:41.347605	0
+50	Điện Thoại Realme Note 60x 3GB/64GB - Hàng Chính Hãng	6	2069000.00	0.0	0	11	Điện Thoại Realme Note 60x 3GB/64GB - Hàng Chính Hãng\nBộ sản phẩm bao gồm: Thân máy, sạc, cáp USB, dụng cụ lấy sim, vỏ bảo vệ, sách hướng dẫn sử dụng.\n\nSắc nét, mượt mà và dịu nhẹ cho đôi mắt\n- Trang...	0.00	0.19	t	2025-10-24 04:23:41.347605	0
+51	Điện Thoại Oppo A18 4GB/64GB - Hàng Chính Hãng	6	2589000.00	0.0	0	11	Điện Thoại Oppo A18 4GB/64GB - Hàng Chính Hãng\nBộ sản phẩm bao gồm: Thân máy, sạc, cáp USB, dụng cụ lấy sim, sách hướng dẫn, vỏ bảo vệ.\n\nHiển thị chi tiết hình ảnh\n- Với màn hình IPS LCD rộng 6.56...	0.00	0.27	t	2025-10-24 04:23:41.347605	0
+52	Điện Thoại Samsung Galaxy A06 4GB/64GB - Hàng Chính Hãng	6	3190000.00	0.0	0	11	Điện Thoại Samsung A06 4GB/64GB - Hàng Chính Hãng\nBộ sản phẩm bao gồm: Thân máy, cáp dữ liệu, tài liệu hướng dẫn, dụng cụ lấy sim.\n\nMàn hình to rộng 6.7". Trải nghiệm xem phim cực đã\n- Tối đa tầm...	0.00	0.30	t	2025-10-24 04:23:41.347605	0
+32	Áo sơ mi nữ form rộng dài tay NeSa Shop, Chất liệu Đũi mềm mịn, thoáng mát, áo kiểu nữ form rộng SMH.038	5	132000.00	0.0	0	2	Áo sơ mi kiểu tay lỡ cổ đức, áo kiểu nữ dễ thương, chất liệu Đũi tơ mềm mát, thấm hút mồ hôi NeSa Shop\n   THÔNG TIN VỀ SẢN PHẨM:\n   1. Tên sản phẩm: Áo sơ mi kiểu tay lỡ cổ đức, áo kiểu nữ dễ...	10.00	0.80	t	2025-10-24 03:16:10.047303	0
+33	Áo lụa trung niên cao cấp tặng mẹ form rộng tay lỡ cổ sơ mi cách điệu, áo kiểu nữ đẹp NeSa Shop SMH.59	5	155000.00	0.0	0	2	THÔNG TIN SẢN PHẨM\n   2. Đặc điểm: Áo được thiết kế dạng chui đầu rất dễ mặc và tôn dáng\n   - Có thể phối áo sơ mi nữ cùng với quần jean, quần kaki, quần tây, chân váy rất xinh\n   - Áo...	6.00	0.98	t	2025-10-24 03:16:10.047303	0
+34	Đồ bộ trung niên tay ngắn cho Bà cho Mẹ, chất liệu Đũi mát mẻ, thấm hút mồ hôi, đồ bộ mặc nhà NeSa Shop ĐBH.27	5	199000.00	0.0	0	2	Đồ bộ trung niên Tay cộc cho Bà cho Mẹ, chất liệu Đũi mát mẻ, thấm hút mồ hôi, đồ bộ mặc nhà.\n   THÔNG TIN SẢN PHẨM\n   1. Tên sản phẩm: Đồ bộ trung niên tay ngắn cho Bà cho Mẹ, chất liệu...	27.00	1.01	t	2025-10-24 03:16:10.047303	0
+35	Quần kiểu nữ ống suông, dài, chất liệu Tăm thái mát, vải mềm mịn, quần nữ form rộng, thoải mái, QNH.58	5	65000.00	0.0	0	2	Quần kiểu nữ ống suông, dài, chất liệu Đũi mát, vải mềm mịn, quần nữ form rộng, thoải mái.THÔNG TIN SẢN PHẨM1 Tên sản phẩm: Quần kiểu nữ ống suông, dài, chất liệu tăm thái mát, vải mềm mịn, quần nữ...	0.00	1.04	t	2025-10-24 03:16:10.047303	0
+53	Điện Thoại Samsung Galaxy A36 5G 8GB/128GB - Hàng Chính Hãng	6	6519000.00	0.0	0	11	Điện Thoại Samsung A36 5G 8GB/128GB - Hàng Chính Hãng\nBộ sản phẩm bao gồm: Thân máy, cáp sạc, dụng cụ lấy sim, sách hướng dẫn.\n\nMàn hình Super AMOLED 6,7 inch ấn tượng\n- Trang bị màn hình kích thước...	0.00	0.16	t	2025-10-24 04:23:41.347605	0
+54	Điện Thoại Samsung Galaxy A26 5G 8GB/128GB - Hàng Chính Hãng	6	5489000.00	0.0	0	11	Điện Thoại Samsung A26 5G 8GB/128GB - Hàng Chính Hãng\nBộ sản phẩm bao gồm: Thân máy, cáp dữ liệu, tài liệu hướng dẫn, dụng cụ lấy sim.\n\nMàn hình 120 Hz mượt mà, trải nghiệm cực đã\n- Trang bị tấm nền...	0.00	0.24	t	2025-10-24 04:23:41.347605	0
+61	Kem tan mỡ Missha Hot Burning Perfect Body Gel Hàn Quốc	7	350000.00	0.0	0	15	Kem tan mỡ Missha Hot Burning Perfect Body Gel Hàn QuốcXuất xứ: Hàn QuốcThương hiệu: MisshaThể tích: 200 ml\n\n- Kem tan mỡ Missha Hot Burning Perfect Body Gel còn nuôi dưỡng da mềm mại, mịn màng, xóa...	55.00	0.18	t	2025-10-24 04:46:46.432736	0
+42	Quần short nam FM NEWBASIC, chất thun Pique cao cấp, thời trang năng động - FORMEN SHOP - FMPS229	4	169000.00	0.0	0	1	Quần đùi nam, chất thun Pique cao cấp, 4 màu\nTủ đô của bạn chắc chắn không thể thiếu chiếc quần lưng chun thời trang này\nThông tin sản phẩm:\n– Chất thun Pique bền đẹp, thấm hút, co dãn tốt\n– Có big...	0.00	0.41	t	2025-10-24 03:18:06.916946	0
+43	Áo khoác dù nam, áo gió nam cao cấp, chống nắng, chống bám bụi – FORMEN SHOP – FMHN005	4	209000.00	0.0	0	1	THÔNG TIN SẢN PHẨM\nNếu mặc áo khoác vải Kaki sợ phai màu thì áo khoác dù là lựa chọn cực kì hợp lý ạ!Vải may 2 lớp chắc chắn, áo chống nước nhẹ, giặt nhanh khô nữa!Áo thiết kế hiện đại, có in chữ...	62.00	0.79	t	2025-10-24 03:18:06.916946	0
+44	Áo thun polo nam Cavalry chất thun cotton muối cao cấp - FORMEN SHOP - FMPS258	4	180000.00	0.0	0	1	Polo Cavalry\n—\nChất liệu: Cotton muối 100% cotton\nMàu sắc: Xanh đen, xám, rêu\nSize L: Dành cho nam từ 55kg đến 65kg\nSize XL: Dành cho nam từ 65kg đến 75kg\nSize XXL: Dành cho nam từ 75kg đến...	0.00	0.73	t	2025-10-24 03:18:06.916946	0
+45	Combo siêu tiết kiệm 3 áo thun thể thao nam, chất thun lạnh co giãn tốt, thoáng mát thoải mái vận động - FORMEN SHOP - FMCB3TY002	4	189000.00	0.0	0	1	Combo siêu tiết kiệm 3 áo thun thể thao nam, chất thun lạnh co giãn tốt, thoáng mát thoải mái vận động - FORMEN SHOP - FMCB3TY002\nÁo cổ tròn thể thao của FORMEN SHOP là 1 chiếc áo thun nam thể thao...	0.00	0.63	t	2025-10-24 03:18:06.916946	0
+46	Áo polo ngắn tay thời trang nam phối màu nhiều kiểu, chất thun cá sấu xịn - FORMEN SHOP - FMHK002	4	59000.00	0.0	0	1	Áo thun polo nam cổ bẻ thun cá sấu cao cấp, thiết kế đơn giản trơn basic - FORMEN SHOP - FMHK001\nÁo thun polo nam có bo cổ polo phối sọc cách điệu của FORMEN SHOP là 1 chiếc áo thun nam polo...	0.00	0.66	t	2025-10-24 03:18:06.916946	0
+47	Áo polo ngắn tay nam, chất thun poly mềm mịn co giãn 4 chiều, họa tiết phối màu trẻ trung - FORMEN SHOP - FMPS195	4	89000.00	0.0	0	1	Áo polo ngắn tay nam, chất thun poly mềm mịn co giãn 4 chiều, họa tiết phối màu trẻ trung - FORMEN SHOP - FMPS195\nÁo thun polo nam có bo cổ polo phối sọc cách điệu của FORMEN SHOP là 1 chiếc áo thun...	0.00	0.24	t	2025-10-24 03:18:06.916946	0
+55	Kem Mờ Sẹo Gentacin của Nhật 10g - Hỗ trợ trị sẹo lồi sẹo lõm	7	170000.00	0.0	0	15	Sẹo là điều khó có thể tránh khỏi sau khi da bị tổn thương. Không kể đến việc ảnh hưởng đến chức năng, việc có sẹo đã gây ra ảnh hưởng rất lớn đến thẩm mỹ và tâm lý. Đặc biệt là vết sẹo bị tối màu ở...	68.00	0.15	t	2025-10-24 04:46:46.432736	0
+56	SON GIÓ FRAN WILSON MOODMATCHER Giữ Ẩm Cho Môi USA	7	119000.00	0.0	0	15	Thông tin nổi bật\n\nSon Gió FRAN WILSON MOODMATCHER Giữ Ẩm Cho Môi USA\nFRAN WILSON là hãng mỹ phẩm xuất hiện hơn 30 năm tại mỹ, đặc biệt dòng son gió của hãng được khách hàng tin dùng. sản phẩm được...	0.00	0.22	t	2025-10-24 04:46:46.432736	0
+57	BỘ 10 MẶT NẠ 3W CLINIC FRESH POMEGRANATE MASK SHEET + TẶNG KÈM 01 MẶT NẠ CÙNG LOẠI	7	120000.00	0.0	0	15	Mặt nạ dưỡng trắng da chống lão hóa chiết xuất lựu 3W Clinic Fresh Pomegranate Mask Sheet 23ml\nThương hiệu: 3w Clinic\nXuất xứ: Hàn Quốc\nDung tích: 23ml/miếng\nLoại da: Mọi loại da.\n\n3W Clinic là một...	46.00	0.10	t	2025-10-24 04:46:46.432736	0
+58	Tẩy Tế bào Chết 3W Clinic 180ml Hàn Quốc	7	75000.00	0.0	0	15	Tẩy Tế bào Chết 3W Clinic 180ml Hàn Quốc\n\nHiện có:\n1. CAFE\n2. GẠO\n3. ỐC SÊN\n4. TRÀ XANH\n5. NHAU THAI CỪU\nTẩy Tế bào Chết 3W Clinic 180ml Hàn Quốc\n- Dung tích: 180ml\n- Xuất xứ: Hàn Quốc\n- Thương hiệu:...	0.00	0.18	t	2025-10-24 04:46:46.432736	0
+59	Bộ 10 gói mặt nạ dưỡng ẩm da chiết xuất nha đam 3W Clinic Fresh Aloe Mask Sheet 23ml X 10	7	150000.00	0.0	0	15	Thương hiệu: 3W CLinic\nXuất xứ: Hàn Quốc\nQuy cách: 1 miếng/gói 23ml\nMột làn da đẹp không chỉ là làn da trắng trẻo, láng mịn được hỗ trợ bởi các loại kem dưỡng da. Da đẹp phải là da khỏe, săn chắc từ...	57.00	0.26	t	2025-10-24 04:46:46.432736	0
+60	Mặt Nạ Vàng 3W Clinic Collagen Luxury Gold Peel Off Pack 100g	7	250000.00	0.0	0	15	Mặt Nạ Vàng Collagen Luxury Gold Peel Off Pack 100g\nXuất xứ: Hàn Quốc\nDung tích: 100ml\nLoại da: Mọi loại da.\n3W Clinic là một trong những thương hiệu mỹ phẩm Hàn Quốc được phái đẹp tin dùng tại nhiều...	44.00	0.21	t	2025-10-24 04:46:46.432736	0
+62	Bình nước thủy tinh Elmich EL-8350T041 EL-8350T052 EL-8350T110, Hàng chính hãng, nhiều dung tích, có đồ lọc trà - JoyMall	8	187000.00	0.0	0	10	Bình nước thủy tinh Elmich EL-8350T041 EL-8350T052 EL-8350T110, Hàng chính hãng, nhiều dung tích, có đồ lọc trà-JoyMall\n \nTHÔNG TIN SẢN PHẨM\n1. EL-8350T041\nDung tích 415ml\nChất liệu Thủy tinh cao...	0.00	1.68	t	2025-10-24 05:26:08.193601	0
+63	Bình giữ nhiệt inox 316 Elmich EL8315 480ml, Hàng chính hãng, nắp dùng làm cốc, có lưới lọc -JoyMall	8	499000.00	0.0	0	10	Bình giữ nhiệt inox 316 Elmich EL8315 480ml, Hàng chính hãng, nắp có thể dùng làm cốc nước, có lưới lọc trà - JoyMall\n\nTHÔNG TIN SẢN PHẨM\nMàu sắc : Xanh đậm/ Xanh nhạt\nDung tích : 480 ml\nCông dụng:...	0.00	1.54	t	2025-10-24 05:26:08.193601	0
+64	Máy xay tỏi ớt dùng pin sạc Elmich PBE-8659 250ml 50w, Hàng chính hãng, bảo hành 24 tháng - JoyMall	8	276000.00	0.0	0	10	Máy xay tỏi ớt cầm tay Elmich PBE-8659 250ml 50w không dây , dùng pin sạc, Hàng chính hãng, bảo hành 24 tháng - JoyMall\nThông số kỹ thuật\nDung lượng pin : 1800mAh\nCông suất : 50W\nĐiện áp :...	0.00	0.71	t	2025-10-24 05:26:08.193601	0
+65	Bình giữ nhiệt 900ml Elmich EL8299, Hàng chính hãng, inox 304, có lõi lọc pha trà, cà phê - JoyMall	8	389000.00	0.0	0	10	Bình giữ nhiệt 900ml Elmich EL8299, Hàng chính hãng, inox 304, có tay cầm, dùng gia đình, nắp có khóa an toàn - JoyMall\n\nTHÔNG TIN SẢN PHẨM\nMàu sắc: Màu sữa\nDung tích : 900ml\nCông dụng : Giữ nhiệt...	0.00	0.95	t	2025-10-24 05:26:08.193601	0
+66	Bộ Dụng Cụ Chế Biến Ăn Dặm Cho Bé Elmich BabyCare EL0774, Hàng Chính Hãng, Nhựa PP An Toàn - JoyMall	8	135000.00	0.0	0	10	Bộ Dụng Cụ Chế Biến Ăn Dặm Cho Bé Elmich BabyCare EL0774, Hàng Chính Hãng, Nhựa PP An Toàn - JoyMall\n\n \nThông số kỹ thuật\nMàu sắc : Be\nKhối lượng sản phẩm : 300g\nChất liệu : Nhựa PP\nThông tin từng bộ...	0.00	1.67	t	2025-10-24 05:26:08.193601	0
+67	Máy vắt cam Elmich CJE-3921OL 700ml , Hàng chính hãng, bảo hành 24 tháng - JoyMall	8	322000.00	0.0	0	10	Máy vắt cam Elmich CJE-3921OL 700ml 40w, Hàng chính hãng, xoay ép 2 chiều vắt kiệt nước, dễ tháo lắp, vệ sinh - JoyMall\n\nTHÔNG TIN SẢN PHẨM\nCông suất 40W\nDung tích 0.7 Lít\nChất liệu nhựa ABS, AS\nCó 2...	0.00	1.82	t	2025-10-24 05:26:08.193601	0
+68	Bình giữ nhiệt gia đình 1.9L inox 304 Elmich EL8352, Hàng chính hãng, có tay cầm, nắp chống tràn - JoyMall	8	505000.00	0.0	0	10	Bình giữ nhiệt gia đình 1.9L inox 304 Elmich EL8352, Hàng chính hãng, có tay cầm, nắp chống tràn - JoyMall\n \nTHÔNG TIN SẢN PHẨM\nMàu sắc Đỏ\nDung tích 1.9L\nCông dụng Giữ nhiệt nóng, lạnh\nChất liệu Inox...	0.00	1.42	t	2025-10-24 05:26:08.193601	0
+69	Ly giữ nhiệt inox 304 Elmich EL8345 480ml, Hàng chính hãng, lớp silicone chống trượt - JoyMall	8	200000.00	0.0	0	10	Cốc giữ nhiệt inox 304 Elmich EL8345 dung tích 480ml, Hàng chính hãng, lớp silicone chống trượt - JoyMall\n\n \n\nĐẶC ĐIỂM NỔI BẬT:\n– Chất liệu inox 304 bền bỉ và an toàn: Thân cốc được làm từ inox 304,...	0.00	1.12	t	2025-10-24 05:26:08.193601	0
+70	Ly giữ nhiệt inox Elmich EL8309 900ml, Hàng chính hãng, giữ nhiệt tốt, nắp bật, kèm ống hút -JoyMall	8	322000.00	0.0	0	10	Ly giữ nhiệt Elmich EL8309 900ml, Hàng chính hãng, inox 304, giữ nóng lạnh, nắp bật, đi kèm ống hút - JoyMall\n\n\nTHÔNG TIN SẢN PHẨM\nMàu sắc : Xanh mint / Xanh navy\nDung tích : 900ml\nCông dụng : Giữ...	0.00	0.96	t	2025-10-24 05:26:08.193601	0
+71	Ấm Đun Nước Inox 304 Elmich EL-3373 3L, Hàng Chính Hãng, Đun Sôi Nhanh, Dùng Được Nhiều Bếp-JoyMall	8	738000.00	0.0	0	10	Ấm đun nước inox 304 Elmich EL-3373 3L, Hàng chính hãng, đun sôi nhanh, dùng được nhiều bếp-JoyMall\n\nThông tin sản phẩm\n– Chất liệu được làm bằng Inox 304 có độ bóng cao, tuyệt đối an toàn cho sức...	0.00	1.43	t	2025-10-24 05:26:08.193601	0
 \.
 
 
@@ -955,15 +951,6 @@ COPY public.product (product_id, name, seller_id, base_price, rating, review_cou
 --
 
 COPY public.product_image (product_image_id, product_id, image_url, is_primary) FROM stdin;
-3	1	products/2025/09/c93b1a0fdc064ca5ab2d06c54bd0e35a.webp	f
-4	1	products/2025/09/f04a91d4d3b54321831aaa9258d6bcbd.webp	f
-5	1	products/2025/09/1d5b9c468bcb4d889c2aa378a093f0d8.webp	f
-6	1	products/2025/09/66f03a2b17544aab9c4fe34ce7e5e6ba.webp	f
-2	1	products/2025/09/43f431a1a6df4dc393052aeba3936f24.webp	f
-1	1	products/2025/09/a8fde98210fe4a9589f4c3ebee3cee01.webp	t
-8	1	products/2025/09/602d856fc1b844fb89135d77e017974a.webp	f
-9	1	products/2025/09/e31a6dd241de4775a9d316da7959de2d.webp	f
-10	1	products/2025/09/13e494f300684197b22cb4fdc6dbe6b0.webp	f
 12	38	products/2025/10/4837fd249bb749d2a45be494974cf6b8.jpg	f
 13	38	products/2025/10/2345267669264ae4b9a22687115d0553.jpg	f
 14	38	products/2025/10/b31f6d808e6a438287f6b7a42c59bfc0.jpg	f
@@ -1281,13 +1268,6 @@ COPY public.product_image (product_image_id, product_id, image_url, is_primary) 
 --
 
 COPY public.product_size (size_id, variant_id, size_name, available_units, in_stock) FROM stdin;
-1	1	M (50-63kg)	100	t
-2	1	L (64-70kg)	100	t
-3	1	XL (71-76kg)	100	t
-4	1	XXL (77-85kg)	100	t
-5	3	L (64-70kg)	200	t
-6	3	M (50-63kg)	150	t
-7	6	S - Nhỏ	100	t
 8	7	L	100	t
 9	7	M	100	t
 10	7	XL	100	t
@@ -1330,11 +1310,6 @@ COPY public.product_size (size_id, variant_id, size_name, available_units, in_st
 --
 
 COPY public.product_variant (variant_id, product_id, variant_name, price_adjustment) FROM stdin;
-3	1	Đen	0.00
-4	1	Xám	0.00
-5	1	Xanh Than	0.00
-1	1	Trắng	0.00
-6	4	Đỏ	0.00
 7	38	Nâu	0.00
 8	38	Đen	0.00
 9	39	Đen	0.00
@@ -1394,15 +1369,13 @@ COPY public.review_reply (review_reply_id, review_id, seller_id, reply_text, rep
 -- Data for Name: seller; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.seller (seller_id, email, phone, fname, lname, password, shop_name, seller_tier, avt_url, description, average_rating, rating_count, is_verified, is_active, created_at) FROM stdin;
-1	myshop@example.com	1900 9999	Mười	Mười	$2b$12$pE/SXLrN1l6lNAr0aUwljOiRBu35Ctbcvirkq6dUAnPMbl6AV.SAO	Test Shop	regular	\N	\N	0.0	0	f	t	2025-08-22 11:16:07.036473
-2	shop2@example.com	09093300145	Hòa	Nguyễn	$2b$12$LBDuaCC44cWxnqKpGVuVqO9eCmajlr53kNlkEgRdqsEzpnS38bP4S	Áo 2	regular	\N	\N	0.0	0	f	t	2025-10-19 08:41:05.026236
-3	duycp102k3@gmail.com		Hoàng	Duy	$2b$12$U0KISdJNlsbGuP5j6i1./.Gn73s/A9knlOPxbo.o/KKUHk1l5KWmm	Hoàng Store	regular	https://lh3.googleusercontent.com/a/ACg8ocJ7cP2G-gS8PhNvAuAlySZ-sbM0-t7ol1WXuYeR3fyPEzRaEig=s96-c	\N	0.0	0	f	t	2025-10-19 13:10:14.456849
-5	nesashop@example.com	0712344567	Thu	Nguyễn	$2b$12$Ft2Sutg3Eq6Fyon4CMm7SudqW.cyHZQhk8nI1gOI74rxuROWsNTqO	Nesa Shop	regular	\N	\N	0.0	0	f	t	2025-10-24 02:58:58.828688
-6	honghanhmobile@example.com	06341867319	Điện	Thoại	$2b$12$tDWZjgTln/rcOZO4goLfqeUKxW2v.HxxuLxQVXCp9Qt9tmp2Or6UC	Hồng Hạnh Mobile	regular	\N	\N	0.0	0	f	t	2025-10-24 04:22:20.066064
-7	myphamauth@example.com	06341867475	Mỹ	Phẩm	$2b$12$jIhojCWoq8JAXrGKoDDI3uZ/ovAq7FBIWZ1frR7IqrVBiq.m7ZTRO	Mỹ Phẩm Auth 68	regular	\N	\N	0.0	0	f	t	2025-10-24 04:45:25.50184
-8	joymall@example.com	0324506823	Joy	Mall	$2b$12$iRPKZxGH8oxY0qIwMiMY3eSMc26DjieL5PbUt1ODQUlULs7StJXkW	JoyMall Official	regular	\N	\N	0.0	0	f	t	2025-10-24 05:23:15.660603
-4	formenshop@example.com	0912345678	Nam	Nguyễn	$2b$12$jgzpQiXGBSwkOLEUkhNA9Oy486o7bEJ64Z7GVK1xEXVWVb9/BFU6G	Formen Shop	regular	avatars/2025/10/4ed5c95a75b64ba8bd169135203fa728.jpg	\N	0.0	0	f	t	2025-10-24 02:12:42.636128
+COPY public.seller (seller_id, email, phone, fname, lname, password, shop_name, seller_tier, avt_url, average_rating, rating_count, is_verified, is_active, created_at) FROM stdin;
+3	duycp102k3@gmail.com		Hoàng	Duy	$2b$12$U0KISdJNlsbGuP5j6i1./.Gn73s/A9knlOPxbo.o/KKUHk1l5KWmm	Hoàng Store	regular	https://lh3.googleusercontent.com/a/ACg8ocJ7cP2G-gS8PhNvAuAlySZ-sbM0-t7ol1WXuYeR3fyPEzRaEig=s96-c	0.0	0	f	t	2025-10-19 13:10:14.456849
+6	honghanhmobile@example.com	06341867319	Điện	Thoại	$2b$12$tDWZjgTln/rcOZO4goLfqeUKxW2v.HxxuLxQVXCp9Qt9tmp2Or6UC	Hồng Hạnh Mobile	regular	\N	0.0	0	f	t	2025-10-24 04:22:20.066064
+4	formenshop@example.com	0912345678	Nam	Nguyễn	$2b$12$jgzpQiXGBSwkOLEUkhNA9Oy486o7bEJ64Z7GVK1xEXVWVb9/BFU6G	Formen Shop	regular	avatars/2025/10/4ed5c95a75b64ba8bd169135203fa728.jpg	0.0	0	f	t	2025-10-24 02:12:42.636128
+5	nesashop@example.com	0712344567	Thu	Nguyễn	$2b$12$Ft2Sutg3Eq6Fyon4CMm7SudqW.cyHZQhk8nI1gOI74rxuROWsNTqO	Nesa Shop	regular	avatars/2025/10/e1071cc405b24a09b99353467e6707e4.jpeg	0.0	0	f	t	2025-10-24 02:58:58.828688
+8	joymall@example.com	0324506823	Joy	Mall	$2b$12$iRPKZxGH8oxY0qIwMiMY3eSMc26DjieL5PbUt1ODQUlULs7StJXkW	JoyMall Official	regular	avatars/2025/10/ed59eeb713b64e19a356e854aacf815a.jpeg	0.0	0	f	t	2025-10-24 05:23:15.660603
+7	myphamauth@example.com	06341867475	Mỹ	Phẩm	$2b$12$jIhojCWoq8JAXrGKoDDI3uZ/ovAq7FBIWZ1frR7IqrVBiq.m7ZTRO	Mỹ Phẩm Auth 68	regular	avatars/2025/10/046e02dc413b475fb3a4cc16d8c54b43.jpg	0.0	0	f	t	2025-10-24 04:45:25.50184
 \.
 
 
@@ -1428,9 +1401,6 @@ COPY public.shopping_cart (shopping_cart_id, buyer_id, created_at, updated_at) F
 --
 
 COPY public.shopping_cart_item (shopping_cart_item_id, shopping_cart_id, product_id, variant_id, size_id, quantity, added_at) FROM stdin;
-1	2	1	1	1	2	2025-10-06 15:58:44.445106
-2	2	1	3	5	2	2025-10-19 08:24:34.753439
-3	2	4	6	7	1	2025-10-19 08:54:14.257389
 \.
 
 
@@ -1904,7 +1874,7 @@ ALTER TABLE ONLY public.buyer_address
 --
 
 ALTER TABLE ONLY public.buyer_address
-    ADD CONSTRAINT buyer_address_buyer_id_fkey FOREIGN KEY (buyer_id) REFERENCES public.buyer(buyer_id);
+    ADD CONSTRAINT buyer_address_buyer_id_fkey FOREIGN KEY (buyer_id) REFERENCES public.buyer(buyer_id) ON DELETE CASCADE;
 
 
 --
@@ -1944,7 +1914,7 @@ ALTER TABLE ONLY public."order"
 --
 
 ALTER TABLE ONLY public.order_item
-    ADD CONSTRAINT order_item_order_id_fkey FOREIGN KEY (order_id) REFERENCES public."order"(order_id);
+    ADD CONSTRAINT order_item_order_id_fkey FOREIGN KEY (order_id) REFERENCES public."order"(order_id) ON DELETE CASCADE;
 
 
 --
@@ -1984,7 +1954,7 @@ ALTER TABLE ONLY public.product
 --
 
 ALTER TABLE ONLY public.product_image
-    ADD CONSTRAINT product_image_product_id_fkey FOREIGN KEY (product_id) REFERENCES public.product(product_id);
+    ADD CONSTRAINT product_image_product_id_fkey FOREIGN KEY (product_id) REFERENCES public.product(product_id) ON DELETE CASCADE;
 
 
 --
@@ -1992,7 +1962,7 @@ ALTER TABLE ONLY public.product_image
 --
 
 ALTER TABLE ONLY public.product
-    ADD CONSTRAINT product_seller_id_fkey FOREIGN KEY (seller_id) REFERENCES public.seller(seller_id);
+    ADD CONSTRAINT product_seller_id_fkey FOREIGN KEY (seller_id) REFERENCES public.seller(seller_id) ON DELETE CASCADE;
 
 
 --
@@ -2000,7 +1970,7 @@ ALTER TABLE ONLY public.product
 --
 
 ALTER TABLE ONLY public.product_size
-    ADD CONSTRAINT product_size_variant_id_fkey FOREIGN KEY (variant_id) REFERENCES public.product_variant(variant_id);
+    ADD CONSTRAINT product_size_variant_id_fkey FOREIGN KEY (variant_id) REFERENCES public.product_variant(variant_id) ON DELETE CASCADE;
 
 
 --
@@ -2008,7 +1978,7 @@ ALTER TABLE ONLY public.product_size
 --
 
 ALTER TABLE ONLY public.product_variant
-    ADD CONSTRAINT product_variant_product_id_fkey FOREIGN KEY (product_id) REFERENCES public.product(product_id);
+    ADD CONSTRAINT product_variant_product_id_fkey FOREIGN KEY (product_id) REFERENCES public.product(product_id) ON DELETE CASCADE;
 
 
 --
@@ -2024,7 +1994,7 @@ ALTER TABLE ONLY public.review
 --
 
 ALTER TABLE ONLY public.review_image
-    ADD CONSTRAINT review_image_review_id_fkey FOREIGN KEY (review_id) REFERENCES public.review(review_id);
+    ADD CONSTRAINT review_image_review_id_fkey FOREIGN KEY (review_id) REFERENCES public.review(review_id) ON DELETE CASCADE;
 
 
 --
@@ -2048,7 +2018,7 @@ ALTER TABLE ONLY public.review
 --
 
 ALTER TABLE ONLY public.review_reply
-    ADD CONSTRAINT review_reply_review_id_fkey FOREIGN KEY (review_id) REFERENCES public.review(review_id);
+    ADD CONSTRAINT review_reply_review_id_fkey FOREIGN KEY (review_id) REFERENCES public.review(review_id) ON DELETE CASCADE;
 
 
 --
@@ -2072,7 +2042,7 @@ ALTER TABLE ONLY public.seller_address
 --
 
 ALTER TABLE ONLY public.seller_address
-    ADD CONSTRAINT seller_address_seller_id_fkey FOREIGN KEY (seller_id) REFERENCES public.seller(seller_id);
+    ADD CONSTRAINT seller_address_seller_id_fkey FOREIGN KEY (seller_id) REFERENCES public.seller(seller_id) ON DELETE CASCADE;
 
 
 --
@@ -2088,7 +2058,7 @@ ALTER TABLE ONLY public.shopping_cart
 --
 
 ALTER TABLE ONLY public.shopping_cart_item
-    ADD CONSTRAINT shopping_cart_item_product_id_fkey FOREIGN KEY (product_id) REFERENCES public.product(product_id);
+    ADD CONSTRAINT shopping_cart_item_product_id_fkey FOREIGN KEY (product_id) REFERENCES public.product(product_id) ON DELETE CASCADE;
 
 
 --
@@ -2096,7 +2066,7 @@ ALTER TABLE ONLY public.shopping_cart_item
 --
 
 ALTER TABLE ONLY public.shopping_cart_item
-    ADD CONSTRAINT shopping_cart_item_shopping_cart_id_fkey FOREIGN KEY (shopping_cart_id) REFERENCES public.shopping_cart(shopping_cart_id);
+    ADD CONSTRAINT shopping_cart_item_shopping_cart_id_fkey FOREIGN KEY (shopping_cart_id) REFERENCES public.shopping_cart(shopping_cart_id) ON DELETE CASCADE;
 
 
 --
@@ -2104,7 +2074,7 @@ ALTER TABLE ONLY public.shopping_cart_item
 --
 
 ALTER TABLE ONLY public.shopping_cart_item
-    ADD CONSTRAINT shopping_cart_item_size_id_fkey FOREIGN KEY (size_id) REFERENCES public.product_size(size_id);
+    ADD CONSTRAINT shopping_cart_item_size_id_fkey FOREIGN KEY (size_id) REFERENCES public.product_size(size_id) ON DELETE CASCADE;
 
 
 --
@@ -2112,7 +2082,7 @@ ALTER TABLE ONLY public.shopping_cart_item
 --
 
 ALTER TABLE ONLY public.shopping_cart_item
-    ADD CONSTRAINT shopping_cart_item_variant_id_fkey FOREIGN KEY (variant_id) REFERENCES public.product_variant(variant_id);
+    ADD CONSTRAINT shopping_cart_item_variant_id_fkey FOREIGN KEY (variant_id) REFERENCES public.product_variant(variant_id) ON DELETE CASCADE;
 
 
 --
@@ -2126,5 +2096,5 @@ CREATE PUBLICATION pub_all FOR ALL TABLES WITH (publish = 'insert, update, delet
 -- PostgreSQL database dump complete
 --
 
-\unrestrict mo8EvYGdvvnWUfaKzdUux7Ntt1exjYXS7jXYtfFnyX7XeiqIaZCw2AaKN6infH5
+\unrestrict 30AcBz9dfVsKof3QHox2QrYzhU7hZO8DthkCYFPf3ezukhKvBMAEXBlU7ulj9Pm
 
