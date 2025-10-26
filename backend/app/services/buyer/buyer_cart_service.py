@@ -162,3 +162,26 @@ def get_buyer_cart(buyer_id: int, db: Session):
         })
 
     return [{"seller": k, "products": v} for k, v in grouped.items()]
+
+
+# ===== XÓA SẢN PHẨM KHỎI GIỎ HÀNG ======
+def buyer_delete_product(buyer_id : int, product_id: int, db: Session):
+    # Tìm giỏ hàng của người mua
+    cart = db.query(ShoppingCart).filter_by(buyer_id=buyer_id).first()
+    if not cart:
+        return []
+    # Tìm sản phẩm trong giỏ hàng đó
+    item = (
+        db.query(ShoppingCartItem)
+        .filter_by(shopping_cart_id = cart.shopping_cart_id, product_id=product_id)
+        .first()
+    )
+    if not item:
+        return {"message": "Product not found in cart"}
+    
+    # Xóa item ra khỏi DB
+    db.delete(item)
+    db.commit()
+
+    return {"message": "Product removed successfully"}
+    
