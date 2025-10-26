@@ -35,6 +35,7 @@ function setupGalleryThumbnails() {
 }
 // Chạy khi DOM đã load xong
 document.addEventListener('DOMContentLoaded', setupGalleryThumbnails);
+
 // Quantity buttons
 const quantityInput = document.getElementById('quantityInput');
 const decreaseBtn = document.getElementById('decreaseBtn');
@@ -71,3 +72,101 @@ if (quantityInput && decreaseBtn && increaseBtn) {
     console.error('ElementsError: quantityInput, decreaseBtn, or increaseBtn');
 }
 
+
+//Review nhiều ảnh hoặc chữ quá max thì ẩn bớt
+document.addEventListener('DOMContentLoaded', function() {
+
+    // ========== XỬ LÝ REVIEW PHOTOS ==========
+    const reviewPhotosContainers = document.querySelectorAll('.review__photos');
+
+    reviewPhotosContainers.forEach(container => {
+        const photos = Array.from(container.querySelectorAll('.review__photo'));
+        const totalPhotos = photos.length;
+        const maxVisible = 3;
+
+        // Nhiều hơn 3 ảnh
+        if (totalPhotos > maxVisible) {
+            // Ẩn các ảnh từ thứ 4 trở đi
+            photos.forEach((photo, index) => {
+                if (index >= maxVisible) {
+                    photo.classList.add('review__photo--hidden');
+                }
+            });
+
+            // Ảnh 3 thêm bóng mờ + số ảnh còn lại
+            const lastVisiblePhoto = photos[maxVisible - 1];
+            lastVisiblePhoto.classList.add('review__photo--more');
+
+            // Làm mờ ảnh thừa
+            const remainingCount = totalPhotos - maxVisible;
+            const overlay = document.createElement('div');
+            overlay.className = 'review__photo-overlay';
+            overlay.textContent = `+${remainingCount}`;
+            lastVisiblePhoto.appendChild(overlay);
+
+            // Click để xem tất cả ảnh
+            lastVisiblePhoto.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                // Hện tất cả ảnh
+                photos.forEach(photo => {
+                    photo.classList.remove('review__photo--hidden');
+                });
+
+                // Xóa mờ
+                lastVisiblePhoto.classList.remove('review__photo--more');
+                if (overlay.parentNode) {
+                    overlay.remove();
+                }
+            });
+        }
+    });
+
+    // Comment review hơn 100 chữ thì ẩn bớt
+    const reviews = document.querySelectorAll('.review');
+
+    reviews.forEach(review => {
+        const textContainer = review.querySelector('.review__text-container');
+        if (!textContainer) return;
+
+        const textElement = textContainer.querySelector('.review__text');
+        if (!textElement) return;
+
+        const text = textElement.textContent.trim();
+        const wordCount = text.split(/\s+/).length;
+        const maxWords = 100;
+
+        if (wordCount > maxWords) {
+            // Modifier để truncate
+            textElement.classList.add('review__text--truncated');
+
+            // More
+            const readMoreBtn = document.createElement('span');
+            readMoreBtn.className = 'review__read-more';
+            readMoreBtn.textContent = 'Xem thêm';
+
+            textContainer.appendChild(readMoreBtn);
+
+            // Xem thêm hoặc thu gọn
+            let isExpanded = false;
+            readMoreBtn.addEventListener('click', function() {
+                isExpanded = !isExpanded;
+
+                if (isExpanded) {
+                    textElement.classList.remove('review__text--truncated');
+                    readMoreBtn.textContent = 'Thu gọn';
+                } else {
+                    textElement.classList.add('review__text--truncated');
+                    readMoreBtn.textContent = 'Xem thêm';
+
+                    // Smooth scroll về vị trí review
+                    textContainer.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'nearest'
+                    });
+                }
+            });
+        }
+    });
+});
