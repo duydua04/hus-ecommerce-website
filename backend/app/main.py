@@ -34,13 +34,12 @@ app.include_router(seller_address_router)
 app.include_router(admin_category_router)
 app.include_router(public_category_router)
 app.include_router(seller_product_router)
-app.include_router(admin_management_user_router)
-from .controller.buyer.buyer_product_controller import router as buyer_product_router
-app.include_router(buyer_product_router)
-from .controller.buyer.buyer_cart_controller import router as buyer_cart_router
-app.include_router(buyer_cart_router)
 app.include_router(admin_manage_user_router)
 app.include_router(admin_manage_discount_router)
 app.include_router(admin_manage_carrier_router)
 app.include_router(seller_review_router)
 app.include_router(seller_order_router)
+from .controller.buyer.buyer_product_controller import router as buyer_product_router
+app.include_router(buyer_product_router)
+from .controller.buyer.buyer_cart_controller import router as buyer_cart_router
+app.include_router(buyer_cart_router)

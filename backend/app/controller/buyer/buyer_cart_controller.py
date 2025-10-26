@@ -53,3 +53,9 @@ def add_to_cart(payload: AddToCartRequest, db: Session = Depends(get_db)):
 @router.get('/showCart/{buyer_id}')
 def get_buyer_cart(buyer_id : int, db: Session = Depends(get_db)):
     return buyer_cart_service.get_buyer_cart(buyer_id, db)
+
+
+# ===== XÓA SẢN PHẨM KHỎI GIỎ HÀNG ======
+@router.delete('/buyer/{buyer_id}/product/{product_id}')
+def delete_product(product_id : int, buyer_id: int, db: Session = Depends(get_db)):
+    return buyer_cart_service.buyer_delete_product(buyer_id, product_id, db)
