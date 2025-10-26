@@ -34,6 +34,7 @@ class ProductResponse(TimestampedOut):
     base_price: Decimal
     rating: float
     review_count: int
+    sold_quantity: int
     category_id: int | None = None
     description: str | None = None
     discount_percent: Decimal
