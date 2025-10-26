@@ -1,40 +1,102 @@
-//Tạo ảnh sản phẩm ẩn
-function setupGalleryThumbnails() {
-    const galleryItems = document.querySelectorAll('.gallery__thumbnails input.gallery__input');
+function setupGalleryAdvanced() {
+    const gallery = document.querySelector('.gallery');
+    if (!gallery) return;
+
+    const mainDisplay = gallery.querySelector('.gallery__main');
+    const thumbnailsContainer = gallery.querySelector('.gallery__thumbnails');
+    const galleryInputs = Array.from(thumbnailsContainer.querySelectorAll('.gallery__input'));
+    const galleryLabels = Array.from(thumbnailsContainer.querySelectorAll('.gallery__thumbnail'));
+
     const maxVisible = 6;
+    let currentPage = 0;
 
-    if (galleryItems.length > maxVisible) {
-        const hiddenCount = galleryItems.length - maxVisible;
+    const thumbnailContents = galleryLabels.map(label => label.textContent.trim());
 
-        // Ẩn các thumbnail từ vị trí thứ 7 trở đi
-        galleryItems.forEach((input, index) => {
-            if (index >= maxVisible) {
-                // Ẩn input và label để sau chạy tính rồi thêm
-                input.style.display = 'none';
-                const label = input.nextElementSibling;
-                if (label) {
-                    label.style.display = 'none';
+    function updateMainDisplay(content) {
+        mainDisplay.classList.add('gallery__main--changing');
+        mainDisplay.textContent = content;
+        setTimeout(() => {
+            mainDisplay.classList.remove('gallery__main--changing');
+        }, 300);
+    }
+
+    function showPage(pageIndex) {
+        currentPage = pageIndex;
+        const startIdx = pageIndex * maxVisible;
+        const endIdx = Math.min(startIdx + maxVisible, galleryInputs.length);
+        const totalPages = Math.ceil(galleryInputs.length / maxVisible);
+
+        galleryInputs.forEach((input, idx) => {
+            galleryLabels[idx].style.display = 'none';
+        });
+
+        for (let i = startIdx; i < endIdx; i++) {
+            galleryLabels[i].style.display = 'flex';
+
+            galleryLabels[i].classList.remove('gallery__thumbnail--more', 'gallery__thumbnail--prev');
+            const oldOverlay = galleryLabels[i].querySelector('.gallery__thumbnail-overlay');
+            if (oldOverlay) oldOverlay.remove();
+        }
+
+        if (pageIndex > 0 && startIdx < galleryInputs.length) {
+            const firstThumb = galleryLabels[startIdx];
+            firstThumb.classList.add('gallery__thumbnail--prev');
+
+            const prevCount = pageIndex * maxVisible;
+            const prevOverlay = document.createElement('div');
+            prevOverlay.className = 'gallery__thumbnail-overlay';
+            prevOverlay.textContent = `+${prevCount}`;
+            firstThumb.appendChild(prevOverlay);
+
+            firstThumb.addEventListener('click', function(e) {
+                e.preventDefault();
+                showPage(pageIndex - 1);
+            }, { once: true });
+        }
+
+        const remainingAfter = galleryInputs.length - endIdx;
+        if (remainingAfter > 0 && endIdx > startIdx) {
+            const lastVisibleIdx = endIdx - 1;
+            const lastThumb = galleryLabels[lastVisibleIdx];
+            lastThumb.classList.add('gallery__thumbnail--more');
+
+            const moreOverlay = document.createElement('div');
+            moreOverlay.className = 'gallery__thumbnail-overlay';
+            moreOverlay.textContent = `+${remainingAfter}`;
+            lastThumb.appendChild(moreOverlay);
+
+            lastThumb.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (pageIndex + 1 < totalPages) {
+                    showPage(pageIndex + 1);
                 }
+            }, { once: true });
+        }
+    }
+
+    galleryInputs.forEach((input, index) => {
+        input.addEventListener('change', function() {
+            if (this.checked) {
+                updateMainDisplay(thumbnailContents[index]);
             }
         });
 
-        // Thêm class và overlay cho thumbnail thứ 6
-        const sixthInput = galleryItems[maxVisible - 1];
-        const sixthThumb = sixthInput.nextElementSibling;
+        galleryLabels[index].addEventListener('click', function(e) {
+            if (!this.classList.contains('gallery__thumbnail--more') &&
+                !this.classList.contains('gallery__thumbnail--prev')) {
+                updateMainDisplay(thumbnailContents[index]);
+            }
+        });
+    });
 
-        if (sixthThumb) {
-            sixthThumb.classList.add('gallery__thumbnail--more');
+    showPage(0);
 
-            // Tạo overlay hiển thị số ảnh còn lại
-            const overlay = document.createElement('div');
-            overlay.className = 'gallery__thumbnail-overlay';
-            overlay.textContent = `+${hiddenCount}`;
-            sixthThumb.appendChild(overlay);
-        }
+    if (thumbnailContents.length > 0) {
+        updateMainDisplay(thumbnailContents[0]);
     }
 }
-// Chạy khi DOM đã load xong
-document.addEventListener('DOMContentLoaded', setupGalleryThumbnails);
+
+document.addEventListener('DOMContentLoaded', setupGalleryAdvanced);
 
 // Quantity buttons
 const quantityInput = document.getElementById('quantityInput');
@@ -76,7 +138,7 @@ if (quantityInput && decreaseBtn && increaseBtn) {
 //Review nhiều ảnh hoặc chữ quá max thì ẩn bớt
 document.addEventListener('DOMContentLoaded', function() {
 
-    // ========== XỬ LÝ REVIEW PHOTOS ==========
+    // Review photo nhiều ảnh
     const reviewPhotosContainers = document.querySelectorAll('.review__photos');
 
     reviewPhotosContainers.forEach(container => {
