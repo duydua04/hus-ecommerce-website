@@ -53,6 +53,14 @@ def get_product_options(product_id: int, db: Session):
         "variants": variant_list
     }
 
+# ====== TÌM GIỎ HÀNG CỦA NGƯỜI MUA ======
+def find_cart(buyer_id: int, db: Session):
+    cart = db.query(ShoppingCart).filter_by(buyer_id=buyer_id).first()
+    if not cart:
+        return []
+    return cart
+
+
 # === THÊM SẢN PHẨM VÀO GIỎ HÀNG ====
 def add_to_cart(db: Session, buyer_id: int, product_id: int, variant_id=None, size_id=None, quantity=1):
     """ 
@@ -117,10 +125,7 @@ def add_to_cart(db: Session, buyer_id: int, product_id: int, variant_id=None, si
 
 # === HIỂN THỊ GIỎ HÀNG CỦA NGƯỜI DÙNG ===
 def get_buyer_cart(buyer_id: int, db: Session):
-    cart = db.query(ShoppingCart).filter_by(buyer_id=buyer_id).first()
-    if not cart:
-        return []
-
+    cart = find_cart(buyer_id, db)
     items = (
         db.query(ShoppingCartItem)
         .join(Product)
@@ -166,10 +171,7 @@ def get_buyer_cart(buyer_id: int, db: Session):
 
 # ===== XÓA SẢN PHẨM KHỎI GIỎ HÀNG ======
 def buyer_delete_product(buyer_id : int, product_id: int, db: Session):
-    # Tìm giỏ hàng của người mua
-    cart = db.query(ShoppingCart).filter_by(buyer_id=buyer_id).first()
-    if not cart:
-        return []
+    cart = find_cart(buyer_id, db)
     # Tìm sản phẩm trong giỏ hàng đó
     item = (
         db.query(ShoppingCartItem)
@@ -185,3 +187,33 @@ def buyer_delete_product(buyer_id : int, product_id: int, db: Session):
 
     return {"message": "Product removed successfully"}
     
+
+# ====== TÍNH TỔNG TIỀN SẢN PHẨM ĐỊNH MUA ======
+def cart_summary(buyer_id : int, list_product_id: list[int], db: Session):
+    cart = find_cart(buyer_id, db)
+    if not cart:
+        return {"total price" : 0, "message" : "Cart not found"}
+    
+    # Lấy danh sách item có product nằm trong list được chọn
+    items = (
+        db.query(ShoppingCartItem)
+        .join(Product)  # sử dụng relationship "product"
+        .filter(
+            ShoppingCartItem.shopping_cart_id == cart.shopping_cart_id,
+            ShoppingCartItem.product_id.in_(list_product_id)
+        )
+        .all()
+    )
+
+    # Kiểm tra có sản phẩm trong giỏ không
+    if not items:
+        return {"total_price": 0, "message": "No matching items in cart"}
+
+    # Tính tổng tiền: base_price * quantity
+    total_price = sum(item.product.base_price * item.quantity for item in items)
+
+    return {"total_price": float(total_price)}
+
+    
+
+
