@@ -82,25 +82,38 @@
             <!-- Product Gallery -->
             <div class="product__gallery">
                 <div class="gallery">
-                    <div class="gallery__main">🪑</div>
+                    <div class="gallery__main">🐢</div>
                     <div class="gallery__thumbnails">
                         <input type="radio" name="gallery" id="thumb-1" class="gallery__input" checked>
-                        <label for="thumb-1" class="gallery__thumbnail">🪑</label>
+                        <label for="thumb-1" class="gallery__thumbnail">🐢</label>
 
                         <input type="radio" name="gallery" id="thumb-2" class="gallery__input">
-                        <label for="thumb-2" class="gallery__thumbnail">🪑</label>
+                        <label for="thumb-2" class="gallery__thumbnail">🐢</label>
 
                         <input type="radio" name="gallery" id="thumb-3" class="gallery__input">
-                        <label for="thumb-3" class="gallery__thumbnail">🪑</label>
+                        <label for="thumb-3" class="gallery__thumbnail">🐢</label>
 
                         <input type="radio" name="gallery" id="thumb-4" class="gallery__input">
-                        <label for="thumb-4" class="gallery__thumbnail">🪑</label>
+                        <label for="thumb-4" class="gallery__thumbnail">🐢</label>
 
                         <input type="radio" name="gallery" id="thumb-5" class="gallery__input">
-                        <label for="thumb-5" class="gallery__thumbnail">🪑</label>
+                        <label for="thumb-5" class="gallery__thumbnail">🐢</label>
 
                         <input type="radio" name="gallery" id="thumb-6" class="gallery__input">
-                        <label for="thumb-6" class="gallery__thumbnail">🪑</label>
+                        <label for="thumb-6" class="gallery__thumbnail">🐢</label>
+
+
+                        <input type="radio" name="gallery" id="thumb-7" class="gallery__input">
+                        <label for="thumb-7" class="gallery__thumbnail">🐢</label>
+
+                        <input type="radio" name="gallery" id="thumb-8" class="gallery__input">
+                        <label for="thumb-8" class="gallery__thumbnail">🐢</label>
+
+                        <input type="radio" name="gallery" id="thumb-9" class="gallery__input">
+                        <label for="thumb-9" class="gallery__thumbnail">🐢</label>
+
+                        <input type="radio" name="gallery" id="thumb-10" class="gallery__input">
+                        <label for="thumb-10" class="gallery__thumbnail">🐢</label>
                     </div>
                 </div>
             </div>
@@ -171,7 +184,9 @@
                     <p class="purchase__tax">Price per kg. Includes VAT</p>
 
                     <div class="purchase__quantity">
-                        <input type="number" class="purchase__quantity-input" value="1" min="1">
+                        <button class="purchase__quantity-btn" id="decreaseBtn">−</button>
+                        <input type="number" class="purchase__quantity-input" id="quantityInput" value="1" min="1">
+                        <button class="purchase__quantity-btn" id="increaseBtn">+</button>
                     </div>
 
                     <button class="purchase__add-to-cart">
@@ -292,6 +307,7 @@
 
                             <div class="review__photos">
                                 <div class="review__photo">📷</div>
+
                                 <div class="review__photo">📷</div>
                                 <div class="review__photo review__photo--more">
                                     📷
@@ -373,63 +389,6 @@
                 </div>
             </div>
         </footer>
-
-    <script>
-        // Tab switching functionality
-        function showTab(index) {
-            const tabs = document.querySelectorAll('.product-details__tab');
-            const panels = document.querySelectorAll('.product-details__panel');
-
-            tabs.forEach((tab, i) => {
-                if (i === index) {
-                    tab.classList.add('product-details__tab--active');
-                } else {
-                    tab.classList.remove('product-details__tab--active');
-                }
-            });
-
-            panels.forEach((panel, i) => {
-                if (i === index) {
-                    panel.classList.add('product-details__panel--active');
-                } else {
-                    panel.classList.remove('product-details__panel--active');
-                }
-            });
-        }
-
-        // Quantity buttons
-        document.querySelectorAll('.purchase__quantity-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const input = this.parentElement.querySelector('.purchase__quantity-input');
-                const currentValue = parseInt(input.value);
-
-                if (this.textContent === '+') {
-                    input.value = currentValue + 1;
-                } else if (this.textContent === '-' && currentValue > 1) {
-                    input.value = currentValue - 1;
-                }
-            });
-        });
-
-        // Size button selection
-        document.querySelectorAll('.product-option__button').forEach(btn => {
-            btn.addEventListener('click', function() {
-                this.parentElement.querySelectorAll('.product-option__button').forEach(b => {
-                    b.classList.remove('product-option__button--active');
-                });
-                this.classList.add('product-option__button--active');
-            });
-        });
-
-        // Gallery thumbnail selection
-        document.querySelectorAll('.gallery__thumbnail').forEach(thumb => {
-            thumb.addEventListener('click', function() {
-                document.querySelectorAll('.gallery__thumbnail').forEach(t => {
-                    t.classList.remove('gallery__thumbnail--active');
-                });
-                this.classList.add('gallery__thumbnail--active');
-            });
-        });
-    </script>
+    <script src="infor_product.js"></script>
 </body>
 </html>
