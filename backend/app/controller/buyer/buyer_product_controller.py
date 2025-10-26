@@ -22,7 +22,7 @@ class ProductSummary(BaseModel):
 
 router = APIRouter(
     prefix="/buyer/products",
-    tags=["products"]
+    tags=["buyer-products"]
 )
 
 #  === LẤY DANH SÁCH SẢN PHẨM CÓ FILTER ===
@@ -57,5 +57,3 @@ def get_filtered_product(
 def get_buyer_product_detail(product_id: int, db: Session = Depends(get_db)):
   
     return buyer_product_service.get_buyer_product_detail(product_id, db)
-
-

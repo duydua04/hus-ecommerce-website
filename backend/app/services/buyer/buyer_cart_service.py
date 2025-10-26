@@ -214,6 +214,9 @@ def cart_summary(buyer_id : int, list_product_id: list[int], db: Session):
 
     return {"total_price": float(total_price)}
 
+
+# ====== UPDATE SẢN PHẨM TRONG GIỎ HÀNG ======
+
     
 
 
