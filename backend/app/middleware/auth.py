@@ -74,5 +74,5 @@ def require_admin(info = Security(get_current_user, scopes=["admin"])):
 def require_buyer(info = Security(get_current_user, scopes=["buyer"])):
     return info
 
-def require_seller(info = Security(get_current_user, scopes=["admin"])):
+def require_seller(info = Security(get_current_user, scopes=["seller"])):
     return info

@@ -106,7 +106,7 @@ def size_has_orders(db: Session, size_id: int) -> bool:
 def get_seller_products(db: Session,
                         seller_id: int,
                         search_query: Optional[str] = None,
-                        active_only: bool = False,
+                        active_only: bool = True,
                         limit: int = 10,
                         offset: int = 0
 ):
@@ -238,6 +238,18 @@ def create_seller_product(db: Session, seller_id: int, payload: ProductCreate):
     """
     Tao san pham moi cho seller.
     """
+
+    exist = db.query(Product.product_id).filter(
+        Product.seller_id == payload.seller_id,
+        Product.name.ilike(f"%{payload.name.strip()}%")
+    )
+
+    if exist:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Product's name is already exists"
+        )
+
     product = Product(
         name=payload.name,
         seller_id=seller_id,

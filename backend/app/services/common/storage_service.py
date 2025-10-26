@@ -66,7 +66,8 @@ async def upload_via_backend(folder: Literal['avatars', 'products', 'reviews'],
             Bucket=settings.S3_BUCKET,
             Key=key,
             Body=body,
-            ContentType=ct
+            ContentType=ct,
+            CacheControl="public, max-age=31536000, immutable"
         )
     except ClientError as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f'S3 put object failed: {e}')

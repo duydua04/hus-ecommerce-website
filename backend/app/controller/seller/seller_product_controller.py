@@ -55,7 +55,7 @@ router = APIRouter(
 def list_my_products(
     seller_info=Depends(require_seller),
     q: Optional[str] = Query(None, description="Search query for product names"),
-    active_only: bool = Query(False, description="Filter to show only active products"),
+    active_only: bool = Query(True, description="Filter to show only active products"),
     limit: int = Query(10, ge=1, le=100, description="Maximum number of products to return"),
     offset: int = Query(0, ge=0, description="Number of products to skip"),
     db: Session = Depends(get_db)

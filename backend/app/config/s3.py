@@ -11,7 +11,6 @@ def create_s3_client():
             aws_access_key_id=settings.S3_ACCESS_KEY,
             aws_secret_access_key=settings.S3_SECRET_KEY,
             region_name=settings.S3_REGION,
-            endpoint_url=settings.S3_ENDPOINT,
             config=Config(signature_version="s3v4"),
         )
     except Exception as e:
@@ -31,6 +30,7 @@ def presign_put(object_key: str, content_type: str, expires: int = 900):
                "Bucket": settings.S3_BUCKET,
                "Key": object_key,
                "ContentType": content_type,
+               "CacheControl": "public, max-age=31536000, immutable",
            },
            ExpiresIn=expires,
        )
@@ -54,9 +54,14 @@ def presign_get(object_key: str, expires: int = 900) :
 
 
 def public_url(object_key: str) -> str:
-    """Trả về URL public nếu bucket đang bật quyền đọc ẩn danh (dev).
+    """Trả về duong dan truy cap toi anh"""
 
-    MinIO: http://<endpoint>/<bucket>/<key>
-    """
+    if not object_key:
+        return ""
+
+    # 1) Neu la url thi tra ve ngay
+    if object_key.strip().lower().startswith(("http://", "https://")):
+        return object_key
+
     base = settings.S3_PUBLIC_ENDPOINT.rstrip("/")
-    return f"{base}/{settings.S3_BUCKET}/{object_key}"
+    return f"{base}/{object_key}"
