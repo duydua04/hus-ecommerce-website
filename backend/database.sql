@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict 30AcBz9dfVsKof3QHox2QrYzhU7hZO8DthkCYFPf3ezukhKvBMAEXBlU7ulj9Pm
+\restrict vqmnGgg1gC2YSqjN51fvuOjqNtjfbhQrdzDnZdTkL8snOWzdIfNuUIgWDgaD4VF
 
 -- Dumped from database version 16.10 (Debian 16.10-1.pgdg13+1)
 -- Dumped by pg_dump version 16.10 (Debian 16.10-1.pgdg13+1)
@@ -684,7 +684,6 @@ CREATE TABLE public.seller (
     avt_url character varying(255),
     average_rating numeric(2,1) DEFAULT 0 NOT NULL,
     rating_count integer DEFAULT 0 NOT NULL,
-    is_verified boolean DEFAULT false NOT NULL,
     is_active boolean DEFAULT true NOT NULL,
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP
 );
@@ -1369,13 +1368,13 @@ COPY public.review_reply (review_reply_id, review_id, seller_id, reply_text, rep
 -- Data for Name: seller; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.seller (seller_id, email, phone, fname, lname, password, shop_name, seller_tier, avt_url, average_rating, rating_count, is_verified, is_active, created_at) FROM stdin;
-3	duycp102k3@gmail.com		Hoàng	Duy	$2b$12$U0KISdJNlsbGuP5j6i1./.Gn73s/A9knlOPxbo.o/KKUHk1l5KWmm	Hoàng Store	regular	https://lh3.googleusercontent.com/a/ACg8ocJ7cP2G-gS8PhNvAuAlySZ-sbM0-t7ol1WXuYeR3fyPEzRaEig=s96-c	0.0	0	f	t	2025-10-19 13:10:14.456849
-6	honghanhmobile@example.com	06341867319	Điện	Thoại	$2b$12$tDWZjgTln/rcOZO4goLfqeUKxW2v.HxxuLxQVXCp9Qt9tmp2Or6UC	Hồng Hạnh Mobile	regular	\N	0.0	0	f	t	2025-10-24 04:22:20.066064
-4	formenshop@example.com	0912345678	Nam	Nguyễn	$2b$12$jgzpQiXGBSwkOLEUkhNA9Oy486o7bEJ64Z7GVK1xEXVWVb9/BFU6G	Formen Shop	regular	avatars/2025/10/4ed5c95a75b64ba8bd169135203fa728.jpg	0.0	0	f	t	2025-10-24 02:12:42.636128
-5	nesashop@example.com	0712344567	Thu	Nguyễn	$2b$12$Ft2Sutg3Eq6Fyon4CMm7SudqW.cyHZQhk8nI1gOI74rxuROWsNTqO	Nesa Shop	regular	avatars/2025/10/e1071cc405b24a09b99353467e6707e4.jpeg	0.0	0	f	t	2025-10-24 02:58:58.828688
-8	joymall@example.com	0324506823	Joy	Mall	$2b$12$iRPKZxGH8oxY0qIwMiMY3eSMc26DjieL5PbUt1ODQUlULs7StJXkW	JoyMall Official	regular	avatars/2025/10/ed59eeb713b64e19a356e854aacf815a.jpeg	0.0	0	f	t	2025-10-24 05:23:15.660603
-7	myphamauth@example.com	06341867475	Mỹ	Phẩm	$2b$12$jIhojCWoq8JAXrGKoDDI3uZ/ovAq7FBIWZ1frR7IqrVBiq.m7ZTRO	Mỹ Phẩm Auth 68	regular	avatars/2025/10/046e02dc413b475fb3a4cc16d8c54b43.jpg	0.0	0	f	t	2025-10-24 04:45:25.50184
+COPY public.seller (seller_id, email, phone, fname, lname, password, shop_name, seller_tier, avt_url, average_rating, rating_count, is_active, created_at) FROM stdin;
+3	duycp102k3@gmail.com		Hoàng	Duy	$2b$12$U0KISdJNlsbGuP5j6i1./.Gn73s/A9knlOPxbo.o/KKUHk1l5KWmm	Hoàng Store	regular	https://lh3.googleusercontent.com/a/ACg8ocJ7cP2G-gS8PhNvAuAlySZ-sbM0-t7ol1WXuYeR3fyPEzRaEig=s96-c	0.0	0	t	2025-10-19 13:10:14.456849
+4	formenshop@example.com	0912345678	Nam	Nguyễn	$2b$12$jgzpQiXGBSwkOLEUkhNA9Oy486o7bEJ64Z7GVK1xEXVWVb9/BFU6G	Formen Shop	regular	avatars/2025/10/4ed5c95a75b64ba8bd169135203fa728.jpg	0.0	0	t	2025-10-24 02:12:42.636128
+5	nesashop@example.com	0712344567	Thu	Nguyễn	$2b$12$Ft2Sutg3Eq6Fyon4CMm7SudqW.cyHZQhk8nI1gOI74rxuROWsNTqO	Nesa Shop	regular	avatars/2025/10/e1071cc405b24a09b99353467e6707e4.jpeg	0.0	0	t	2025-10-24 02:58:58.828688
+8	joymall@example.com	0324506823	Joy	Mall	$2b$12$iRPKZxGH8oxY0qIwMiMY3eSMc26DjieL5PbUt1ODQUlULs7StJXkW	JoyMall Official	regular	avatars/2025/10/ed59eeb713b64e19a356e854aacf815a.jpeg	0.0	0	t	2025-10-24 05:23:15.660603
+7	myphamauth@example.com	06341867475	Mỹ	Phẩm	$2b$12$jIhojCWoq8JAXrGKoDDI3uZ/ovAq7FBIWZ1frR7IqrVBiq.m7ZTRO	Mỹ Phẩm Auth 68	regular	avatars/2025/10/b9ff18c81c754fd99d626b4f7dc629c2.jpg	0.0	0	t	2025-10-24 04:45:25.50184
+6	honghanhmobile@example.com	06341867319	Điện	Thoại	$2b$12$tDWZjgTln/rcOZO4goLfqeUKxW2v.HxxuLxQVXCp9Qt9tmp2Or6UC	Hồng Hạnh Mobile	regular	avatars/2025/10/9c6dd9b5416d43c5abc51ea1324278c2.jpg	0.0	0	t	2025-10-24 04:22:20.066064
 \.
 
 
@@ -2096,5 +2095,5 @@ CREATE PUBLICATION pub_all FOR ALL TABLES WITH (publish = 'insert, update, delet
 -- PostgreSQL database dump complete
 --
 
-\unrestrict 30AcBz9dfVsKof3QHox2QrYzhU7hZO8DthkCYFPf3ezukhKvBMAEXBlU7ulj9Pm
+\unrestrict vqmnGgg1gC2YSqjN51fvuOjqNtjfbhQrdzDnZdTkL8snOWzdIfNuUIgWDgaD4VF
 

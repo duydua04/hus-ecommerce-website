@@ -52,7 +52,6 @@ class Seller(Base):
     avt_url = Column(String(255))
     average_rating = Column(Numeric(2, 1), nullable=False, default=0)
     rating_count = Column(Integer, nullable=False, default=0)
-    is_verified = Column(Boolean, nullable=False, default=False)
     is_active = Column(Boolean, nullable=False, default=True)
     created_at = Column(DateTime, server_default=func.now())
 

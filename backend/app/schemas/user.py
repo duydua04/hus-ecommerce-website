@@ -60,7 +60,6 @@ class SellerUpdate(BaseModel):
     shop_name: str | None = None
     seller_tier: SellerTier | None = None
     avt_url: str | None = None
-    is_verified: bool | None = None
     is_active: bool | None = None
 
 # Response tu server tra ve thong tin cua nguoi ban
@@ -75,5 +74,4 @@ class SellerResponse(TimestampedOut):
     avt_url: str | None = None
     average_rating: float
     rating_count: int
-    is_verified: bool
     is_active: bool
