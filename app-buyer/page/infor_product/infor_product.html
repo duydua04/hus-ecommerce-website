@@ -15,8 +15,8 @@
             <div class="header__left">
                 <div class="brand">
                     <a href="#" class="brand__link">
-                        <img src="../../accets/logo/logo.jpg" alt="Logo brand" class="brand__logo">
-                        <span class="brand__name">BrandName</span>
+                        <div class="brand__logo">🐳</div>
+                        <span class="brand__name">Brandname</span>
                     </a>
                 </div>
             </div>
@@ -130,36 +130,37 @@
             <!-- Product Info -->
             <div class="product__info">
                 <div class="product-info">
-                    <h1 class="product-info__title">Simple Modern Minimalist Nordic Dining Chair for Home or Kitchen</h1>
+                    <h1 class="product-info__title">Ghế mây basic hình heo con decord bếp</h1>
 
                     <div class="product-info__rating">
                         <div class="rating">
                             <span class="rating__stars">★★★★★</span>
                             <span class="rating__score">4.5</span>
-                            <span class="rating__reviews">52 reviews</span>
-                            <span class="rating__orders">15,154 orders</span>
+                            <span class="rating__reviews">52 Đánh giá</span>
+                            <span class="rating__orders">15,154 Lượt mua</span>
                         </div>
                     </div>
 
                     <div class="product-info__stock">
-                        <span class="stock stock--available">In stock</span>
+                        <span class="stock stock--available">Còn hàng</span>
                     </div>
 
                     <ul class="product-info__features">
-                        <li class="product-info__feature">Material: Leather</li>
-                        <li class="product-info__feature">Color: Brown</li>
-                        <li class="product-info__feature">Size: 23 inch x 31 inch</li>
-                        <li class="product-info__feature">Weight: 1500 gr</li>
+                        <li class="product-info__feature">Chất liệu: Leather</li>
+                        <li class="product-info__feature">Màu sắc: Nâu</li>
+                        <li class="product-info__feature">Kích cỡ: 23 inch x 31 inch</li>
+                        <li class="product-info__feature">Cân nặng: 1.500 kg</li>
                     </ul>
 
                     <div class="product-info__options">
                         <div class="product-option">
-                            <label class="product-option__label">Color:</label>
+                            <label class="product-option__label">Màu sắc:</label>
                             <select class="product-option__select">
                                 <option>Choose...</option>
-                                <option>Brown</option>
-                                <option>Black</option>
-                                <option>White</option>
+                                <option>Nâu</option>
+                                <option>Đen</option>
+                                <option>Trắng</option>
+                                <option>Hồng</option>
                             </select>
                         </div>
 
@@ -167,16 +168,16 @@
                             <label class="product-option__label">Size:</label>
                             <div class="product-option__buttons">
                                 <input type="radio" name="size" id="size-large" class="product-option__input" checked>
-                                <label for="size-large" class="product-option__button">Large</label>
+                                <label for="size-large" class="product-option__button">L</label>
 
                                 <input type="radio" name="size" id="size-medium" class="product-option__input">
-                                <label for="size-medium" class="product-option__button">Medium</label>
+                                <label for="size-medium" class="product-option__button">M</label>
 
                                 <input type="radio" name="size" id="size-small" class="product-option__input">
-                                <label for="size-small" class="product-option__button">Small</label>
+                                <label for="size-small" class="product-option__button">S</label>
 
                                 <input type="radio" name="size" id="size-tiny" class="product-option__input">
-                                <label for="size-tiny" class="product-option__button">Tiny</label>
+                                <label for="size-tiny" class="product-option__button">XS</label>
                             </div>
                         </div>
                     </div>
@@ -186,49 +187,45 @@
             <!-- Product Purchase -->
             <div class="product__purchase">
                 <div class="purchase">
-                    <div class="purchase__price">
-                        <span class="purchase__current-price">$98.00</span>
-                        <span class="purchase__original-price">$128.00</span>
+                    <div class="purchase__seller">
+                        <div class="purchase__seller-header">
+                            <div class="purchase__seller-face">🪺</div>
+                            <div class="purchase__seller-infor">
+                                <div class="purchase__seller-name-row">
+                                    <h3 class="purchase__seller-name">Nhà Sách Fusaha</h3>
+                                </div>
+                                <div class="purchase__seller-rank">
+                                    <span class="purchase__seller-stars">★</span>
+                                    <span class="purchase__seller-score">4.8</span>
+                                    <span class="purchase__seller-reviews">(420k+ đánh giá)</span>
+                                </div>
+                            </div>
+                            <button class="purchase__seller-messenger" aria-label="Chat with seller">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
-                    <p class="purchase__tax">Price per kg. Includes VAT</p>
-
+                    <p class="purchase__text">Số lượng</p>
                     <div class="purchase__quantity">
                         <button class="purchase__quantity-btn" id="decreaseBtn">−</button>
                         <input type="number" class="purchase__quantity-input" id="quantityInput" value="1" min="1">
                         <button class="purchase__quantity-btn" id="increaseBtn">+</button>
                     </div>
+                    <p class="purchase__text">Tạm Tính</p>
+
+                    <div class="purchase__price">
+                        <span class="purchase__current-price">98.000₫</span>
+                        <span class="purchase__original-price">128.000₫</span>
+                    </div>
 
                     <button class="purchase__add-to-cart">
-                        🛒 Add to cart
+                        🛒 Thêm Vào Giỏ Hàng
                     </button>
 
-                    <button class="purchase__buy-now">Buy now</button>
+                    <button class="purchase__buy-now">Mua ngay</button>
 
-                    <button class="purchase__wishlist">Add to wishlist</button>
-
-                    <div class="purchase__features">
-                        <div class="purchase__feature">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                            </svg>
-                            <span>Worldwide shipping</span>
-                        </div>
-                        <div class="purchase__feature">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                            </svg>
-                            <span>Secure payment</span>
-                        </div>
-                        <div class="purchase__feature">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                            </svg>
-                            <span>2 years full warranty</span>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -238,42 +235,24 @@
             <!-- Detailed Information Section -->
             <section class="detail-info">
                 <div class="detail-info__container">
-                    <h2 class="detail-info__title">Detailed information</h2>
+                    <h2 class="detail-info__title">Thông tin sản phẩm</h2>
 
                     <div class="detail-info__description">
-                        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
-                        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</br>
+                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</br>
+                        Memory size : 128GB</br>
+                        Material type: Plastic and metall<br>
+                        Screen resolution: 12.5 inch</br>
+                        Power source: Electricity</br>
+                        Compatibility: Android OS, Windows
                     </div>
-
-                    <table class="detail-info__specs">
-                        <tr>
-                            <td class="detail-info__spec-name">Memory size</td>
-                            <td class="detail-info__spec-value">128 GB</td>
-                        </tr>
-                        <tr>
-                            <td class="detail-info__spec-name">Material type</td>
-                            <td class="detail-info__spec-value">Plastic and metall</td>
-                        </tr>
-                        <tr>
-                            <td class="detail-info__spec-name">Screen resolution</td>
-                            <td class="detail-info__spec-value">12.5 inch</td>
-                        </tr>
-                        <tr>
-                            <td class="detail-info__spec-name">Power source</td>
-                            <td class="detail-info__spec-value">Electricity</td>
-                        </tr>
-                        <tr>
-                            <td class="detail-info__spec-name">Compatibility</td>
-                            <td class="detail-info__spec-value">Android OS, Windows</td>
-                        </tr>
-                    </table>
                 </div>
             </section>
 
             <!-- Reviews Section -->
             <section class="reviews">
                 <div class="reviews__container">
-                    <h2 class="reviews__title">Reviews</h2>
+                    <h2 class="reviews__title">Đánh giá</h2>
 
                     <div class="reviews__list">
                         <div class="review">
