@@ -1,3 +1,34 @@
+ // Xử lý tăng/giảm số lượng
+document.querySelectorAll('.cart-item__quantity-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const cartItem = this.closest('.cart-item');
+        const quantityEl = cartItem.querySelector('.cart-item__quantity-value');
+        const decreaseBtn = cartItem.querySelector('[data-action="decrease"]');
+        let quantity = parseInt(quantityEl.textContent);
+
+        if (this.dataset.action === 'increase') {
+            quantity++;
+        } else if (this.dataset.action === 'decrease' && quantity > 1) {
+            quantity--;
+        }
+
+        quantityEl.textContent = quantity;
+        decreaseBtn.disabled = quantity === 1;
+
+        updateItemPrice(cartItem);
+        updateCartSummary();
+    });
+});
+
+//Tăng giảm tiền theo số lượng
+function updateItemPrice(cartItem) {
+    const basePrice = parseFloat(cartItem.dataset.price);
+    const quantity = parseInt(cartItem.querySelector('.cart-item__quantity-value').textContent);
+    const totalPrice = basePrice * quantity;
+
+    cartItem.querySelector('.cart-item__price').textContent = totalPrice.toFixed(2) + '₫';
+}
+
 // Checkbox
 document.querySelectorAll('.seller-group__checkbox').forEach(sellerCheckbox => {
     sellerCheckbox.addEventListener('click', function() {
@@ -149,5 +180,14 @@ if (removeAllButton) {
         }
     });
 }
+
+//Làm mở nút giảm nếu số luognwj =1
+document.querySelectorAll('.cart-item').forEach(item => {
+    const decreaseBtn = item.querySelector('[data-action="decrease"]');
+    const quantity = parseInt(item.querySelector('.cart-item__quantity-value').textContent);
+    if (quantity === 1) {
+        decreaseBtn.disabled = true;
+    }
+});
 
 
