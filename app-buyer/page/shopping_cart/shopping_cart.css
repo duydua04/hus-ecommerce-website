@@ -29,10 +29,127 @@
 }
 
 .cart-items {
-    background-color: white;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+//Seller của sản phẩm
+.seller-group {
+    background-color: var(--blue-200);
     border: 1px solid var(--neutral-200);
     border-radius: var(--border-radius-base);
-    padding: 24px;
+    padding: 20px;
+}
+
+.seller-group__header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--neutral-200);
+    margin-bottom: 16px;
+}
+
+.seller-group__avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 2px solid var(--neutral-200);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--blue-300);
+    font-size: 1.5rem;
+}
+
+.seller-group__info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.seller-group__name-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.seller-group__name {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--neutral-900);
+}
+
+.seller-group__rating {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.85rem;
+}
+
+.seller-group__stars {
+    color: #fbbf24;
+    font-size: 0.9rem;
+}
+
+.seller-group__score {
+    font-weight: 600;
+    color: var(--neutral-900);
+}
+
+.seller-group__reviews {
+    color: var(--neutral-600);
+}
+
+.seller-group__checkbox,
+.seller-group__remove {
+    width: 25px;
+    height: 25px;
+    border: 2px solid var(--neutral-300);
+    background-color: white;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    transition: all 0.3s;
+    position: relative;
+}
+
+.seller-group__checkbox {
+    border-color: var(--neutral-400);
+}
+
+.seller-group__checkbox-icon {
+    opacity: 0;
+    transition: opacity 0.3s;
+    stroke: white;
+}
+
+.seller-group__checkbox:hover {
+    background-color: var(--blue-600);
+    border-color: var(--blue-600);
+}
+
+.seller-group__checkbox.selected {
+    background-color: var(--blue-600);
+    border-color: var(--blue-600);
+}
+
+.seller-group__checkbox.selected .seller-group__checkbox-icon {
+    opacity: 1;
+    stroke: white;
+}
+
+.seller-group__remove:hover {
+    background-color: var(--red-500);
+    border-color: var(--red-500);
+    color: white;
 }
 
 .cart-item {
@@ -135,11 +252,11 @@
     align-items: center;
 }
 
-.cart-item__favorite,
+.cart-item__checkbox,
 .cart-item__remove {
-    width: 36px;
-    height: 36px;
-    border: 1px solid var(--neutral-300);
+    width: 25px;
+    height: 25px;
+    border: 2px solid var(--neutral-300);
     background-color: white;
     border-radius: 6px;
     cursor: pointer;
@@ -147,14 +264,29 @@
     align-items: center;
     justify-content: center;
     font-size: 1.1rem;
-    color: black;
     transition: all 0.3s;
+    position: relative;
 }
 
-.cart-item__favorite:hover {
-    background-color: var(--red-500);
-    border-color: var(--red-500);
-    color: white;
+.cart-item__checkbox-icon {
+    opacity: 0;
+    transition: opacity 0.3s;
+    stroke: white;
+}
+
+.cart-item__checkbox:hover {
+    background-color: var(--blue-600);
+    border-color: var(--blue-600);
+}
+
+.cart-item__checkbox.selected {
+    background-color: var(--blue-600);
+    border-color: var(--blue-600);
+}
+
+.cart-item__checkbox.selected .cart-item__checkbox-icon {
+    opacity: 1;
+    stroke: white;
 }
 
 .cart-item__remove:hover {

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shopping_cart</title>
+    <title>Cart</title>
     <Link rel="stylesheet" href="../web_framework/variables.css">
     <link rel="stylesheet" href="shopping_cart.css">
 </head>
@@ -13,7 +13,7 @@
             <div class="header__left">
                 <div class="brand">
                     <a href="#" class="brand__link">
-                        <img src="../../accets/logo/logo.jpg" alt="Logo brand" class="brand__logo">
+                        <div class="brand__logo">🐳</div>
                         <span class="brand__name">BrandName</span>
                     </a>
                 </div>
@@ -84,39 +84,117 @@
             <!-- Cart Items -->
             <div class="cart-items">
                 <!-- Item 1 -->
-                <div class="cart-item">
-                    <div class="cart-item__image-wrapper">
-                        <div alt="Product" class="cart-item__image">❤️</div>
-                    </div>
-                    <div class="cart-item__content">
-                        <div class="cart-item__top">
-                            <div class="cart-item__info">
-                                <h3 class="cart-item__name">Great product name goes here</h3>
-                                <ul class="cart-item__details">
-                                    <li>Size: medium</li>
-                                    <li>Material: Plastic</li>
-                                    <li>Color: blue</li>
-                                </ul>
+                <div class="seller-group" data-seller="Pagasa">
+                    <div class="seller-group__header">
+                        <div class="seller-group__avatar">🎃</div>
+                        <div class="seller-group__info">
+                            <div class="seller-group__name-row">
+                                <h3 class="seller-group__name">Pagasa</h3>
                             </div>
-                            <div class="cart-item__price">
-                                46.00 USD
-                                <div class="cart-item__bottom">
-                                    <div class="cart-item__quantity">
-                                        <select class="cart-item__quantity-select">
-                                            <option value="1" selected>Qty: 1</option>
-                                            <option value="2">Qty: 2</option>
-                                            <option value="3">Qty: 3</option>
-                                            <option value="4">Qty: 4</option>
-                                            <option value="5">Qty: 5</option>
-                                        </select>
+                            <div class="seller-group__rating">
+                                <span class="seller-group__stars">★</span>
+                                <span class="seller-group__score">4.8</span>
+                                <span class="seller-group__reviews">(420k+ đánh giá)</span>
+                            </div>
+                        </div>
+                        <button class="seller-group__checkbox" title="Select to buy">
+                            <svg class="seller-group__checkbox-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                        </button>
+                        <button class="seller-group__remove" title="Remove seller">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14z"></path>
+                                <line x1="10" y1="11" x2="10" y2="17"></line>
+                                <line x1="14" y1="11" x2="14" y2="17"></line>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="cart-item">
+                        <div class="cart-item__image-wrapper">
+                            <div alt="Product" class="cart-item__image">❤️</div>
+                        </div>
+                        <div class="cart-item__content">
+                            <div class="cart-item__top">
+                                <div class="cart-item__info">
+                                    <h3 class="cart-item__name">Great product name goes here</h3>
+                                    <ul class="cart-item__details">
+                                        <li>Size: medium</li>
+                                        <li>Material: Plastic</li>
+                                        <li>Color: blue</li>
+                                    </ul>
+                                </div>
+                                <div class="cart-item__price">
+                                    46.00 USD
+                                    <div class="cart-item__bottom">
+                                        <div class="cart-item__quantity">
+                                            <select class="cart-item__quantity-select">
+                                                <option value="1" selected>Qty: 1</option>
+                                                <option value="2">Qty: 2</option>
+                                                <option value="3">Qty: 3</option>
+                                                <option value="4">Qty: 4</option>
+                                                <option value="5">Qty: 5</option>
+                                            </select>
+                                        </div>
+                                        <div class="cart-item__actions">
+                                            <button class="cart-item__checkbox" title="Select to buy">
+                                                <svg class="cart-item__checkbox-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                                </svg>
+                                            </button>
+                                            <button class="cart-item__remove" title="Remove item">
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14z"></path>
+                                                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                                                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                                                </svg>
+                                            </button>
+                                        </div>
                                     </div>
-                                    <div class="cart-item__actions">
-                                        <button class="cart-item__favorite" title="Add to favorites">
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M19.4626 3.99415C16.7809 2.34923 14.4404 3.01211 13.0344 4.06801C12.4578 4.50096 12.1696 4.71743 12 4.71743C11.8304 4.71743 11.5422 4.50096 10.9656 4.06801C9.55962 3.01211 7.21909 2.34923 4.53744 3.99415C1.01807 6.15294 0.221721 13.2749 8.33953 19.2834C9.88572 20.4278 10.6588 21 12 21C13.3412 21 14.1143 20.4278 15.6605 19.2834C23.7783 13.2749 22.9819 6.15294 19.4626 3.99415Z" stroke="#14181F" stroke-width="1.5" stroke-linecap="round"></path>
-                                            </svg>
-                                        </button>
-                                        <button class="cart-item__remove" title="Remove item">✕</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Item 2 -->
+                    <div class="cart-item">
+                        <div class="cart-item__image-wrapper">
+                            <div alt="Product" class="cart-item__image">🎃</div>
+                        </div>
+                        <div class="cart-item__content">
+                            <div class="cart-item__top">
+                                <div class="cart-item__info">
+                                    <h3 class="cart-item__name">Cutting-edge device title goes here</h3>
+                                    <ul class="cart-item__details">
+                                        <li>Size: medium</li>
+                                        <li>Material: Plastic</li>
+                                        <li>Color: blue</li>
+                                    </ul>
+                                </div>
+                                <div class="cart-item__price">
+                                    46.00 USD
+                                    <div class="cart-item__bottom">
+                                        <div class="cart-item__quantity">
+                                            <select class="cart-item__quantity-select">
+                                                <option value="1" selected>Qty: 1</option>
+                                                <option value="2">Qty: 2</option>
+                                                <option value="3">Qty: 3</option>
+                                            </select>
+                                        </div>
+                                        <div class="cart-item__actions">
+                                            <button class="cart-item__checkbox" title="Select to buy">
+                                                <svg class="cart-item__checkbox-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                                </svg>
+                                            </button>
+                                            <button class="cart-item__remove" title="Remove item">
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14z"></path>
+                                                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                                                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                                                </svg>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -124,160 +202,158 @@
                     </div>
                 </div>
 
-                <!-- Item 2 -->
-                <div class="cart-item">
-                    <div class="cart-item__image-wrapper">
-                        <div alt="Product" class="cart-item__image">🎃</div>
-                    </div>
-                    <div class="cart-item__content">
-                        <div class="cart-item__top">
-                            <div class="cart-item__info">
-                                <h3 class="cart-item__name">Cutting-edge device title goes here</h3>
-                                <ul class="cart-item__details">
-                                    <li>Size: medium</li>
-                                    <li>Material: Plastic</li>
-                                    <li>Color: blue</li>
-                                </ul>
+                <div class="seller-group" data-seller="Ty Huu">
+                    <div class="seller-group__header">
+                        <div class="seller-group__avatar">🚀</div>
+                        <div class="seller-group__info">
+                            <div class="seller-group__name-row">
+                                <h3 class="seller-group__name">Quán cơm Tỳ Hưu</h3>
                             </div>
-                            <div class="cart-item__price">
-                                46.00 USD
-                                <div class="cart-item__bottom">
-                                    <div class="cart-item__quantity">
-                                        <select class="cart-item__quantity-select">
-                                            <option value="1" selected>Qty: 1</option>
-                                            <option value="2">Qty: 2</option>
-                                            <option value="3">Qty: 3</option>
-                                        </select>
-                                    </div>
-                                    <div class="cart-item__actions">
-                                        <button class="cart-item__favorite" title="Add to favorites">
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M19.4626 3.99415C16.7809 2.34923 14.4404 3.01211 13.0344 4.06801C12.4578 4.50096 12.1696 4.71743 12 4.71743C11.8304 4.71743 11.5422 4.50096 10.9656 4.06801C9.55962 3.01211 7.21909 2.34923 4.53744 3.99415C1.01807 6.15294 0.221721 13.2749 8.33953 19.2834C9.88572 20.4278 10.6588 21 12 21C13.3412 21 14.1143 20.4278 15.6605 19.2834C23.7783 13.2749 22.9819 6.15294 19.4626 3.99415Z" stroke="#14181F" stroke-width="1.5" stroke-linecap="round"></path>
-                                            </svg>
-                                        </button>
-                                        <button class="cart-item__remove" title="Remove item">✕</button>
-                                    </div>
-                                </div>
+                            <div class="seller-group__rating">
+                                <span class="seller-group__stars">★</span>
+                                <span class="seller-group__score">4.6</span>
+                                <span class="seller-group__reviews">(520k+ đánh giá)</span>
                             </div>
                         </div>
+                        <button class="seller-group__checkbox" title="Select to buy">
+                            <svg class="seller-group__checkbox-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                        </button>
                     </div>
-                </div>
-
                 <!-- Item 3 -->
-                <div class="cart-item">
-                    <div class="cart-item__image-wrapper">
-                        <div alt="Product" class="cart-item__image">🥼</div>
-                    </div>
-                    <div class="cart-item__content">
-                        <div class="cart-item__top">
-                            <div class="cart-item__info">
-                                <h3 class="cart-item__name">Hot sale wholesale Original Second hand</h3>
-                                <ul class="cart-item__details">
-                                    <li>Size: medium</li>
-                                    <li>Material: Plastic</li>
-                                    <li>Color: blue</li>
-                                </ul>
-                            </div>
-                            <div class="cart-item__price">
-                                46.00 USD
-                                <div class="cart-item__bottom">
-                                    <div class="cart-item__quantity">
-                                        <select class="cart-item__quantity-select">
-                                            <option value="1" selected>Qty: 1</option>
-                                            <option value="2">Qty: 2</option>
-                                            <option value="3">Qty: 3</option>
-                                        </select>
+                    <div class="cart-item">
+                        <div class="cart-item__image-wrapper">
+                            <div alt="Product" class="cart-item__image">🥼</div>
+                        </div>
+                        <div class="cart-item__content">
+                            <div class="cart-item__top">
+                                <div class="cart-item__info">
+                                    <h3 class="cart-item__name">Hot sale wholesale Original Second hand</h3>
+                                    <ul class="cart-item__details">
+                                        <li>Size: medium</li>
+                                        <li>Material: Plastic</li>
+                                        <li>Color: blue</li>
+                                    </ul>
+                                </div>
+                                <div class="cart-item__price">
+                                    46.00 USD
+                                    <div class="cart-item__bottom">
+                                        <div class="cart-item__quantity">
+                                            <select class="cart-item__quantity-select">
+                                                <option value="1" selected>Qty: 1</option>
+                                                <option value="2">Qty: 2</option>
+                                                <option value="3">Qty: 3</option>
+                                            </select>
+                                        </div>
+                                        <div class="cart-item__actions">
+                                            <button class="cart-item__checkbox" title="Select to buy">
+                                                <svg class="cart-item__checkbox-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                                </svg>
+                                            </button>
+                                            <button class="cart-item__remove" title="Remove item">
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14z"></path>
+                                                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                                                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                                                </svg>
+                                            </button>
+                                        </div>
                                     </div>
-                                    <div class="cart-item__actions">
-                                        <button class="cart-item__favorite" title="Add to favorites">
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M19.4626 3.99415C16.7809 2.34923 14.4404 3.01211 13.0344 4.06801C12.4578 4.50096 12.1696 4.71743 12 4.71743C11.8304 4.71743 11.5422 4.50096 10.9656 4.06801C9.55962 3.01211 7.21909 2.34923 4.53744 3.99415C1.01807 6.15294 0.221721 13.2749 8.33953 19.2834C9.88572 20.4278 10.6588 21 12 21C13.3412 21 14.1143 20.4278 15.6605 19.2834C23.7783 13.2749 22.9819 6.15294 19.4626 3.99415Z" stroke="#14181F" stroke-width="1.5" stroke-linecap="round"></path>
-                                            </svg>
-                                        </button>
-                                        <button class="cart-item__remove" title="Remove item">✕</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Item 4 -->
+                    <div class="cart-item">
+                        <div class="cart-item__image-wrapper">
+                            <div alt="Product" class="cart-item__image">🛹</div>
+                        </div>
+                        <div class="cart-item__content">
+                            <div class="cart-item__top">
+                                <div class="cart-item__info">
+                                    <h3 class="cart-item__name">Great product name goes here</h3>
+                                    <ul class="cart-item__details">
+                                        <li>Size: XXL</li>
+                                        <li>Color: Orange</li>
+                                    </ul>
+                                </div>
+                                <div class="cart-item__price">
+                                    46.00 USD
+                                    <div class="cart-item__bottom">
+                                        <div class="cart-item__quantity">
+                                            <select class="cart-item__quantity-select">
+                                                <option value="1" selected>Qty: 1</option>
+                                                <option value="2">Qty: 2</option>
+                                                <option value="3">Qty: 3</option>
+                                            </select>
+                                        </div>
+                                        <div class="cart-item__actions">
+                                            <button class="cart-item__checkbox" title="Select to buy">
+                                                <svg class="cart-item__checkbox-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                                </svg>
+                                            </button>
+                                            <button class="cart-item__remove" title="Remove item">
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14z"></path>
+                                                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                                                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Item 5 -->
+                    <div class="cart-item">
+                        <div class="cart-item__image-wrapper">
+                            <div alt="Product" class="cart-item__image">🛞</div>
+                        </div>
+                        <div class="cart-item__content">
+                            <div class="cart-item__top">
+                                <div class="cart-item__info">
+                                    <h3 class="cart-item__name">Great product name goes here</h3>
+                                    <ul class="cart-item__details">
+                                        <li>Size: Small</li>
+                                        <li>Material: Metallic</li>
+                                    </ul>
+                                </div>
+                                <div class="cart-item__price">
+                                    46.00 USD
+                                    <div class="cart-item__bottom">
+                                        <div class="cart-item__quantity">
+                                            <select class="cart-item__quantity-select">
+                                                <option value="1" selected>Qty: 1</option>
+                                                <option value="2">Qty: 2</option>
+                                                <option value="3">Qty: 3</option>
+                                            </select>
+                                        </div>
+                                        <div class="cart-item__actions">
+                                            <button class="cart-item__checkbox" title="Select to buy">
+                                                <svg class="cart-item__checkbox-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                                </svg>
+                                            </button>
+                                            <button class="cart-item__remove" title="Remove item">
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14z"></path>
+                                                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                                                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                                                </svg>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <!-- Item 4 -->
-                <div class="cart-item">
-                    <div class="cart-item__image-wrapper">
-                        <div alt="Product" class="cart-item__image">🛹</div>
-                    </div>
-                    <div class="cart-item__content">
-                        <div class="cart-item__top">
-                            <div class="cart-item__info">
-                                <h3 class="cart-item__name">Great product name goes here</h3>
-                                <ul class="cart-item__details">
-                                    <li>Size: XXL</li>
-                                    <li>Color: Orange</li>
-                                </ul>
-                            </div>
-                            <div class="cart-item__price">
-                                46.00 USD
-                                <div class="cart-item__bottom">
-                                    <div class="cart-item__quantity">
-                                        <select class="cart-item__quantity-select">
-                                            <option value="1" selected>Qty: 1</option>
-                                            <option value="2">Qty: 2</option>
-                                            <option value="3">Qty: 3</option>
-                                        </select>
-                                    </div>
-                                    <div class="cart-item__actions">
-                                        <button class="cart-item__favorite" title="Add to favorites">
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M19.4626 3.99415C16.7809 2.34923 14.4404 3.01211 13.0344 4.06801C12.4578 4.50096 12.1696 4.71743 12 4.71743C11.8304 4.71743 11.5422 4.50096 10.9656 4.06801C9.55962 3.01211 7.21909 2.34923 4.53744 3.99415C1.01807 6.15294 0.221721 13.2749 8.33953 19.2834C9.88572 20.4278 10.6588 21 12 21C13.3412 21 14.1143 20.4278 15.6605 19.2834C23.7783 13.2749 22.9819 6.15294 19.4626 3.99415Z" stroke="#14181F" stroke-width="1.5" stroke-linecap="round"></path>
-                                            </svg>
-                                        </button>
-                                        <button class="cart-item__remove" title="Remove item">✕</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Item 5 -->
-                <div class="cart-item">
-                    <div class="cart-item__image-wrapper">
-                        <div alt="Product" class="cart-item__image">🛞</div>
-                    </div>
-                    <div class="cart-item__content">
-                        <div class="cart-item__top">
-                            <div class="cart-item__info">
-                                <h3 class="cart-item__name">Great product name goes here</h3>
-                                <ul class="cart-item__details">
-                                    <li>Size: Small</li>
-                                    <li>Material: Metallic</li>
-                                </ul>
-                            </div>
-                            <div class="cart-item__price">
-                                46.00 USD
-                                <div class="cart-item__bottom">
-                                    <div class="cart-item__quantity">
-                                        <select class="cart-item__quantity-select">
-                                            <option value="1" selected>Qty: 1</option>
-                                            <option value="2">Qty: 2</option>
-                                            <option value="3">Qty: 3</option>
-                                        </select>
-                                    </div>
-                                    <div class="cart-item__actions">
-                                        <button class="cart-item__favorite" title="Add to favorites">
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M19.4626 3.99415C16.7809 2.34923 14.4404 3.01211 13.0344 4.06801C12.4578 4.50096 12.1696 4.71743 12 4.71743C11.8304 4.71743 11.5422 4.50096 10.9656 4.06801C9.55962 3.01211 7.21909 2.34923 4.53744 3.99415C1.01807 6.15294 0.221721 13.2749 8.33953 19.2834C9.88572 20.4278 10.6588 21 12 21C13.3412 21 14.1143 20.4278 15.6605 19.2834C23.7783 13.2749 22.9819 6.15294 19.4626 3.99415Z" stroke="#14181F" stroke-width="1.5" stroke-linecap="round"></path>
-                                            </svg>
-                                        </button>
-                                        <button class="cart-item__remove" title="Remove item">✕</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
 
                 <div class="cart-items__footer">
                     <button class="cart-items__remove-all">Remove all from cart</button>
