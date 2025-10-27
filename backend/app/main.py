@@ -39,3 +39,6 @@ app.include_router(admin_manage_discount_router)
 app.include_router(admin_manage_carrier_router)
 app.include_router(seller_review_router)
 app.include_router(seller_order_router)
+
+from .controller.seller.seller_profile_controller import router as seller_profile_router
+app.include_router(seller_profile_router)
