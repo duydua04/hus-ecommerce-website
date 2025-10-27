@@ -115,6 +115,7 @@ body {
     -webkit-text-size-adjust: 100%;
     background-color: white;
     color: black;
+    padding-top: 80px;
 }
 
 @media (max-width: 640px) {
@@ -136,6 +137,23 @@ body {
     margin: 0 auto;
     gap: 20px;
     box-sizing: border-box;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background-color: white;
+    z-index: 1000;
+}
+
+.header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 100vw;
+    height: 100%;
+    background-color: white;
+    z-index: -1;
 }
 .header__left {
     display: flex;

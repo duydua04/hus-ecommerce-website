@@ -1,4 +1,8 @@
- // Xử lý tăng/giảm số lượng
+function formatVND(amount) {
+   return amount.toLocaleString('vi-VN') + '₫';
+}
+
+// Xử lý tăng/giảm số lượng
 document.querySelectorAll('.cart-item__quantity-btn').forEach(btn => {
     btn.addEventListener('click', function() {
         const cartItem = this.closest('.cart-item');
@@ -21,12 +25,23 @@ document.querySelectorAll('.cart-item__quantity-btn').forEach(btn => {
 });
 
 //Tăng giảm tiền theo số lượng
-function updateItemPrice(cartItem) {
-    const basePrice = parseFloat(cartItem.dataset.price);
-    const quantity = parseInt(cartItem.querySelector('.cart-item__quantity-value').textContent);
-    const totalPrice = basePrice * quantity;
+function getBasePrice(cartItem) {
+    const priceText = cartItem.querySelector('.cart-item__price-value').textContent;
+    // Loại bỏ dấu chấm, khoảng trắng và ký tự ₫
+    const priceNumber = priceText.replace(/\./g, '').replace(/₫/g, '').trim();
+    return parseFloat(priceNumber);
+}
 
-    cartItem.querySelector('.cart-item__price').textContent = totalPrice.toFixed(2) + '₫';
+function updateItemPrice(cartItem) {
+    // Lưu giá gốc vào thuộc tính tùy chỉnh nếu chưa có
+    if (!cartItem._basePrice) {
+        cartItem._basePrice = getBasePrice(cartItem);
+    }
+
+    const quantity = parseInt(cartItem.querySelector('.cart-item__quantity-value').textContent);
+    const totalPrice = cartItem._basePrice * quantity;
+
+    cartItem.querySelector('.cart-item__price-value').textContent = formatVND(totalPrice);
 }
 
 // Checkbox
