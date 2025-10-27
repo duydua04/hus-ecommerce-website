@@ -9,7 +9,10 @@
       rel="stylesheet"
     />
     <!--My css-->
-    <link rel="stylesheet" href="../style.css" />
+    <link rel="stylesheet" href="../css/base.css" />
+    <link rel="stylesheet" href="../css/layout.css" />
+    <link rel="stylesheet" href="../css/components.css" />
+    <link rel="stylesheet" href="../css/pages.css" />
 
     <title>AdminHub</title>
   </head>
@@ -33,11 +36,24 @@
             <span class="sidebar__menu-text">Danh mục</span>
           </a>
         </li>
-        <li class="sidebar__menu-item sidebar__menu-item--active">
-          <a href="user.html" class="sidebar__menu-link">
+        <li class="sidebar__menu-item">
+          <a href="#" class="sidebar__menu-link sidebar__menu-link--dropdown">
             <i class="bx bx-user sidebar__menu-icon"></i>
             <span class="sidebar__menu-text">Người dùng</span>
+            <i class="bx bx-chevron-down sidebar__menu-arrow"></i>
           </a>
+          <ul class="sidebar__submenu">
+            <li class="sidebar__submenu-item">
+              <a href="buyer.html" class="sidebar__submenu-link">
+                <span class="sidebar__submenu-text">Người mua</span>
+              </a>
+            </li>
+            <li class="sidebar__submenu-item">
+              <a href="seller.html" class="sidebar__submenu-link">
+                <span class="sidebar__submenu-text">Người bán</span>
+              </a>
+            </li>
+          </ul>
         </li>
         <li class="sidebar__menu-item">
           <a href="discount.html" class="sidebar__menu-link">
@@ -110,6 +126,13 @@
         <div class="toolbar"></div>
       </main>
     </section>
-    <script src="../script.js"></script>
+    <!-- Components (load trước) -->
+    <script src="../js/components.js"></script>
+
+    <!-- Pages -->
+    <script src="../js/pages/user.js"></script>
+
+    <!-- Main (load sau cùng) -->
+    <script src="../js/main.js"></script>
   </body>
 </html>

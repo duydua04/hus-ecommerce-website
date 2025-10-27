@@ -812,3 +812,46 @@ body {
     font-size: 16px;
   }
 }
+
+/* Submenu styles */
+.sidebar__submenu {
+  list-style: none;
+  padding-left: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+
+.sidebar__menu-item--active .sidebar__submenu {
+  max-height: 200px;
+}
+
+.sidebar__submenu-item {
+  padding: 0;
+}
+
+.sidebar__submenu-link {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px 12px 60px;
+  color: inherit;
+  text-decoration: none;
+  transition: background-color 0.3s;
+}
+
+.sidebar__submenu-link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar__submenu-text {
+  font-size: 14px;
+}
+
+.sidebar__menu-arrow {
+  margin-left: auto;
+  transition: transform 0.3s ease;
+}
+
+.sidebar__menu-item--active .sidebar__menu-arrow {
+  transform: rotate(180deg);
+}
