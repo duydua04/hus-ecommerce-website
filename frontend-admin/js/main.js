@@ -1,8 +1,8 @@
-/*MAIN.JS - File khởi chạy chính của ứng dụng*/
+/*FILE KHỞI CHẠY CHÍNH CỦA ỨNG DỤNG*/
 
 /*Chờ DOM load xong rồi mới chạy*/
 document.addEventListener("DOMContentLoaded", function () {
-  console.log("🚀 App initialized!");
+  console.log("App initialized!");
 
   // Khởi tạo tất cả components
   if (typeof initComponents === "function") {

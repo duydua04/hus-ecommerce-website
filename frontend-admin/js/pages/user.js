@@ -1,9 +1,7 @@
-/*===============================================
-  USER.JS - Xử lý trang Người dùng
-===============================================*/
+/*XỬ LÝ TRANG NGƯỜI DÙNG*/
 
 function initUser() {
-  console.log("👤 User page initialized!");
+  console.log("User page initialized!");
 
   // Xử lý riêng cho trang user
   loadUserList();
@@ -20,8 +18,10 @@ function loadUserList() {
 
 /*Xử lý tìm kiếm user*/
 function initUserSearch() {
-  const searchInput = document.querySelector(".toolbar__search .search-box__input");
-  
+  const searchInput = document.querySelector(
+    ".toolbar__search .search-box__input"
+  );
+
   if (searchInput) {
     searchInput.addEventListener("input", function (e) {
       const keyword = e.target.value.toLowerCase();
