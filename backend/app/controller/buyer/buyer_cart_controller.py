@@ -9,7 +9,8 @@ from pydantic import BaseModel
 from decimal import Decimal
 from sqlalchemy.orm import selectinload
 from datetime import datetime
-
+from ...middleware.auth import require_buyer
+from ...models.users import Buyer
 router = APIRouter(
     prefix="/buyer/cart",
     tags=["cart"]
@@ -24,18 +25,21 @@ def get_product_options(product_id: int, db: Session = Depends(get_db)):
 # === THÊM SẢN PHẨM VÀO GIỎ HÀNG ====
 # Request schema
 class AddToCartRequest(BaseModel):
-    buyer_id: int
     product_id: int
     variant_id: Optional[int] = None
     size_id: Optional[int] = None
     quantity: int = 1
 
 @router.post("/addToCart")
-def add_to_cart(payload: AddToCartRequest, db: Session = Depends(get_db)):
+def add_to_cart(
+    payload: AddToCartRequest,
+    db: Session = Depends(get_db),
+    buyer: Buyer = Depends(require_buyer)
+):
     try:
         cart = buyer_cart_service.add_to_cart(
             db=db,
-            buyer_id=payload.buyer_id,
+            buyer_id = buyer["user"].buyer_id,  # ✅ Lấy buyer_id từ token (đã xác thực)
             product_id=payload.product_id,
             variant_id=payload.variant_id,
             size_id=payload.size_id,
@@ -51,20 +55,22 @@ def add_to_cart(payload: AddToCartRequest, db: Session = Depends(get_db)):
 
 # === HIỂN THỊ GIỎ HÀNG CỦA NGƯỜI DÙNG ===
 @router.get('/showCart/{buyer_id}')
-def get_buyer_cart(buyer_id : int, db: Session = Depends(get_db)):
+def get_buyer_cart(buyer: Buyer  = Depends(require_buyer), db: Session = Depends(get_db)):
+    buyer_id = buyer["user"].buyer_id
     return buyer_cart_service.get_buyer_cart(buyer_id, db)
 
 
 # ===== XÓA SẢN PHẨM KHỎI GIỎ HÀNG ======
 @router.delete('/buyer/{buyer_id}/product/{product_id}')
-def delete_product(product_id : int, buyer_id: int, db: Session = Depends(get_db)):
+def delete_product(product_id : int, buyer: Buyer  = Depends(require_buyer), db: Session = Depends(get_db)):
+    buyer_id = buyer["user"].buyer_id
     return buyer_cart_service.buyer_delete_product(buyer_id, product_id, db)
 
 # ===== TÍNH TỔNG TIỀN SẢN PHẨM ĐỊNH MUA =====
 class CartSummaryRequest(BaseModel):
-    buyer_id: int
     list_product_id: list[int]
 
 @router.post("/summary")
-def buyer_cart_summary(request: CartSummaryRequest, db: Session = Depends(get_db)):
-    return buyer_cart_service.cart_summary(request.buyer_id, request.list_product_id, db)
+def buyer_cart_summary(request: CartSummaryRequest,db: Session = Depends(get_db),buyer: Buyer = Depends(require_buyer)):
+    buyer_id = buyer["user"].buyer_id
+    return buyer_cart_service.cart_summary(buyer_id, request.list_product_id, db)
