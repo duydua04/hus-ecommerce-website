@@ -1,6 +1,4 @@
-/*===============================================
-  DASHBOARD.JS - Xử lý trang Dashboard
-===============================================*/
+/*XỬ LÝ TRANG DASHBOARD*/
 
 function initDashboard() {
   console.log("Dashboard initialized!");

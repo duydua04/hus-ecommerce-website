@@ -1,9 +1,7 @@
-/*===============================================
-  CATEGORY.JS - Xử lý trang Danh mục
-===============================================*/
+/*XỬ LÝ TRANG DANH MỤC*/
 
 function initCategory() {
-  console.log("📁 Category page initialized!");
+  console.log("Category page initialized!");
 
   // Xử lý riêng cho trang category
   loadCategoryList();
