@@ -36,7 +36,7 @@
             <span class="sidebar__menu-text">Danh mục</span>
           </a>
         </li>
-        <li class="sidebar__menu-item">
+        <li class="sidebar__menu-item sidebar__menu-item--active">
           <a href="#" class="sidebar__menu-link sidebar__menu-link--dropdown">
             <i class="bx bx-user sidebar__menu-icon"></i>
             <span class="sidebar__menu-text">Người dùng</span>
@@ -49,13 +49,16 @@
               </a>
             </li>
             <li class="sidebar__submenu-item">
-              <a href="seller.html" class="sidebar__submenu-link">
+              <a
+                href="seller.html"
+                class="sidebar__submenu-link sidebar__submenu-link--active"
+              >
                 <span class="sidebar__submenu-text">Người bán</span>
               </a>
             </li>
           </ul>
         </li>
-        <li class="sidebar__menu-item sidebar__menu-item--active">
+        <li class="sidebar__menu-item">
           <a href="discount.html" class="sidebar__menu-link">
             <i class="bx bx-purchase-tag-alt sidebar__menu-icon"></i>
             <span class="sidebar__menu-text">Giảm giá</span>
@@ -104,7 +107,7 @@
       <main class="main">
         <!-- Block: page-header -->
         <div class="page-header">
-          <h1 class="page-header__title">Giảm giá</h1>
+          <h1 class="page-header__title">Người bán</h1>
           <ul class="page-header__breadcrumb breadcrumb">
             <li class="breadcrumb__item">
               <a href="dashboard.html" class="breadcrumb__link">Trang chủ</a>
@@ -114,98 +117,23 @@
             </li>
             <li class="breadcrumb__item">
               <a
-                href="discount.html"
+                href="user.html"
                 class="breadcrumb__link breadcrumb__link--active"
-                >Giảm giá</a
+                >Người bán</a
               >
             </li>
           </ul>
         </div>
 
         <!-- Block: toolbar -->
-        <div class="toolbar">
-          <!-- Element: toolbar__header -->
-          <div class="toolbar__header">
-            <div class="toolbar__title">
-              <h3 class="toolbar__title-text">Danh sách đơn hàng</h3>
-              <p class="toolbar__title-desc">
-                Quản lý và theo dõi sản phẩm của cửa hàng
-              </p>
-            </div>
-            <button class="toolbar__btn-add btn btn--primary">
-              <i class="bx bx-plus btn__icon"></i>
-              <span class="btn__text">Thêm đơn hàng</span>
-            </button>
-          </div>
-
-          <!-- Element: toolbar__actions -->
-          <div class="toolbar__actions">
-            <div class="toolbar__search search-box">
-              <i class="bx bx-search search-box__icon"></i>
-              <input
-                type="text"
-                class="search-box__input"
-                placeholder="Tìm kiếm đơn hàng..."
-              />
-            </div>
-            <button class="toolbar__btn-filter btn btn--secondary">
-              <i class="bx bx-filter btn__icon"></i>
-              <span class="btn__text">Lọc</span>
-            </button>
-          </div>
-
-          <!-- Element: toolbar__table -->
-          <div class="toolbar__table">
-            <table class="table">
-              <thead class="table__head">
-                <tr class="table__row">
-                  <th class="table__header">Cột 1</th>
-                  <th class="table__header">Cột 2</th>
-                  <th class="table__header table__header--hide-mobile">
-                    Cột 3
-                  </th>
-                  <th class="table__header table__header--hide-mobile">
-                    Cột 4
-                  </th>
-                  <th class="table__header table__header--hide-tablet">
-                    Cột 5
-                  </th>
-                  <th class="table__header table__header--actions">Cột 6</th>
-                </tr>
-              </thead>
-              <tbody class="table__body"></tbody>
-            </table>
-          </div>
-
-          <!-- Element: toolbar__pagination -->
-          <div class="toolbar__pagination pagination">
-            <button class="pagination__btn">
-              <i class="bx bx-chevron-left pagination__icon"></i>
-            </button>
-            <button class="pagination__btn pagination__btn--active">1</button>
-            <button class="pagination__btn">2</button>
-            <button class="pagination__btn">3</button>
-            <button class="pagination__btn pagination__btn--hide-mobile">
-              4
-            </button>
-            <span class="pagination__dots pagination__dots--hide-mobile"
-              >...</span
-            >
-            <button class="pagination__btn pagination__btn--hide-mobile">
-              10
-            </button>
-            <button class="pagination__btn">
-              <i class="bx bx-chevron-right pagination__icon"></i>
-            </button>
-          </div>
-        </div>
+        <div class="toolbar"></div>
       </main>
     </section>
     <!-- Components (load trước) -->
     <script src="../js/components.js"></script>
 
     <!-- Pages -->
-    <!--<script src="../js/pages/category.js"></script> -->
+    <script src="../js/pages/user.js"></script>
 
     <!-- Main (load sau cùng) -->
     <script src="../js/main.js"></script>

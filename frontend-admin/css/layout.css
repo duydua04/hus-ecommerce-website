@@ -1,0 +1,288 @@
+/*Bố cục: sidebar, navbar, content, main*/
+
+/*BLOCK: sidebar - Menu bên trái trang*/
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: var(--sidebar-width);
+  height: 100vh;
+  background: var(--bg-white);
+  border-right: 1px solid var(--border-color);
+  z-index: 1000;
+  transition: var(--transition);
+  overflow-x: hidden;
+}
+
+/* MODIFIER: sidebar--collapsed - Sidebar thu gọn */
+.sidebar--collapsed {
+  width: var(--sidebar-collapsed);
+}
+
+/* ELEMENT: sidebar__brand - Logo/Brand */
+.sidebar__brand {
+  height: var(--navbar-height);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 20px;
+  color: var(--blue);
+  font-size: 20px;
+  font-weight: 700;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.sidebar__brand-icon {
+  font-size: 28px;
+  min-width: 30px;
+}
+
+.sidebar--collapsed .sidebar__brand-text {
+  display: none;
+}
+
+/* ELEMENT: sidebar__menu - Menu navigation */
+.sidebar__menu {
+  padding: 20px 12px;
+}
+
+.sidebar__menu-item {
+  margin-bottom: 8px;
+}
+
+.sidebar__menu-link {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  color: var(--text-secondary);
+  font-size: 15px;
+  font-weight: 500;
+  transition: var(--transition);
+  white-space: nowrap;
+}
+
+.sidebar__menu-link:hover {
+  background: var(--bg-hover);
+  color: var(--blue);
+}
+
+/* MODIFIER: sidebar__menu-item--active - Item đang active */
+.sidebar__menu-item--active .sidebar__menu-link {
+  background: var(--blue-light);
+  color: var(--blue);
+}
+
+.sidebar__menu-icon {
+  font-size: 22px;
+  min-width: 22px;
+}
+
+.sidebar--collapsed .sidebar__menu-link {
+  justify-content: center;
+  padding: 12px;
+}
+
+.sidebar--collapsed .sidebar__menu-text {
+  display: none;
+}
+
+/* Submenu styles */
+.sidebar__submenu {
+  list-style: none;
+  padding-left: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  margin-top: 4px;
+  margin-bottom: 6px;
+}
+
+.sidebar__menu-item--active .sidebar__submenu {
+  max-height: 500px;
+}
+
+.sidebar__submenu-item {
+  padding: 0;
+  margin-left: 40px; /* thụt vào so với menu cha */
+}
+
+.sidebar__submenu-link {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 20px;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 8px;
+  margin: 6px 0;
+  background-color: transparent;
+  transition: var(--transition);
+}
+
+.sidebar__submenu-link:hover,
+.sidebar__submenu-link--active {
+  color: var(--blue);
+}
+
+.sidebar__submenu-link:hover {
+  background-color: var(--bg-hover);
+}
+
+.sidebar__submenu-link--active {
+  background-color: var(--blue-light);
+}
+
+.sidebar__menu-arrow {
+  margin-left: auto;
+  transition: transform 0.3s ease;
+}
+
+.sidebar__menu-item--active .sidebar__menu-arrow {
+  transform: rotate(180deg);
+}
+
+/*BLOCK: content - Phần nội dung*/
+.content {
+  margin-left: var(--sidebar-width);
+  min-height: 100vh;
+  transition: var(--transition);
+}
+
+.sidebar--collapsed ~ .content {
+  margin-left: var(--sidebar-collapsed);
+}
+
+/*BLOCK: navbar - Thanh điều hướng trên cùng*/
+.navbar {
+  height: var(--navbar-height);
+  background: var(--bg-white);
+  border-bottom: 1px solid var(--border-color);
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+/* ELEMENT: navbar__left - Phần bên trái */
+.navbar__left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.navbar__menu-icon {
+  font-size: 24px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  color: var(--text-secondary);
+  transition: var(--transition);
+}
+
+.navbar__menu-icon:hover {
+  background: var(--bg-hover);
+  color: var(--blue);
+}
+
+/* ELEMENT: navbar__search - Search box */
+.navbar__search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  min-width: 280px;
+  transition: var(--transition);
+}
+
+.navbar__search:focus-within {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px var(--blue-light);
+}
+
+.navbar__search-icon {
+  color: var(--text-muted);
+  font-size: 18px;
+}
+
+.navbar__search-input {
+  border: none;
+  outline: none;
+  background: transparent;
+  width: 100%;
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+/* ELEMENT: navbar__right - Phần bên phải */
+.navbar__right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+/* ELEMENT: navbar__notification - Icon thông báo */
+.navbar__notification {
+  position: relative;
+  font-size: 22px;
+  color: var(--text-secondary);
+  padding: 8px;
+  border-radius: 8px;
+  transition: var(--transition);
+}
+
+.navbar__notification:hover {
+  background: var(--bg-hover);
+  color: var(--blue);
+}
+
+.navbar__notification-icon {
+  display: block;
+}
+
+.navbar__notification-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 10px;
+  background: var(--red);
+  color: white;
+  font-size: 11px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ELEMENT: navbar__profile - Avatar profile */
+.navbar__profile-img {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--border-color);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.navbar__profile-img:hover {
+  border-color: var(--blue);
+}
+
+/*BLOCK: main - Phần nội dung chính*/
+.main {
+  padding: 32px 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}

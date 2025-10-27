@@ -24,4 +24,14 @@ if (menuToggleIcon && sidebar) {
     sidebar.classList.toggle("sidebar--collapsed");
   });
 }
-//
+
+// Toggle submenu
+document.querySelectorAll(".sidebar__menu-link--dropdown").forEach((link) => {
+  link.addEventListener("click", function (e) {
+    e.preventDefault();
+    const menuItem = this.parentElement;
+
+    // Toggle active class
+    menuItem.classList.toggle("sidebar__menu-item--active");
+  });
+});
