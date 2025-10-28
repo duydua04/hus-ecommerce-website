@@ -9,7 +9,10 @@
       rel="stylesheet"
     />
     <!--My css-->
-    <link rel="stylesheet" href="../style.css" />
+    <link rel="stylesheet" href="../css/base.css" />
+    <link rel="stylesheet" href="../css/layout.css" />
+    <link rel="stylesheet" href="../css/components.css" />
+    <link rel="stylesheet" href="../css/pages.css" />
 
     <title>SellerHub</title>
   </head>
@@ -191,6 +194,15 @@
         </div>
       </main>
     </section>
-    <script src="../script.js"></script>
+    <!-- Components (load trước) -->
+    <script src="../js/components.js"></script>
+
+    <!-- Pages -->
+    <!--
+    <script src="../js/pages/user.js"></script>
+    -->
+
+    <!-- Main (load sau cùng) -->
+    <script src="../js/main.js"></script>
   </body>
 </html>
