@@ -127,14 +127,14 @@
           <!-- Element: toolbar__header -->
           <div class="toolbar__header">
             <div class="toolbar__title">
-              <h3 class="toolbar__title-text">Danh sách đơn hàng</h3>
+              <h3 class="toolbar__title-text">Danh sách mã giảm giá</h3>
               <p class="toolbar__title-desc">
-                Quản lý và theo dõi sản phẩm của cửa hàng
+                Quản lý và theo dõi các mã giảm giá của cửa hàng
               </p>
             </div>
             <button class="toolbar__btn-add btn btn--primary">
               <i class="bx bx-plus btn__icon"></i>
-              <span class="btn__text">Thêm đơn hàng</span>
+              <span class="btn__text">Thêm mã</span>
             </button>
           </div>
 
@@ -145,7 +145,7 @@
               <input
                 type="text"
                 class="search-box__input"
-                placeholder="Tìm kiếm đơn hàng..."
+                placeholder="Tìm kiếm mã..."
               />
             </div>
             <button class="toolbar__btn-filter btn btn--secondary">
@@ -159,21 +159,42 @@
             <table class="table">
               <thead class="table__head">
                 <tr class="table__row">
-                  <th class="table__header">Cột 1</th>
-                  <th class="table__header">Cột 2</th>
+                  <th class="table__header">Mã giảm giá</th>
+                  <th class="table__header">Tỉ lệ giảm giá</th>
                   <th class="table__header table__header--hide-mobile">
-                    Cột 3
+                    Đơn hàng tối thiểu
                   </th>
                   <th class="table__header table__header--hide-mobile">
-                    Cột 4
+                    Max Discount
                   </th>
-                  <th class="table__header table__header--hide-tablet">
-                    Cột 5
+                  <th class="table__header">Bắt đầu</th>
+                  <th class="table__header">Kết thúc</th>
+                  <th class="table__header table__header--actions">
+                    Hành động
                   </th>
-                  <th class="table__header table__header--actions">Cột 6</th>
                 </tr>
               </thead>
-              <tbody class="table__body"></tbody>
+              <tbody class="table__body">
+                <tr class="table__row">
+                  <td class="table__cell">.....</td>
+                  <td class="table__cell">.....</td>
+                  <td class="table__cell table__cell--hide-mobile">.....</td>
+                  <td class="table__cell table__cell--hide-mobile">.....</td>
+                  <td class="table__cell">.....</td>
+                  <td class="table__cell">.....</td>
+                  <td class="table__cell table__cell--actions">
+                    <button class="action-btn action-btn--view" title="Xem">
+                      <i class="bx bx-show action-btn__icon"></i>
+                    </button>
+                    <button class="action-btn action-btn--edit" title="Sửa">
+                      <i class="bx bx-edit action-btn__icon"></i>
+                    </button>
+                    <button class="action-btn action-btn--delete" title="Xóa">
+                      <i class="bx bx-trash action-btn__icon"></i>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
             </table>
           </div>
 
