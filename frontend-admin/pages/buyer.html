@@ -126,7 +126,96 @@
         </div>
 
         <!-- Block: toolbar -->
-        <div class="toolbar"></div>
+        <div class="toolbar">
+          <!-- Element: toolbar__header -->
+          <div class="toolbar__header">
+            <div class="toolbar__title">
+              <h3 class="toolbar__title-text">Danh sách khách hàng</h3>
+              <p class="toolbar__title-desc">Quản lý và theo dõi khách hàng</p>
+            </div>
+            <button class="toolbar__btn-add btn btn--primary">
+              <i class="bx bx-plus btn__icon"></i>
+              <span class="btn__text">Thêm khách hàng</span>
+            </button>
+          </div>
+
+          <!-- Element: toolbar__actions -->
+          <div class="toolbar__actions">
+            <div class="toolbar__search search-box">
+              <i class="bx bx-search search-box__icon"></i>
+              <input
+                type="text"
+                class="search-box__input"
+                placeholder="Tìm kiếm khách hàng..."
+              />
+            </div>
+            <button class="toolbar__btn-filter btn btn--secondary">
+              <i class="bx bx-filter btn__icon"></i>
+              <span class="btn__text">Lọc</span>
+            </button>
+          </div>
+
+          <!-- Element: toolbar__table -->
+          <div class="toolbar__table">
+            <table class="table">
+              <thead class="table__head">
+                <!--email, sdt, họ, tên, avatar, thứ hạng, thùng rác-->
+                <tr class="table__row">
+                  <th class="table__header">Avatar</th>
+                  <th class="table__header">Họ</th>
+                  <th class="table__header">Tên</th>
+                  <th class="table__header table__header--hide-mobile">
+                    Số điện thoại
+                  </th>
+                  <th class="table__header table__header--hide-mobile">
+                    email
+                  </th>
+                  <th class="table__header">Thứ hạng</th>
+                  <th class="table__header table__header--actions">
+                    Hành động
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="table__body">
+                <tr class="table__row">
+                  <td class="table__cell">.....</td>
+                  <td class="table__cell">.....</td>
+                  <td class="table__cell">.....</td>
+                  <td class="table__cell table__cell--hide-mobile">.....</td>
+                  <td class="table__cell table__cell--hide-mobile">.....</td>
+                  <td class="table__cell">.....</td>
+                  <td class="table__cell table__cell--actions">
+                    <button class="action-btn action-btn--delete" title="Xóa">
+                      <i class="bx bx-trash action-btn__icon"></i>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Element: toolbar__pagination -->
+          <div class="toolbar__pagination pagination">
+            <button class="pagination__btn">
+              <i class="bx bx-chevron-left pagination__icon"></i>
+            </button>
+            <button class="pagination__btn pagination__btn--active">1</button>
+            <button class="pagination__btn">2</button>
+            <button class="pagination__btn">3</button>
+            <button class="pagination__btn pagination__btn--hide-mobile">
+              4
+            </button>
+            <span class="pagination__dots pagination__dots--hide-mobile"
+              >...</span
+            >
+            <button class="pagination__btn pagination__btn--hide-mobile">
+              10
+            </button>
+            <button class="pagination__btn">
+              <i class="bx bx-chevron-right pagination__icon"></i>
+            </button>
+          </div>
+        </div>
       </main>
     </section>
     <!-- Components (load trước) -->
