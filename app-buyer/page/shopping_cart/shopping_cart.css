@@ -1,5 +1,5 @@
 .cart {
-    max-width: 1400px;
+    max-width: 1264px;
     width: 90%;
     margin: 0 auto;
     padding: 20px
@@ -7,13 +7,26 @@
 
 .cart__header {
     margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
 .cart__title {
     font-size: 2rem;
     font-weight: 600;
     margin-bottom: 4px;
-    color: var(--neutral-900);
+    color: var(--blue-600);
+}
+
+.cart__title-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    margin-bottom: 0;
+    color: var(--blue-600);
 }
 
 .cart__layout {
@@ -146,7 +159,7 @@ toolbar__header {
 
 .toolbar__header-cell {
     font-size: 0.75rem;
-    font-weight: 600;
+    font-weight: 700;
     color: var(--neutral-900);
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -167,6 +180,9 @@ toolbar__header {
   align-items: center;
   gap: 8px;
   margin: 30px;
+  padding-top: 20px;
+  margin-top: 10px;
+  border-top: 1px solid var(--neutral-300);
 }
 
 .pagination__btn {
@@ -314,24 +330,24 @@ toolbar__header {
 }
 
 .seller-group__checkbox:hover {
-    background-color: var(--blue-600);
+    background-color: var(--blue-200);
     border-color: var(--blue-600);
 }
 
 .seller-group__checkbox.selected {
-    background-color: var(--blue-600);
+    background-color: var(--blue-200);
     border-color: var(--blue-600);
 }
 
 .seller-group__checkbox.selected .seller-group__checkbox-icon {
     opacity: 1;
-    stroke: white;
+    stroke: var(--blue-600);
 }
 
 .seller-group__remove:hover {
-    background-color: var(--red-500);
+    background-color: var(--red-200);
     border-color: var(--red-500);
-    color: white;
+    color: var(--red-500);
 }
 
 .product-row {
@@ -340,12 +356,12 @@ toolbar__header {
     gap: 12px;
     padding: 16px 24px;
     align-items: center;
-    border-bottom: 1px solid var(--neutral-300);
     transition: background-color 0.2s;
+    position: relative;
 }
 
 .product-row:hover {
-    background-color: var(--neutral-300);
+    background-color: var(--blue-200);
 }
 
  /* Đường kẻ dưới sản phẩm*/
@@ -356,11 +372,11 @@ toolbar__header {
     left: 5%;
     right: 5%;
     height: 1px;
-    background-color: var(--neutral-300);
+    background-color: var(--neutral-200);
 }
 
-.product-row:last-child {
-    border-bottom: none;
+.product-row:last-child::after {
+    display: none;
 }
 
 /* Image Column */
@@ -511,9 +527,9 @@ toolbar__header {
 }
 
 .action-btn--remove:hover {
-    background-color: var(--red-500);
+    background-color: var(--red-200);
     border-color: var(--red-500);
-    color: white;
+    color: var(--red-500);
 }
 
 .cart-item {
@@ -545,9 +561,9 @@ toolbar__header {
 }
 
 .cart-items__remove-all:hover {
-    background-color: var(--red-500);
+    background-color: var(--red-200);
     border-color: var(--red-500);
-    color: white;
+    color: var(--red-500);
 }
 
 /* Cart Summary */

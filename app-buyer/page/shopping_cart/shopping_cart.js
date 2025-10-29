@@ -2,7 +2,16 @@ function formatVND(amount) {
     return amount.toLocaleString('vi-VN') + '₫';
 }
 
-// Update cart summary
+// Đếm tổng số sản phẩm trong giỏ hàng
+function updateTotalProducts() {
+    const totalProducts = document.querySelectorAll('.product-row').length;
+    const totalProductsEl = document.getElementById('total-products');
+    if (totalProductsEl) {
+        totalProductsEl.textContent = totalProducts;
+    }
+}
+
+// Update cart summary - Cập nhật số sản phẩm đã chọn và tổng tiền
 function updateCartSummary() {
     const selectedCheckboxes = document.querySelectorAll('.action-btn--checkbox.selected');
     let subtotal = 0;
@@ -10,22 +19,31 @@ function updateCartSummary() {
 
     selectedCheckboxes.forEach(checkbox => {
         const row = checkbox.closest('.product-row');
-        const basePrice = parseInt(row.dataset.basePrice);
-        const quantity = parseInt(row.querySelector('.quantity__value').textContent);
-        subtotal += basePrice * quantity;
+        const priceText = row.querySelector('.product__price').textContent;
+        // Lấy giá từ text, loại bỏ ký tự không phải số
+        const price = parseInt(priceText.replace(/[^\d]/g, ''));
+        subtotal += price;
         count++;
     });
 
+    // Phí vận chuyển chỉ áp dụng khi có sản phẩm được chọn
     const shipping = count > 0 ? 15000 : 0;
-    const total = subtotal + shipping;
 
+    // Giảm giá (tạm thời = 0, có thể thay đổi sau)
+    const discount = - 0;
+
+    // Tổng tiền = Subtotal + Shipping - Discount
+    const total = subtotal + shipping - discount;
+
+    // Cập nhật UI
     document.getElementById('selected-count').textContent = count;
     document.getElementById('subtotal').textContent = formatVND(subtotal);
+    document.getElementById('shipping').textContent = formatVND(shipping);
+    document.getElementById('discount').textContent = formatVND(discount);
     document.getElementById('total').textContent = formatVND(total);
-    document.getElementById('discount').textContent = '0₫';
 }
 
-// Quantity buttons
+// Quantity buttons - Tăng giảm số lượng
 document.querySelectorAll('.quantity__btn').forEach(btn => {
     btn.addEventListener('click', function() {
         const row = this.closest('.product-row');
@@ -42,7 +60,7 @@ document.querySelectorAll('.quantity__btn').forEach(btn => {
         quantityEl.textContent = quantity;
         decreaseBtn.disabled = quantity === 1;
 
-        // Update price
+        // Update price based on quantity
         const basePrice = parseInt(row.dataset.basePrice);
         const totalPrice = basePrice * quantity;
         row.querySelector('.product__price').textContent = formatVND(totalPrice);
@@ -51,14 +69,14 @@ document.querySelectorAll('.quantity__btn').forEach(btn => {
     });
 });
 
-// Seller checkbox
+// Seller checkbox - Chọn tất cả sản phẩm của seller
 document.querySelectorAll('.seller-group__checkbox').forEach(sellerCheckbox => {
     sellerCheckbox.addEventListener('click', function() {
         const sellerGroup = this.closest('.seller-group');
         const isSelected = this.classList.contains('selected');
 
         if (!isSelected) {
-            // Unselect all other sellers
+            // Bỏ chọn tất cả seller khác
             document.querySelectorAll('.seller-group__checkbox').forEach(cb => {
                 if (cb !== this) cb.classList.remove('selected');
             });
@@ -86,7 +104,7 @@ document.querySelectorAll('.seller-group__checkbox').forEach(sellerCheckbox => {
     });
 });
 
-// Item checkbox
+// Item checkbox - Chọn từng sản phẩm
 document.querySelectorAll('.action-btn--checkbox').forEach(checkbox => {
     checkbox.addEventListener('click', function() {
         const sellerGroup = this.closest('.seller-group');
@@ -124,7 +142,7 @@ document.querySelectorAll('.action-btn--checkbox').forEach(checkbox => {
     });
 });
 
-// Remove item
+// Remove item - Xóa sản phẩm
 document.querySelectorAll('.action-btn--remove').forEach(btn => {
     btn.addEventListener('click', function() {
         const row = this.closest('.product-row');
@@ -132,6 +150,7 @@ document.querySelectorAll('.action-btn--remove').forEach(btn => {
 
         row.style.opacity = '0';
         row.style.transform = 'translateX(-20px)';
+        row.style.transition = 'all 0.3s';
 
         setTimeout(() => {
             row.remove();
@@ -148,16 +167,18 @@ document.querySelectorAll('.action-btn--remove').forEach(btn => {
                         toolbar.remove();
                     }
 
+                    updateTotalProducts();
                     updateCartSummary();
                 }, 300);
             } else {
+                updateTotalProducts();
                 updateCartSummary();
             }
         }, 300);
     });
 });
 
-// Remove seller
+// Remove seller - Xóa tất cả sản phẩm của seller
 document.querySelectorAll('.seller-group__remove').forEach(btn => {
     btn.addEventListener('click', function() {
         const sellerGroup = this.closest('.seller-group');
@@ -165,6 +186,7 @@ document.querySelectorAll('.seller-group__remove').forEach(btn => {
 
         if (confirm(`Bạn có chắc muốn xóa tất cả sản phẩm của "${sellerName}"?`)) {
             sellerGroup.style.opacity = '0';
+            sellerGroup.style.transition = 'all 0.3s';
 
             setTimeout(() => {
                 sellerGroup.remove();
@@ -175,34 +197,42 @@ document.querySelectorAll('.seller-group__remove').forEach(btn => {
                     toolbar.remove();
                 }
 
+                updateTotalProducts();
                 updateCartSummary();
             }, 300);
         }
     });
 });
 
-// Remove all
+// Remove all - Xóa tất cả sản phẩm
 document.querySelector('.cart-items__remove-all').addEventListener('click', function() {
     if (confirm('Bạn có chắc muốn xóa tất cả sản phẩm khỏi giỏ hàng?')) {
         const toolbar = document.querySelector('.toolbar');
         if (toolbar) {
             toolbar.style.opacity = '0';
+            toolbar.style.transition = 'all 0.3s';
             setTimeout(() => {
                 toolbar.remove();
+                updateTotalProducts();
                 updateCartSummary();
             }, 300);
         }
     }
 });
 
-// Initialize - disable decrease buttons at quantity 1
+// Initialize - Khởi tạo
 document.querySelectorAll('.product-row').forEach(row => {
     const decreaseBtn = row.querySelector('[data-action="decrease"]');
     const quantity = parseInt(row.querySelector('.quantity__value').textContent);
     if (quantity === 1) {
         decreaseBtn.disabled = true;
     }
+
+    // Set initial price display
+    const basePrice = parseInt(row.dataset.basePrice);
+    row.querySelector('.product__price').textContent = formatVND(basePrice);
 });
 
-// Initial summary update
+// Initial updates
+updateTotalProducts();
 updateCartSummary();
