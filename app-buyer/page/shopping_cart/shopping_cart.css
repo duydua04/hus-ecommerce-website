@@ -698,13 +698,13 @@ toolbar__header {
 }
 
 .cart-summary__delivery-label {
-    font-size: 0.85rem;
-    color: var(--neutral-600);
+    font-size: 0.9rem;
+    color: var(--green-500);
     margin-bottom: 2px;
 }
 
-.cart-summary__delivery-date {
-    font-size: 0.9rem;
+.cart-summary__delivery-location {
+    font-size: 0.85rem;
     font-weight: 600;
     color: var(--neutral-900);
 }
