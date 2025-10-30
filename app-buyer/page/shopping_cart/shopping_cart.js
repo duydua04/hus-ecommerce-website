@@ -15,19 +15,21 @@ function updateTotalProducts() {
 function updateCartSummary() {
     const selectedCheckboxes = document.querySelectorAll('.action-btn--checkbox.selected');
     let subtotal = 0;
-    let count = 0;
+    let totalQuantity = 0;
 
     selectedCheckboxes.forEach(checkbox => {
         const row = checkbox.closest('.product-row');
         const priceText = row.querySelector('.product__price').textContent;
         // Lấy giá từ text, loại bỏ ký tự không phải số
         const price = parseInt(priceText.replace(/[^\d]/g, ''));
+
+        const quantity = parseInt(row.querySelector('.quantity__value').textContent);
         subtotal += price;
-        count++;
+        totalQuantity += quantity;
     });
 
     // Phí vận chuyển chỉ áp dụng khi có sản phẩm được chọn
-    const shipping = count > 0 ? 15000 : 0;
+    const shipping = totalQuantity > 0 ? (subtotal > 1000000 ? 0 : (15000 * Math.floor(totalQuantity/10 + 1))) : 0;
 
     // Giảm giá (tạm thời = 0, có thể thay đổi sau)
     const discount = - 0;
@@ -35,8 +37,8 @@ function updateCartSummary() {
     // Tổng tiền = Subtotal + Shipping - Discount
     const total = subtotal + shipping - discount;
 
-    // Cập nhật UI
-    document.getElementById('selected-count').textContent = count;
+    // Cập nhật giá tiền các thành phần
+    document.getElementById('selected-count').textContent = selectedCheckboxes.length;
     document.getElementById('subtotal').textContent = formatVND(subtotal);
     document.getElementById('shipping').textContent = formatVND(shipping);
     document.getElementById('discount').textContent = formatVND(discount);
@@ -51,6 +53,10 @@ document.querySelectorAll('.quantity__btn').forEach(btn => {
         const decreaseBtn = row.querySelector('[data-action="decrease"]');
         let quantity = parseInt(quantityEl.textContent);
 
+        const priceText = row.querySelector('.product__price').textContent;
+        const currentPrice = parseInt(priceText.replace(/[^\d]/g, ''));
+        const basePrice = Math.floor(currentPrice / quantity);
+
         if (this.dataset.action === 'increase') {
             quantity++;
         } else if (this.dataset.action === 'decrease' && quantity > 1) {
@@ -60,8 +66,6 @@ document.querySelectorAll('.quantity__btn').forEach(btn => {
         quantityEl.textContent = quantity;
         decreaseBtn.disabled = quantity === 1;
 
-        // Update price based on quantity
-        const basePrice = parseInt(row.dataset.basePrice);
         const totalPrice = basePrice * quantity;
         row.querySelector('.product__price').textContent = formatVND(totalPrice);
 
@@ -90,7 +94,7 @@ document.querySelectorAll('.seller-group__checkbox').forEach(sellerCheckbox => {
 
         this.classList.toggle('selected');
 
-        // Toggle all items in this seller
+        // Click tất cả sản phẩm trong seller
         const itemCheckboxes = sellerGroup.querySelectorAll('.action-btn--checkbox');
         itemCheckboxes.forEach(itemCheckbox => {
             if (this.classList.contains('selected')) {
@@ -228,9 +232,6 @@ document.querySelectorAll('.product-row').forEach(row => {
         decreaseBtn.disabled = true;
     }
 
-    // Set initial price display
-    const basePrice = parseInt(row.dataset.basePrice);
-    row.querySelector('.product__price').textContent = formatVND(basePrice);
 });
 
 // Initial updates

@@ -145,17 +145,6 @@ body {
     z-index: 1000;
 }
 
-.header::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%)
-    width: 100vw;
-    height: 100%;
-    background-color: white;
-    z-index: -1;
-}
 .header__left {
     display: flex;
     align-items: center;
