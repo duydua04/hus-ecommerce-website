@@ -12,7 +12,8 @@
     <link rel="stylesheet" href="../css/base.css" />
     <link rel="stylesheet" href="../css/layout.css" />
     <link rel="stylesheet" href="../css/components.css" />
-    <link rel="stylesheet" href="../css/pages.css" />
+    <link rel="stylesheet" href="../css/pages/pages.css" />
+    <link rel="stylesheet" href="../css/pages/orders.css" />
 
     <title>SellerHub</title>
   </head>
@@ -174,7 +175,9 @@
                     Nguyễn Văn A
                   </td>
                   <td class="table__cell table__cell--hide-mobile">
-                    Đang giao
+                    <span class="status-badge status-badge--shipping"
+                      >Đang giao</span
+                    >
                   </td>
                   <td class="table__cell table__cell--price">1.250.000đ</td>
                   <td class="table__cell table__cell--actions">
@@ -196,7 +199,9 @@
                     Nguyễn Văn B
                   </td>
                   <td class="table__cell table__cell--hide-mobile">
-                    Hoàn thành
+                    <span class="status-badge status-badge--completed"
+                      >Hoàn thành</span
+                    >
                   </td>
                   <td class="table__cell table__cell--price">850.000đ</td>
                   <td class="table__cell table__cell--actions">
@@ -218,7 +223,9 @@
                     Lê Minh C
                   </td>
                   <td class="table__cell table__cell--hide-mobile">
-                    Chờ xử lý
+                    <span class="status-badge status-badge--pending"
+                      >Chờ xử lý</span
+                    >
                   </td>
                   <td class="table__cell table__cell--price">2.100.000đ</td>
                   <td class="table__cell table__cell--actions">
@@ -239,7 +246,11 @@
                   <td class="table__cell table__cell--hide-mobile">
                     Phạm Thị D
                   </td>
-                  <td class="table__cell table__cell--hide-mobile">Đã hủy</td>
+                  <td class="table__cell table__cell--hide-mobile">
+                    <span class="status-badge status-badge--cancelled"
+                      >Đã hủy</span
+                    >
+                  </td>
                   <td class="table__cell table__cell--price">450.000đ</td>
                   <td class="table__cell table__cell--actions">
                     <button class="action-btn action-btn--view" title="Xem">
@@ -260,7 +271,9 @@
                     Hoàng Văn E
                   </td>
                   <td class="table__cell table__cell--hide-mobile">
-                    Hoàn thành
+                    <span class="status-badge status-badge--completed"
+                      >Hoàn thành</span
+                    >
                   </td>
                   <td class="table__cell table__cell--price">3.500.000đ</td>
                   <td class="table__cell table__cell--actions">
