@@ -254,3 +254,82 @@
     font-size: 16px;
   }
 }
+
+/*Địa chỉ cho trang locations*/
+/* Address Card */
+.address-card {
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.address-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.address-card__name {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-right: 12px;
+}
+
+.address-card__phone {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.address-card__actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.address-card__action-link {
+  color: var(--blue);
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.address-card__body {
+  margin-bottom: 12px;
+}
+
+.address-card__address {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 4px;
+}
+
+.address-card__footer {
+  display: flex;
+  align-items: center;
+}
+
+.address-card__badge {
+  border: 1px solid var(--red);
+  color: var(--red);
+  padding: 2px 8px;
+  font-size: 12px;
+  border-radius: 5px;
+  display: inline-block;
+}
+
+.address-card__set-default {
+  background-color: var(--bg-white);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 8px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.address-card__set-default:hover {
+  background-color: var(--bg-hover);
+}
