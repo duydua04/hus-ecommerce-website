@@ -102,11 +102,19 @@
   background: var(--bg-hover);
 }
 
-.table__cell {
+.table__row {
   padding: 16px;
   border-bottom: 1px solid var(--border-color);
   font-size: 14px;
   color: var(--text-primary);
+}
+.table__cell {
+  margin-top: 16px;
+  margin-bottom: 16px;
+  padding: 16px;
+  font-size: 14px;
+  color: var(--text-primary);
+  align-items: center;
 }
 
 .table__img {
