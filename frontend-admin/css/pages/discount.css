@@ -16,3 +16,11 @@
   font-size: 13px;
   color: var(--text-primary);
 }
+
+.table__header--actions {
+  text-align: center;
+}
+.table__cell--actions {
+  text-align: right;
+  padding-right: 5px;
+}
