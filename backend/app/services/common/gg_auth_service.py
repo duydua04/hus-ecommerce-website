@@ -1,4 +1,4 @@
-from fastapi import HTTPException, Request
+from fastapi import HTTPException, Request, Response
 from sqlalchemy.orm import Session
 from authlib.integrations.starlette_client import OAuthError
 
@@ -7,8 +7,12 @@ from ...config.settings import settings
 from ...models.users import Admin, Buyer, Seller
 from ...utils.security import hash_password
 from .auth_service import issue_token
+from starlette.responses import RedirectResponse
 
 ALLOWED_ROLES = {"buyer", "seller"}
+# URL trang chu
+FRONTEND_BUYER_HOMEPAGE = "/"
+FRONTEND_SELLER_HOMEPAGE = "/seller/products"
 
 async def google_login_start(request: Request, role: str):
     """
@@ -26,22 +30,25 @@ async def google_login_start(request: Request, role: str):
     if not redirect_uri:
         raise HTTPException(status_code=500, detail="GOOGLE_REDIRECT_URI is not configured")
 
-    # Có thể thêm access_type/prompt ở đây nếu muốn refresh_token
     return await google.authorize_redirect(
         request, redirect_uri,
-        access_type="offline",   # nhận refresh_token
-        prompt="consent"         # ép consent (tùy nhu cầu)
+        access_type="offline",
+        prompt="consent"
     )
 
-async def google_login_callback(request: Request, db: Session):
+
+async def google_login_callback(request: Request, response: Response, db: Session):
     """
-    Xu ly callback tu phai google
+    Xử lý callback từ Google.
     """
+
+    # Lay token tu google
     try:
         token = await google.authorize_access_token(request)
     except OAuthError as e:
         raise HTTPException(status_code=400, detail=f"OAuth error: {str(e)}")
 
+    # thuc hien lay thong tin user
     userinfo = token.get("userinfo")
     if not userinfo:
         raise HTTPException(status_code=400, detail="Missing userinfo from Google")
@@ -54,34 +61,75 @@ async def google_login_callback(request: Request, db: Session):
     if not email:
         raise HTTPException(status_code=400, detail="Google account has no email")
 
+    # --- 3. Lấy vai trò mong muốn (đã lưu ở bước login_start) ---
     desired_role = request.session.get("oauth_target_role", "buyer")
 
-    # Ưu tiên giữ đúng vai trò nếu đã tồn tại
-    admin = db.query(Admin).filter(Admin.email == email).first()
-    if admin:
-        return issue_token(email=admin.email, role="admin")
+    token_data = None
+    redirect_url = FRONTEND_BUYER_HOMEPAGE  # Mac dinh la trang chu cua nguoi mua
 
-    seller = db.query(Seller).filter(Seller.email == email).first()
-    buyer  = db.query(Buyer ).filter(Buyer .email == email).first()
-
+    # Tim user neu chua co thuc hien tao user
     if desired_role == "seller":
-        if seller:
-            return issue_token(email=seller.email, role="seller")
-        new_seller = Seller(
-            email=email, phone="", fname=given_name, lname=family_name,
-            password=hash_password("oauth-google-placeholder"),
-            shop_name=f"{given_name or 'Shop'} Store", avt_url=picture,
-        )
-        db.add(new_seller); db.commit(); db.refresh(new_seller)
-        return issue_token(email=new_seller.email, role="seller")
+        seller = db.query(Seller).filter(Seller.email == email).first()
 
-    # desired_role == "buyer" (mặc định)
-    if buyer:
-        return issue_token(email=buyer.email, role="buyer")
+        if not seller:
+            # Neu la buyer thi khong cho dang nhap seller
+            buyer = db.query(Buyer).filter(Buyer.email == email).first()
+            if buyer:
+                raise HTTPException(status_code=400, detail="Email already exists as a buyer")
 
-    new_buyer = Buyer(
-        email=email, phone="", fname=given_name, lname=family_name,
-        password=hash_password("oauth-google-placeholder"), avt_url=picture,
+            # Tạo Seller mới
+            new_seller = Seller(
+                email=email,
+                phone=None,
+                fname=given_name,
+                lname=family_name,
+                password=hash_password("oauth-google-placeholder"),
+                shop_name=f"{given_name} Store",
+                avt_url=picture,
+            )
+            db.add(new_seller)
+            db.commit()
+            db.refresh(new_seller)
+            seller = new_seller
+
+        token_data = issue_token(email=seller.email, role="seller")
+        redirect_url = FRONTEND_SELLER_HOMEPAGE
+
+    else:  # Mặc định là 'buyer'
+        buyer = db.query(Buyer).filter(Buyer.email == email).first()
+
+        if not buyer:
+            # Neu la seller khong cho dang nhap buyer
+            seller = db.query(Seller).filter(Seller.email == email).first()
+            if seller:
+                raise HTTPException(status_code=400, detail="Email already exists as a seller.")
+
+            # Tạo Buyer mới
+            new_buyer = Buyer(
+                email=email,
+                phone=None,
+                fname=given_name,
+                lname=family_name,
+                password=hash_password("oauth-google-placeholder"),
+                avt_url=picture,
+            )
+            db.add(new_buyer)
+            db.commit()
+            db.refresh(new_buyer)
+            buyer = new_buyer
+
+        token_data = issue_token(email=buyer.email, role="buyer")
+        redirect_url = FRONTEND_BUYER_HOMEPAGE
+
+        # Set Token vào HttpOnly Cookie
+    response.set_cookie(
+        key="access_token",
+        value=f"Bearer {token_data.access_token}",
+        max_age=token_data.expires_in,
+        httponly=True,
+        samesite="lax",
+        secure=False  # (Nho khi nao deploy sang https thi doi thanh True)
     )
-    db.add(new_buyer); db.commit(); db.refresh(new_buyer)
-    return issue_token(email=new_buyer.email, role="buyer")
+
+    # --- 7. Chuyển hướng người dùng ---
+    return RedirectResponse(url=redirect_url)

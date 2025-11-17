@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict vqmnGgg1gC2YSqjN51fvuOjqNtjfbhQrdzDnZdTkL8snOWzdIfNuUIgWDgaD4VF
+\restrict bntJ1gpYBenDZQoPff3W8YWEzVpY7NQHmea4UgIV95KjY0t8UYS5eMF0uDbmVUI
 
 -- Dumped from database version 16.10 (Debian 16.10-1.pgdg13+1)
 -- Dumped by pg_dump version 16.10 (Debian 16.10-1.pgdg13+1)
@@ -18,105 +18,8 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
-DROP PUBLICATION IF EXISTS pub_all;
-ALTER TABLE IF EXISTS ONLY public.shopping_cart_item DROP CONSTRAINT IF EXISTS shopping_cart_item_variant_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.shopping_cart_item DROP CONSTRAINT IF EXISTS shopping_cart_item_size_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.shopping_cart_item DROP CONSTRAINT IF EXISTS shopping_cart_item_shopping_cart_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.shopping_cart_item DROP CONSTRAINT IF EXISTS shopping_cart_item_product_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.shopping_cart DROP CONSTRAINT IF EXISTS shopping_cart_buyer_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.seller_address DROP CONSTRAINT IF EXISTS seller_address_seller_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.seller_address DROP CONSTRAINT IF EXISTS seller_address_address_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.review_reply DROP CONSTRAINT IF EXISTS review_reply_seller_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.review_reply DROP CONSTRAINT IF EXISTS review_reply_review_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.review DROP CONSTRAINT IF EXISTS review_product_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.review DROP CONSTRAINT IF EXISTS review_order_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.review_image DROP CONSTRAINT IF EXISTS review_image_review_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.review DROP CONSTRAINT IF EXISTS review_buyer_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.product_variant DROP CONSTRAINT IF EXISTS product_variant_product_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.product_size DROP CONSTRAINT IF EXISTS product_size_variant_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.product DROP CONSTRAINT IF EXISTS product_seller_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.product_image DROP CONSTRAINT IF EXISTS product_image_product_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.product DROP CONSTRAINT IF EXISTS product_category_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.order_item DROP CONSTRAINT IF EXISTS order_item_variant_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.order_item DROP CONSTRAINT IF EXISTS order_item_size_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.order_item DROP CONSTRAINT IF EXISTS order_item_product_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.order_item DROP CONSTRAINT IF EXISTS order_item_order_id_fkey;
-ALTER TABLE IF EXISTS ONLY public."order" DROP CONSTRAINT IF EXISTS order_discount_id_fkey;
-ALTER TABLE IF EXISTS ONLY public."order" DROP CONSTRAINT IF EXISTS order_carrier_id_fkey;
-ALTER TABLE IF EXISTS ONLY public."order" DROP CONSTRAINT IF EXISTS order_buyer_id_fkey;
-ALTER TABLE IF EXISTS ONLY public."order" DROP CONSTRAINT IF EXISTS order_buyer_address_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.buyer_address DROP CONSTRAINT IF EXISTS buyer_address_buyer_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.buyer_address DROP CONSTRAINT IF EXISTS buyer_address_address_id_fkey;
-DROP INDEX IF EXISTS public.idx_product_variant_product_id;
-DROP INDEX IF EXISTS public.idx_product_sold_seller;
-DROP INDEX IF EXISTS public.idx_product_sold_quantity;
-DROP INDEX IF EXISTS public.idx_product_sold_category;
-DROP INDEX IF EXISTS public.idx_product_size_variant_id;
-DROP INDEX IF EXISTS public.idx_buyer_phone;
-DROP INDEX IF EXISTS public.idx_buyer_email;
-DROP INDEX IF EXISTS public.idx_buyer_buyer_id;
-DROP INDEX IF EXISTS public.idx_admin_phone;
-DROP INDEX IF EXISTS public.idx_admin_email;
-DROP INDEX IF EXISTS public.idx_admin_admin_id;
-ALTER TABLE IF EXISTS ONLY public.product_size DROP CONSTRAINT IF EXISTS uq_variant_size_name;
-ALTER TABLE IF EXISTS ONLY public.product_variant DROP CONSTRAINT IF EXISTS uq_product_variant_name;
-ALTER TABLE IF EXISTS ONLY public.shopping_cart DROP CONSTRAINT IF EXISTS shopping_cart_pkey;
-ALTER TABLE IF EXISTS ONLY public.shopping_cart_item DROP CONSTRAINT IF EXISTS shopping_cart_item_pkey;
-ALTER TABLE IF EXISTS ONLY public.seller DROP CONSTRAINT IF EXISTS seller_pkey;
-ALTER TABLE IF EXISTS ONLY public.seller DROP CONSTRAINT IF EXISTS seller_phone_key;
-ALTER TABLE IF EXISTS ONLY public.seller DROP CONSTRAINT IF EXISTS seller_email_key;
-ALTER TABLE IF EXISTS ONLY public.seller_address DROP CONSTRAINT IF EXISTS seller_address_pkey;
-ALTER TABLE IF EXISTS ONLY public.review_reply DROP CONSTRAINT IF EXISTS review_reply_pkey;
-ALTER TABLE IF EXISTS ONLY public.review DROP CONSTRAINT IF EXISTS review_pkey;
-ALTER TABLE IF EXISTS ONLY public.review_image DROP CONSTRAINT IF EXISTS review_image_pkey;
-ALTER TABLE IF EXISTS ONLY public.product_variant DROP CONSTRAINT IF EXISTS product_variant_pkey;
-ALTER TABLE IF EXISTS ONLY public.product_size DROP CONSTRAINT IF EXISTS product_size_pkey;
-ALTER TABLE IF EXISTS ONLY public.product DROP CONSTRAINT IF EXISTS product_pkey;
-ALTER TABLE IF EXISTS ONLY public.product_image DROP CONSTRAINT IF EXISTS product_image_pkey;
-ALTER TABLE IF EXISTS ONLY public."order" DROP CONSTRAINT IF EXISTS order_pkey;
-ALTER TABLE IF EXISTS ONLY public.order_item DROP CONSTRAINT IF EXISTS order_item_pkey;
-ALTER TABLE IF EXISTS ONLY public.discount DROP CONSTRAINT IF EXISTS discount_pkey;
-ALTER TABLE IF EXISTS ONLY public.discount DROP CONSTRAINT IF EXISTS discount_code_key;
-ALTER TABLE IF EXISTS ONLY public.category DROP CONSTRAINT IF EXISTS category_pkey;
-ALTER TABLE IF EXISTS ONLY public.category DROP CONSTRAINT IF EXISTS category_category_name_key;
-ALTER TABLE IF EXISTS ONLY public.carrier DROP CONSTRAINT IF EXISTS carrier_pkey;
-ALTER TABLE IF EXISTS ONLY public.buyer DROP CONSTRAINT IF EXISTS buyer_pkey;
-ALTER TABLE IF EXISTS ONLY public.buyer DROP CONSTRAINT IF EXISTS buyer_phone_key;
-ALTER TABLE IF EXISTS ONLY public.buyer DROP CONSTRAINT IF EXISTS buyer_email_key;
-ALTER TABLE IF EXISTS ONLY public.buyer_address DROP CONSTRAINT IF EXISTS buyer_address_pkey;
-ALTER TABLE IF EXISTS ONLY public.admin DROP CONSTRAINT IF EXISTS admin_pkey;
-ALTER TABLE IF EXISTS ONLY public.admin DROP CONSTRAINT IF EXISTS admin_phone_key;
-ALTER TABLE IF EXISTS ONLY public.admin DROP CONSTRAINT IF EXISTS admin_email_key;
-ALTER TABLE IF EXISTS ONLY public.address DROP CONSTRAINT IF EXISTS address_pkey;
-DROP TABLE IF EXISTS public.shopping_cart_item;
-DROP TABLE IF EXISTS public.shopping_cart;
-DROP TABLE IF EXISTS public.seller_address;
-DROP TABLE IF EXISTS public.seller;
-DROP TABLE IF EXISTS public.review_reply;
-DROP TABLE IF EXISTS public.review_image;
-DROP TABLE IF EXISTS public.review;
-DROP TABLE IF EXISTS public.product_variant;
-DROP TABLE IF EXISTS public.product_size;
-DROP TABLE IF EXISTS public.product_image;
-DROP TABLE IF EXISTS public.product;
-DROP TABLE IF EXISTS public.order_item;
-DROP TABLE IF EXISTS public."order";
-DROP TABLE IF EXISTS public.discount;
-DROP TABLE IF EXISTS public.category;
-DROP TABLE IF EXISTS public.carrier;
-DROP TABLE IF EXISTS public.buyer_address;
-DROP TABLE IF EXISTS public.buyer;
-DROP TABLE IF EXISTS public.admin;
-DROP TABLE IF EXISTS public.address;
-DROP TYPE IF EXISTS public.seller_tier;
-DROP TYPE IF EXISTS public.seller_address_label_enum;
-DROP TYPE IF EXISTS public.payment_status_enum;
-DROP TYPE IF EXISTS public.payment_method_enum;
-DROP TYPE IF EXISTS public.order_status_enum;
-DROP TYPE IF EXISTS public.buyer_tier;
-DROP TYPE IF EXISTS public.buyer_address_label_enum;
 --
--- Name: buyer_address_label_enum; Type: TYPE; Schema: public; Owner: -
+-- Name: buyer_address_label_enum; Type: TYPE; Schema: public; Owner: mywebsite
 --
 
 CREATE TYPE public.buyer_address_label_enum AS ENUM (
@@ -126,8 +29,10 @@ CREATE TYPE public.buyer_address_label_enum AS ENUM (
 );
 
 
+ALTER TYPE public.buyer_address_label_enum OWNER TO mywebsite;
+
 --
--- Name: buyer_tier; Type: TYPE; Schema: public; Owner: -
+-- Name: buyer_tier; Type: TYPE; Schema: public; Owner: mywebsite
 --
 
 CREATE TYPE public.buyer_tier AS ENUM (
@@ -139,8 +44,10 @@ CREATE TYPE public.buyer_tier AS ENUM (
 );
 
 
+ALTER TYPE public.buyer_tier OWNER TO mywebsite;
+
 --
--- Name: order_status_enum; Type: TYPE; Schema: public; Owner: -
+-- Name: order_status_enum; Type: TYPE; Schema: public; Owner: mywebsite
 --
 
 CREATE TYPE public.order_status_enum AS ENUM (
@@ -153,8 +60,10 @@ CREATE TYPE public.order_status_enum AS ENUM (
 );
 
 
+ALTER TYPE public.order_status_enum OWNER TO mywebsite;
+
 --
--- Name: payment_method_enum; Type: TYPE; Schema: public; Owner: -
+-- Name: payment_method_enum; Type: TYPE; Schema: public; Owner: mywebsite
 --
 
 CREATE TYPE public.payment_method_enum AS ENUM (
@@ -164,8 +73,10 @@ CREATE TYPE public.payment_method_enum AS ENUM (
 );
 
 
+ALTER TYPE public.payment_method_enum OWNER TO mywebsite;
+
 --
--- Name: payment_status_enum; Type: TYPE; Schema: public; Owner: -
+-- Name: payment_status_enum; Type: TYPE; Schema: public; Owner: mywebsite
 --
 
 CREATE TYPE public.payment_status_enum AS ENUM (
@@ -176,8 +87,10 @@ CREATE TYPE public.payment_status_enum AS ENUM (
 );
 
 
+ALTER TYPE public.payment_status_enum OWNER TO mywebsite;
+
 --
--- Name: seller_address_label_enum; Type: TYPE; Schema: public; Owner: -
+-- Name: seller_address_label_enum; Type: TYPE; Schema: public; Owner: mywebsite
 --
 
 CREATE TYPE public.seller_address_label_enum AS ENUM (
@@ -187,8 +100,10 @@ CREATE TYPE public.seller_address_label_enum AS ENUM (
 );
 
 
+ALTER TYPE public.seller_address_label_enum OWNER TO mywebsite;
+
 --
--- Name: seller_tier; Type: TYPE; Schema: public; Owner: -
+-- Name: seller_tier; Type: TYPE; Schema: public; Owner: mywebsite
 --
 
 CREATE TYPE public.seller_tier AS ENUM (
@@ -198,12 +113,14 @@ CREATE TYPE public.seller_tier AS ENUM (
 );
 
 
+ALTER TYPE public.seller_tier OWNER TO mywebsite;
+
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
 
 --
--- Name: address; Type: TABLE; Schema: public; Owner: -
+-- Name: address; Type: TABLE; Schema: public; Owner: mywebsite
 --
 
 CREATE TABLE public.address (
@@ -217,8 +134,10 @@ CREATE TABLE public.address (
 );
 
 
+ALTER TABLE public.address OWNER TO mywebsite;
+
 --
--- Name: address_address_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: address_address_id_seq; Type: SEQUENCE; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE public.address ALTER COLUMN address_id ADD GENERATED BY DEFAULT AS IDENTITY (
@@ -232,7 +151,7 @@ ALTER TABLE public.address ALTER COLUMN address_id ADD GENERATED BY DEFAULT AS I
 
 
 --
--- Name: admin; Type: TABLE; Schema: public; Owner: -
+-- Name: admin; Type: TABLE; Schema: public; Owner: mywebsite
 --
 
 CREATE TABLE public.admin (
@@ -247,8 +166,10 @@ CREATE TABLE public.admin (
 );
 
 
+ALTER TABLE public.admin OWNER TO mywebsite;
+
 --
--- Name: admin_admin_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: admin_admin_id_seq; Type: SEQUENCE; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE public.admin ALTER COLUMN admin_id ADD GENERATED BY DEFAULT AS IDENTITY (
@@ -262,13 +183,13 @@ ALTER TABLE public.admin ALTER COLUMN admin_id ADD GENERATED BY DEFAULT AS IDENT
 
 
 --
--- Name: buyer; Type: TABLE; Schema: public; Owner: -
+-- Name: buyer; Type: TABLE; Schema: public; Owner: mywebsite
 --
 
 CREATE TABLE public.buyer (
     buyer_id integer NOT NULL,
     email character varying(255) NOT NULL,
-    phone character varying(20) NOT NULL,
+    phone character varying(20),
     fname character varying(255) NOT NULL,
     lname character varying(255),
     password character varying(255) NOT NULL,
@@ -279,8 +200,10 @@ CREATE TABLE public.buyer (
 );
 
 
+ALTER TABLE public.buyer OWNER TO mywebsite;
+
 --
--- Name: buyer_address; Type: TABLE; Schema: public; Owner: -
+-- Name: buyer_address; Type: TABLE; Schema: public; Owner: mywebsite
 --
 
 CREATE TABLE public.buyer_address (
@@ -292,8 +215,10 @@ CREATE TABLE public.buyer_address (
 );
 
 
+ALTER TABLE public.buyer_address OWNER TO mywebsite;
+
 --
--- Name: buyer_address_buyer_address_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: buyer_address_buyer_address_id_seq; Type: SEQUENCE; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE public.buyer_address ALTER COLUMN buyer_address_id ADD GENERATED BY DEFAULT AS IDENTITY (
@@ -307,7 +232,7 @@ ALTER TABLE public.buyer_address ALTER COLUMN buyer_address_id ADD GENERATED BY 
 
 
 --
--- Name: buyer_buyer_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: buyer_buyer_id_seq; Type: SEQUENCE; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE public.buyer ALTER COLUMN buyer_id ADD GENERATED BY DEFAULT AS IDENTITY (
@@ -321,7 +246,7 @@ ALTER TABLE public.buyer ALTER COLUMN buyer_id ADD GENERATED BY DEFAULT AS IDENT
 
 
 --
--- Name: carrier; Type: TABLE; Schema: public; Owner: -
+-- Name: carrier; Type: TABLE; Schema: public; Owner: mywebsite
 --
 
 CREATE TABLE public.carrier (
@@ -334,8 +259,10 @@ CREATE TABLE public.carrier (
 );
 
 
+ALTER TABLE public.carrier OWNER TO mywebsite;
+
 --
--- Name: carrier_carrier_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: carrier_carrier_id_seq; Type: SEQUENCE; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE public.carrier ALTER COLUMN carrier_id ADD GENERATED BY DEFAULT AS IDENTITY (
@@ -349,7 +276,7 @@ ALTER TABLE public.carrier ALTER COLUMN carrier_id ADD GENERATED BY DEFAULT AS I
 
 
 --
--- Name: category; Type: TABLE; Schema: public; Owner: -
+-- Name: category; Type: TABLE; Schema: public; Owner: mywebsite
 --
 
 CREATE TABLE public.category (
@@ -358,8 +285,10 @@ CREATE TABLE public.category (
 );
 
 
+ALTER TABLE public.category OWNER TO mywebsite;
+
 --
--- Name: category_category_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: category_category_id_seq; Type: SEQUENCE; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE public.category ALTER COLUMN category_id ADD GENERATED BY DEFAULT AS IDENTITY (
@@ -373,7 +302,7 @@ ALTER TABLE public.category ALTER COLUMN category_id ADD GENERATED BY DEFAULT AS
 
 
 --
--- Name: discount; Type: TABLE; Schema: public; Owner: -
+-- Name: discount; Type: TABLE; Schema: public; Owner: mywebsite
 --
 
 CREATE TABLE public.discount (
@@ -390,8 +319,10 @@ CREATE TABLE public.discount (
 );
 
 
+ALTER TABLE public.discount OWNER TO mywebsite;
+
 --
--- Name: discount_discount_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: discount_discount_id_seq; Type: SEQUENCE; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE public.discount ALTER COLUMN discount_id ADD GENERATED BY DEFAULT AS IDENTITY (
@@ -405,7 +336,7 @@ ALTER TABLE public.discount ALTER COLUMN discount_id ADD GENERATED BY DEFAULT AS
 
 
 --
--- Name: order; Type: TABLE; Schema: public; Owner: -
+-- Name: order; Type: TABLE; Schema: public; Owner: mywebsite
 --
 
 CREATE TABLE public."order" (
@@ -427,8 +358,10 @@ CREATE TABLE public."order" (
 );
 
 
+ALTER TABLE public."order" OWNER TO mywebsite;
+
 --
--- Name: order_item; Type: TABLE; Schema: public; Owner: -
+-- Name: order_item; Type: TABLE; Schema: public; Owner: mywebsite
 --
 
 CREATE TABLE public.order_item (
@@ -443,8 +376,10 @@ CREATE TABLE public.order_item (
 );
 
 
+ALTER TABLE public.order_item OWNER TO mywebsite;
+
 --
--- Name: order_item_order_item_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: order_item_order_item_id_seq; Type: SEQUENCE; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE public.order_item ALTER COLUMN order_item_id ADD GENERATED BY DEFAULT AS IDENTITY (
@@ -458,7 +393,7 @@ ALTER TABLE public.order_item ALTER COLUMN order_item_id ADD GENERATED BY DEFAUL
 
 
 --
--- Name: order_order_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: order_order_id_seq; Type: SEQUENCE; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE public."order" ALTER COLUMN order_id ADD GENERATED BY DEFAULT AS IDENTITY (
@@ -472,7 +407,7 @@ ALTER TABLE public."order" ALTER COLUMN order_id ADD GENERATED BY DEFAULT AS IDE
 
 
 --
--- Name: product; Type: TABLE; Schema: public; Owner: -
+-- Name: product; Type: TABLE; Schema: public; Owner: mywebsite
 --
 
 CREATE TABLE public.product (
@@ -493,8 +428,10 @@ CREATE TABLE public.product (
 );
 
 
+ALTER TABLE public.product OWNER TO mywebsite;
+
 --
--- Name: product_image; Type: TABLE; Schema: public; Owner: -
+-- Name: product_image; Type: TABLE; Schema: public; Owner: mywebsite
 --
 
 CREATE TABLE public.product_image (
@@ -505,8 +442,10 @@ CREATE TABLE public.product_image (
 );
 
 
+ALTER TABLE public.product_image OWNER TO mywebsite;
+
 --
--- Name: product_image_product_image_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: product_image_product_image_id_seq; Type: SEQUENCE; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE public.product_image ALTER COLUMN product_image_id ADD GENERATED BY DEFAULT AS IDENTITY (
@@ -520,7 +459,7 @@ ALTER TABLE public.product_image ALTER COLUMN product_image_id ADD GENERATED BY 
 
 
 --
--- Name: product_product_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: product_product_id_seq; Type: SEQUENCE; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE public.product ALTER COLUMN product_id ADD GENERATED BY DEFAULT AS IDENTITY (
@@ -534,7 +473,7 @@ ALTER TABLE public.product ALTER COLUMN product_id ADD GENERATED BY DEFAULT AS I
 
 
 --
--- Name: product_size; Type: TABLE; Schema: public; Owner: -
+-- Name: product_size; Type: TABLE; Schema: public; Owner: mywebsite
 --
 
 CREATE TABLE public.product_size (
@@ -546,8 +485,10 @@ CREATE TABLE public.product_size (
 );
 
 
+ALTER TABLE public.product_size OWNER TO mywebsite;
+
 --
--- Name: product_size_size_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: product_size_size_id_seq; Type: SEQUENCE; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE public.product_size ALTER COLUMN size_id ADD GENERATED BY DEFAULT AS IDENTITY (
@@ -561,7 +502,7 @@ ALTER TABLE public.product_size ALTER COLUMN size_id ADD GENERATED BY DEFAULT AS
 
 
 --
--- Name: product_variant; Type: TABLE; Schema: public; Owner: -
+-- Name: product_variant; Type: TABLE; Schema: public; Owner: mywebsite
 --
 
 CREATE TABLE public.product_variant (
@@ -572,8 +513,10 @@ CREATE TABLE public.product_variant (
 );
 
 
+ALTER TABLE public.product_variant OWNER TO mywebsite;
+
 --
--- Name: product_variant_variant_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: product_variant_variant_id_seq; Type: SEQUENCE; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE public.product_variant ALTER COLUMN variant_id ADD GENERATED BY DEFAULT AS IDENTITY (
@@ -587,7 +530,7 @@ ALTER TABLE public.product_variant ALTER COLUMN variant_id ADD GENERATED BY DEFA
 
 
 --
--- Name: review; Type: TABLE; Schema: public; Owner: -
+-- Name: review; Type: TABLE; Schema: public; Owner: mywebsite
 --
 
 CREATE TABLE public.review (
@@ -602,8 +545,10 @@ CREATE TABLE public.review (
 );
 
 
+ALTER TABLE public.review OWNER TO mywebsite;
+
 --
--- Name: review_image; Type: TABLE; Schema: public; Owner: -
+-- Name: review_image; Type: TABLE; Schema: public; Owner: mywebsite
 --
 
 CREATE TABLE public.review_image (
@@ -613,8 +558,10 @@ CREATE TABLE public.review_image (
 );
 
 
+ALTER TABLE public.review_image OWNER TO mywebsite;
+
 --
--- Name: review_image_review_image_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: review_image_review_image_id_seq; Type: SEQUENCE; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE public.review_image ALTER COLUMN review_image_id ADD GENERATED BY DEFAULT AS IDENTITY (
@@ -628,7 +575,7 @@ ALTER TABLE public.review_image ALTER COLUMN review_image_id ADD GENERATED BY DE
 
 
 --
--- Name: review_reply; Type: TABLE; Schema: public; Owner: -
+-- Name: review_reply; Type: TABLE; Schema: public; Owner: mywebsite
 --
 
 CREATE TABLE public.review_reply (
@@ -640,8 +587,10 @@ CREATE TABLE public.review_reply (
 );
 
 
+ALTER TABLE public.review_reply OWNER TO mywebsite;
+
 --
--- Name: review_reply_review_reply_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: review_reply_review_reply_id_seq; Type: SEQUENCE; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE public.review_reply ALTER COLUMN review_reply_id ADD GENERATED BY DEFAULT AS IDENTITY (
@@ -655,7 +604,7 @@ ALTER TABLE public.review_reply ALTER COLUMN review_reply_id ADD GENERATED BY DE
 
 
 --
--- Name: review_review_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: review_review_id_seq; Type: SEQUENCE; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE public.review ALTER COLUMN review_id ADD GENERATED BY DEFAULT AS IDENTITY (
@@ -669,13 +618,13 @@ ALTER TABLE public.review ALTER COLUMN review_id ADD GENERATED BY DEFAULT AS IDE
 
 
 --
--- Name: seller; Type: TABLE; Schema: public; Owner: -
+-- Name: seller; Type: TABLE; Schema: public; Owner: mywebsite
 --
 
 CREATE TABLE public.seller (
     seller_id integer NOT NULL,
     email character varying(255) NOT NULL,
-    phone character varying(20) NOT NULL,
+    phone character varying(20),
     fname character varying(255) NOT NULL,
     lname character varying(255),
     password character varying(255) NOT NULL,
@@ -689,8 +638,10 @@ CREATE TABLE public.seller (
 );
 
 
+ALTER TABLE public.seller OWNER TO mywebsite;
+
 --
--- Name: seller_address; Type: TABLE; Schema: public; Owner: -
+-- Name: seller_address; Type: TABLE; Schema: public; Owner: mywebsite
 --
 
 CREATE TABLE public.seller_address (
@@ -702,8 +653,10 @@ CREATE TABLE public.seller_address (
 );
 
 
+ALTER TABLE public.seller_address OWNER TO mywebsite;
+
 --
--- Name: seller_address_seller_address_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: seller_address_seller_address_id_seq; Type: SEQUENCE; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE public.seller_address ALTER COLUMN seller_address_id ADD GENERATED BY DEFAULT AS IDENTITY (
@@ -717,7 +670,7 @@ ALTER TABLE public.seller_address ALTER COLUMN seller_address_id ADD GENERATED B
 
 
 --
--- Name: seller_seller_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: seller_seller_id_seq; Type: SEQUENCE; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE public.seller ALTER COLUMN seller_id ADD GENERATED BY DEFAULT AS IDENTITY (
@@ -731,7 +684,7 @@ ALTER TABLE public.seller ALTER COLUMN seller_id ADD GENERATED BY DEFAULT AS IDE
 
 
 --
--- Name: shopping_cart; Type: TABLE; Schema: public; Owner: -
+-- Name: shopping_cart; Type: TABLE; Schema: public; Owner: mywebsite
 --
 
 CREATE TABLE public.shopping_cart (
@@ -742,8 +695,10 @@ CREATE TABLE public.shopping_cart (
 );
 
 
+ALTER TABLE public.shopping_cart OWNER TO mywebsite;
+
 --
--- Name: shopping_cart_item; Type: TABLE; Schema: public; Owner: -
+-- Name: shopping_cart_item; Type: TABLE; Schema: public; Owner: mywebsite
 --
 
 CREATE TABLE public.shopping_cart_item (
@@ -757,8 +712,10 @@ CREATE TABLE public.shopping_cart_item (
 );
 
 
+ALTER TABLE public.shopping_cart_item OWNER TO mywebsite;
+
 --
--- Name: shopping_cart_item_shopping_cart_item_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: shopping_cart_item_shopping_cart_item_id_seq; Type: SEQUENCE; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE public.shopping_cart_item ALTER COLUMN shopping_cart_item_id ADD GENERATED BY DEFAULT AS IDENTITY (
@@ -772,7 +729,7 @@ ALTER TABLE public.shopping_cart_item ALTER COLUMN shopping_cart_item_id ADD GEN
 
 
 --
--- Name: shopping_cart_shopping_cart_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: shopping_cart_shopping_cart_id_seq; Type: SEQUENCE; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE public.shopping_cart ALTER COLUMN shopping_cart_id ADD GENERATED BY DEFAULT AS IDENTITY (
@@ -786,7 +743,7 @@ ALTER TABLE public.shopping_cart ALTER COLUMN shopping_cart_id ADD GENERATED BY 
 
 
 --
--- Data for Name: address; Type: TABLE DATA; Schema: public; Owner: -
+-- Data for Name: address; Type: TABLE DATA; Schema: public; Owner: mywebsite
 --
 
 COPY public.address (address_id, fullname, street, ward, district, province, phone) FROM stdin;
@@ -797,7 +754,7 @@ COPY public.address (address_id, fullname, street, ward, district, province, pho
 
 
 --
--- Data for Name: admin; Type: TABLE DATA; Schema: public; Owner: -
+-- Data for Name: admin; Type: TABLE DATA; Schema: public; Owner: mywebsite
 --
 
 COPY public.admin (admin_id, email, phone, fname, lname, password, avt_url, created_at) FROM stdin;
@@ -807,17 +764,18 @@ COPY public.admin (admin_id, email, phone, fname, lname, password, avt_url, crea
 
 
 --
--- Data for Name: buyer; Type: TABLE DATA; Schema: public; Owner: -
+-- Data for Name: buyer; Type: TABLE DATA; Schema: public; Owner: mywebsite
 --
 
 COPY public.buyer (buyer_id, email, phone, fname, lname, password, avt_url, buyer_tier, is_active, created_at) FROM stdin;
-2	duybeck04@gmail.com		Hoàng	Duy	$2b$12$FRsLTk9dtfy7IVrXB0bP/.Trsgif01cBttY1xJJm4AjoG3kR/naLa	https://lh3.googleusercontent.com/a/ACg8ocKEzau7V4JTkki3XmQq_yriFsCncL2Y-prQwVI80DKiInyVUg=s96-c	bronze	t	2025-10-19 12:59:19.963175
 1	myname@example.com	0994654771	Name	My	$2b$12$0cdDIhnA4qZ4uUd0R8ODvO7WjQpZMLiCJM/mbdw6nVKIHJSJguWz2	avatars/2025/10/8a54495ccfb34d1b9f861b82e4aad803.jpg	bronze	t	2025-08-22 11:01:29.930014
+2	duybeck04@gmail.com	\N	Hoàng	Duy	$2b$12$FRsLTk9dtfy7IVrXB0bP/.Trsgif01cBttY1xJJm4AjoG3kR/naLa	https://lh3.googleusercontent.com/a/ACg8ocKEzau7V4JTkki3XmQq_yriFsCncL2Y-prQwVI80DKiInyVUg=s96-c	bronze	t	2025-10-19 12:59:19.963175
+4	hoangdinhduy_t67@hus.edu.vn	\N	Duy	Hoàng Đình	$2b$12$rYkKPvVj2Il2LXQ3DWoM9.51rDUgJK0i2QEoEi/sxGCqJpFcT3yYO	https://lh3.googleusercontent.com/a/ACg8ocLeaW9k1VAGmfDQO6S_toCZPegMTAjXcmZ8fwl7RllChykNiQ=s96-c	bronze	t	2025-11-17 13:25:40.969192
 \.
 
 
 --
--- Data for Name: buyer_address; Type: TABLE DATA; Schema: public; Owner: -
+-- Data for Name: buyer_address; Type: TABLE DATA; Schema: public; Owner: mywebsite
 --
 
 COPY public.buyer_address (buyer_address_id, buyer_id, address_id, is_default, label) FROM stdin;
@@ -828,7 +786,7 @@ COPY public.buyer_address (buyer_address_id, buyer_id, address_id, is_default, l
 
 
 --
--- Data for Name: carrier; Type: TABLE DATA; Schema: public; Owner: -
+-- Data for Name: carrier; Type: TABLE DATA; Schema: public; Owner: mywebsite
 --
 
 COPY public.carrier (carrier_id, carrier_name, carrier_avt_url, base_price, price_per_kg, is_active) FROM stdin;
@@ -838,7 +796,7 @@ COPY public.carrier (carrier_id, carrier_name, carrier_avt_url, base_price, pric
 
 
 --
--- Data for Name: category; Type: TABLE DATA; Schema: public; Owner: -
+-- Data for Name: category; Type: TABLE DATA; Schema: public; Owner: mywebsite
 --
 
 COPY public.category (category_id, category_name) FROM stdin;
@@ -872,7 +830,7 @@ COPY public.category (category_id, category_name) FROM stdin;
 
 
 --
--- Data for Name: discount; Type: TABLE DATA; Schema: public; Owner: -
+-- Data for Name: discount; Type: TABLE DATA; Schema: public; Owner: mywebsite
 --
 
 COPY public.discount (discount_id, code, discount_percent, min_order_value, max_discount, start_date, end_date, usage_limit, used_count, is_active) FROM stdin;
@@ -882,7 +840,7 @@ COPY public.discount (discount_id, code, discount_percent, min_order_value, max_
 
 
 --
--- Data for Name: order; Type: TABLE DATA; Schema: public; Owner: -
+-- Data for Name: order; Type: TABLE DATA; Schema: public; Owner: mywebsite
 --
 
 COPY public."order" (order_id, buyer_id, buyer_address_id, payment_method, subtotal, shipping_price, discount_amount, total_price, order_date, delivery_date, order_status, payment_status, discount_id, carrier_id, notes) FROM stdin;
@@ -890,7 +848,7 @@ COPY public."order" (order_id, buyer_id, buyer_address_id, payment_method, subto
 
 
 --
--- Data for Name: order_item; Type: TABLE DATA; Schema: public; Owner: -
+-- Data for Name: order_item; Type: TABLE DATA; Schema: public; Owner: mywebsite
 --
 
 COPY public.order_item (order_item_id, order_id, product_id, variant_id, size_id, quantity, unit_price, total_price) FROM stdin;
@@ -898,7 +856,7 @@ COPY public.order_item (order_item_id, order_id, product_id, variant_id, size_id
 
 
 --
--- Data for Name: product; Type: TABLE DATA; Schema: public; Owner: -
+-- Data for Name: product; Type: TABLE DATA; Schema: public; Owner: mywebsite
 --
 
 COPY public.product (product_id, name, seller_id, base_price, rating, review_count, category_id, description, discount_percent, weight, is_active, created_at, sold_quantity) FROM stdin;
@@ -946,7 +904,7 @@ COPY public.product (product_id, name, seller_id, base_price, rating, review_cou
 
 
 --
--- Data for Name: product_image; Type: TABLE DATA; Schema: public; Owner: -
+-- Data for Name: product_image; Type: TABLE DATA; Schema: public; Owner: mywebsite
 --
 
 COPY public.product_image (product_image_id, product_id, image_url, is_primary) FROM stdin;
@@ -1263,7 +1221,7 @@ COPY public.product_image (product_image_id, product_id, image_url, is_primary) 
 
 
 --
--- Data for Name: product_size; Type: TABLE DATA; Schema: public; Owner: -
+-- Data for Name: product_size; Type: TABLE DATA; Schema: public; Owner: mywebsite
 --
 
 COPY public.product_size (size_id, variant_id, size_name, available_units, in_stock) FROM stdin;
@@ -1305,7 +1263,7 @@ COPY public.product_size (size_id, variant_id, size_name, available_units, in_st
 
 
 --
--- Data for Name: product_variant; Type: TABLE DATA; Schema: public; Owner: -
+-- Data for Name: product_variant; Type: TABLE DATA; Schema: public; Owner: mywebsite
 --
 
 COPY public.product_variant (variant_id, product_id, variant_name, price_adjustment) FROM stdin;
@@ -1341,7 +1299,7 @@ COPY public.product_variant (variant_id, product_id, variant_name, price_adjustm
 
 
 --
--- Data for Name: review; Type: TABLE DATA; Schema: public; Owner: -
+-- Data for Name: review; Type: TABLE DATA; Schema: public; Owner: mywebsite
 --
 
 COPY public.review (review_id, product_id, buyer_id, order_id, review_text, rating, is_verified, review_date) FROM stdin;
@@ -1349,7 +1307,7 @@ COPY public.review (review_id, product_id, buyer_id, order_id, review_text, rati
 
 
 --
--- Data for Name: review_image; Type: TABLE DATA; Schema: public; Owner: -
+-- Data for Name: review_image; Type: TABLE DATA; Schema: public; Owner: mywebsite
 --
 
 COPY public.review_image (review_image_id, review_id, image_url) FROM stdin;
@@ -1357,7 +1315,7 @@ COPY public.review_image (review_image_id, review_id, image_url) FROM stdin;
 
 
 --
--- Data for Name: review_reply; Type: TABLE DATA; Schema: public; Owner: -
+-- Data for Name: review_reply; Type: TABLE DATA; Schema: public; Owner: mywebsite
 --
 
 COPY public.review_reply (review_reply_id, review_id, seller_id, reply_text, reply_date) FROM stdin;
@@ -1365,21 +1323,21 @@ COPY public.review_reply (review_reply_id, review_id, seller_id, reply_text, rep
 
 
 --
--- Data for Name: seller; Type: TABLE DATA; Schema: public; Owner: -
+-- Data for Name: seller; Type: TABLE DATA; Schema: public; Owner: mywebsite
 --
 
 COPY public.seller (seller_id, email, phone, fname, lname, password, shop_name, seller_tier, avt_url, average_rating, rating_count, is_active, created_at) FROM stdin;
-3	duycp102k3@gmail.com		Hoàng	Duy	$2b$12$U0KISdJNlsbGuP5j6i1./.Gn73s/A9knlOPxbo.o/KKUHk1l5KWmm	Hoàng Store	regular	https://lh3.googleusercontent.com/a/ACg8ocJ7cP2G-gS8PhNvAuAlySZ-sbM0-t7ol1WXuYeR3fyPEzRaEig=s96-c	0.0	0	t	2025-10-19 13:10:14.456849
 4	formenshop@example.com	0912345678	Nam	Nguyễn	$2b$12$jgzpQiXGBSwkOLEUkhNA9Oy486o7bEJ64Z7GVK1xEXVWVb9/BFU6G	Formen Shop	regular	avatars/2025/10/4ed5c95a75b64ba8bd169135203fa728.jpg	0.0	0	t	2025-10-24 02:12:42.636128
 5	nesashop@example.com	0712344567	Thu	Nguyễn	$2b$12$Ft2Sutg3Eq6Fyon4CMm7SudqW.cyHZQhk8nI1gOI74rxuROWsNTqO	Nesa Shop	regular	avatars/2025/10/e1071cc405b24a09b99353467e6707e4.jpeg	0.0	0	t	2025-10-24 02:58:58.828688
 8	joymall@example.com	0324506823	Joy	Mall	$2b$12$iRPKZxGH8oxY0qIwMiMY3eSMc26DjieL5PbUt1ODQUlULs7StJXkW	JoyMall Official	regular	avatars/2025/10/ed59eeb713b64e19a356e854aacf815a.jpeg	0.0	0	t	2025-10-24 05:23:15.660603
 7	myphamauth@example.com	06341867475	Mỹ	Phẩm	$2b$12$jIhojCWoq8JAXrGKoDDI3uZ/ovAq7FBIWZ1frR7IqrVBiq.m7ZTRO	Mỹ Phẩm Auth 68	regular	avatars/2025/10/b9ff18c81c754fd99d626b4f7dc629c2.jpg	0.0	0	t	2025-10-24 04:45:25.50184
-6	honghanhmobile@example.com	06341867319	Điện	Thoại	$2b$12$tDWZjgTln/rcOZO4goLfqeUKxW2v.HxxuLxQVXCp9Qt9tmp2Or6UC	Hồng Hạnh Mobile	regular	avatars/2025/10/9c6dd9b5416d43c5abc51ea1324278c2.jpg	0.0	0	t	2025-10-24 04:22:20.066064
+6	honghanhmobile@example.com	06341867476	Mỹ	Phẩm	$2b$12$tDWZjgTln/rcOZO4goLfqeUKxW2v.HxxuLxQVXCp9Qt9tmp2Or6UC	Mỹ Phẩm Auth 68	regular	avatars/2025/10/9c6dd9b5416d43c5abc51ea1324278c2.jpg	0.0	0	t	2025-10-24 04:22:20.066064
+3	duycp102k3@gmail.com	\N	Hoàng	Duy	$2b$12$U0KISdJNlsbGuP5j6i1./.Gn73s/A9knlOPxbo.o/KKUHk1l5KWmm	Hoàng Store	regular	https://lh3.googleusercontent.com/a/ACg8ocJ7cP2G-gS8PhNvAuAlySZ-sbM0-t7ol1WXuYeR3fyPEzRaEig=s96-c	0.0	0	t	2025-10-19 13:10:14.456849
 \.
 
 
 --
--- Data for Name: seller_address; Type: TABLE DATA; Schema: public; Owner: -
+-- Data for Name: seller_address; Type: TABLE DATA; Schema: public; Owner: mywebsite
 --
 
 COPY public.seller_address (seller_address_id, seller_id, address_id, is_default, label) FROM stdin;
@@ -1387,16 +1345,16 @@ COPY public.seller_address (seller_address_id, seller_id, address_id, is_default
 
 
 --
--- Data for Name: shopping_cart; Type: TABLE DATA; Schema: public; Owner: -
+-- Data for Name: shopping_cart; Type: TABLE DATA; Schema: public; Owner: mywebsite
 --
 
 COPY public.shopping_cart (shopping_cart_id, buyer_id, created_at, updated_at) FROM stdin;
-2	1	2025-10-06 15:58:44.445106	2025-10-19 08:54:14.261906
+2	1	2025-10-06 15:58:44.445106	2025-10-31 13:49:01.819116
 \.
 
 
 --
--- Data for Name: shopping_cart_item; Type: TABLE DATA; Schema: public; Owner: -
+-- Data for Name: shopping_cart_item; Type: TABLE DATA; Schema: public; Owner: mywebsite
 --
 
 COPY public.shopping_cart_item (shopping_cart_item_id, shopping_cart_id, product_id, variant_id, size_id, quantity, added_at) FROM stdin;
@@ -1404,147 +1362,147 @@ COPY public.shopping_cart_item (shopping_cart_item_id, shopping_cart_id, product
 
 
 --
--- Name: address_address_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+-- Name: address_address_id_seq; Type: SEQUENCE SET; Schema: public; Owner: mywebsite
 --
 
 SELECT pg_catalog.setval('public.address_address_id_seq', 6, true);
 
 
 --
--- Name: admin_admin_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+-- Name: admin_admin_id_seq; Type: SEQUENCE SET; Schema: public; Owner: mywebsite
 --
 
 SELECT pg_catalog.setval('public.admin_admin_id_seq', 2, true);
 
 
 --
--- Name: buyer_address_buyer_address_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+-- Name: buyer_address_buyer_address_id_seq; Type: SEQUENCE SET; Schema: public; Owner: mywebsite
 --
 
 SELECT pg_catalog.setval('public.buyer_address_buyer_address_id_seq', 6, true);
 
 
 --
--- Name: buyer_buyer_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+-- Name: buyer_buyer_id_seq; Type: SEQUENCE SET; Schema: public; Owner: mywebsite
 --
 
-SELECT pg_catalog.setval('public.buyer_buyer_id_seq', 2, true);
+SELECT pg_catalog.setval('public.buyer_buyer_id_seq', 4, true);
 
 
 --
--- Name: carrier_carrier_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+-- Name: carrier_carrier_id_seq; Type: SEQUENCE SET; Schema: public; Owner: mywebsite
 --
 
 SELECT pg_catalog.setval('public.carrier_carrier_id_seq', 3, true);
 
 
 --
--- Name: category_category_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+-- Name: category_category_id_seq; Type: SEQUENCE SET; Schema: public; Owner: mywebsite
 --
 
 SELECT pg_catalog.setval('public.category_category_id_seq', 32, true);
 
 
 --
--- Name: discount_discount_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+-- Name: discount_discount_id_seq; Type: SEQUENCE SET; Schema: public; Owner: mywebsite
 --
 
 SELECT pg_catalog.setval('public.discount_discount_id_seq', 2, true);
 
 
 --
--- Name: order_item_order_item_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+-- Name: order_item_order_item_id_seq; Type: SEQUENCE SET; Schema: public; Owner: mywebsite
 --
 
 SELECT pg_catalog.setval('public.order_item_order_item_id_seq', 1, false);
 
 
 --
--- Name: order_order_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+-- Name: order_order_id_seq; Type: SEQUENCE SET; Schema: public; Owner: mywebsite
 --
 
 SELECT pg_catalog.setval('public.order_order_id_seq', 1, false);
 
 
 --
--- Name: product_image_product_image_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+-- Name: product_image_product_image_id_seq; Type: SEQUENCE SET; Schema: public; Owner: mywebsite
 --
 
 SELECT pg_catalog.setval('public.product_image_product_image_id_seq', 319, true);
 
 
 --
--- Name: product_product_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+-- Name: product_product_id_seq; Type: SEQUENCE SET; Schema: public; Owner: mywebsite
 --
 
 SELECT pg_catalog.setval('public.product_product_id_seq', 71, true);
 
 
 --
--- Name: product_size_size_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+-- Name: product_size_size_id_seq; Type: SEQUENCE SET; Schema: public; Owner: mywebsite
 --
 
 SELECT pg_catalog.setval('public.product_size_size_id_seq', 42, true);
 
 
 --
--- Name: product_variant_variant_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+-- Name: product_variant_variant_id_seq; Type: SEQUENCE SET; Schema: public; Owner: mywebsite
 --
 
 SELECT pg_catalog.setval('public.product_variant_variant_id_seq', 34, true);
 
 
 --
--- Name: review_image_review_image_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+-- Name: review_image_review_image_id_seq; Type: SEQUENCE SET; Schema: public; Owner: mywebsite
 --
 
 SELECT pg_catalog.setval('public.review_image_review_image_id_seq', 1, false);
 
 
 --
--- Name: review_reply_review_reply_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+-- Name: review_reply_review_reply_id_seq; Type: SEQUENCE SET; Schema: public; Owner: mywebsite
 --
 
 SELECT pg_catalog.setval('public.review_reply_review_reply_id_seq', 1, false);
 
 
 --
--- Name: review_review_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+-- Name: review_review_id_seq; Type: SEQUENCE SET; Schema: public; Owner: mywebsite
 --
 
 SELECT pg_catalog.setval('public.review_review_id_seq', 1, false);
 
 
 --
--- Name: seller_address_seller_address_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+-- Name: seller_address_seller_address_id_seq; Type: SEQUENCE SET; Schema: public; Owner: mywebsite
 --
 
 SELECT pg_catalog.setval('public.seller_address_seller_address_id_seq', 1, false);
 
 
 --
--- Name: seller_seller_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+-- Name: seller_seller_id_seq; Type: SEQUENCE SET; Schema: public; Owner: mywebsite
 --
 
 SELECT pg_catalog.setval('public.seller_seller_id_seq', 8, true);
 
 
 --
--- Name: shopping_cart_item_shopping_cart_item_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+-- Name: shopping_cart_item_shopping_cart_item_id_seq; Type: SEQUENCE SET; Schema: public; Owner: mywebsite
 --
 
-SELECT pg_catalog.setval('public.shopping_cart_item_shopping_cart_item_id_seq', 3, true);
+SELECT pg_catalog.setval('public.shopping_cart_item_shopping_cart_item_id_seq', 7, true);
 
 
 --
--- Name: shopping_cart_shopping_cart_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+-- Name: shopping_cart_shopping_cart_id_seq; Type: SEQUENCE SET; Schema: public; Owner: mywebsite
 --
 
 SELECT pg_catalog.setval('public.shopping_cart_shopping_cart_id_seq', 2, true);
 
 
 --
--- Name: address address_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: address address_pkey; Type: CONSTRAINT; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE ONLY public.address
@@ -1552,7 +1510,7 @@ ALTER TABLE ONLY public.address
 
 
 --
--- Name: admin admin_email_key; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: admin admin_email_key; Type: CONSTRAINT; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE ONLY public.admin
@@ -1560,7 +1518,7 @@ ALTER TABLE ONLY public.admin
 
 
 --
--- Name: admin admin_phone_key; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: admin admin_phone_key; Type: CONSTRAINT; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE ONLY public.admin
@@ -1568,7 +1526,7 @@ ALTER TABLE ONLY public.admin
 
 
 --
--- Name: admin admin_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: admin admin_pkey; Type: CONSTRAINT; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE ONLY public.admin
@@ -1576,7 +1534,7 @@ ALTER TABLE ONLY public.admin
 
 
 --
--- Name: buyer_address buyer_address_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: buyer_address buyer_address_pkey; Type: CONSTRAINT; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE ONLY public.buyer_address
@@ -1584,7 +1542,7 @@ ALTER TABLE ONLY public.buyer_address
 
 
 --
--- Name: buyer buyer_email_key; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: buyer buyer_email_key; Type: CONSTRAINT; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE ONLY public.buyer
@@ -1592,7 +1550,7 @@ ALTER TABLE ONLY public.buyer
 
 
 --
--- Name: buyer buyer_phone_key; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: buyer buyer_phone_key; Type: CONSTRAINT; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE ONLY public.buyer
@@ -1600,7 +1558,7 @@ ALTER TABLE ONLY public.buyer
 
 
 --
--- Name: buyer buyer_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: buyer buyer_pkey; Type: CONSTRAINT; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE ONLY public.buyer
@@ -1608,7 +1566,7 @@ ALTER TABLE ONLY public.buyer
 
 
 --
--- Name: carrier carrier_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: carrier carrier_pkey; Type: CONSTRAINT; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE ONLY public.carrier
@@ -1616,7 +1574,7 @@ ALTER TABLE ONLY public.carrier
 
 
 --
--- Name: category category_category_name_key; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: category category_category_name_key; Type: CONSTRAINT; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE ONLY public.category
@@ -1624,7 +1582,7 @@ ALTER TABLE ONLY public.category
 
 
 --
--- Name: category category_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: category category_pkey; Type: CONSTRAINT; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE ONLY public.category
@@ -1632,7 +1590,7 @@ ALTER TABLE ONLY public.category
 
 
 --
--- Name: discount discount_code_key; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: discount discount_code_key; Type: CONSTRAINT; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE ONLY public.discount
@@ -1640,7 +1598,7 @@ ALTER TABLE ONLY public.discount
 
 
 --
--- Name: discount discount_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: discount discount_pkey; Type: CONSTRAINT; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE ONLY public.discount
@@ -1648,7 +1606,7 @@ ALTER TABLE ONLY public.discount
 
 
 --
--- Name: order_item order_item_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: order_item order_item_pkey; Type: CONSTRAINT; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE ONLY public.order_item
@@ -1656,7 +1614,7 @@ ALTER TABLE ONLY public.order_item
 
 
 --
--- Name: order order_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: order order_pkey; Type: CONSTRAINT; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE ONLY public."order"
@@ -1664,7 +1622,7 @@ ALTER TABLE ONLY public."order"
 
 
 --
--- Name: product_image product_image_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: product_image product_image_pkey; Type: CONSTRAINT; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE ONLY public.product_image
@@ -1672,7 +1630,7 @@ ALTER TABLE ONLY public.product_image
 
 
 --
--- Name: product product_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: product product_pkey; Type: CONSTRAINT; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE ONLY public.product
@@ -1680,7 +1638,7 @@ ALTER TABLE ONLY public.product
 
 
 --
--- Name: product_size product_size_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: product_size product_size_pkey; Type: CONSTRAINT; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE ONLY public.product_size
@@ -1688,7 +1646,7 @@ ALTER TABLE ONLY public.product_size
 
 
 --
--- Name: product_variant product_variant_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: product_variant product_variant_pkey; Type: CONSTRAINT; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE ONLY public.product_variant
@@ -1696,7 +1654,7 @@ ALTER TABLE ONLY public.product_variant
 
 
 --
--- Name: review_image review_image_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: review_image review_image_pkey; Type: CONSTRAINT; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE ONLY public.review_image
@@ -1704,7 +1662,7 @@ ALTER TABLE ONLY public.review_image
 
 
 --
--- Name: review review_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: review review_pkey; Type: CONSTRAINT; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE ONLY public.review
@@ -1712,7 +1670,7 @@ ALTER TABLE ONLY public.review
 
 
 --
--- Name: review_reply review_reply_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: review_reply review_reply_pkey; Type: CONSTRAINT; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE ONLY public.review_reply
@@ -1720,7 +1678,7 @@ ALTER TABLE ONLY public.review_reply
 
 
 --
--- Name: seller_address seller_address_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: seller_address seller_address_pkey; Type: CONSTRAINT; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE ONLY public.seller_address
@@ -1728,7 +1686,7 @@ ALTER TABLE ONLY public.seller_address
 
 
 --
--- Name: seller seller_email_key; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: seller seller_email_key; Type: CONSTRAINT; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE ONLY public.seller
@@ -1736,7 +1694,7 @@ ALTER TABLE ONLY public.seller
 
 
 --
--- Name: seller seller_phone_key; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: seller seller_phone_key; Type: CONSTRAINT; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE ONLY public.seller
@@ -1744,7 +1702,7 @@ ALTER TABLE ONLY public.seller
 
 
 --
--- Name: seller seller_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: seller seller_pkey; Type: CONSTRAINT; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE ONLY public.seller
@@ -1752,7 +1710,7 @@ ALTER TABLE ONLY public.seller
 
 
 --
--- Name: shopping_cart_item shopping_cart_item_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: shopping_cart_item shopping_cart_item_pkey; Type: CONSTRAINT; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE ONLY public.shopping_cart_item
@@ -1760,7 +1718,7 @@ ALTER TABLE ONLY public.shopping_cart_item
 
 
 --
--- Name: shopping_cart shopping_cart_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: shopping_cart shopping_cart_pkey; Type: CONSTRAINT; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE ONLY public.shopping_cart
@@ -1768,7 +1726,7 @@ ALTER TABLE ONLY public.shopping_cart
 
 
 --
--- Name: product_variant uq_product_variant_name; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: product_variant uq_product_variant_name; Type: CONSTRAINT; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE ONLY public.product_variant
@@ -1776,7 +1734,7 @@ ALTER TABLE ONLY public.product_variant
 
 
 --
--- Name: product_size uq_variant_size_name; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: product_size uq_variant_size_name; Type: CONSTRAINT; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE ONLY public.product_size
@@ -1784,84 +1742,84 @@ ALTER TABLE ONLY public.product_size
 
 
 --
--- Name: idx_admin_admin_id; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_admin_admin_id; Type: INDEX; Schema: public; Owner: mywebsite
 --
 
 CREATE INDEX idx_admin_admin_id ON public.admin USING btree (admin_id);
 
 
 --
--- Name: idx_admin_email; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_admin_email; Type: INDEX; Schema: public; Owner: mywebsite
 --
 
 CREATE INDEX idx_admin_email ON public.admin USING btree (email);
 
 
 --
--- Name: idx_admin_phone; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_admin_phone; Type: INDEX; Schema: public; Owner: mywebsite
 --
 
 CREATE INDEX idx_admin_phone ON public.admin USING btree (phone);
 
 
 --
--- Name: idx_buyer_buyer_id; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_buyer_buyer_id; Type: INDEX; Schema: public; Owner: mywebsite
 --
 
 CREATE INDEX idx_buyer_buyer_id ON public.buyer USING btree (buyer_id);
 
 
 --
--- Name: idx_buyer_email; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_buyer_email; Type: INDEX; Schema: public; Owner: mywebsite
 --
 
 CREATE INDEX idx_buyer_email ON public.buyer USING btree (email);
 
 
 --
--- Name: idx_buyer_phone; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_buyer_phone; Type: INDEX; Schema: public; Owner: mywebsite
 --
 
 CREATE INDEX idx_buyer_phone ON public.buyer USING btree (phone);
 
 
 --
--- Name: idx_product_size_variant_id; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_product_size_variant_id; Type: INDEX; Schema: public; Owner: mywebsite
 --
 
 CREATE INDEX idx_product_size_variant_id ON public.product_size USING btree (variant_id);
 
 
 --
--- Name: idx_product_sold_category; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_product_sold_category; Type: INDEX; Schema: public; Owner: mywebsite
 --
 
 CREATE INDEX idx_product_sold_category ON public.product USING btree (category_id, sold_quantity DESC);
 
 
 --
--- Name: idx_product_sold_quantity; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_product_sold_quantity; Type: INDEX; Schema: public; Owner: mywebsite
 --
 
 CREATE INDEX idx_product_sold_quantity ON public.product USING btree (sold_quantity DESC);
 
 
 --
--- Name: idx_product_sold_seller; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_product_sold_seller; Type: INDEX; Schema: public; Owner: mywebsite
 --
 
 CREATE INDEX idx_product_sold_seller ON public.product USING btree (seller_id, sold_quantity DESC);
 
 
 --
--- Name: idx_product_variant_product_id; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_product_variant_product_id; Type: INDEX; Schema: public; Owner: mywebsite
 --
 
 CREATE INDEX idx_product_variant_product_id ON public.product_variant USING btree (product_id);
 
 
 --
--- Name: buyer_address buyer_address_address_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: buyer_address buyer_address_address_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE ONLY public.buyer_address
@@ -1869,7 +1827,7 @@ ALTER TABLE ONLY public.buyer_address
 
 
 --
--- Name: buyer_address buyer_address_buyer_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: buyer_address buyer_address_buyer_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE ONLY public.buyer_address
@@ -1877,7 +1835,7 @@ ALTER TABLE ONLY public.buyer_address
 
 
 --
--- Name: order order_buyer_address_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: order order_buyer_address_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE ONLY public."order"
@@ -1885,7 +1843,7 @@ ALTER TABLE ONLY public."order"
 
 
 --
--- Name: order order_buyer_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: order order_buyer_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE ONLY public."order"
@@ -1893,7 +1851,7 @@ ALTER TABLE ONLY public."order"
 
 
 --
--- Name: order order_carrier_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: order order_carrier_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE ONLY public."order"
@@ -1901,7 +1859,7 @@ ALTER TABLE ONLY public."order"
 
 
 --
--- Name: order order_discount_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: order order_discount_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE ONLY public."order"
@@ -1909,7 +1867,7 @@ ALTER TABLE ONLY public."order"
 
 
 --
--- Name: order_item order_item_order_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: order_item order_item_order_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE ONLY public.order_item
@@ -1917,7 +1875,7 @@ ALTER TABLE ONLY public.order_item
 
 
 --
--- Name: order_item order_item_product_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: order_item order_item_product_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE ONLY public.order_item
@@ -1925,7 +1883,7 @@ ALTER TABLE ONLY public.order_item
 
 
 --
--- Name: order_item order_item_size_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: order_item order_item_size_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE ONLY public.order_item
@@ -1933,7 +1891,7 @@ ALTER TABLE ONLY public.order_item
 
 
 --
--- Name: order_item order_item_variant_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: order_item order_item_variant_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE ONLY public.order_item
@@ -1941,7 +1899,7 @@ ALTER TABLE ONLY public.order_item
 
 
 --
--- Name: product product_category_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: product product_category_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE ONLY public.product
@@ -1949,7 +1907,7 @@ ALTER TABLE ONLY public.product
 
 
 --
--- Name: product_image product_image_product_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: product_image product_image_product_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE ONLY public.product_image
@@ -1957,7 +1915,7 @@ ALTER TABLE ONLY public.product_image
 
 
 --
--- Name: product product_seller_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: product product_seller_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE ONLY public.product
@@ -1965,7 +1923,7 @@ ALTER TABLE ONLY public.product
 
 
 --
--- Name: product_size product_size_variant_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: product_size product_size_variant_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE ONLY public.product_size
@@ -1973,7 +1931,7 @@ ALTER TABLE ONLY public.product_size
 
 
 --
--- Name: product_variant product_variant_product_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: product_variant product_variant_product_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE ONLY public.product_variant
@@ -1981,7 +1939,7 @@ ALTER TABLE ONLY public.product_variant
 
 
 --
--- Name: review review_buyer_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: review review_buyer_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE ONLY public.review
@@ -1989,7 +1947,7 @@ ALTER TABLE ONLY public.review
 
 
 --
--- Name: review_image review_image_review_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: review_image review_image_review_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE ONLY public.review_image
@@ -1997,7 +1955,7 @@ ALTER TABLE ONLY public.review_image
 
 
 --
--- Name: review review_order_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: review review_order_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE ONLY public.review
@@ -2005,7 +1963,7 @@ ALTER TABLE ONLY public.review
 
 
 --
--- Name: review review_product_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: review review_product_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE ONLY public.review
@@ -2013,7 +1971,7 @@ ALTER TABLE ONLY public.review
 
 
 --
--- Name: review_reply review_reply_review_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: review_reply review_reply_review_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE ONLY public.review_reply
@@ -2021,7 +1979,7 @@ ALTER TABLE ONLY public.review_reply
 
 
 --
--- Name: review_reply review_reply_seller_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: review_reply review_reply_seller_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE ONLY public.review_reply
@@ -2029,7 +1987,7 @@ ALTER TABLE ONLY public.review_reply
 
 
 --
--- Name: seller_address seller_address_address_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: seller_address seller_address_address_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE ONLY public.seller_address
@@ -2037,7 +1995,7 @@ ALTER TABLE ONLY public.seller_address
 
 
 --
--- Name: seller_address seller_address_seller_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: seller_address seller_address_seller_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE ONLY public.seller_address
@@ -2045,7 +2003,7 @@ ALTER TABLE ONLY public.seller_address
 
 
 --
--- Name: shopping_cart shopping_cart_buyer_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: shopping_cart shopping_cart_buyer_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE ONLY public.shopping_cart
@@ -2053,7 +2011,7 @@ ALTER TABLE ONLY public.shopping_cart
 
 
 --
--- Name: shopping_cart_item shopping_cart_item_product_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: shopping_cart_item shopping_cart_item_product_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE ONLY public.shopping_cart_item
@@ -2061,7 +2019,7 @@ ALTER TABLE ONLY public.shopping_cart_item
 
 
 --
--- Name: shopping_cart_item shopping_cart_item_shopping_cart_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: shopping_cart_item shopping_cart_item_shopping_cart_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE ONLY public.shopping_cart_item
@@ -2069,7 +2027,7 @@ ALTER TABLE ONLY public.shopping_cart_item
 
 
 --
--- Name: shopping_cart_item shopping_cart_item_size_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: shopping_cart_item shopping_cart_item_size_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE ONLY public.shopping_cart_item
@@ -2077,7 +2035,7 @@ ALTER TABLE ONLY public.shopping_cart_item
 
 
 --
--- Name: shopping_cart_item shopping_cart_item_variant_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: shopping_cart_item shopping_cart_item_variant_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: mywebsite
 --
 
 ALTER TABLE ONLY public.shopping_cart_item
@@ -2085,15 +2043,17 @@ ALTER TABLE ONLY public.shopping_cart_item
 
 
 --
--- Name: pub_all; Type: PUBLICATION; Schema: -; Owner: -
+-- Name: pub_all; Type: PUBLICATION; Schema: -; Owner: mywebsite
 --
 
 CREATE PUBLICATION pub_all FOR ALL TABLES WITH (publish = 'insert, update, delete, truncate');
 
 
+ALTER PUBLICATION pub_all OWNER TO mywebsite;
+
 --
 -- PostgreSQL database dump complete
 --
 
-\unrestrict vqmnGgg1gC2YSqjN51fvuOjqNtjfbhQrdzDnZdTkL8snOWzdIfNuUIgWDgaD4VF
+\unrestrict bntJ1gpYBenDZQoPff3W8YWEzVpY7NQHmea4UgIV95KjY0t8UYS5eMF0uDbmVUI
 

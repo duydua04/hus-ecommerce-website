@@ -22,7 +22,7 @@ class Buyer(Base):
     __tablename__ = "buyer"
 
     buyer_id = Column(Integer, primary_key=True, autoincrement=True)
-    email = Column(String(255), nullable=False, unique=True)
+    email = Column(String(255), nullable=True, unique=True)
     phone = Column(String(20), nullable=False, unique=True)
     fname = Column(String(255), nullable=False)
     lname = Column(String(255))
@@ -43,7 +43,7 @@ class Seller(Base):
 
     seller_id = Column(Integer, primary_key=True, autoincrement=True)
     email = Column(String(255), nullable=False, unique=True)
-    phone = Column(String(20), nullable=False, unique=True)
+    phone = Column(String(20), nullable=True, unique=True)
     fname = Column(String(255), nullable=False)
     lname = Column(String(255))
     password = Column(String(255), nullable=False)
