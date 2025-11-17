@@ -4,7 +4,7 @@ from authlib.integrations.starlette_client import OAuthError
 
 from ...utils.google_auth import google
 from ...config.settings import settings
-from ...models.users import Admin, Buyer, Seller
+from ...models.users import Buyer, Seller
 from ...utils.security import hash_password
 from .auth_service import issue_token
 from starlette.responses import RedirectResponse
