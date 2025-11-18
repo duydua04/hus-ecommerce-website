@@ -29,28 +29,35 @@ def get_me(info = Depends(get_current_user)):
 # Router dang ky/tao buyer moi
 @router.post("/register/buyer", response_model=BuyerResponse)
 def register_buyer(payload: RegisterBuyer, db: Session = Depends(get_db)):
+    """Router dang ky buyer"""
     return auth_service.register_buyer(db, payload)
 
 # Router dang ky/tao seller moi
 @router.post("/register/seller", response_model=SellerResponse)
 def register_seller(payload: RegisterSeller, db: Session = Depends(get_db)):
+    """Router dang ky seller"""
     return auth_service.register_seller(db, payload)
 
 # Cac router dang nhap deu tra ve token de biet la ai
-#Router dang nhap cho admin
 @router.post("/login/admin", response_model=OAuth2Token)
-def login_admin(payload: Login, db: Session = Depends(get_db)):
-    return auth_service.login_admin(db, payload)
+def login_admin(payload: Login, response: Response, db: Session = Depends(get_db)):
+    token_data = auth_service.login_admin(db, payload)
+    auth_service.set_auth_cookies(response, token_data.access_token, token_data.refresh_token)
+    return token_data
 
-#Router dang nhap cho buyer
+
 @router.post("/login/buyer", response_model=OAuth2Token)
-def login_buyer(payload: Login, db: Session = Depends(get_db)):
-    return auth_service.login_buyer(db, payload)
+def login_buyer(payload: Login, response: Response, db: Session = Depends(get_db)):
+    token_data = auth_service.login_buyer(db, payload)
+    auth_service.set_auth_cookies(response, token_data.access_token, token_data.refresh_token)
+    return token_data
 
-#Router dang nhap cho seller
+
 @router.post("/login/seller", response_model=OAuth2Token)
-def login_seller(payload: Login, db: Session = Depends(get_db)):
-    return auth_service.login_seller(db, payload)
+def login_seller(payload: Login, response: Response, db: Session = Depends(get_db)):
+    token_data = auth_service.login_seller(db, payload)
+    auth_service.set_auth_cookies(response, token_data.access_token, token_data.refresh_token)
+    return token_data
 
 # ===== Router de test tren swagger =====
 @router.post("/token", response_model=OAuth2Token)
@@ -86,8 +93,29 @@ def oauth2_password(form: OAuth2PasswordRequestForm = Depends(), db: Session = D
 
 # ===== Refresh =====
 @router.post("/refresh", response_model=OAuth2Token)
-def refresh(payload: RefreshTokenRequest, db: Session = Depends(get_db)):
-    return auth_service.refresh_access_token(db, payload.refresh_token)
+def refresh(request: Request, response: Response, db: Session = Depends(get_db)):
+    """
+    Endpoint Refresh Token
+    """
+
+    refresh_token = request.cookies.get("refresh_token")
+
+    if not refresh_token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Refresh token missing in cookie",
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+
+    new_token_data = auth_service.refresh_access_token(db, refresh_token)
+
+    auth_service.set_auth_cookies(
+        response,
+        access_token=new_token_data.access_token,
+        refresh_token=new_token_data.refresh_token
+    )
+
+    return new_token_data
 
 # Google Login — router riêng
 @router.get("/google/login/buyer")
@@ -103,3 +131,8 @@ async def google_login_seller(request: Request):
 @router.get("/google/callback")
 async def google_callback(request: Request, response: Response, db: Session = Depends(get_db)):
     return await gg_auth_service.google_login_callback(request, response, db)
+
+@router.post("/logout")
+def logout(response: Response):
+    """Router dang xuat tai khoan"""
+    return auth_service.logout(response)
