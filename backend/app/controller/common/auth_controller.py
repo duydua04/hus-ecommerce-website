@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Request
+from fastapi import APIRouter, Depends, HTTPException, status, Request, Response
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from ...config.db import get_db
@@ -101,5 +101,5 @@ async def google_login_seller(request: Request):
     return await gg_auth_service.google_login_start(request, role="seller")
 
 @router.get("/google/callback")
-async def google_callback(request: Request, db: Session = Depends(get_db)):
-    return await gg_auth_service.google_login_callback(request, db)
+async def google_callback(request: Request, response: Response, db: Session = Depends(get_db)):
+    return await gg_auth_service.google_login_callback(request, response, db)

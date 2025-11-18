@@ -101,10 +101,8 @@ def list_sellers(db: Session,
             shop_name=s.shop_name,
             seller_tier=s.seller_tier,
             avt_url=public_url(s.avt_url) if s.avt_url else None,
-            description=s.description,
             average_rating=s.average_rating,
             rating_count=s.rating_count,
-            is_verified=s.is_verified,
             is_active=s.is_active,
             created_at=s.created_at
         )

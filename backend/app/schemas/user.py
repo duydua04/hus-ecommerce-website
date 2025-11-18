@@ -58,9 +58,9 @@ class SellerUpdate(BaseModel):
     fname: str | None = None
     lname: str | None = None
     shop_name: str | None = None
-    seller_tier: SellerTier | None = None
-    avt_url: str | None = None
-    is_active: bool | None = None
+    #seller_tier: SellerTier | None = None
+    #avt_url: str | None = None
+    #is_active: bool | None = None
 
 # Response tu server tra ve thong tin cua nguoi ban
 class SellerResponse(TimestampedOut):
