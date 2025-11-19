@@ -76,7 +76,6 @@ def get_current_user(security_scopes: SecurityScopes,
     return {"role": role, "sub": sub, "user": user}
 
 
-# Các hàm dependency giữ nguyên
 def require_admin(info=Security(get_current_user, scopes=["admin"])):
     return info
 
