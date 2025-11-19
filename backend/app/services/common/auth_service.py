@@ -1,4 +1,4 @@
-from fastapi import  HTTPException, status
+from fastapi import  HTTPException, status, Response
 from sqlalchemy.orm import Session
 from ...config.settings import settings
 from ...models.users import Admin, Seller, Buyer
@@ -144,3 +144,55 @@ def refresh_access_token(db: Session, refresh_token: str):
 
     # Issue new tokens
     return issue_token(email, role)
+
+
+def logout(response: Response):
+    """
+    Ham dang xuat, xoa httponly cookie chua access_token
+    """
+
+    response.delete_cookie(
+        key="access_token",
+        httponly=True,
+        secure=False, # Khi nao deploy thi doi sang True,
+        path="/"
+    )
+
+    response.delete_cookie(
+        key="refresh_token",
+        httponly=True,
+        secure=False,  # Đổi thành True khi deploy
+        samesite="lax",
+        path="/auth/refresh"
+    )
+
+    return {"message": "Logout successfully"}
+
+
+def set_auth_cookies(response: Response, access_token: str, refresh_token: str):
+    """
+    Set token vào HttpOnly Cookie.
+    """
+    # 1. Set Access Token (Hiệu lực ngắn, dùng toàn trang)
+    access_minutes = int(getattr(settings, "OAUTH2_ACCESS_TOKEN_EXPIRE_MINUTES", 180))
+    response.set_cookie(
+        key="access_token",
+        value=access_token,
+        httponly=True,
+        samesite="lax",
+        secure=False,       # Doi thanh true nếu chạy HTTPS - deploy
+        path="/",           # Gửi kèm mọi request
+        max_age=access_minutes * 60
+    )
+
+    # 2. Set Refresh Token
+    refresh_days = int(getattr(settings, "OAUTH2_REFRESH_TOKEN_EXPIRE_DAYS", 30))
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        httponly=True,
+        samesite="lax",
+        secure=False,        # True nếu chạy HTTPS
+        path="/auth/refresh", # <--- QUAN TRỌNG: Chỉ gửi cookie này khi gọi API refresh
+        max_age=refresh_days * 24 * 60 * 60
+    )
