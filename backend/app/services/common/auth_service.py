@@ -8,6 +8,9 @@ from ...utils.security import (
     hash_password, verify_password, create_access_token,
     create_refresh_token, verify_refresh_token
 )
+from ...utils.email import send_otp_email
+from ...utils.security import decode_token
+from ...utils.otp import create_otp
 
 
 def email_or_phone_taken(db: Session, model, email: str, phone: str):
@@ -173,7 +176,8 @@ def set_auth_cookies(response: Response, access_token: str, refresh_token: str):
     """
     Set token vào HttpOnly Cookie.
     """
-    # 1. Set Access Token (Hiệu lực ngắn, dùng toàn trang)
+
+    # Set access token
     access_minutes = int(getattr(settings, "OAUTH2_ACCESS_TOKEN_EXPIRE_MINUTES", 180))
     response.set_cookie(
         key="access_token",
@@ -193,6 +197,130 @@ def set_auth_cookies(response: Response, access_token: str, refresh_token: str):
         httponly=True,
         samesite="lax",
         secure=False,        # True nếu chạy HTTPS
-        path="/auth/refresh", # <--- QUAN TRỌNG: Chỉ gửi cookie này khi gọi API refresh
+        path="/auth/refresh", # Chỉ gửi cookie này khi gọi API refresh
         max_age=refresh_days * 24 * 60 * 60
     )
+
+
+async def forgot_password_request(db: Session, email: str, role: str):
+    """
+    Xu ly yeu cau quen mat khau
+    """
+    user = None
+    if role == 'admin':
+        user = db.query(Admin).filter(Admin.email == email).first()
+    elif role == 'buyer':
+        user = db.query(Buyer).filter(Buyer.email == email).first()
+    elif role == 'seller':
+        user = db.query(Seller).filter(Seller.email == email).first()
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found with this role"
+        )
+
+    otp_code = create_otp()
+    otp_hash = hash_password(otp_code)
+
+    # Gui email, lay ten de gui
+    firstname = getattr(user, "fname", email)
+    await send_otp_email(email, firstname, otp_code)
+
+    # 4. Token reset chua hast otp
+    reset_token = create_access_token(
+        sub=email,
+        role=role,
+        expires_minutes=settings.RESET_PASSWORD_TOKEN_EXPIRE_MINUTES,
+        extra={
+            "type": "reset_waiting",
+            "otp_hash": otp_hash
+        }
+    )
+
+    return {"message": "OTP sent to email", "reset_token": reset_token}
+
+
+def verify_otp_for_reset(otp_input: str, reset_token: str):
+    """
+    Xac thuc otp thong qua token
+    """
+    try:
+        payload = decode_token(reset_token)
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Token expired or invalid"
+        )
+
+    if payload.get("type") != "reset_waiting":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid token type for OTP verification"
+        )
+
+    # Lấy hash từ token
+    otp_hash_in_token = payload.get("otp_hash")
+
+    # Verify OTP
+    if not verify_password(otp_input, otp_hash_in_token):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Invalid OTP"
+        )
+
+    # Neu dung tao token moi de doi mat khau
+    email = payload.get("sub")
+    role = payload.get("role")
+
+    permission_token = create_access_token(
+        sub=email,
+        role=role,
+        expires_minutes=5,
+        extra={"type": "reset_allowed"}
+    )
+
+    return {"message": "OTP verified", "permission_token": permission_token}
+
+
+def reset_password_final(db: Session, new_password: str, permission_token: str):
+    """
+    Check token 'reset_allowed'
+    Update password vao db
+    """
+    try:
+        payload = decode_token(permission_token)
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Session expired, please start over")
+
+    if payload.get("type") != "reset_allowed":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Unauthorized to reset password"
+        )
+
+    email = payload.get("sub")
+    role = payload.get("role")
+
+    # Tìm và update user
+    user = None
+    if role == 'admin':
+        user = db.query(Admin).filter(Admin.email == email).first()
+    elif role == 'buyer':
+        user = db.query(Buyer).filter(Buyer.email == email).first()
+    elif role == 'seller':
+        user = db.query(Seller).filter(Seller.email == email).first()
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+
+    # Update Pass
+    user.password = hash_password(new_password)
+    db.commit()
+
+    return {"message": "Password reset successfully"}

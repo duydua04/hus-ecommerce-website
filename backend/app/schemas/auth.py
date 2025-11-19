@@ -35,3 +35,14 @@ class RefreshTokenRequest(BaseModel):
 class TokenData(BaseModel):
     email: str | None = None
     role: str | None = None
+
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+    role: str
+
+class VerifyOTPRequest(BaseModel):
+    otp: str
+
+class ResetPasswordRequest(BaseModel):
+    new_password: str
+    confirm_password: str

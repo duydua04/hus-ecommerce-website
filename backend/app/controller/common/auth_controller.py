@@ -1,14 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Request, Response
-from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from ...config.db import get_db
 from ...middleware.auth import get_current_user
-from ...schemas import RefreshTokenRequest
 from ...schemas.auth import RegisterBuyer, RegisterSeller, Login, OAuth2Token
 from ...schemas.user import BuyerResponse, SellerResponse
 from ...services.common import auth_service, gg_auth_service
-from ...models.users import Admin, Seller, Buyer
-from ...utils.security import verify_password
+from ...schemas.auth import ForgotPasswordRequest, VerifyOTPRequest, ResetPasswordRequest
+
 
 router = APIRouter(
     prefix="/auth",
@@ -26,19 +24,20 @@ def get_me(info = Depends(get_current_user)):
         "lname": getattr(u, "lname", None),
         "avt_url": getattr(u, "avt_url", None),
     }
-# Router dang ky/tao buyer moi
+
+
 @router.post("/register/buyer", response_model=BuyerResponse)
 def register_buyer(payload: RegisterBuyer, db: Session = Depends(get_db)):
     """Router dang ky buyer"""
     return auth_service.register_buyer(db, payload)
 
-# Router dang ky/tao seller moi
+
 @router.post("/register/seller", response_model=SellerResponse)
 def register_seller(payload: RegisterSeller, db: Session = Depends(get_db)):
     """Router dang ky seller"""
     return auth_service.register_seller(db, payload)
 
-# Cac router dang nhap deu tra ve token de biet la ai
+
 @router.post("/login/admin", response_model=OAuth2Token)
 def login_admin(payload: Login, response: Response, db: Session = Depends(get_db)):
     token_data = auth_service.login_admin(db, payload)
@@ -59,39 +58,7 @@ def login_seller(payload: Login, response: Response, db: Session = Depends(get_d
     auth_service.set_auth_cookies(response, token_data.access_token, token_data.refresh_token)
     return token_data
 
-# ===== Router de test tren swagger =====
-@router.post("/token", response_model=OAuth2Token)
-def oauth2_password(form: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    """
-    Dành cho Swagger "Authorize":
-    - form.username: email
-    - form.password: mật khẩu
-    - form.scopes  : ["admin"] / ["seller"] / ["buyer"] (mặc định: buyer nếu trống)
-    """
-    email = form.username
-    password = form.password
-    role = "buyer"
-    if "admin" in form.scopes:
-        role = "admin"
-    elif "seller" in form.scopes:
-        role = "seller"
 
-    # Xác thực người dùng theo role đã chọn
-    user = None
-    if role == "admin":
-        user = db.query(Admin).filter(Admin.email == email).first()
-    elif role == "seller":
-        user = db.query(Seller).filter(Seller.email == email).first()
-    else:
-        user = db.query(Buyer).filter(Buyer.email == email).first()
-
-    if user is None or not verify_password(password, user.password):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                            detail="Invalid email or password",
-                            headers={"WWW-Authenticate": "Bearer"})
-    return auth_service.issue_token(email=email, role=role)
-
-# ===== Refresh =====
 @router.post("/refresh", response_model=OAuth2Token)
 def refresh(request: Request, response: Response, db: Session = Depends(get_db)):
     """
@@ -117,22 +84,103 @@ def refresh(request: Request, response: Response, db: Session = Depends(get_db))
 
     return new_token_data
 
-# Google Login — router riêng
+
 @router.get("/google/login/buyer")
 async def google_login_buyer(request: Request):
     """Dang nhap bang gg cho buyer"""
     return await gg_auth_service.google_login_start(request, role="buyer")
+
 
 @router.get("/google/login/seller")
 async def google_login_seller(request: Request):
     """Router dang nhap bang gg cho seller"""
     return await gg_auth_service.google_login_start(request, role="seller")
 
+
 @router.get("/google/callback")
 async def google_callback(request: Request, response: Response, db: Session = Depends(get_db)):
     return await gg_auth_service.google_login_callback(request, response, db)
+
 
 @router.post("/logout")
 def logout(response: Response):
     """Router dang xuat tai khoan"""
     return auth_service.logout(response)
+
+
+@router.post("/forgot-password")
+async def forgot_password(payload: ForgotPasswordRequest, response: Response, db: Session = Depends(get_db)):
+    """
+    Gui email otp va set token vao cookie
+    """
+    result = await auth_service.forgot_password_request(db, payload.email, payload.role)
+
+    # Lưu token vào cookie
+    response.set_cookie(
+        key="reset_token",
+        value=result["reset_token"],
+        httponly=True,
+        samesite="lax",
+        secure=False,  # True nếu deploy
+        max_age=5 * 60
+    )
+    return {"message": "OTP has been sent to your email"}
+
+
+@router.post("/verify-otp")
+def verify_otp(payload: VerifyOTPRequest, request: Request, response: Response):
+    """
+    Router check OTP, neu dung tao token moi
+    quan ly cap cao hon viec dien lai mat khau
+    """
+    token = request.cookies.get("reset_token")
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Session missing or expired"
+        )
+
+    result = auth_service.verify_otp_for_reset(payload.otp, token)
+
+    # Update Cookie với token(reset_allowed)
+    response.set_cookie(
+        key="reset_token",
+        value=result["permission_token"],
+        httponly=True,
+        samesite="lax",
+        secure=False,
+        max_age=5 * 60
+    )
+
+    return {"message": "OTP valid, you can now reset password"}
+
+
+@router.post("/reset-password")
+def reset_password(
+        payload: ResetPasswordRequest,
+        request: Request,
+        response: Response,
+        db: Session = Depends(get_db)
+):
+    """
+    Router nhap pass moi, update lai vao db
+    """
+    if payload.new_password != payload.confirm_password:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Passwords do not match"
+        )
+
+    token = request.cookies.get("reset_token")
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Session missing"
+        )
+
+    result = auth_service.reset_password_final(db, payload.new_password, token)
+
+    # Xóa cookie reset sau khi thành công
+    response.delete_cookie("reset_token")
+
+    return result
