@@ -1,0 +1,20 @@
+.sidebar__brand {
+  height: var(--navbar-height);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 20px;
+  color: var(--blue);
+  font-size: 20px;
+  font-weight: 700;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.sidebar__brand-icon {
+  font-size: 28px;
+  min-width: 30px;
+}
+
+.sidebar--collapsed .sidebar__brand-text {
+  display: none;
+}

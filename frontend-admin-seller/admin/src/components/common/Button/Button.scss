@@ -1,0 +1,43 @@
+/* BLOCK: btn - Nút bấm chung */
+.btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+  white-space: nowrap;
+}
+
+.btn__icon {
+  font-size: 18px;
+}
+
+/* MODIFIER: btn--primary */
+.btn--primary {
+  background: var(--blue);
+  color: white;
+}
+
+.btn--primary:hover {
+  background: var(--blue-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+/* MODIFIER: btn--secondary */
+.btn--secondary {
+  background: var(--bg-white);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+}
+
+.btn--secondary:hover {
+  border-color: var(--blue);
+  color: var(--blue);
+  background: var(--blue-light);
+}

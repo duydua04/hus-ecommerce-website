@@ -1,0 +1,26 @@
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.breadcrumb__link {
+  color: var(--text-muted);
+  transition: var(--transition);
+}
+
+.breadcrumb__link:hover {
+  color: var(--blue);
+}
+
+/* MODIFIER: breadcrumb__link--active */
+.breadcrumb__link--active {
+  color: var(--blue);
+  font-weight: 500;
+}
+
+.breadcrumb__separator {
+  color: var(--text-muted);
+  font-size: 16px;
+}

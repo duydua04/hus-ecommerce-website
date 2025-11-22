@@ -1,0 +1,18 @@
+/*BLOCK: sidebar - Menu bên trái trang*/
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: var(--sidebar-width);
+  height: 100vh;
+  background: var(--bg-white);
+  border-right: 1px solid var(--border-color);
+  z-index: 1000;
+  transition: var(--transition);
+  overflow-x: hidden;
+}
+
+/* MODIFIER: sidebar--collapsed - Sidebar thu gọn */
+.sidebar--collapsed {
+  width: var(--sidebar-collapsed);
+}
