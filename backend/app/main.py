@@ -59,7 +59,14 @@ app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY)
 app.add_middleware(
     CORSMiddleware,
     # allow_origins=["*"],  # Cho phép tất cả các nguồn (front-end) truy cập
-    allow_origins=["*"],
+    allow_origins=[
+        "http://localhost:3000",      # React dev server
+        "http://127.0.0.1:3000",      # Alternative localhost
+        "http://localhost:3001",      # Nếu React chạy port khác
+        # Thêm domain production khi deploy:
+        # "https://yourdomain.com",
+        # "https://www.yourdomain.com",
+    ],
     allow_credentials=True,
     allow_methods=["*"],  # Cho phép tất cả các phương thức HTTP
     allow_headers=["*"],  # Cho phép tất cả các header
