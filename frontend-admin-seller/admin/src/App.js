@@ -6,6 +6,10 @@ import BuyerPage from "./pages/User/BuyerPage";
 import SellerPage from "./pages/User/SellerPage";
 import DiscountPage from "./pages/Discount/DiscountPage";
 import TransportPage from "./pages/Transport/TransportPage";
+import LoginPage from "./pages/Login/LoginPage";
+
+import PrivateRoute from "./components/PrivateRoute";
+
 import "./assets/styles/global.scss";
 import "boxicons/css/boxicons.min.css";
 
@@ -13,13 +17,73 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<TransportPage />} />
-        <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/category" element={<CategoryPage />} />
-        <Route path="/buyer" element={<BuyerPage />} />
-        <Route path="/seller" element={<SellerPage />} />
-        <Route path="/discount" element={<DiscountPage />} />
-        <Route path="/transport" element={<TransportPage />} />
+        {/* Public */}
+        <Route path="/login" element={<LoginPage />} />
+
+        {/* Protected */}
+        <Route
+          path="/dashboard"
+          element={
+            <PrivateRoute>
+              <DashboardPage />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/category"
+          element={
+            <PrivateRoute>
+              <CategoryPage />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/buyer"
+          element={
+            <PrivateRoute>
+              <BuyerPage />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/seller"
+          element={
+            <PrivateRoute>
+              <SellerPage />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/discount"
+          element={
+            <PrivateRoute>
+              <DiscountPage />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/transport"
+          element={
+            <PrivateRoute>
+              <TransportPage />
+            </PrivateRoute>
+          }
+        />
+
+        {/* Default */}
+        <Route
+          path="/"
+          element={
+            <PrivateRoute>
+              <DashboardPage />
+            </PrivateRoute>
+          }
+        />
       </Routes>
     </Router>
   );
