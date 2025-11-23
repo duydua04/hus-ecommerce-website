@@ -17,7 +17,7 @@ export const useCarrier = () => {
     setError(null);
     try {
       const data = await carrierService.listCarriers(searchQuery);
-      setCarriers(data);
+      setCarriers(Array.isArray(data) ? data : []);
     } catch (err) {
       setError(err.detail || "Lỗi khi lấy danh sách đơn vị vận chuyển");
       console.error("Fetch carriers error:", err);

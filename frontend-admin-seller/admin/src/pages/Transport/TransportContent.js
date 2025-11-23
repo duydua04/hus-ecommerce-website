@@ -181,6 +181,10 @@ export default function TransportContent() {
               setCurrentPage(1);
             }}
           />
+          <button className="toolbar__btn-filter btn btn--secondary">
+            <i className="bx bx-filter btn__icon"></i>
+            <span className="btn__text">Lọc</span>
+          </button>
         </div>
       </div>
 
