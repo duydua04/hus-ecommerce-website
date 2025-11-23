@@ -1,21 +1,17 @@
 import axios from "axios";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
-const CARRIERS_ENDPOINT = `${API_URL}/admin/carriers/`;
+const CARRIERS_ENDPOINT = `${API_URL}/admin/carriers`; // Đúng cú pháp
 
 const carrierService = {
   /**
    * Lấy danh sách các đơn vị vận chuyển hoạt động
-   * @param {string} q - Query tìm kiếm
-   * @returns {Promise<Array>}
    */
   listCarriers: async (q = null) => {
     try {
-      const response = await axios.get(CARRIERS_ENDPOINT, {
+      const response = await axios.get(`${CARRIERS_ENDPOINT}/`, {
         params: { q },
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
+        withCredentials: true,
       });
       return response.data;
     } catch (error) {
@@ -25,14 +21,12 @@ const carrierService = {
 
   /**
    * Tạo một đơn vị vận chuyển mới
-   * @param {Object} data - Dữ liệu carrier
-   * @returns {Promise<Object>}
    */
   createCarrier: async (data) => {
     try {
-      const response = await axios.post(CARRIERS_ENDPOINT, data, {
+      const response = await axios.post(`${CARRIERS_ENDPOINT}/`, data, {
+        withCredentials: true,
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
           "Content-Type": "application/json",
         },
       });
@@ -44,9 +38,6 @@ const carrierService = {
 
   /**
    * Cập nhật thông tin đơn vị vận chuyển
-   * @param {number} carrierId - ID của carrier
-   * @param {Object} data - Dữ liệu cần cập nhật
-   * @returns {Promise<Object>}
    */
   updateCarrier: async (carrierId, data) => {
     try {
@@ -54,8 +45,8 @@ const carrierService = {
         `${CARRIERS_ENDPOINT}/${carrierId}`,
         data,
         {
+          withCredentials: true,
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
             "Content-Type": "application/json",
           },
         }
@@ -67,10 +58,7 @@ const carrierService = {
   },
 
   /**
-   * Tải lên avatar cho đơn vị vận chuyển
-   * @param {number} carrierId - ID của carrier
-   * @param {File} file - File hình ảnh
-   * @returns {Promise<Object>}
+   * Upload avatar
    */
   uploadAvatar: async (carrierId, file) => {
     try {
@@ -81,8 +69,8 @@ const carrierService = {
         `${CARRIERS_ENDPOINT}/${carrierId}/upload-avatar`,
         formData,
         {
+          withCredentials: true,
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
             "Content-Type": "multipart/form-data",
           },
         }
@@ -94,16 +82,12 @@ const carrierService = {
   },
 
   /**
-   * Xóa đơn vị vận chuyển
-   * @param {number} carrierId - ID của carrier
-   * @returns {Promise<Object>}
+   * Xóa carrier
    */
   deleteCarrier: async (carrierId) => {
     try {
       const response = await axios.delete(`${CARRIERS_ENDPOINT}/${carrierId}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
+        withCredentials: true,
       });
       return response.data;
     } catch (error) {
@@ -112,16 +96,12 @@ const carrierService = {
   },
 
   /**
-   * Lấy chi tiết một đơn vị vận chuyển
-   * @param {number} carrierId - ID của carrier
-   * @returns {Promise<Object>}
+   * Lấy chi tiết carrier
    */
   getCarrierDetail: async (carrierId) => {
     try {
       const response = await axios.get(`${CARRIERS_ENDPOINT}/${carrierId}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
+        withCredentials: true,
       });
       return response.data;
     } catch (error) {
