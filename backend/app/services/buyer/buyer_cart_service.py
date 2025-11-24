@@ -1,4 +1,5 @@
 from fastapi import HTTPException, status
+from pydantic import BaseModel
 from sqlalchemy.orm import Session, selectinload, Query
 from ...schemas.product import ProductResponse
 from ...models import Product, ProductSize, ProductImage, ProductVariant
@@ -214,8 +215,48 @@ def cart_summary(buyer_id : int, list_product_id: list[int], db: Session):
 
     return {"total_price": float(total_price)}
 
+class UpdateCartItemRequest(BaseModel):
+    quantity: int | None = None
+    action: str | None = None  # "increase"
 
-# ====== UPDATE SẢN PHẨM TRONG GIỎ HÀNG ======
+# ====== UPDATE SỐ LƯỢNG SẢN PHẨM TRONG GIỎ HÀNG ======
+def buyer_update_quantity_item(buyer_id: int, item_id: int, data: UpdateCartItemRequest, db: Session):
+    cart = find_cart(buyer_id, db)
+
+    item = (
+        db.query(ShoppingCartItem)
+        .filter(
+            ShoppingCartItem.shopping_cart_id == cart.shopping_cart_id,
+            ShoppingCartItem.shopping_cart_item_id == item_id
+        )
+        .first()
+    )
+
+    if not item:
+        return {"message": "Item not found"}
+
+    # --- TH 1: tăng +1 ---
+    if data.action == "increase":
+        item.quantity += 1
+
+    # --- TH 2: nhập quantity mới ---
+    elif data.quantity is not None:
+        if data.quantity <= 0:
+            return {"message": "Quantity must be > 0"}
+        item.quantity = data.quantity
+
+    else:
+        return {"message": "No valid action or quantity provided"}
+
+    db.commit()
+    db.refresh(item)
+
+    return {
+        "message": "Item updated",
+        "item_id": item.shopping_cart_item_id,
+        "new_quantity": item.quantity
+    }
+
 
     
 
