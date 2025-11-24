@@ -24,7 +24,7 @@ from ...schemas.product import (
     ProductVariantUpdate,
     ProductVariantWithSizesResponse,
 )
-from ...services.common.storage_service import delete_object, upload_many_via_backend, upload_via_backend
+from ...utils.storage import delete_object, upload_many_via_backend, upload_via_backend
 from sqlalchemy import func
 
 # VALIDATION HELPERS
