@@ -170,14 +170,17 @@ def get_buyer_cart(buyer_id: int, db: Session):
 
 
 # ===== XÓA SẢN PHẨM KHỎI GIỎ HÀNG ======
-def buyer_delete_product(buyer_id : int, product_id: int, db: Session):
+def buyer_delete_product(buyer_id : int, shopping_cart_item_id: int, db: Session):
     cart = find_cart(buyer_id, db)
     # Tìm sản phẩm trong giỏ hàng đó
     item = (
-        db.query(ShoppingCartItem)
-        .filter_by(shopping_cart_id = cart.shopping_cart_id, product_id=product_id)
-        .first()
+    db.query(ShoppingCartItem)
+    .filter(
+        ShoppingCartItem.shopping_cart_id == cart.shopping_cart_id,
+        ShoppingCartItem.shopping_cart_item_id == shopping_cart_item_id
     )
+    .first()
+)
     if not item:
         return {"message": "Product not found in cart"}
     

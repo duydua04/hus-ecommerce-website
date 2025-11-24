@@ -61,10 +61,10 @@ def get_buyer_cart(buyer: Buyer  = Depends(require_buyer), db: Session = Depends
 
 
 # ===== XÓA SẢN PHẨM KHỎI GIỎ HÀNG ======
-@router.delete('/buyer/{buyer_id}/product/{product_id}')
-def delete_product(product_id : int, buyer: Buyer  = Depends(require_buyer), db: Session = Depends(get_db)):
+@router.delete('/cart/item/{item_id}')
+def delete_cart_item(item_id: int, buyer: Buyer = Depends(require_buyer), db: Session = Depends(get_db)):
     buyer_id = buyer["user"].buyer_id
-    return buyer_cart_service.buyer_delete_product(buyer_id, product_id, db)
+    return buyer_cart_service.buyer_delete_product(buyer_id, item_id, db)
 
 # ===== TÍNH TỔNG TIỀN SẢN PHẨM ĐỊNH MUA =====
 class CartSummaryRequest(BaseModel):
