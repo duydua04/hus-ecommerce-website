@@ -290,25 +290,6 @@ hr {
     color: white;
 }
 
-/* Auth Block */
-.auth__signin {
-    display: inline-block;
-    align-items: center;
-    justify-content: center;
-    padding: 8px 14px;
-    border-radius: 6px;
-    background-color: var(--blue-200);
-    color: #000;
-    text-decoration: none;
-    font-weight: 700;
-    font-family: var(--font-family);
-}
-.auth__signin:hover,
-.auth__signin:focus {
-    background-color: var(--blue-600);
-    color: white;
-}
-
 /* Icon Group Block */
 .icon-group {
     display: flex;
