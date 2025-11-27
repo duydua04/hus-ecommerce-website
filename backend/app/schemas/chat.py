@@ -26,14 +26,21 @@ class ChatHistoryResponse(BaseModel):
     messages: List[MessageResponse]
     next_cursor: Optional[str] = None  # Con tro moc thoi gian load trang tiep
 
+class ChatPartner(BaseModel):
+    id: int
+    name: str
+    avatar: Optional[str] = None
+    role: str
+
+
 
 class ConversationResponse(BaseModel):
     conversation_id: int
-    buyer_id: int
-    seller_id: int
     last_message: Optional[str]
     last_message_at: datetime
     unread_counts: Dict[str, int]
+
+    partner: ChatPartner
 
     class Config:
         from_attributes = True

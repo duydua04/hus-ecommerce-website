@@ -1,8 +1,9 @@
-from sqlalchemy.orm import Session
-from fastapi import HTTPException
-from datetime import datetime
+from sqlalchemy.orm import Session, joinedload
+from fastapi import HTTPException, status
+from datetime import datetime, timezone
 from typing import Optional
 
+from ...config import public_url
 from ...models.chat import Conversation, Message
 from ...models.users import Buyer, Seller
 from ...schemas.chat import SendMessageRequest
@@ -12,10 +13,12 @@ from ...utils.security import verify_access_token
 
 # --- Helper Logic ---
 def update_conversation_meta(db: Session, conversation: Conversation, content: str, has_images: bool, sender: str):
+    """Update thong tin cua hoi thoai ve so tin nhan chua doc"""
+
     preview = content if content else ("[Hình ảnh]" if has_images else "Tin nhắn mới")
 
     conversation.last_message = preview
-    conversation.last_message_at = datetime.utcnow()
+    conversation.last_message_at = datetime.now(timezone.utc)
 
     # Tăng unread cho người nhận
     recipient_role = "seller" if sender == "buyer" else "buyer"
@@ -27,26 +30,38 @@ def update_conversation_meta(db: Session, conversation: Conversation, content: s
     db.commit()
 
 
-# --- Main Logic ---
 
 async def send_direct_message_service(db: Session, sender_id: int, sender: str, payload: SendMessageRequest):
+    """Ham gui tin nhan truc tiep"""
+
     sender = sender.lower()
     recipient_role = "seller" if sender == "buyer" else "buyer"
 
-    # 1. KIỂM TRA NGƯỜI NHẬN (Query theo đúng ID riêng của bảng)
+    # Kiem tra nguoi nhan bang id cua nguoi do trong bang tuong ung
     recipient = None
     if recipient_role == "seller":
-        recipient = db.query(Seller).filter(Seller.seller_id == payload.recipient_id).first()
+        recipient = (db.query(Seller)
+                     .filter(Seller.seller_id == payload.recipient_id)
+                     .first()
+        )
     else:
-        recipient = db.query(Buyer).filter(Buyer.buyer_id == payload.recipient_id).first()
+        recipient = (db.query(Buyer)
+                     .filter(Buyer.buyer_id == payload.recipient_id)
+                     .first()
+        )
 
     if not recipient:
-        raise HTTPException(status_code=404, detail=f"Recipient {recipient_role} not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Recipient {recipient_role} not found")
 
-    # 2. Tìm Conversation
+    # Tìm Conversation
     conversation = None
     if payload.conversation_id:
-        conversation = db.query(Conversation).filter(Conversation.conversation_id == payload.conversation_id).first()
+        conversation = (db.query(Conversation)
+                        .filter(Conversation.conversation_id == payload.conversation_id)
+                        .first()
+        )
 
     if not conversation:
         # Tìm theo cặp ID
@@ -58,14 +73,17 @@ async def send_direct_message_service(db: Session, sender_id: int, sender: str, 
             Conversation.seller_id == seller_id
         ).first()
 
-    # 3. Auto Create Conversation
+    # Tu dong tao cuoc tro chuyen neu chua co, chi co buyer duoc gui truoc
     if not conversation:
-        buyer_id = sender_id if sender == 'buyer' else payload.recipient_id
-        seller_id = payload.recipient_id if sender == 'buyer' else sender_id
+        if sender == 'seller':
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Seller cannot start a new conservation."
+            )
 
         conversation = Conversation(
-            buyer_id=buyer_id,
-            seller_id=seller_id,
+            buyer_id=sender_id,
+            seller_id=payload.recipient_id,
             last_message="Bắt đầu trò chuyện",
             unread_counts={"buyer": 0, "seller": 0}
         )
@@ -73,7 +91,7 @@ async def send_direct_message_service(db: Session, sender_id: int, sender: str, 
         db.commit()
         db.refresh(conversation)
 
-    # 4. Create Message
+    # Tao tin nhan moi
     new_msg = Message(
         conversation_id=conversation.conversation_id,
         sender=sender,
@@ -82,9 +100,9 @@ async def send_direct_message_service(db: Session, sender_id: int, sender: str, 
     )
     db.add(new_msg)
     db.commit()
-    db.refresh(new_msg)  # Refresh lần 1
+    db.refresh(new_msg)
 
-    # 5. Update Metadata
+    # Update Metadata
     update_conversation_meta(db, conversation, payload.content, bool(payload.image_urls), sender)
 
     # 6. Send WebSocket
@@ -98,13 +116,15 @@ async def send_direct_message_service(db: Session, sender_id: int, sender: str, 
     }
     await chat_manager.send_personal_message(ws_data, payload.recipient_id, recipient_role)
 
-    # 7. QUAN TRỌNG: Refresh lần cuối để tránh lỗi Pydantic Validation Error
     db.refresh(new_msg)
 
     return new_msg
 
 
+
 def get_history_cursor_service(db: Session, conversation_id: int, cursor: Optional[str], limit: int):
+    """Ham de load tin nhan, su dung ki thuat Pagination de phan trang"""
+
     query = db.query(Message).filter(Message.conversation_id == conversation_id)
 
     if cursor:
@@ -125,15 +145,66 @@ def get_history_cursor_service(db: Session, conversation_id: int, cursor: Option
     return {"messages": messages, "next_cursor": next_cursor}
 
 
-def get_inbox_service(db: Session, user_id: int, role: str):
-    query = db.query(Conversation)
+def get_conversations_service(db: Session, user_id: int, role: str):
+    query = db.query(Conversation).options(
+        joinedload(Conversation.seller),
+        joinedload(Conversation.buyer)
+    )
 
     if role == 'buyer':
         query = query.filter(Conversation.buyer_id == user_id)
     else:
         query = query.filter(Conversation.seller_id == user_id)
 
-    return query.order_by(Conversation.last_message_at.desc()).all()
+    # Sắp xếp và thực thi truy vấn
+    conversations = query.order_by(Conversation.last_message_at.desc()).all()
+
+    # 4. Map dữ liệu trả về
+    results = []
+
+    for conv in conversations:
+        partner_info = None
+
+        # Xử lý logic xác định người nhắn tin với mình
+        if role == 'buyer':
+            # Nếu mình là Buyer -> Đối phương là Seller
+            partner = conv.seller
+            if partner:
+                partner_info = {
+                    "id": partner.seller_id,
+                    "name": partner.shop_name,
+                    "avatar": public_url(getattr(partner, "avt_url", None)),
+                    "role": "seller"
+                }
+        else:
+            # Nếu mình là Seller -> Đối phương là Buyer
+            partner = conv.buyer
+            if partner:
+                partner_info = {
+                    "id": partner.buyer_id,  # Hoặc partner.id tùy model của bạn
+                    "name": f"{partner.fname} {partner.lname}",
+                    "avatar": public_url(getattr(partner, "avt_url", None)),
+                    "role": "buyer"
+                }
+
+        if not partner_info:
+            partner_info = {
+                "id": 0,
+                "name": "Người dùng bị ẩn",
+                "avatar": None,
+                "role": "Unknown"
+            }
+
+        results.append({
+            "conversation_id": conv.conversation_id,
+            "last_message": conv.last_message,
+            "last_message_at": conv.last_message_at,
+            "unread_counts": conv.unread_counts,
+            "partner": partner_info or {}
+        })
+
+    return results
+
 
 def get_user_from_token_param(token: str, db: Session):
     """Giải mã token và tìm user trong DB"""
