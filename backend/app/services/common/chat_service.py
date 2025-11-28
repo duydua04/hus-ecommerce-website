@@ -1,7 +1,9 @@
 from sqlalchemy.orm import Session, joinedload
-from fastapi import HTTPException, status
+from fastapi import HTTPException, status, File, UploadFile
 from datetime import datetime, timezone
-from typing import Optional
+from typing import Optional, List
+
+from starlette.datastructures import UploadFile
 
 from ...config import public_url
 from ...models.chat import Conversation, Message
@@ -9,7 +11,7 @@ from ...models.users import Buyer, Seller
 from ...schemas.chat import SendMessageRequest
 from ...utils.chat_manager import chat_manager
 from ...utils.security import verify_access_token
-
+from ...utils.storage import upload_many_via_backend
 
 # --- Helper Logic ---
 def update_conversation_meta(db: Session, conversation: Conversation, content: str, has_images: bool, sender: str):
@@ -225,6 +227,18 @@ def get_user_from_token_param(token: str, db: Session):
     except Exception:
         return None, None
     return None, None
+
+
+async def upload_images(files: List[UploadFile] = File(...)):
+    if len(files) > 5:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Max 5 files"
+        )
+
+    results = await upload_many_via_backend(folder="chat", files=files, max_size_mb=1)
+
+    return {"urls": [public_url(r['object_key']) for r in results]}
 
 
 def get_user_id(user, role: str):

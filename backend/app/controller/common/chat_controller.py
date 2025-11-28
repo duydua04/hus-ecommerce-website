@@ -23,12 +23,7 @@ async def upload_chat_images(
         current_user: dict = Depends(get_current_user)
 ):
 
-    if len(files) > 5:
-        raise HTTPException(status_code=400, detail="Max 5 files")
-
-    results = await storage.upload_many_via_backend(folder="chat", files=files, max_size_mb=1)
-
-    return {"urls": [public_url(r['object_key']) for r in results]}
+   return await upload_images(files)
 
 
 @router.post("/send", response_model=MessageResponse)
