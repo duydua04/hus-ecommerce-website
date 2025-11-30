@@ -3,8 +3,6 @@ from fastapi import HTTPException, status, File, UploadFile
 from datetime import datetime, timezone
 from typing import Optional, List
 
-from starlette.datastructures import UploadFile
-
 from ...config import public_url
 from ...models.chat import Conversation, Message
 from ...models.users import Buyer, Seller
@@ -12,6 +10,7 @@ from ...schemas.chat import SendMessageRequest
 from ...utils.chat_manager import chat_manager
 from ...utils.security import verify_access_token
 from ...utils.storage import upload_many_via_backend
+
 
 # --- Helper Logic ---
 def update_conversation_meta(db: Session, conversation: Conversation, content: str, has_images: bool, sender: str):
@@ -30,7 +29,6 @@ def update_conversation_meta(db: Session, conversation: Conversation, content: s
     conversation.unread_counts = current_counts
     db.add(conversation)
     db.commit()
-
 
 
 async def send_direct_message_service(db: Session, sender_id: int, sender: str, payload: SendMessageRequest):
@@ -161,7 +159,7 @@ def get_conversations_service(db: Session, user_id: int, role: str):
     # Sắp xếp và thực thi truy vấn
     conversations = query.order_by(Conversation.last_message_at.desc()).all()
 
-    # 4. Map dữ liệu trả về
+    # Map dữ liệu trả về
     results = []
 
     for conv in conversations:

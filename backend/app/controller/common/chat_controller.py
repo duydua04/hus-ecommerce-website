@@ -8,8 +8,7 @@ from ...middleware.auth import get_current_user
 from ...schemas.chat import MessageResponse, ChatHistoryResponse, ConversationResponse
 from ...services.common.chat_service import *
 from ...utils.chat_manager import chat_manager
-from ...utils import storage
-from ...config.s3 import public_url
+
 
 router = APIRouter(
     prefix="/chat",
@@ -17,13 +16,11 @@ router = APIRouter(
 )
 
 
-@router.post("/upload")
-async def upload_chat_images(
-        files: List[UploadFile] = File(...),
-        current_user: dict = Depends(get_current_user)
-):
+@router.post("/upload", dependencies=[Depends(get_current_user)])
+async def upload_chat_images(files: List[UploadFile] = File(...)):
+    """API upload anh cua doan chat"""
 
-   return await upload_images(files)
+    return await upload_images(files)
 
 
 @router.post("/send", response_model=MessageResponse)
@@ -32,6 +29,12 @@ async def send_message(
         db: Session = Depends(get_db),
         current_user: dict = Depends(get_current_user)
 ):
+
+    """
+    APi gui tin nhan
+    Logic co xac dinh nguoi gui va nguoi nhan dua vao thong tin current user truyen vao
+    """
+
     user = current_user['user']
     role = current_user['role']
     user_id = get_user_id(user, role)
@@ -47,6 +50,10 @@ def get_messages(
         db: Session = Depends(get_db),
         current_user = Depends(get_current_user)
 ):
+    """
+    API tra lai thong tin tin nhan cua cac doan chat,
+    """
+
     return get_history_cursor_service(db, conversation_id, cursor, limit)
 
 
@@ -55,6 +62,9 @@ def get_inbox(
         db: Session = Depends(get_db),
         current_user: dict = Depends(get_current_user)
 ):
+
+    """API tra lai thong tin cac doan chat cua nguoi dung, sap xep theo thoi gian moi naht"""
+
     user = current_user['user']
     role = current_user['role']
     user_id = get_user_id(user, role)
@@ -68,6 +78,8 @@ async def chat_socket_endpoint(
         token: str = Query(...),
         db: Session = Depends(get_db)
 ):
+
+    """API ket noi websocket voi phan chat"""
 
     user_id, role = get_user_from_token_param(token, db)
 
