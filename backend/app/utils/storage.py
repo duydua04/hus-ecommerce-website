@@ -2,8 +2,8 @@ from __future__ import annotations
 from typing import Literal, IO, List
 from fastapi import HTTPException, UploadFile, status
 from botocore.exceptions import ClientError
-from ...config.settings import settings
-from ...config.s3 import get_s3_client
+from ..config.settings import settings
+from ..config.s3 import get_s3_client
 import time, uuid, mimetypes, boto3
 from urllib.parse import urlparse
 
@@ -15,16 +15,19 @@ def _s3():
     # Tao S3 client - import tu config.s3
     return get_s3_client()
 
+
 def guess_end_file(filename: str):
     # Ham xu lay de lay ra duoi file
     if filename and "." in filename:
         return "." + filename.split(".")[-1].lower()
     return ""
 
-def gen_key(prefix: Literal["avatars", "products", "reviews"], filename: str):
+
+def gen_key(prefix: Literal["avatars", "products", "reviews", "chat"], filename: str):
     # Ham tao ra key duy nhat co cau truc de luu tru file
     t = time.gmtime()
     return f"{prefix}/{t.tm_year:04d}/{t.tm_mon:02d}/{uuid.uuid4().hex}{guess_end_file(filename)}"
+
 
 def validate_content_type(ct: str):
     # Ham xac thuc va kiem tra loai noi dung cua file upload, chi cho phep cac dinh dang anh va video duoc cho phep
@@ -36,6 +39,7 @@ def validate_content_type(ct: str):
         return ct
 
     raise HTTPException(status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, detail=f'Unsupported content type: {ct}')
+
 
 # Ham upload file Minio
 async def upload_via_backend(folder: Literal['avatars', 'products', 'reviews'],
@@ -73,6 +77,7 @@ async def upload_via_backend(folder: Literal['avatars', 'products', 'reviews'],
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f'S3 put object failed: {e}')
 
     return {'object_key': key, 'content_type': content_type, 'size': len(body)}
+
 
 """
 Ham stream file tu minio ve. Cac tham so truyen vao la 

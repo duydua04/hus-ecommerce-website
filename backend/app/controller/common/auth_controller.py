@@ -1,5 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Request, Response
 from sqlalchemy.orm import Session
+
+from ...config import public_url
 from ...config.db import get_db
 from ...middleware.auth import get_current_user
 from ...schemas.auth import RegisterBuyer, RegisterSeller, Login, OAuth2Token
@@ -22,7 +24,7 @@ def get_me(info = Depends(get_current_user)):
         "email": u.email,
         "fname": u.fname,
         "lname": getattr(u, "lname", None),
-        "avt_url": getattr(u, "avt_url", None),
+        "avt_url": public_url(getattr(u, "avt_url", None)),
     }
 
 
