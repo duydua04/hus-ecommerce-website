@@ -1,14 +1,13 @@
 from __future__ import annotations
-from typing import Optional, Iterable, Tuple, List, Literal
 from fastapi import HTTPException, status, UploadFile
 from sqlalchemy.orm import Session
-from sqlalchemy import select, func, asc, desc, exists
+from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 
 from ...models import Carrier
 from ...models import Order
 from ...schemas.carrier import CarrierCreate, CarrierUpdate, CarrierOut
-from ...services.common.storage_service import upload_via_backend
+from ...utils.storage import upload_via_backend
 from ...config.s3 import public_url
 
 def ensure_unique_name(db: Session, name: str, exclude_id: int | None = None):

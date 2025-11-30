@@ -23,7 +23,7 @@ def verify_password(plain: str, hashed: str):
 def create_access_token(sub: str, role: str, expires_minutes: int | None = None, extra: Dict[str, Any] | None = None):
     """
     Tạo OAuth access token để xác thực người dùng trong các request tiếp theo,
-    sub va role la thong tin xax thuc de xac dinh nguoi dung khi nguoi dung goi API
+    sub va role la thong tin xac thuc de xac dinh nguoi dung khi nguoi dung goi API
     """
     if expires_minutes is None:
         expires_minutes = int(getattr(settings, "OAUTH2_ACCESS_TOKEN_EXPIRE_MINUTES", 180))
