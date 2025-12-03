@@ -45,7 +45,7 @@ async def register_buyer(db: Session, payload: RegisterBuyer):
         role="admin",  # Gửi cho nhóm Admin
         event="new_user_registered",  # Tên sự kiện riêng
         data={
-            "title": "👤 Người dùng mới",
+            "title": "Người dùng mới",
             "message": f"Khách hàng {buyer.fname} ({buyer.email}) vừa đăng ký thành công.",
             "user_id": buyer.buyer_id,
             "role": "buyer",

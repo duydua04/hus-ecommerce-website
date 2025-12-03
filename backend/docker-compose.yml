@@ -18,17 +18,16 @@ services:
       retries: 10
 
   mongo:
-    image: mongo:6.0
+    image: mongo:7.0
     container_name: website_mongo # Đổi tên container để tránh trùng tên cũ
     restart: always
     environment:
       MONGO_INITDB_ROOT_USERNAME: mywebsite
       MONGO_INITDB_ROOT_PASSWORD: password
     ports:
-      # Cấu trúc: "PORT_MAY_THAT : PORT_TRONG_DOCKER"
-      - "27018:27017"  # <--- QUAN TRỌNG: Map cổng 27018 ở ngoài vào 27017 bên trong
+      - "27018:27017"
     volumes:
-      - mongo_data:/data/db # Đổi tên volume để không dùng chung dữ liệu cũ
+      - mongo_data:/data/db
     healthcheck:
       test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
       interval: 10s

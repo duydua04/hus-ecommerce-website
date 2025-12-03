@@ -11,5 +11,7 @@ async def init_mongo():
         document_models=[
             Conversation,
             Message,
+            Notification,
+
         ]
     )

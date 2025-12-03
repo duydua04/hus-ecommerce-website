@@ -38,16 +38,22 @@ def validate_content_type(ct: str):
     if ct.startswith('video/') and ct in VIDEO_MIME:
         return ct
 
-    raise HTTPException(status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, detail=f'Unsupported content type: {ct}')
+    raise HTTPException(
+        status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+        detail=f'Unsupported content type: {ct}'
+    )
 
 
-# Ham upload file Minio
+# Ham upload file S3
 async def upload_via_backend(folder: Literal['avatars', 'products', 'reviews'],
                              file: UploadFile,
                              max_size_mb: int = 10):
     # Neu file khong co ten thi bao loi
     if not file.filename:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='File name is required')
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='File name is required'
+        )
 
     # Xac dinh content file va validate no
     content_type = file.content_type or mimetypes.guess_type(file.filename)[0] or ""
@@ -58,7 +64,10 @@ async def upload_via_backend(folder: Literal['avatars', 'products', 'reviews'],
     size_mb = len(body) / (1024 * 1024)
 
     if size_mb > max_size_mb:
-        raise HTTPException(status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, detail=f"File too large: {size_mb}")
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail=f"File too large: {size_mb}"
+        )
 
     # Tao key va ket noi s3
     key = gen_key(folder, file.filename)
@@ -79,47 +88,6 @@ async def upload_via_backend(folder: Literal['avatars', 'products', 'reviews'],
     return {'object_key': key, 'content_type': content_type, 'size': len(body)}
 
 
-"""
-Ham stream file tu minio ve. Cac tham so truyen vao la 
-    object_key: Duong dan file
-    range_header: Header range tu client
-"""
-def get_object_range(object_key: str, range_header: str | None = None):
-    # Ket noi voi s3
-    s3 = _s3()
-    params = {'Bucket': settings.S3_BUCKET, 'Key': object_key} # param chua tham so co ban la bucket va key
-
-    if range_header:
-        params['Range'] = range_header
-
-    # Bay loi lay file tu minio s3
-    try:
-        resp = s3.get_object(**params)
-    except ClientError as e:
-        code = e.response["Error"]["Code"]
-        if code in ("404", "NoSuchKey"):
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='File not found')
-        if code == "InvalidRange":
-            raise HTTPException(status_code=status.HTTP_416_REQUESTED_RANGE_NOT_SATISFIABLE, detail="Invalid Range")
-
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f'S3 get object failed: {e}')
-
-    body = resp['Body'] # Lay body tu s2 response ve
-    headers = {
-        'Content-Type': resp.get("ContentType", "application/octet-stream"),
-        'Accept-Ranges': 'bytes',
-    }
-
-    # status la 205 neu client gui range request
-    # status la 200 neu client request toan bo file
-    http_status = 206 if range_header else 200
-
-    if range_header and "ContentRange" in resp:
-        headers['Content-Range'] = resp['ContentRange']
-    if 'ContentLength' in resp:
-        headers['Content-Length'] = str(resp['ContentLength'])
-
-    return body, headers, http_status
 
 def delete_object(object_key: str):
     # Ham thuc hien xoa object tren minio
@@ -151,9 +119,10 @@ def extract_object_key(url_or_key: str):
 
     return path
 
+
 async def upload_many_via_backend(folder: Literal['avatars', 'products', 'reviews'],
                                   files: List[UploadFile],
-                                  max_size_mb: int = 10):
+                                  max_size_mb: int = 2):
     """
         Upload nhiều file qua backend (tuần tự).
         Trả về list kết quả giống upload_via_backend ở phía bên trên

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Notification Listener</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        body { font-family: sans-serif; background: #2c3e50; color: white; padding: 50px; display: flex; justify-content: center; }
+        .dashboard { background: white; color: #333; width: 500px; padding: 30px; border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+
+        h2 { margin-top: 0; border-bottom: 2px solid #eee; padding-bottom: 15px; }
+
+        .status { font-weight: bold; padding: 5px 10px; border-radius: 4px; display: inline-block; margin-bottom: 20px; background: #eee; color: #666; }
+        .status.live { background: #d4edda; color: #155724; }
+        .status.dead { background: #f8d7da; color: #721c24; }
+
+        /* List */
+        #logs { list-style: none; padding: 0; max-height: 400px; overflow-y: auto; }
+        .log-item { background: #f8f9fa; border-left: 5px solid #3498db; padding: 15px; margin-bottom: 10px; border-radius: 4px; animation: slideIn 0.4s; }
+        .log-title { font-weight: bold; color: #2980b9; display: block; margin-bottom: 5px; }
+        .log-time { float: right; font-size: 0.8em; color: #999; }
+
+        @keyframes slideIn { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard">
+        <h2>🛡️ Admin Dashboard</h2>
+
+        <div>Status: <span id="status" class="status">Đang kết nối...</span></div>
+
+        <ul id="logs">
+            <li style="text-align: center; color: #999; margin-top: 20px;">Đang chờ người dùng đăng ký...</li>
+        </ul>
+    </div>
+
+    <script>
+        const API_URL = "http://localhost:8000";
+
+        // 1. Tự động đăng nhập Admin khi mở trang
+        // (Hardcode user admin để test cho nhanh)
+        async function autoLoginAndListen() {
+            try {
+                console.log("Đang đăng nhập Admin...");
+                const res = await axios.post(`${API_URL}/auth/login/admin`, {
+                    email: "admin1@example.com", // Đảm bảo email này có trong DB
+                    password: "admin1"         // Đảm bảo pass đúng
+                });
+
+                const token = res.data.access_token;
+                connectSSE(token);
+
+            } catch (err) {
+                document.getElementById('status').innerText = "Lỗi Login: " + err.message;
+                document.getElementById('status').className = "status dead";
+            }
+        }
+
+        // 2. Kết nối SSE
+        function connectSSE(token) {
+            const url = `${API_URL}/notifications/stream?token=${token}`;
+            const evtSource = new EventSource(url);
+
+            evtSource.onopen = () => {
+                const st = document.getElementById('status');
+                st.innerText = "🟢 LIVE CONNECTED";
+                st.className = "status live";
+                console.log("SSE Ready!");
+            };
+
+            // --- LẮNG NGHE SỰ KIỆN 'new_user_registered' ---
+            evtSource.addEventListener("new_user_registered", (e) => {
+                const data = JSON.parse(e.data);
+
+                // Xóa thông báo placeholder cũ nếu có
+                const logs = document.getElementById('logs');
+                if(logs.innerText.includes("Đang chờ")) logs.innerHTML = "";
+
+                // Render thông báo mới
+                const li = document.createElement('li');
+                li.className = "log-item";
+                li.innerHTML = `
+                    <span class="log-time">${data.time || 'Just now'}</span>
+                    <span class="log-title">${data.title}</span>
+                    ${data.message}
+                `;
+                logs.prepend(li); // Thêm vào đầu
+            });
+
+            evtSource.onerror = () => {
+                const st = document.getElementById('status');
+                st.innerText = "🔴 Mất kết nối";
+                st.className = "status dead";
+            };
+        }
+
+        // Chạy ngay khi mở trang
+        autoLoginAndListen();
+    </script>
+</body>
+</html>

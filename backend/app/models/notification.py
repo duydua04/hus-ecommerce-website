@@ -2,6 +2,7 @@ from typing import Dict, Any
 from datetime import datetime
 from beanie import Document
 from pydantic import Field
+from pymongo import IndexModel, ASCENDING, DESCENDING
 
 
 class Notification(Document):
@@ -17,6 +18,6 @@ class Notification(Document):
     class Settings:
         name = "notifications"
         indexes = [
-            [("recipient_id", 1), ("recipient_role", 1)],
-            [("created_at", 1), {"expireAfterSeconds": 2592000}] # Tự xóa sau 30 ngày
+            IndexModel([("recipient_id", ASCENDING), ("recipient_role", ASCENDING)]),
+            IndexModel([("created_at", ASCENDING)], expireAfterSeconds=2592000)
         ]

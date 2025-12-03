@@ -32,7 +32,7 @@ from .controller.common.auth_controller import router as auth_router
 from .controller.common.avatar_controller import router as avatar_router
 from .controller.common.public_category_controller import router as public_category_router
 from .controller.common.chat_controller import router as chat_router
-
+from .controller.common.notification_controller import router as notice_router
 
 
 
@@ -100,7 +100,7 @@ app.include_router(auth_router)
 app.include_router(avatar_router)
 app.include_router(public_category_router)
 app.include_router(chat_router)
-
+app.include_router(notice_router)
 
 
 
