@@ -1,39 +1,34 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Boolean, Text, UniqueConstraint, JSON
-from sqlalchemy.orm import relationship
-from datetime import datetime, timezone
-from ..config.db import Base
+from typing import Optional, List, Dict
+from datetime import datetime
+from beanie import Document
+from pydantic import Field
+from pymongo import IndexModel, ASCENDING, DESCENDING
 
+class Conversation(Document):
+    buyer_id: int
+    seller_id: int
+    last_message: Optional[str] = None
+    last_message_at: datetime = Field(default_factory=datetime.utcnow)
+    unread_counts: Dict[str, int] = {"buyer": 0, "seller": 0}
 
-class Conversation(Base):
-    __tablename__ = "conversation"
+    class Settings:
+        name = "conversations"
+        indexes = [
+            IndexModel([("buyer_id", ASCENDING), ("seller_id", ASCENDING)], unique=True),
+            IndexModel([("last_message_at", DESCENDING)])
+        ]
 
-    conversation_id = Column(Integer, primary_key=True, index=True)
-    buyer_id = Column(Integer, ForeignKey("buyer.buyer_id"), nullable=False)
-    seller_id = Column(Integer, ForeignKey("seller.seller_id"), nullable=False)
-    last_message = Column(Text, nullable=True)
-    last_message_at = Column(DateTime, default=datetime.now(timezone.utc), index=True)
-    unread_counts = Column(JSON, default={"buyer": 0, "seller": 0})
+class Message(Document):
+    conversation_id: str
+    sender: str
+    content: Optional[str] = None
+    images: List[str] = []
+    is_read: bool = False
+    created_at: datetime = Field(default_factory=datetime.utcnow)
 
-    # Quan hệ
-    buyer = relationship("Buyer", backref="conversation")
-    seller = relationship("Seller", backref="conversation")
-    messages = relationship("Message", back_populates="conversation")
-
-    # 1 Buyer chỉ có 1 Chat với 1 Seller
-    __table_args__ = (
-        UniqueConstraint('buyer_id', 'seller_id', name='unique_chat_pair'),
-    )
-
-
-class Message(Base):
-    __tablename__ = "message"
-
-    message_id = Column(Integer, primary_key=True, index=True)
-    conversation_id = Column(Integer, ForeignKey("conversation.conversation_id"), nullable=False)
-    sender = Column(String, nullable=False)
-    content = Column(Text, nullable=True)
-    images = Column(JSON, default=[])
-    is_read = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=datetime.now(timezone.utc), index=True)
-
-    conversation = relationship("Conversation", back_populates="messages")
+    class Settings:
+        name = "messages"
+        indexes = [
+            IndexModel([("conversation_id", ASCENDING)]),
+            IndexModel([("created_at", DESCENDING)])
+        ]

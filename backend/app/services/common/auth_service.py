@@ -1,9 +1,12 @@
+from datetime import datetime
+
 from fastapi import  HTTPException, status, Response
 from sqlalchemy.orm import Session
 from ...config.settings import settings
 from ...models.users import Admin, Seller, Buyer
 from ...schemas.auth import RegisterBuyer, RegisterSeller, Login, OAuth2Token
 from ...schemas.user import BuyerResponse, SellerResponse
+from ...utils.sse_manager import sse_manager
 from ...utils.security import (
     hash_password, verify_password, create_access_token,
     create_refresh_token, verify_refresh_token
@@ -18,7 +21,7 @@ def email_or_phone_taken(db: Session, model, email: str, phone: str):
 
 
 # Cac ham Register
-def register_buyer(db: Session, payload: RegisterBuyer):
+async def register_buyer(db: Session, payload: RegisterBuyer):
     # Kiem tra neu email va phone da ton tai thi bao loi
     if email_or_phone_taken(db, Buyer, payload.email, payload.phone):
         raise HTTPException(
@@ -37,6 +40,19 @@ def register_buyer(db: Session, payload: RegisterBuyer):
     db.add(buyer)
     db.commit()
     db.refresh(buyer)
+
+    await sse_manager.broadcast_to_role(
+        role="admin",  # Gửi cho nhóm Admin
+        event="new_user_registered",  # Tên sự kiện riêng
+        data={
+            "title": "👤 Người dùng mới",
+            "message": f"Khách hàng {buyer.fname} ({buyer.email}) vừa đăng ký thành công.",
+            "user_id": buyer.buyer_id,
+            "role": "buyer",
+            "time": datetime.now().strftime("%H:%M:%S")
+        }
+    )
+
     return BuyerResponse.model_validate(buyer)
 
 

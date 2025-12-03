@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HUS Chat System (Mongo Hybrid)</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        :root { --primary: #0084ff; --bg: #f0f2f5; --me-bg: #0084ff; --other-bg: #e4e6eb; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: var(--bg); height: 100vh; display: flex; align-items: center; justify-content: center; }
+
+        /* Login Screen */
+        #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 1000; display: flex; justify-content: center; align-items: center; }
+        .login-box { width: 320px; padding: 30px; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); text-align: center; }
+        .login-box input, .login-box select, .login-box button { width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #ccc; }
+        .login-box button { background: var(--primary); color: white; border: none; font-weight: bold; cursor: pointer; }
+
+        /* Main App */
+        .app-container { width: 1100px; height: 85vh; background: white; border-radius: 12px; display: flex; overflow: hidden; box-shadow: 0 5px 20px rgba(0,0,0,0.1); display: none; }
+
+        /* Sidebar */
+        .sidebar { width: 320px; border-right: 1px solid #ddd; display: flex; flex-direction: column; }
+        .sidebar-header { padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; background: #f8f9fa; }
+        .btn-add { border: none; background: none; color: var(--primary); font-size: 20px; cursor: pointer; }
+
+        .inbox-list { flex: 1; overflow-y: auto; }
+        .conv-item { display: flex; padding: 12px; cursor: pointer; border-bottom: 1px solid #f1f1f1; align-items: center; transition: 0.2s; }
+        .conv-item:hover { background: #f5f5f5; }
+        .conv-item.active { background: #e6f2ff; border-left: 4px solid var(--primary); }
+        .conv-avatar { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; margin-right: 10px; border: 1px solid #eee; }
+        .conv-info { flex: 1; overflow: hidden; }
+        .conv-name { font-weight: 600; font-size: 14px; margin-bottom: 3px; }
+        .conv-last { font-size: 12px; color: #666; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .unread-dot { width: 10px; height: 10px; background: red; border-radius: 50%; margin-left: 5px; }
+
+        /* Chat Area */
+        .chat-area { flex: 1; display: flex; flex-direction: column; }
+        .chat-header { height: 60px; border-bottom: 1px solid #ddd; display: flex; align-items: center; padding: 0 20px; gap: 10px; background: white; }
+        .partner-name { font-weight: bold; }
+
+        .messages-box { flex: 1; padding: 20px; overflow-y: auto; background: #fff; display: flex; flex-direction: column; gap: 8px; }
+
+        .msg { max-width: 70%; padding: 8px 12px; border-radius: 15px; font-size: 14px; line-height: 1.4; word-wrap: break-word; position: relative; }
+        .msg-me { align-self: flex-end; background: var(--me-bg); color: white; border-bottom-right-radius: 2px; }
+        .msg-other { align-self: flex-start; background: var(--other-bg); color: black; border-bottom-left-radius: 2px; }
+        .msg-img { max-width: 200px; border-radius: 8px; margin-top: 5px; display: block; cursor: pointer; }
+        .msg-time { font-size: 10px; margin-top: 4px; opacity: 0.7; text-align: right; display: block; }
+
+        /* Input */
+        .input-area { padding: 15px; border-top: 1px solid #ddd; background: white; }
+        .preview-area { display: flex; gap: 5px; margin-bottom: 5px; }
+        .preview-thumb { width: 50px; height: 50px; border-radius: 4px; object-fit: cover; border: 1px solid #ddd; }
+
+        .input-row { display: flex; gap: 10px; align-items: center; }
+        .chat-input { flex: 1; padding: 10px 15px; border-radius: 20px; border: 1px solid #ddd; outline: none; }
+        .icon-btn { font-size: 18px; color: var(--primary); cursor: pointer; background: none; border: none; padding: 5px; }
+    </style>
+</head>
+<body>
+
+    <div id="login-overlay">
+        <div class="login-box">
+            <h3>💬 Đăng nhập Chat</h3>
+            <select id="role">
+                <option value="buyer">Buyer</option>
+                <option value="seller">Seller</option>
+            </select>
+            <input type="text" id="email" value="buyer@example.com">
+            <input type="password" id="password" value="123456">
+            <button onclick="handleLogin()" id="btnLogin">Đăng nhập</button>
+            <div id="login-err" style="color: red; font-size: 12px; margin-top: 5px;"></div>
+        </div>
+    </div>
+
+    <div class="app-container" id="app-screen">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div id="my-name" style="font-weight: bold;">...</div>
+                <button class="btn-add" onclick="startNewChat()" title="Chat mới">
+                    <i class="fas fa-plus-circle"></i>
+                </button>
+            </div>
+            <div class="inbox-list" id="inbox-list"></div>
+        </div>
+
+        <div class="chat-area">
+            <div class="chat-header" id="chat-header" style="visibility: hidden;">
+                <img id="header-avt" src="" style="width: 35px; height: 35px; border-radius: 50%; object-fit: cover;">
+                <div class="partner-name" id="header-name">User</div>
+            </div>
+
+            <div class="messages-box" id="messages-box">
+                <div style="margin: auto; color: #999;">Chọn hội thoại để bắt đầu</div>
+            </div>
+
+            <div class="input-area" id="input-area" style="visibility: hidden;">
+                <div class="preview-area" id="preview-area"></div>
+                <div class="input-row">
+                    <input type="file" id="file-input" hidden accept="image/*" multiple onchange="uploadFiles(this)">
+                    <button class="icon-btn" onclick="document.getElementById('file-input').click()">
+                        <i class="far fa-image"></i>
+                    </button>
+                    <input type="text" id="msg-input" class="chat-input" placeholder="Nhập tin nhắn..." onkeypress="if(event.key==='Enter') sendMsg()">
+                    <button class="icon-btn" onclick="sendMsg()">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = "http://localhost:8000";
+        const api = axios.create({ baseURL: API_URL });
+
+        let currentUser = null;
+        let currentChat = null; // { convId: string|null, partnerId: int }
+        let ws = null;
+        let uploadedUrls = [];
+
+        // --- 1. LOGIN ---
+        async function handleLogin() {
+            const role = document.getElementById('role').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const btn = document.getElementById('btnLogin');
+
+            try {
+                btn.disabled = true; btn.innerText = "Loading...";
+
+                // 1.1 Get Token
+                const res = await api.post(`/auth/login/${role}`, { email, password });
+                const token = res.data.access_token;
+                api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+
+                // 1.2 Get Me Info
+                const meRes = await api.get("/auth/me");
+                currentUser = { ...meRes.data, token };
+
+                // 1.3 UI Setup
+                document.getElementById('login-overlay').style.display = 'none';
+                document.getElementById('app-screen').style.display = 'flex';
+                document.getElementById('my-name').innerText = `${currentUser.role.toUpperCase()}: ${currentUser.fname}`;
+
+                loadInbox();
+                connectWebSocket();
+
+            } catch (err) {
+                console.error(err);
+                document.getElementById('login-err').innerText = "Login thất bại!";
+                btn.disabled = false; btn.innerText = "Đăng nhập";
+            }
+        }
+
+        // --- 2. LOAD INBOX ---
+        async function loadInbox() {
+            try {
+                // Gọi API lấy danh sách hội thoại
+                const res = await api.get("/chat/conversations");
+                const list = res.data;
+                const container = document.getElementById('inbox-list');
+                container.innerHTML = "";
+
+                list.forEach(conv => {
+                    const p = conv.partner;
+
+                    // ID có thể là conversation_id hoặc _id
+                    const realId = conv.conversation_id || conv._id;
+                    const isActive = currentChat && currentChat.convId === realId ? "active" : "";
+                    const avatar = p.avatar || "https://via.placeholder.com/50";
+
+                    // Unread
+                    const unread = conv.unread_counts[currentUser.role] || 0;
+                    const unreadHtml = unread > 0 ? `<div class="unread-dot"></div>` : "";
+                    const boldStyle = unread > 0 ? "font-weight: bold; color: black;" : "";
+
+                    const html = `
+                        <div class="conv-item ${isActive}" onclick="selectChat('${realId}', ${p.id}, '${p.name}', '${avatar}')">
+                            <img src="${avatar}" class="conv-avatar">
+                            <div class="conv-info">
+                                <div class="conv-name" style="display:flex; justify-content:space-between;">
+                                    <span>${p.name}</span>
+                                    ${unreadHtml}
+                                </div>
+                                <div class="conv-last" style="${boldStyle}">${conv.last_message || "..."}</div>
+                            </div>
+                        </div>
+                    `;
+                    container.innerHTML += html;
+                });
+            } catch (err) { console.error(err); }
+        }
+
+        // --- 3. CHAT MỚI ---
+        function startNewChat() {
+            const idStr = prompt("Nhập ID (Postgres ID) của người muốn chat:");
+            if (!idStr) return;
+            const partnerId = parseInt(idStr);
+            if (isNaN(partnerId)) return;
+
+            // Set convId là null để không gọi API history
+            currentChat = { convId: null, partnerId: partnerId };
+
+            // UI Reset
+            document.getElementById('chat-header').style.visibility = 'visible';
+            document.getElementById('input-area').style.visibility = 'visible';
+            document.getElementById('header-name').innerText = `User #${partnerId} (Mới)`;
+            document.getElementById('header-avt').src = "https://via.placeholder.com/50";
+
+            const box = document.getElementById('messages-box');
+            box.innerHTML = `<div style="margin:auto; text-align:center; color:#888;">Bắt đầu cuộc trò chuyện mới...</div>`;
+
+            // Bỏ active cũ
+            document.querySelectorAll('.conv-item').forEach(e => e.classList.remove('active'));
+        }
+
+        // --- 4. CHỌN CHAT ---
+        async function selectChat(convId, partnerId, name, avatar) {
+            currentChat = { convId, partnerId };
+
+            document.getElementById('chat-header').style.visibility = 'visible';
+            document.getElementById('input-area').style.visibility = 'visible';
+            document.getElementById('header-name').innerText = name;
+            document.getElementById('header-avt').src = avatar;
+
+            const box = document.getElementById('messages-box');
+            box.innerHTML = "";
+
+            // Nếu là chat mới (null ID) -> Không load history
+            if (!convId) return;
+
+            try {
+                const res = await api.get(`/chat/${convId}/messages?limit=50`);
+                // API trả về Mới -> Cũ, ta giữ nguyên và render
+                const msgs = res.data.messages;
+
+                // Đảo ngược mảng trên Frontend để hiển thị Cũ (trên) -> Mới (dưới)
+                // (Vì ta dùng appendChild/insertAdjacentHTML('beforeend'))
+                msgs.forEach(msg => renderMessage(msg));
+
+                box.scrollTop = box.scrollHeight;
+            } catch (err) { console.error(err); }
+
+            loadInbox();
+        }
+
+        // --- 5. RENDER MSG ---
+        function renderMessage(msg) {
+            const box = document.getElementById('messages-box');
+            if (box.innerText.includes("Bắt đầu cuộc")) box.innerHTML = "";
+
+            // So sánh Role để biết trái/phải
+            const isMe = (msg.sender === currentUser.role);
+
+            let imgHtml = "";
+            if (msg.images && msg.images.length > 0) {
+                msg.images.forEach(url => imgHtml += `<img src="${url}" class="msg-img" onclick="window.open(this.src)">`);
+            }
+
+            const time = new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
+            const html = `
+                <div class="msg ${isMe ? 'msg-me' : 'msg-other'}">
+                    ${msg.content ? `<div>${msg.content}</div>` : ""}
+                    ${imgHtml}
+                    <span class="msg-time">${time}</span>
+                </div>
+            `;
+            box.insertAdjacentHTML('beforeend', html);
+            box.scrollTop = box.scrollHeight;
+        }
+
+        // --- 6. GỬI TIN ---
+        async function sendMsg() {
+            const input = document.getElementById('msg-input');
+            const content = input.value.trim();
+            if (!content && uploadedUrls.length === 0) return;
+            if (!currentChat) return;
+
+            const payload = {
+                recipient_id: currentChat.partnerId,
+                content: content,
+                image_urls: uploadedUrls,
+                conversation_id: currentChat.convId // Có thể null
+            };
+
+            try {
+                const res = await api.post("/chat/send", payload);
+                const newMsg = res.data;
+
+                renderMessage(newMsg);
+
+                input.value = ""; uploadedUrls = [];
+                document.getElementById('preview-area').innerHTML = "";
+
+                // Nếu là chat mới -> Reload để lấy ID thật
+                if (!currentChat.convId) loadInbox();
+                else loadInbox();
+
+            } catch (err) { alert("Gửi lỗi: " + err.message); }
+        }
+
+        // --- 7. UPLOAD ---
+        async function uploadFiles(input) {
+            const files = input.files;
+            if (!files.length) return;
+            const formData = new FormData();
+            for(let i=0; i<files.length; i++) formData.append("files", files[i]);
+
+            try {
+                const res = await api.post("/chat/upload", formData, { headers: {'Content-Type': 'multipart/form-data'}});
+                const urls = res.data.urls;
+                uploadedUrls.push(...urls);
+
+                urls.forEach(url => {
+                    document.getElementById('preview-area').innerHTML += `<img src="${url}" class="preview-thumb">`;
+                });
+                input.value = "";
+            } catch (e) { alert("Lỗi upload ảnh"); }
+        }
+
+        // --- 8. SOCKET ---
+        function connectWebSocket() {
+            const url = `ws://localhost:8000/chat/ws/chat?token=${currentUser.token}`;
+            ws = new WebSocket(url);
+
+            ws.onopen = () => console.log("WS Connected ✅");
+
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                console.log("WS Msg:", data);
+
+                if (currentChat) {
+                    // So sánh string ID
+                    const activeId = String(currentChat.convId);
+                    const incomingId = String(data.conversation_id);
+
+                    // Render nếu đang mở đúng chat
+                    if (activeId === incomingId || !currentChat.convId) {
+                        if (data.sender !== currentUser.role) renderMessage(data);
+                    }
+                }
+                loadInbox();
+            };
+
+            ws.onclose = (e) => {
+                console.log("WS Closed", e.code);
+                if (e.code === 1008) alert("Token hết hạn.");
+            };
+        }
+    </script>
+</body>
+</html>

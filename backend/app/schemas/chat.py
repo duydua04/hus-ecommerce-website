@@ -1,46 +1,51 @@
-from pydantic import BaseModel
-from typing import List, Optional, Dict
+from pydantic import BaseModel, Field, BeforeValidator
+from typing import List, Optional, Dict, Annotated
 from datetime import datetime
+
+
+PyObjectId = Annotated[str, BeforeValidator(str)]
 
 
 class SendMessageRequest(BaseModel):
     recipient_id: int
     content: Optional[str] = None
     image_urls: List[str] = []
-    conversation_id: Optional[int] = None
+    conversation_id: Optional[str] = None
 
-
-class MessageResponse(BaseModel):
-    message_id: int
-    sender: str
-    content: Optional[str]
-    images: List[str]
-    created_at: datetime
-    is_read: bool
-
-    class Config:
-        from_attributes = True
-
-
-class ChatHistoryResponse(BaseModel):
-    messages: List[MessageResponse]
-    next_cursor: Optional[str] = None  # Con tro moc thoi gian load trang tiep
 
 class ChatPartner(BaseModel):
     id: int
     name: str
     avatar: Optional[str] = None
-    role: str
+    role: str  # 'buyer' hoặc 'seller'
 
+
+class MessageResponse(BaseModel):
+    id: PyObjectId = Field(..., alias="_id")
+    conversation_id: str
+    sender: str  # 'buyer' hoặc 'seller'
+    content: Optional[str] = None
+    images: List[str] = []
+    is_read: bool
+    created_at: datetime
+
+    class Config:
+        populate_by_name = True  # Để Pydantic hiểu alias="_id"
+        from_attributes = True
 
 
 class ConversationResponse(BaseModel):
-    conversation_id: int
-    last_message: Optional[str]
+    conversation_id: PyObjectId = Field(..., alias="_id")
+    last_message: Optional[str] = None
     last_message_at: datetime
-    unread_counts: Dict[str, int]
-
-    partner: ChatPartner
+    unread_counts: Dict[str, int] = {"buyer": 0, "seller": 0}
+    partner: ChatPartner  # Thông tin người chat cùng
 
     class Config:
+        populate_by_name = True
         from_attributes = True
+
+
+class ChatHistoryResponse(BaseModel):
+    messages: List[MessageResponse]
+    next_cursor: Optional[str] = None

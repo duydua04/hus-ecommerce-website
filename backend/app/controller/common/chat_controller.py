@@ -1,8 +1,4 @@
-from fastapi import (
-    APIRouter, Depends, Query, WebSocket, WebSocketDisconnect,
-    UploadFile, File
-)
-from typing import List
+from fastapi import APIRouter, Depends, Query, WebSocket, WebSocketDisconnect
 from ...config.db import get_db
 from ...middleware.auth import get_current_user
 from ...schemas.chat import MessageResponse, ChatHistoryResponse, ConversationResponse
@@ -16,81 +12,39 @@ router = APIRouter(
 )
 
 
-@router.post("/upload", dependencies=[Depends(get_current_user)])
-async def upload_chat_images(files: List[UploadFile] = File(...)):
-    """API upload anh cua doan chat"""
-
+@router.post("/upload")
+async def upload_images(files: List[UploadFile] = File(...), _=Depends(get_current_user)):
     return await upload_images(files)
 
 
 @router.post("/send", response_model=MessageResponse)
-async def send_message(
-        payload: SendMessageRequest,
-        db: Session = Depends(get_db),
-        current_user: dict = Depends(get_current_user)
-):
-
-    """
-    APi gui tin nhan
-    Logic co xac dinh nguoi gui va nguoi nhan dua vao thong tin current user truyen vao
-    """
-
-    user = current_user['user']
-    role = current_user['role']
-    user_id = get_user_id(user, role)
-
-    return await send_direct_message_service(db, user_id, role, payload)
-
-
-@router.get("/{conversation_id}/messages", response_model=ChatHistoryResponse)
-def get_messages(
-        conversation_id: int,
-        cursor: Optional[str] = Query(None),
-        limit: int = Query(20),
-        db: Session = Depends(get_db),
-        current_user = Depends(get_current_user)
-):
-    """
-    API tra lai thong tin tin nhan cua cac doan chat,
-    """
-
-    return get_history_cursor_service(db, conversation_id, cursor, limit)
+async def send_message(payload: SendMessageRequest, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
+    return await send_direct_message_service(
+        db, get_user_id(current_user['user'], current_user['role']),
+        current_user['role'], payload
+    )
 
 
 @router.get("/conversations", response_model=List[ConversationResponse])
-def get_inbox(
-        db: Session = Depends(get_db),
-        current_user: dict = Depends(get_current_user)
-):
+async def get_inbox(db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
+    return await get_inbox_service(
+        db, get_user_id(current_user['user'], current_user['role']), current_user['role']
+    )
 
-    """API tra lai thong tin cac doan chat cua nguoi dung, sap xep theo thoi gian moi naht"""
 
-    user = current_user['user']
-    role = current_user['role']
-    user_id = get_user_id(user, role)
-
-    return get_conversations_service(db, user_id, role)
+@router.get("/{conversation_id}/messages", response_model=ChatHistoryResponse)
+async def get_messages(conversation_id: str, cursor: Optional[str] = None, limit: int = 20, _=Depends(get_current_user)):
+    return await get_history_cursor_service(conversation_id, cursor, limit)
 
 
 @router.websocket("/ws/chat")
-async def chat_socket_endpoint(
-        websocket: WebSocket,
-        token: str = Query(...),
-        db: Session = Depends(get_db)
-):
-
-    """API ket noi websocket voi phan chat"""
-
-    user_id, role = get_user_from_token_param(token, db)
-
-    if not user_id:
+async def ws_chat(websocket: WebSocket, token: str = Query(...), db: Session = Depends(get_db)):
+    uid, role = get_user_from_token(token, db)
+    if not uid:
         await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
         return
-
-    await chat_manager.connect(websocket, user_id, role)
-
+    await chat_manager.connect(websocket, uid, role)
     try:
-        while True:
-            await websocket.receive_text()
+        while True: await websocket.receive_text()
     except WebSocketDisconnect:
-        chat_manager.disconnect(user_id, role)
+        chat_manager.disconnect(websocket, uid, role)

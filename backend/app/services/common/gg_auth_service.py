@@ -1,3 +1,5 @@
+import uuid
+
 from fastapi import HTTPException, Request, Response
 from sqlalchemy.orm import Session
 from authlib.integrations.starlette_client import OAuthError
@@ -83,7 +85,7 @@ async def google_login_callback(request: Request, response: Response, db: Sessio
                 phone=None,
                 fname=given_name,
                 lname=family_name,
-                password=hash_password("oauth-google-placeholder"),
+                password=hash_password(str(uuid.uuid4())),
                 shop_name=f"{given_name} Store",
                 avt_url=picture,
             )

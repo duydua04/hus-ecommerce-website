@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 from .config import settings
-
+from .config.lifespan import lifespan
 
 
 
@@ -52,7 +52,10 @@ from .controller.buyer.buyer_address_controller import router as buyer_address_r
 
 
 
-app = FastAPI(title="Ecommerce Website")
+app = FastAPI(
+    title="Ecommerce Website",
+    lifespan=lifespan
+)
 
 app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY)
 

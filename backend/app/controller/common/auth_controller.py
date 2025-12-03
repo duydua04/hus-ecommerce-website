@@ -29,9 +29,9 @@ def get_me(info = Depends(get_current_user)):
 
 
 @router.post("/register/buyer", response_model=BuyerResponse)
-def register_buyer(payload: RegisterBuyer, db: Session = Depends(get_db)):
+async def register_buyer(payload: RegisterBuyer, db: Session = Depends(get_db)):
     """Router dang ky buyer"""
-    return auth_service.register_buyer(db, payload)
+    return await auth_service.register_buyer(db, payload)
 
 
 @router.post("/register/seller", response_model=SellerResponse)

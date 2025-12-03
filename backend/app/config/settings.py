@@ -35,7 +35,9 @@ class Settings(BaseSettings):
     MAIL_FROM_NAME: str
 
     RESET_PASSWORD_TOKEN_EXPIRE_MINUTES: int = 5
-    
+
+    MONGO_URL: str
+    MONGO_DB_NAME: str
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
 settings = Settings()
