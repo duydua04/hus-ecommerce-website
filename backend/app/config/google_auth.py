@@ -1,6 +1,6 @@
 # app/utils/google_oauth.py
 from authlib.integrations.starlette_client import OAuth
-from ..config.settings import settings
+from .settings import settings
 
 oauth = OAuth()
 google = oauth.register(

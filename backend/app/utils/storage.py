@@ -1,138 +1,114 @@
 from __future__ import annotations
-from typing import Literal, IO, List
+from typing import Literal, List
 from fastapi import HTTPException, UploadFile, status
 from botocore.exceptions import ClientError
+from urllib.parse import urlparse
+import time
+import uuid
+import mimetypes
 from ..config.settings import settings
 from ..config.s3 import get_s3_client
-import time, uuid, mimetypes, boto3
-from urllib.parse import urlparse
 
-# Luu tru nhung dinh dang file cho phep tai
+# Constants
 IMAGE_MIME = {"image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"}
 VIDEO_MIME = {"video/mp4", "video/webm"}
-
-def _s3():
-    # Tao S3 client - import tu config.s3
-    return get_s3_client()
+ALLOWED_FOLDERS = Literal["avatars", "products", "reviews", "chat"]
 
 
-def guess_end_file(filename: str):
-    # Ham xu lay de lay ra duoi file
-    if filename and "." in filename:
-        return "." + filename.split(".")[-1].lower()
-    return ""
+class S3Storage:
+    def __init__(self):
+        # Khởi tạo S3 Client 1 lần duy nhất khi tạo Instance
+        self.s3_client = get_s3_client()
+        self.bucket = settings.S3_BUCKET
 
-
-def gen_key(prefix: Literal["avatars", "products", "reviews", "chat"], filename: str):
-    # Ham tao ra key duy nhat co cau truc de luu tru file
-    t = time.gmtime()
-    return f"{prefix}/{t.tm_year:04d}/{t.tm_mon:02d}/{uuid.uuid4().hex}{guess_end_file(filename)}"
-
-
-def validate_content_type(ct: str):
-    # Ham xac thuc va kiem tra loai noi dung cua file upload, chi cho phep cac dinh dang anh va video duoc cho phep
-    ct = (ct or "").lower().strip() # Chuan hoa input
-    if ct.startswith('image/') and ct in IMAGE_MIME:
-        return ct
-
-    if ct.startswith('video/') and ct in VIDEO_MIME:
-        return ct
-
-    raise HTTPException(
-        status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-        detail=f'Unsupported content type: {ct}'
-    )
-
-
-# Ham upload file S3
-async def upload_via_backend(folder: Literal['avatars', 'products', 'reviews'],
-                             file: UploadFile,
-                             max_size_mb: int = 10):
-    # Neu file khong co ten thi bao loi
-    if not file.filename:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail='File name is required'
-        )
-
-    # Xac dinh content file va validate no
-    content_type = file.content_type or mimetypes.guess_type(file.filename)[0] or ""
-    ct = validate_content_type(content_type)
-
-    # Doc va kiem tra kich thuoc file
-    body = await file.read()
-    size_mb = len(body) / (1024 * 1024)
-
-    if size_mb > max_size_mb:
-        raise HTTPException(
-            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-            detail=f"File too large: {size_mb}"
-        )
-
-    # Tao key va ket noi s3
-    key = gen_key(folder, file.filename)
-    s3 = _s3()
-
-    # Thuc hien upload file len minio
-    try:
-        s3.put_object(
-            Bucket=settings.S3_BUCKET,
-            Key=key,
-            Body=body,
-            ContentType=ct,
-            CacheControl="public, max-age=31536000, immutable"
-        )
-    except ClientError as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f'S3 put object failed: {e}')
-
-    return {'object_key': key, 'content_type': content_type, 'size': len(body)}
-
-
-
-def delete_object(object_key: str):
-    # Ham thuc hien xoa object tren minio
-    s3 = _s3()
-    try:
-        s3.delete_object(Bucket=settings.S3_BUCKET, Key=object_key)
-        return {'deleted': True, 'object_key': object_key}
-    except ClientError as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"S3 delete failed {e}")
-
-def extract_object_key(url_or_key: str):
-    # Nhan vao full url sau do tra ve object key
-    if not url_or_key:
+    @staticmethod
+    def _guess_end_file(filename: str) -> str:
+        if filename and "." in filename:
+            return "." + filename.split(".")[-1].lower()
         return ""
 
-    # Kiem tra neu chuoi bat dau bang http thi la url khong phai thi tra ve chuoi do bo di "/"
-    if not url_or_key.lower().startswith(("http://", "https://")):
-        return url_or_key.lstrip("/")
+    @staticmethod
+    def _gen_key(self, prefix: ALLOWED_FOLDERS, filename: str) -> str:
+        t = time.gmtime()
+        ext = self._guess_end_file(filename)
+        return f"{prefix}/{t.tm_year:04d}/{t.tm_mon:02d}/{uuid.uuid4().hex}{ext}"
 
-    # Phan tich url thanh cac phan sau do lay phan path cua url
-    u = urlparse(url_or_key)
-    path = u.path.lstrip("/")
-    bucket = settings.S3_BUCKET
+    @staticmethod
+    def _validate_content_type(ct: str) -> str:
+        ct = (ct or "").lower().strip()
+        if ct.startswith('image/') and ct in IMAGE_MIME:
+            return ct
+        if ct.startswith('video/') and ct in VIDEO_MIME:
+            return ct
 
-    # neu path bat dau bang ten bucket + "/" thi tra ve doan sau cua path
-    # neu khong tra ve toan bo path
-    if path.startswith(bucket + "/"):
-        return path[len(bucket) + 1:]
+        raise HTTPException(
+            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            detail=f'Unsupported content type: {ct}'
+        )
 
-    return path
+    def extract_object_key(self, url_or_key: str) -> str:
+        if not url_or_key:
+            return ""
+        if not url_or_key.lower().startswith(("http://", "https://")):
+            return url_or_key.lstrip("/")
+
+        u = urlparse(url_or_key)
+        path = u.path.lstrip("/")
+        if path.startswith(self.bucket + "/"):
+            return path[len(self.bucket) + 1:]
+        return path
 
 
-async def upload_many_via_backend(folder: Literal['avatars', 'products', 'reviews'],
-                                  files: List[UploadFile],
-                                  max_size_mb: int = 2):
-    """
-        Upload nhiều file qua backend (tuần tự).
-        Trả về list kết quả giống upload_via_backend ở phía bên trên
-    """
-    if not files:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No files provided")
+    async def upload_file(self, folder: ALLOWED_FOLDERS, file: UploadFile, max_size_mb: int = 10):
+        if not file.filename:
+            raise HTTPException(status_code=400, detail='File name is required')
 
-    results = []
-    for f in files:
-        res = await upload_via_backend(folder, f, max_size_mb=max_size_mb)
-        results.append(res)
+        # Validate Content Type
+        content_type = file.content_type or mimetypes.guess_type(file.filename)[0] or ""
+        valid_ct = self._validate_content_type(content_type)
 
-    return results
+        # Validate Size
+        body = await file.read()
+        size_mb = len(body) / (1024 * 1024)
+        if size_mb > max_size_mb:
+            raise HTTPException(status_code=413, detail=f"File too large: {size_mb:.2f}MB")
+
+        # Generate Key
+        key = self._gen_key(folder, file.filename)
+
+        # Upload to S3
+        try:
+            self.s3_client.put_object(
+                Bucket=self.bucket,
+                Key=key,
+                Body=body,
+                ContentType=valid_ct,
+                CacheControl="public, max-age=31536000, immutable"
+            )
+        except ClientError as e:
+            raise HTTPException(status_code=500, detail=f'S3 upload failed: {e}')
+
+        return {'object_key': key, 'content_type': valid_ct, 'size': len(body)}
+
+
+    async def upload_many(self, folder: ALLOWED_FOLDERS, files: List[UploadFile], max_size_mb: int = 10):
+        if not files:
+            raise HTTPException(status_code=400, detail="No files provided")
+
+        results = []
+        for f in files:
+            # Reset con trỏ file về 0 để đảm bảo đọc được dữ liệu nếu file bị đọc trước đó
+            await f.seek(0)
+            res = await self.upload_file(folder, f, max_size_mb)
+            results.append(res)
+        return results
+
+
+    def delete_file(self, object_key: str):
+        try:
+            self.s3_client.delete_object(Bucket=self.bucket, Key=object_key)
+            return {'deleted': True, 'object_key': object_key}
+        except ClientError as e:
+            raise HTTPException(status_code=500, detail=f"S3 delete failed {e}")
+
+storage = S3Storage()

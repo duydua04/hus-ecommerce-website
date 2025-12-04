@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 from fastapi import HTTPException, status, UploadFile
 from sqlalchemy.orm import Session
 from sqlalchemy import func
@@ -7,13 +8,12 @@ from sqlalchemy.exc import IntegrityError
 from ...models import Carrier
 from ...models import Order
 from ...schemas.carrier import CarrierCreate, CarrierUpdate, CarrierOut
-from ...utils.storage import upload_via_backend
+from ...utils.storage import storage
 from ...config.s3 import public_url
 
 def ensure_unique_name(db: Session, name: str, exclude_id: int | None = None):
     """
     Đảm bảo không có carrier nào đang active trùng tên (không phân biệt hoa thường).
-    exclude_id: bỏ qua carrier_id này khi update
     """
     query = db.query(Carrier).filter(
         func.lower(Carrier.carrier_name) == func.lower(name),
@@ -104,6 +104,7 @@ async def create_carrier(
 
     return carrier_to_out_public(carrier)
 
+
 def update_carrier(db: Session, carrier_id: int, payload: CarrierUpdate):
     carrier = get_carrier_or_404(db, carrier_id)
 
@@ -132,6 +133,7 @@ def update_carrier(db: Session, carrier_id: int, payload: CarrierUpdate):
 
         return carrier_to_out_public(carrier)
 
+
 async def update_carrier_avatar(
     db: Session,
     carrier_id: int,
@@ -140,11 +142,12 @@ async def update_carrier_avatar(
 ):
     """Upload avatar cua don vi van chuyen"""
     c = get_carrier_or_404(db, carrier_id)
-    res = await upload_via_backend("avatars", avatar_file, max_size_mb=max_avt_size)
+    res = await storage.upload_file("avatars", avatar_file, max_size_mb=max_avt_size)
     c.carrier_avt_url = res["object_key"]  # Lưu KEY
     db.commit()
     db.refresh(c)
     return carrier_to_out_public(c)
+
 
 def delete_carrier(db: Session, carrier_id: int):
     """Neu chua co don hang thi xoa cung, co thi xoa mem"""

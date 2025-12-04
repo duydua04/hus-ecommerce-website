@@ -13,7 +13,7 @@ from .controller.admin.admin_category_controller import router as admin_category
 from .controller.admin.user_management_controller import router as admin_manage_user_router
 from .controller.admin.admin_discount_controller import router as admin_manage_discount_router
 from .controller.admin.admin_carrier_controller import router as admin_manage_carrier_router
-
+from .controller.admin.admin_notification_controller import router as admin_notify_router
 
 
 
@@ -30,7 +30,6 @@ from .controller.seller.seller_profile_controller import router as seller_profil
 # IMPORT COMMON CONTROLLER
 from .controller.common.auth_controller import router as auth_router
 from .controller.common.avatar_controller import router as avatar_router
-from .controller.common.public_category_controller import router as public_category_router
 from .controller.common.chat_controller import router as chat_router
 from .controller.common.notification_controller import router as notice_router
 
@@ -76,7 +75,7 @@ app.include_router(admin_category_router)
 app.include_router(admin_manage_user_router)
 app.include_router(admin_manage_discount_router)
 app.include_router(admin_manage_carrier_router)
-
+app.include_router(admin_notify_router)
 
 
 
@@ -98,7 +97,6 @@ app.include_router(seller_profile_router)
 # APP INCLUDE COMMON ROUTER
 app.include_router(auth_router)
 app.include_router(avatar_router)
-app.include_router(public_category_router)
 app.include_router(chat_router)
 app.include_router(notice_router)
 

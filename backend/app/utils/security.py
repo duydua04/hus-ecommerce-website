@@ -2,8 +2,10 @@ import secrets
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict
 import bcrypt, jwt
+from fastapi import Response
 from jwt import ExpiredSignatureError, InvalidTokenError
 from ..config.settings import settings
+from ..schemas.auth import OAuth2Token
 
 # ===== Password hashing =====
 def hash_password(plain: str):
@@ -92,3 +94,33 @@ def verify_refresh_token(token: str):
         return payload
     except (ExpiredSignatureError, InvalidTokenError) as e:
         raise e
+
+def issue_token(email: str, role: str):
+    access_expires = settings.OAUTH2_ACCESS_TOKEN_EXPIRE_MINUTES
+    refresh_expires = settings.OAUTH2_REFRESH_TOKEN_EXPIRE_DAYS
+
+    access_token = create_access_token(sub=email, role=role, expires_minutes=access_expires)
+    refresh_token = create_refresh_token(sub=email, role=role, expires_days=refresh_expires)
+
+    return OAuth2Token(
+        access_token=access_token,
+        refresh_token=refresh_token,
+        token_type="bearer",
+        expires_in=access_expires * 60,
+        scope=role
+    )
+
+def set_auth_cookies(response: Response, access_token: str, refresh_token: str):
+    """Set token vào HttpOnly Cookie"""
+    access_minutes = settings.OAUTH2_ACCESS_TOKEN_EXPIRE_MINUTES
+    refresh_days = settings.OAUTH2_REFRESH_TOKEN_EXPIRE_DAYS
+
+    response.set_cookie(
+        key="access_token", value=access_token, httponly=True,
+        samesite="lax", secure=False, path="/", max_age=access_minutes * 60
+    )
+    response.set_cookie(
+        key="refresh_token", value=refresh_token, httponly=True,
+        samesite="lax", secure=False, path="/auth/refresh", max_age=refresh_days * 24 * 3600
+    )
+
