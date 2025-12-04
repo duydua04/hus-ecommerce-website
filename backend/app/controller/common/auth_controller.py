@@ -35,9 +35,9 @@ async def register_buyer(payload: RegisterBuyer, db: Session = Depends(get_db)):
 
 
 @router.post("/register/seller", response_model=SellerResponse)
-def register_seller(payload: RegisterSeller, db: Session = Depends(get_db)):
+async def register_seller(payload: RegisterSeller, db: Session = Depends(get_db)):
     """Router dang ky seller"""
-    return auth_service.register_seller(db, payload)
+    return await auth_service.register_seller(db, payload)
 
 
 @router.post("/login/admin", response_model=OAuth2Token)

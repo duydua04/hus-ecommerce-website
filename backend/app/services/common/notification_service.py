@@ -1,18 +1,16 @@
-from typing import List, Optional
+from datetime import datetime, timezone
+from typing import List, Optional, Dict, Any
 from beanie import PydanticObjectId
-# Import đúng tên model bạn đang dùng
+from sqlalchemy.orm import Session
+from ...models import Admin, Buyer
 from ...models.notification import Notification
 from ...utils.sse_manager import sse_manager
 
 
-# --- 1. TẠO & GỬI THÔNG BÁO ---
+# HÀM DÙNG CHUNG
 async def create_and_send_notification(
-        user_id: int,
-        role: str,
-        title: str,
-        message: str,
-        event: str,
-        data: dict = None
+        user_id: int, role: str, title: str,
+        message: str, event: str,data: dict = None
 ):
 
     notif = Notification(
@@ -23,9 +21,10 @@ async def create_and_send_notification(
         event_type=event,
         data=data or {}
     )
+
     await notif.insert()
 
-    # B. Bắn Realtime SSE
+    # Bắn Realtime SSE
     payload = {
         "id": str(notif.id),
         "title": title,
@@ -40,12 +39,96 @@ async def create_and_send_notification(
     return notif
 
 
-# --- 2. LẤY DANH SÁCH (Có lọc chưa đọc) ---
+async def _broadcast_to_all_admins(
+        db: Session,
+        title: str,
+        message: str,
+        event_type: str,
+        data: Dict[str, Any]
+):
+    """
+    Lưu DB cho từng Admin và bắn SSE.
+    """
+
+    admins = db.query(Admin).all()
+    if not admins:
+        return
+
+    for admin in admins:
+        admin_id = getattr(admin, 'admin_id', None)
+
+        notif = Notification(
+            recipient_id=admin_id,
+            recipient_role="admin",
+            title=title,
+            message=message,
+            event_type=event_type,
+            data=data,
+            created_at=datetime.now(timezone.utc),
+            is_read=False
+        )
+        await notif.insert()
+
+    sse_payload = {
+        "title": title,
+        "message": message,
+        "data": data,
+        "event_type": event_type,
+        "created_at": datetime.now(timezone.utc).strftime("%H:%M:%S"),
+        "is_read": False
+    }
+
+    await sse_manager.broadcast_to_role(role="admin", event=event_type, data=sse_payload)
+
+
+# HAM CHO ADMIN
+async def notify_new_buyer_registration(db: Session, buyer: Buyer):
+    """Xử lý nội dung thông báo khi có Buyer mới"""
+
+    title = "Khách hàng mới"
+    message = f"Khách hàng {buyer.lname} {buyer.fname} vừa đăng ký tài khoản."
+
+    data = {
+        "user_id": buyer.buyer_id,
+        "role": "buyer",
+        "email": buyer.email,
+    }
+
+    await _broadcast_to_all_admins(
+        db=db,
+        title=title,
+        message=message,
+        event_type="new_user_registered",
+        data=data
+    )
+
+
+async def notify_new_seller_registration(db: Session, seller):
+    """Xử lý nội dung thông báo khi có Seller mới"""
+    title = "Đối tác bán hàng mới"
+    message = f"Shop {seller.shop_name} vừa đăng ký gia nhập sàn."
+
+    data = {
+        "user_id": seller.seller_id,
+        "role": "seller",
+        "email": seller.email,
+        "shop_name": seller.shop_name,
+    }
+
+    await _broadcast_to_all_admins(
+        db=db,
+        title=title,
+        message=message,
+        event_type="new_user_registered",
+        data=data
+    )
+
+
 async def get_notifications(
         user_id: int,
         role: str,
         limit: int = 20,
-        unread_only: bool = False  # <--- Bổ sung tham số này
+        unread_only: bool = False
 ):
     # Tạo query cơ bản
     query = Notification.find(
@@ -61,24 +144,20 @@ async def get_notifications(
     return await query.sort("-created_at").limit(limit).to_list()
 
 
-# --- 3. ĐÁNH DẤU ĐÃ ĐỌC (1 cái) ---
+
 async def mark_as_read(notif_id: str, user_id: int):
     """
     Đánh dấu 1 thông báo là đã đọc.
-    Cần check xem thông báo đó có đúng là của user_id này không.
     """
     try:
-        # Convert string ID sang PydanticObjectId
         oid = PydanticObjectId(notif_id)
         notif = await Notification.get(oid)
     except:
-        return False  # ID không hợp lệ
+        return False
 
-    # Kiểm tra tồn tại và quyền sở hữu
     if not notif or notif.recipient_id != user_id:
         return False
 
-    # Update
     notif.is_read = True
     await notif.save()
 

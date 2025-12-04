@@ -11,7 +11,10 @@ from ...utils.security import verify_access_token
 from ...utils.sse_manager import sse_manager
 from ...schemas.notification import NotificationResponse    
 
-router = APIRouter(prefix="/notifications", tags=["notifications"])
+router = APIRouter(
+    prefix="/notifications",
+    tags=["notifications"]
+)
 
 
 # --- HELPER: Lấy User ID từ Token (Cho SSE) ---
@@ -37,7 +40,6 @@ def get_user_sse(token, db):
     return None, None
 
 
-# --- HELPER: Lấy User ID từ Current User (Cho HTTP API) ---
 def get_current_user_id(user, role):
     if role == 'buyer':
         return user.buyer_id
@@ -69,9 +71,6 @@ async def stream(
     return EventSourceResponse(sse_manager.connect(uid, role))
 
 
-# ==========================================
-# 2. LẤY DANH SÁCH THÔNG BÁO (History)
-# ==========================================
 @router.get("/", response_model=List[NotificationResponse])
 async def get_notifications(
         limit: int = Query(20, ge=1, le=100),
@@ -93,9 +92,6 @@ async def get_notifications(
     )
 
 
-# ==========================================
-# 3. ĐÁNH DẤU ĐÃ ĐỌC (1 Cái)
-# ==========================================
 @router.put("/{notif_id}/read")
 async def mark_as_read(
         notif_id: str,
