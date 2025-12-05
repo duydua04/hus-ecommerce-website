@@ -244,5 +244,5 @@ class ChatService:
         return {"urls": [public_url(r['object_key']) for r in results]}
 
 
-def get_chat_service(db: Session = Depends(get_db)) -> ChatService:
+def get_chat_service(db: Session = Depends(get_db)):
     return ChatService(db)

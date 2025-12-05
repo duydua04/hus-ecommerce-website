@@ -34,7 +34,7 @@ class BuyerUpdate(BaseModel):
 class BuyerResponse(TimestampedOut):
     buyer_id: int
     email: EmailStr
-    phone: str
+    phone: str | None = None
     fname: str
     lname: str | None = None
     avt_url: str | None = None
@@ -66,7 +66,7 @@ class SellerUpdate(BaseModel):
 class SellerResponse(TimestampedOut):
     seller_id: int
     email: EmailStr
-    phone: str
+    phone: str | None = None
     fname: str
     lname: str | None = None
     shop_name: str

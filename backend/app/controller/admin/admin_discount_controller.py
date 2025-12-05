@@ -13,7 +13,7 @@ router = APIRouter(
 )
 
 
-@router.get("/", response_model=Page[DiscountResponse])
+@router.get("/")
 def admin_list_discount(
     q: str | None = None,
     limit: int = Query(10, ge=1),

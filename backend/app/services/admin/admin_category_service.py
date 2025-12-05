@@ -38,7 +38,7 @@ class AdminCategoryService(BaseCategoryService):
         return CategoryResponse.model_validate(cat)
 
 
-    def update(self, category_id: int, payload: CategoryUpdate) -> CategoryResponse:
+    def update(self, category_id: int, payload: CategoryUpdate):
         # Gọi hàm get của cha để tìm và check 404
         cat = self.db.query(Category).get(category_id)
         if not cat:

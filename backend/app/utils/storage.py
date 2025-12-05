@@ -21,18 +21,20 @@ class S3Storage:
         self.s3_client = get_s3_client()
         self.bucket = settings.S3_BUCKET
 
+
     @staticmethod
     def _guess_end_file(filename: str) -> str:
         if filename and "." in filename:
             return "." + filename.split(".")[-1].lower()
         return ""
 
-    @staticmethod
-    def _gen_key(self, prefix: ALLOWED_FOLDERS, filename: str) -> str:
+
+    def _gen_key(self, prefix: ALLOWED_FOLDERS, filename: str):
         t = time.gmtime()
         ext = self._guess_end_file(filename)
 
         return f"{prefix}/{t.tm_year:04d}/{t.tm_mon:02d}/{uuid.uuid4().hex}{ext}"
+
 
     @staticmethod
     def _validate_content_type(ct: str) -> str:
@@ -46,6 +48,7 @@ class S3Storage:
             status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
             detail=f'Unsupported content type: {ct}'
         )
+
 
     def extract_object_key(self, url_or_key: str) -> str:
         if not url_or_key:
@@ -63,7 +66,10 @@ class S3Storage:
 
     async def upload_file(self, folder: ALLOWED_FOLDERS, file: UploadFile, max_size_mb: int = 10):
         if not file.filename:
-            raise HTTPException(status_code=400, detail='File name is required')
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail='File name is required'
+            )
 
         # Validate Content Type
         content_type = file.content_type or mimetypes.guess_type(file.filename)[0] or ""
@@ -121,5 +127,6 @@ class S3Storage:
             return {'deleted': True, 'object_key': object_key}
         except ClientError as e:
             raise HTTPException(status_code=500, detail=f"S3 delete failed {e}")
+
 
 storage = S3Storage()

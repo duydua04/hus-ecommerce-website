@@ -2,7 +2,6 @@ from fastapi import APIRouter, Depends, Query, status
 from typing import Optional
 
 from ...middleware.auth import require_admin
-from ...schemas.common import Page
 from ...schemas.category import CategoryCreate, CategoryUpdate, CategoryResponse
 
 from ...services.admin.admin_category_service import (
@@ -18,7 +17,7 @@ router = APIRouter(
 )
 
 
-@router.get("/", response_model=Page[CategoryResponse])
+@router.get("/")
 def api_list_categories(
     q: Optional[str] = Query(None, description="Search by category_name"),
     limit: int = Query(20, ge=1, le=200),

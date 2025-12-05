@@ -24,8 +24,7 @@ from .discount import DiscountCreate, DiscountUpdate, DiscountResponse
 from .cart import ShoppingCartResponse, ShoppingCartItemCreate, ShoppingCartItemUpdate, ShoppingCartItemResponse
 from .order import OrderCreate, OrderUpdateStatus, OrderResponse, OrderItemResponse
 from .review import (
-    ReviewCreate, ReviewUpdate, ReviewResponse, ReviewImageCreate,
-    ReviewImageResponse,ReviewReplyCreate, ReviewReplyResponse
+    ReviewCreate,  ReviewResponse, ReviewReplyCreate, ReviewReplyResponse
 )
 
 __all__ = [
@@ -70,7 +69,6 @@ __all__ = [
     "OrderCreate", "OrderUpdateStatus", "OrderResponse", "OrderItemResponse",
 
     # review
-    "ReviewCreate", "ReviewUpdate", "ReviewResponse",
-    "ReviewImageCreate", "ReviewImageResponse",
+    "ReviewCreate", "ReviewResponse",
     "ReviewReplyCreate", "ReviewReplyResponse",
 ]

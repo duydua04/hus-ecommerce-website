@@ -88,14 +88,15 @@ async def get_messages(
 async def chat_socket_endpoint(
         websocket: WebSocket,
         token: str = Query(...),
-        db: Session = Depends(get_db)
+        db: Session = Depends(get_db),
+
 ):
     """
     Kết nối WebSocket để nhận tin nhắn Realtime.
     Auth qua Token trên URL.
     """
 
-    user_id, role = get_user_from_token(token, db)
+    user_id, role = ChatService.get_user_from_token(token, db)
 
     if not user_id:
         await websocket.close(code=status.WS_1008_POLICY_VIOLATION)

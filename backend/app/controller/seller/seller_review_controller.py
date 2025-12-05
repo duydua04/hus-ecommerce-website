@@ -16,7 +16,7 @@ router = APIRouter(
 )
 
 
-@router.get("", response_model=Page[ReviewResponse])
+@router.get("", response_model=Page)
 async def list_reviews_for_seller(
         product_name: Optional[str] = Query(None),
         rating: Optional[int] = Query(None, ge=1, le=5),
