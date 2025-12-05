@@ -1,12 +1,12 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
 from sqlalchemy.orm import Session
-
 from ...models.address import Address, BuyerAddress, SellerAddress
 from ...schemas.address import AddressCreate, AddressUpdate
 
 
 class BaseAddressService(ABC):
+
     def __init__(self, db: Session):
         self.db = db
 
@@ -19,6 +19,7 @@ class BaseAddressService(ABC):
         self.db.refresh(address)
 
         return address
+
 
     def _cleanup_orphan_address(self, address_id: int):
         """Dọn dẹp Address gốc nếu không còn ai dùng"""

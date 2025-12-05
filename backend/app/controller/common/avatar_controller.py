@@ -42,7 +42,10 @@ def delete_my_avatar(db: Session = Depends(get_db), info = Depends(get_current_u
     user = info["user"]
 
     if not user.avt_url:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No avatar to delete")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No avatar to delete"
+        )
 
     object_key = storage.extract_object_key(user.avt_url)
 

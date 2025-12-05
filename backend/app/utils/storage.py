@@ -31,6 +31,7 @@ class S3Storage:
     def _gen_key(self, prefix: ALLOWED_FOLDERS, filename: str) -> str:
         t = time.gmtime()
         ext = self._guess_end_file(filename)
+
         return f"{prefix}/{t.tm_year:04d}/{t.tm_mon:02d}/{uuid.uuid4().hex}{ext}"
 
     @staticmethod
@@ -56,6 +57,7 @@ class S3Storage:
         path = u.path.lstrip("/")
         if path.startswith(self.bucket + "/"):
             return path[len(self.bucket) + 1:]
+
         return path
 
 
@@ -71,7 +73,10 @@ class S3Storage:
         body = await file.read()
         size_mb = len(body) / (1024 * 1024)
         if size_mb > max_size_mb:
-            raise HTTPException(status_code=413, detail=f"File too large: {size_mb:.2f}MB")
+            raise HTTPException(
+                status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                detail=f"File too large: {size_mb:.2f}MB"
+            )
 
         # Generate Key
         key = self._gen_key(folder, file.filename)
@@ -86,21 +91,27 @@ class S3Storage:
                 CacheControl="public, max-age=31536000, immutable"
             )
         except ClientError as e:
-            raise HTTPException(status_code=500, detail=f'S3 upload failed: {e}')
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f'S3 upload failed: {e}'
+            )
 
         return {'object_key': key, 'content_type': valid_ct, 'size': len(body)}
 
 
     async def upload_many(self, folder: ALLOWED_FOLDERS, files: List[UploadFile], max_size_mb: int = 10):
         if not files:
-            raise HTTPException(status_code=400, detail="No files provided")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="No files provided"
+            )
 
         results = []
         for f in files:
-            # Reset con trỏ file về 0 để đảm bảo đọc được dữ liệu nếu file bị đọc trước đó
             await f.seek(0)
             res = await self.upload_file(folder, f, max_size_mb)
             results.append(res)
+
         return results
 
 
