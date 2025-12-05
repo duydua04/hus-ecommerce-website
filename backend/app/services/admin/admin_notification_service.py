@@ -66,6 +66,7 @@ class AdminNotificationService(BaseNotificationService):
 
         await self._broadcast_to_admins(title, message, "new_user_registered", data)
 
+
     async def notify_new_seller_registration(self, seller: Seller):
         """
         Kịch bản: Có đối tác (Seller) mới đăng ký.

@@ -35,7 +35,15 @@ class BaseCategoryService(ABC):
         categories = query.order_by(Category.category_name.asc())\
                           .limit(limit).offset(offset).all()
         data = [CategoryResponse.model_validate(c) for c in categories]
-        return Page(meta=PageMeta(total=total, limit=limit, offset=offset), data=data)
+
+        return Page(
+            meta=PageMeta(
+                total=total,
+                limit=limit,
+                offset=offset
+            ),
+            data=data
+        )
 
 
     @abstractmethod

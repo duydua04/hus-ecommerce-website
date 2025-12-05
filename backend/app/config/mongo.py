@@ -1,6 +1,7 @@
 from motor.motor_asyncio import AsyncIOMotorClient
 from beanie import init_beanie
 from .settings import settings
+from ..models import Review
 from ..models.chat import Conversation, Message
 from ..models.notification import Notification
 
@@ -12,6 +13,6 @@ async def init_mongo():
             Conversation,
             Message,
             Notification,
-
+            Review
         ]
     )

@@ -127,8 +127,8 @@ class GoogleAuthService:
 
         return seller
 
-
-    async def login_start(self, request: Request, role: str):
+    @staticmethod
+    async def login_start(request: Request, role: str):
         """Bước 1: Redirect sang Google"""
         desired_role = (role or "buyer").lower()
         if desired_role not in ALLOWED_ROLES:
