@@ -10,7 +10,8 @@ from ..models.users import Admin, Buyer, Seller
 
 def get_current_user(security_scopes: SecurityScopes,
                      request: Request,
-                     db: Session = Depends(get_db)):
+                     db: Session = Depends(get_db)
+):
     """
     Kiểm tra và trả về người dùng hiện tại.
     """

@@ -21,6 +21,7 @@ services:
     image: mongo:8.0
     container_name: website_mongo # Đổi tên container để tránh trùng tên cũ
     restart: always
+    command: ["mongod", "--quiet"]
     environment:
       MONGO_INITDB_ROOT_USERNAME: mywebsite
       MONGO_INITDB_ROOT_PASSWORD: password

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Request, Response
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, BackgroundTasks
 from ...config import public_url
 from ...middleware.auth import get_current_user
 
@@ -139,12 +139,12 @@ async def google_callback(
 async def forgot_password(
         payload: ForgotPasswordRequest,
         response: Response,
+        background_tasks: BackgroundTasks,
         service: AuthService = Depends(get_auth_service)
 ):
     """Gửi OTP qua email"""
-    result = await service.forgot_password_request(payload.email, payload.role)
+    result = await service.forgot_password_request(payload.email, payload.role, background_tasks)
 
-    # Set Cookie tạm để verify bước sau
     response.set_cookie(
         key="reset_token",
         value=result["reset_token"],

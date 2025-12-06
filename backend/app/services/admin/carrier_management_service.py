@@ -40,6 +40,7 @@ class AdminCarrierService(BaseCarrierService):
             query = query.filter(Carrier.carrier_name.ilike(f"%{q.strip()}%"))
 
         carriers = query.order_by(Carrier.carrier_name.asc()).limit(limit).offset(offset).all()
+
         return [self._to_response(c) for c in carriers]
 
 
@@ -120,6 +121,7 @@ class AdminCarrierService(BaseCarrierService):
         # Xóa cứng
         self.db.delete(carrier)
         self.db.commit()
+
         return {"deleted": True, "id": carrier_id}
 
 

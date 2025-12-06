@@ -51,7 +51,7 @@ class AdminNotificationService(BaseNotificationService):
 
     async def notify_new_buyer_registration(self, buyer: Buyer):
         """
-        Kịch bản: Có khách hàng (Buyer) mới đăng ký.
+        Có khách hàng (Buyer) mới đăng ký.
         """
         title = "Khách hàng mới"
         message = f"Khách hàng {buyer.fname} {buyer.lname}vừa tạo tài khoản."
@@ -69,10 +69,10 @@ class AdminNotificationService(BaseNotificationService):
 
     async def notify_new_seller_registration(self, seller: Seller):
         """
-        Kịch bản: Có đối tác (Seller) mới đăng ký.
+        Có đối tác (Seller) mới đăng ký.
         """
         title = "Đối tác bán hàng mới"
-        message = f"Shop {seller.shop_name} vừa đăng ký gia nhập sàn."
+        message = f"Gian hàng {seller.shop_name} vừa đăng ký gia nhập sàn."
 
         data = {
             "user_id": seller.seller_id,

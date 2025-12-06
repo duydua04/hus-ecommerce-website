@@ -35,6 +35,7 @@ class AdminCategoryService(BaseCategoryService):
         self.db.add(cat)
         self.db.commit()
         self.db.refresh(cat)
+
         return CategoryResponse.model_validate(cat)
 
 

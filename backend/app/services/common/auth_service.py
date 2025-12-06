@@ -1,4 +1,4 @@
-from fastapi import HTTPException, status, Response, Depends
+from fastapi import HTTPException, status, Response, Depends, BackgroundTasks
 from sqlalchemy.orm import Session
 
 from ...config.db import get_db
@@ -151,7 +151,7 @@ class AuthService:
         return {"message": "Logout successfully"}
 
 
-    async def forgot_password_request(self, email: str, role: str):
+    async def forgot_password_request(self, email: str, role: str, background_tasks: BackgroundTasks):
         user = None
         if role == 'admin':
             user = self.db.query(Admin).filter(Admin.email == email).first()
@@ -167,7 +167,7 @@ class AuthService:
         firstname = getattr(user, "fname", email)
 
         # Gọi Email Service
-        await email_service.send_otp_email(email, firstname, otp_code)
+        background_tasks.add_task(email_service.send_otp_email, email, firstname, otp_code)
 
         reset_token = create_access_token(
             sub=email,
@@ -177,6 +177,7 @@ class AuthService:
         )
 
         return {"message": "OTP sent", "reset_token": reset_token}
+
 
     @staticmethod
     def verify_otp_for_reset(otp_input: str, reset_token: str):
