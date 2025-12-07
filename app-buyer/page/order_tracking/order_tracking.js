@@ -89,7 +89,7 @@ const orders = [
             image: '../../accets/product-interior/review-3.png'
         },
         price: { original: '650.000₫', final: '490.000₫' },
-        statusInfo: { icon: '↩️', text: 'Đang xử lý hoàn tiền', label: '', color: 'var(--orange-600)' }
+        statusInfo: { icon: '', text: 'Đang xử lý hoàn tiền', label: '', color: 'var(--neutral-600)' }
     }
 ];
 

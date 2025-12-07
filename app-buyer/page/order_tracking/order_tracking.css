@@ -71,13 +71,13 @@
 }
 
 .sidebar-menu__link.active {
-    color: var(--red-600);
-    background-color: var(--red-50);
+    color: var(--blue-600);
+    background-color: var(--blue-50);
 }
 
 .sidebar-menu__badge {
     margin-left: auto;
-    background-color: var(--red-600);
+    background-color: var(--blue-600);
     color: white;
     padding: 2px 8px;
     border-radius: 10px;
@@ -111,11 +111,11 @@
 }
 
 .tab:hover {
-    color: var(--red-600);
+    color: var(--blue-600);
 }
 
 .tab.active {
-    color: var(--red-600);
+    color: var(--blue-600);
 }
 
 .tab.active::after {
@@ -125,7 +125,7 @@
     left: 0;
     right: 0;
     height: 2px;
-    background-color: var(--red-600);
+    background-color: var(--blue-600);
 }
 
 .search-bar {
@@ -187,8 +187,8 @@
 .chat-button {
     padding: 4px 12px;
     background-color: white;
-    border: 1px solid var(--red-600);
-    color: var(--red-600);
+    border: 1px solid var(--blue-600);
+    color: var(--blue-600);
     border-radius: 2px;
     cursor: pointer;
     font-size: 0.85rem;
@@ -285,7 +285,7 @@
 
 .total-amount {
     font-size: 1.25rem;
-    color: var(--red-600);
+    color: var(--blue-600);
     font-weight: 600;
 }
 
@@ -308,17 +308,19 @@
 }
 
 .btn:hover {
-    background-color: var(--neutral-50);
+    background-color: white;
+    border: 1px solid var(--blue-600);
+    color: var(--blue-600);
 }
 
 .btn-primary {
-    background-color: var(--red-600);
+    background-color: var(--blue-600);
     color: white;
-    border-color: var(--red-600);
+    border-color: var(--blue-600);
 }
 
 .btn-primary:hover {
-    background-color: var(--red-700);
+    background-color: var(--blue-500);
 }
 
 .empty-state {
