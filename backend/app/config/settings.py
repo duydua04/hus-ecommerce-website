@@ -38,6 +38,14 @@ class Settings(BaseSettings):
 
     MONGO_URL: str
     MONGO_DB_NAME: str
+
+    FRONTEND_BUYER_URL: str = "http://localhost:3000"
+    FRONTEND_SELLER_URL: str = "http://localhost:3001"
+    FRONTEND_ADMIN_URL: str =  "http://localhost:3002"
+
+    DEFAULT_BUYER_HOME: str = "/"
+    DEFAULT_SELLER_HOME: str = "/products"
+
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
 settings = Settings()

@@ -1,5 +1,7 @@
 import uuid
-from fastapi import HTTPException, Request, Response, status, Depends
+import json
+import base64
+from fastapi import HTTPException, Request, status, Depends, BackgroundTasks
 from sqlalchemy.orm import Session
 from authlib.integrations.starlette_client import OAuthError
 from starlette.responses import RedirectResponse
@@ -8,15 +10,11 @@ from ...config.google_auth import google
 from ...config.settings import settings
 from ...config.db import get_db
 from ...models.users import Buyer, Seller
-
 from ...utils.security import hash_password, issue_token, set_auth_cookies
-
 from ..admin.admin_notification_service import AdminNotificationService, get_admin_notif_service
 
 
 ALLOWED_ROLES = {"buyer", "seller"}
-FRONTEND_BUYER_HOMEPAGE = "/"
-FRONTEND_SELLER_HOMEPAGE = "/seller/products"
 
 
 class GoogleAuthService:
@@ -27,8 +25,37 @@ class GoogleAuthService:
 
 
     @staticmethod
+    def _encode_state(role: str, next_url: str) -> str:
+        """
+        Mã hóa role và next_url thành chuỗi state để gửi sang Google.
+        """
+        payload = {
+            "role": role,
+            "next": next_url,
+            "nonce": str(uuid.uuid4())
+        }
+        json_str = json.dumps(payload)
+
+        return base64.urlsafe_b64encode(json_str.encode()).decode()
+
+
+    @staticmethod
+    def _decode_state(state_str: str) -> dict:
+        """Giải mã state nhận về từ Google"""
+        try:
+            if not state_str:
+                return {}
+            json_str = base64.urlsafe_b64decode(state_str).decode()
+            return json.loads(json_str)
+        except Exception:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid OAuth state"
+            )
+
+
+    @staticmethod
     async def _fetch_google_user_info(request: Request):
-        """Trao đổi Code lấy Token và UserInfo từ Google"""
         try:
             token = await google.authorize_access_token(request)
         except OAuthError as e:
@@ -38,13 +65,7 @@ class GoogleAuthService:
             )
 
         userinfo = token.get("userinfo")
-        if not userinfo:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Missing userinfo from Google"
-            )
-
-        if not userinfo.get("email"):
+        if not userinfo or not userinfo.get("email"):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Google account has no email"
@@ -53,24 +74,22 @@ class GoogleAuthService:
         return userinfo
 
 
-    @staticmethod
-    def _get_desired_role(request: Request):
-        """Lấy role user đã chọn từ Session"""
-        return request.session.get("oauth_target_role", "buyer")
-
-
     async def _get_or_create_buyer(self, user_info: dict):
+        """
+        Trả về: (UserObject, is_new_user)
+        """
         email = user_info.get("email")
 
+        # 1. Check conflict logic
         if self.db.query(Seller).filter(Seller.email == email).first():
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Email này đã được đăng ký là Seller, không thể đăng nhập Buyer."
+                detail="Email này đã là Seller, không thể đăng nhập Buyer."
             )
 
         buyer = self.db.query(Buyer).filter(Buyer.email == email).first()
 
-        # Nếu chưa có thi tạo mới
+        # 2. Logic tạo mới
         if not buyer:
             new_buyer = Buyer(
                 email=email,
@@ -85,26 +104,22 @@ class GoogleAuthService:
             self.db.commit()
             self.db.refresh(new_buyer)
 
-            await self.notif_service.notify_new_buyer_registration(new_buyer)
+            return new_buyer, True
 
-            return new_buyer
-
-        return buyer
+        return buyer, False
 
 
-    async def _get_or_create_seller(self, user_info: dict):
+    async def _get_or_create_seller(self, user_info: dict) -> tuple[Seller, bool]:
         email = user_info.get("email")
 
-        # Nếu email này đã là Buyer thì không cho đăng nhập Seller
         if self.db.query(Buyer).filter(Buyer.email == email).first():
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Email này đã được đăng ký là Buyer, không thể đăng nhập Seller."
+                detail="Email này đã là Buyer, không thể đăng nhập Seller."
             )
 
         seller = self.db.query(Seller).filter(Seller.email == email).first()
 
-        # Nếu chưa có -> Tạo mới
         if not seller:
             fname = user_info.get("given_name", "")
             new_seller = Seller(
@@ -113,7 +128,7 @@ class GoogleAuthService:
                 fname=fname,
                 lname=user_info.get("family_name", ""),
                 password=hash_password(str(uuid.uuid4())),
-                shop_name=f"{fname} Store",  # Tên shop mặc định
+                shop_name=f"{fname} Store",
                 avt_url=user_info.get("picture"),
                 is_active=True
             )
@@ -121,61 +136,101 @@ class GoogleAuthService:
             self.db.commit()
             self.db.refresh(new_seller)
 
-            await self.notif_service.notify_new_seller_registration(new_seller)
+            return new_seller, True
 
-            return new_seller
+        return seller, False
 
-        return seller
 
-    @staticmethod
-    async def login_start(request: Request, role: str):
-        """Bước 1: Redirect sang Google"""
+    async def login_start(self, request: Request, role: str, next_url: str = None):
+        """
+        Bước 1: Redirect sang Google
+        """
         desired_role = (role or "buyer").lower()
         if desired_role not in ALLOWED_ROLES:
-            raise HTTPException(status_code=400, detail="Invalid role")
-
-        # Lưu role vào session để dùng lại ở bước callback
-        request.session["oauth_target_role"] = desired_role
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid role"
+            )
 
         if not settings.GOOGLE_REDIRECT_URI:
             raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Config missing: GOOGLE_REDIRECT_URI"
             )
 
+        if next_url and not next_url.startswith("/"):
+            next_url = None
+
+        # Gói data vào state
+        custom_state = self._encode_state(desired_role, next_url)
+
         return await google.authorize_redirect(
-            request, settings.GOOGLE_REDIRECT_URI,
-            access_type="offline", prompt="consent"
+            request,
+            settings.GOOGLE_REDIRECT_URI,
+            access_type="offline",
+            prompt="consent",
+            state=custom_state
         )
 
-    async def login_callback(self, request: Request, response: Response):
-        """Bước 2: Xử lý dữ liệu Google trả về"""
-        # 1. Lấy thông tin
+
+    async def login_callback(self, request: Request, background_tasks: BackgroundTasks):
+        """
+        Xử lý khi Google trả về (Callback)
+        """
+        # Trao đổi lấy User Info
         userinfo = await self._fetch_google_user_info(request)
-        role = self._get_desired_role(request)
 
+        # Giải mã State để biết Role và Next URL
+        state_str = request.query_params.get("state")
+        state_data = self._decode_state(state_str)
+
+        role = state_data.get("role", "buyer")
+        next_path = state_data.get("next")
+
+        # Tìm hoặc Tạo User
         target_user = None
-        redirect_url = FRONTEND_BUYER_HOMEPAGE
+        is_new = False
+        base_frontend_url = ""
+        default_home = ""
 
-        # 2. Xử lý User theo Role
         if role == "seller":
-            target_user = await self._get_or_create_seller(userinfo)
-            redirect_url = FRONTEND_SELLER_HOMEPAGE
+            target_user, is_new = await self._get_or_create_seller(userinfo)
+            base_frontend_url = settings.FRONTEND_SELLER_URL
+            default_home = settings.DEFAULT_SELLER_HOME
         else:
-            target_user = await self._get_or_create_buyer(userinfo)
-            redirect_url = FRONTEND_BUYER_HOMEPAGE
+            target_user, is_new = await self._get_or_create_buyer(userinfo)
+            base_frontend_url = settings.FRONTEND_BUYER_URL
+            default_home = settings.DEFAULT_BUYER_HOME
 
-        # 3. Cấp Token (Dùng hàm tiện ích chung)
+        # Kích hoạt Background Task nếu là user mới
+        if is_new:
+            if role == "seller":
+                background_tasks.add_task(
+                    self.notif_service.notify_new_seller_registration,
+                    target_user
+                )
+            else:
+                background_tasks.add_task(
+                    self.notif_service.notify_new_buyer_registration,
+                    target_user
+                )
+
+        # 5. Xây dựng URL Redirect
+        final_path = next_path if next_path else default_home
+        if not final_path.startswith("/"):
+            final_path = "/" + final_path
+
+        absolute_redirect_url = f"{base_frontend_url}{final_path}"
+
+        # 6. Cấp Token & Cookie
         token_data = issue_token(email=target_user.email, role=role)
 
-        # 4. Tạo Redirect & Set Cookie
-        redirect_response = RedirectResponse(url=redirect_url, status_code=302)
-
-        set_auth_cookies(
-            redirect_response,
-            token_data.access_token,
-            token_data.refresh_token
+        redirect_response = RedirectResponse(
+            url=absolute_redirect_url,
+            status_code=status.HTTP_302_FOUND
         )
+
+        set_auth_cookies(redirect_response, token_data.access_token, token_data.refresh_token)
 
         return redirect_response
 

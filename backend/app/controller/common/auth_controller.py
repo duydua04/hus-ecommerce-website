@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Request, Response, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, BackgroundTasks, status
 from ...config import public_url
 from ...middleware.auth import get_current_user
 
@@ -93,7 +93,10 @@ def refresh(
     """Cấp lại Access Token mới từ Refresh Token"""
     refresh_token = request.cookies.get("refresh_token")
     if not refresh_token:
-        raise HTTPException(status_code=401, detail="Refresh token missing in cookie")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Refresh token missing in cookie"
+        )
 
     new_token = service.refresh_access_token(refresh_token)
 
@@ -129,10 +132,10 @@ async def google_login_seller(
 @router.get("/google/callback")
 async def google_callback(
         request: Request,
-        response: Response,
+        background_tasks: BackgroundTasks,
         service: GoogleAuthService = Depends(get_google_auth_service)
 ):
-    return await service.login_callback(request, response)
+    return await service.login_callback(request, background_tasks)
 
 
 @router.post("/forgot-password")
@@ -166,7 +169,10 @@ def verify_otp(
     """Kiểm tra OTP, nếu đúng cấp token quyền đổi pass"""
     token = request.cookies.get("reset_token")
     if not token:
-        raise HTTPException(status_code=400, detail="Session missing or expired")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Session missing or expired"
+        )
 
     result = service.verify_otp_for_reset(payload.otp, token)
 
@@ -191,11 +197,17 @@ def reset_password(
 ):
     """Đổi mật khẩu mới"""
     if payload.new_password != payload.confirm_password:
-        raise HTTPException(status_code=400, detail="Passwords do not match")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Passwords do not match"
+        )
 
     token = request.cookies.get("reset_token")
     if not token:
-        raise HTTPException(status_code=400, detail="Session missing")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Session missing"
+        )
 
     result = service.reset_password_final(payload.new_password, token)
 
