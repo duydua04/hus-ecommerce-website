@@ -142,11 +142,11 @@ async def google_callback(
 async def forgot_password(
         payload: ForgotPasswordRequest,
         response: Response,
-        background_tasks: BackgroundTasks,
+        # background_tasks: BackgroundTasks,
         service: AuthService = Depends(get_auth_service)
 ):
     """Gửi OTP qua email"""
-    result = await service.forgot_password_request(payload.email, payload.role, background_tasks)
+    result = await service.forgot_password_request(payload.email, payload.role)
 
     response.set_cookie(
         key="reset_token",

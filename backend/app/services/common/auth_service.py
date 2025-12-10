@@ -5,15 +5,14 @@ from ...config.db import get_db
 from ...config.settings import settings
 from ...models.users import Admin, Seller, Buyer
 
-from ...schemas.auth import RegisterBuyer, RegisterSeller, Login, OAuth2Token
+from ...schemas.auth import RegisterBuyer, RegisterSeller, Login
 from ...schemas.user import BuyerResponse, SellerResponse
 from ...utils.security import (
     hash_password, verify_password, create_access_token,
     verify_refresh_token, decode_token, issue_token
 )
-from ...utils.email import email_service
 from ...utils.otp import create_otp
-
+from ...tasks.email_task import send_otp_email_task
 from ..admin.admin_notification_service import AdminNotificationService, get_admin_notif_service
 
 
@@ -129,9 +128,8 @@ class AuthService:
 
         # Check User Exist
         user = None
-        if role == 'admin':
-            user = self.db.query(Admin).filter(Admin.email == email).first()
-        elif role == 'buyer':
+
+        if role == 'buyer':
             user = self.db.query(Buyer).filter(Buyer.email == email).first()
         elif role == 'seller':
             user = self.db.query(Seller).filter(Seller.email == email).first()
@@ -151,23 +149,24 @@ class AuthService:
         return {"message": "Logout successfully"}
 
 
-    async def forgot_password_request(self, email: str, role: str, background_tasks: BackgroundTasks):
+    async def forgot_password_request(self, email: str, role: str):
         user = None
-        if role == 'admin':
-            user = self.db.query(Admin).filter(Admin.email == email).first()
-        elif role == 'buyer':
+        if role == 'buyer':
             user = self.db.query(Buyer).filter(Buyer.email == email).first()
         elif role == 'seller':
             user = self.db.query(Seller).filter(Seller.email == email).first()
 
-        if not user: raise HTTPException(status_code=404, detail="User not found")
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found"
+            )
 
         otp_code = create_otp()
         otp_hash = hash_password(otp_code)
         firstname = getattr(user, "fname", email)
 
-        # Gọi Email Service
-        background_tasks.add_task(email_service.send_otp_email, email, firstname, otp_code)
+        send_otp_email_task.delay(email, firstname, otp_code)
 
         reset_token = create_access_token(
             sub=email,
@@ -216,14 +215,16 @@ class AuthService:
 
         email, role = payload.get("sub"), payload.get("role")
 
-        if role == 'admin':
-            user = self.db.query(Admin).filter(Admin.email == email).first()
-        elif role == 'buyer':
+        if role == 'buyer':
             user = self.db.query(Buyer).filter(Buyer.email == email).first()
         elif role == 'seller':
             user = self.db.query(Seller).filter(Seller.email == email).first()
 
-        if not user: raise HTTPException(404, "User not found")
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail= "User not found"
+            )
 
         user.password = hash_password(new_password)
         self.db.commit()
