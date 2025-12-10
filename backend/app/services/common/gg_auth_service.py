@@ -95,7 +95,7 @@ async def google_login_callback(request: Request, response: Response, db: Sessio
         token_data = issue_token(email=seller.email, role="seller")
         redirect_url = FRONTEND_SELLER_HOMEPAGE
 
-    else:  # Mặc định là 'buyer'
+    else:
         buyer = db.query(Buyer).filter(Buyer.email == email).first()
 
         if not buyer:
@@ -121,15 +121,16 @@ async def google_login_callback(request: Request, response: Response, db: Sessio
         token_data = issue_token(email=buyer.email, role="buyer")
         redirect_url = FRONTEND_BUYER_HOMEPAGE
 
-        # Set Token vào HttpOnly Cookie
-    response.set_cookie(
+
+    redirect_response = RedirectResponse(url=redirect_url, status_code=302)
+
+    redirect_response.set_cookie(
         key="access_token",
-        value=f"Bearer {token_data.access_token}",
+        value=token_data.access_token,  # <--- SỬA: BỎ "Bearer " ĐI, CHỈ LẤY TOKEN
         max_age=token_data.expires_in,
         httponly=True,
         samesite="lax",
-        secure=False  # (Nho khi nao deploy sang https thi doi thanh True)
+        secure=False  # Đặt True nếu deploy HTTPS
     )
 
-    # --- 7. Chuyển hướng người dùng ---
-    return RedirectResponse(url=redirect_url)
+    return redirect_response

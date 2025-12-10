@@ -1,4 +1,5 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import EmailStr
 
 class Settings(BaseSettings):
     """
@@ -26,6 +27,15 @@ class Settings(BaseSettings):
 
     SECRET_KEY: str
 
+    MAIL_USERNAME: str
+    MAIL_PASSWORD: str
+    MAIL_FROM: EmailStr
+    MAIL_PORT: int
+    MAIL_SERVER: str
+    MAIL_FROM_NAME: str
+
+    RESET_PASSWORD_TOKEN_EXPIRE_MINUTES: int = 5
+    
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
 settings = Settings()
