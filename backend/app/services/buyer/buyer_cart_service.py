@@ -256,8 +256,3 @@ def buyer_update_quantity_item(buyer_id: int, item_id: int, data: UpdateCartItem
         "item_id": item.shopping_cart_item_id,
         "new_quantity": item.quantity
     }
-
-
-    
-
-
