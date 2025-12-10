@@ -2,6 +2,7 @@ import asyncio
 from ..utils.celery_client import celery_app
 from ..utils.email import email_service
 
+
 @celery_app.task(name="send_otp_email_task",
                  autoretry_for=(Exception,),
                  retry_backoff=True,

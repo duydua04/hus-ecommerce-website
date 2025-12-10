@@ -1,10 +1,12 @@
-from sqlalchemy.orm import Session
 from datetime import datetime, timezone
 from typing import Optional, List
-from fastapi import HTTPException, UploadFile, status
+
+from fastapi import HTTPException, UploadFile, status, Depends
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 
 from ...config import public_url
-from ...utils.chat_manager import chat_manager
+from ...utils.socket_manager import socket_manager
 from ...utils.storage import storage
 from ...utils.security import verify_access_token
 
@@ -12,14 +14,12 @@ from ...models.chat import Conversation, Message
 from ...models.users import Buyer, Seller
 
 from ...schemas.chat import SendMessageRequest
-
-from fastapi import Depends
 from ...config.db import get_db
 
 
 class ChatService:
 
-    def __init__(self, db: Session):
+    def __init__(self, db: AsyncSession):
         self.db = db
 
 
@@ -34,24 +34,31 @@ class ChatService:
 
 
     @staticmethod
-    def get_user_from_token(token, db):
-        """Helper lấy User từ Token """
+    async def get_user_from_token(token: str, db: AsyncSession):
+        """Helper lấy User từ Token (Async)"""
         try:
             p = verify_access_token(token)
             email, role = p['sub'], p['role']
 
             if role == 'buyer':
-                u = db.query(Buyer).filter(Buyer.email == email).first()
-                if u: return u.buyer_id, role
+                stmt = select(Buyer).where(Buyer.email == email)
+                result = await db.execute(stmt)
+                u = result.scalar_one_or_none()
+                if u:
+                    return u.buyer_id, role
+
             elif role == 'seller':
-                u = db.query(Seller).filter(Seller.email == email).first()
-                if u: return u.seller_id, role
-        except:
+                stmt = select(Seller).where(Seller.email == email)
+                result = await db.execute(stmt)
+                u = result.scalar_one_or_none()
+                if u:
+                    return u.seller_id, role
+        except Exception:
             pass
         return None, None
 
 
-    def _attach_partner_info(self, conversations: list, role: str):
+    async def _attach_partner_info(self, conversations: list, role: str):
         """
         Ghép thông tin User từ Postgres vào danh sách Chat Mongo.
         """
@@ -62,16 +69,23 @@ class ChatService:
         for conv in conversations:
             target_ids.append(conv.seller_id if role == 'buyer' else conv.buyer_id)
 
-        # 2. Query Postgres
+        if not target_ids:
+            return []
+
+        # Query Postgres
         users_map = {}
         if role == 'buyer':
-            sellers = self.db.query(Seller).filter(Seller.seller_id.in_(target_ids)).all()
+            stmt = select(Seller).where(Seller.seller_id.in_(target_ids))
+            result = await self.db.execute(stmt)
+            sellers = result.scalars().all()
             users_map = {s.seller_id: s for s in sellers}
         else:
-            buyers = self.db.query(Buyer).filter(Buyer.buyer_id.in_(target_ids)).all()
+            stmt = select(Buyer).where(Buyer.buyer_id.in_(target_ids))
+            result = await self.db.execute(stmt)
+            buyers = result.scalars().all()
             users_map = {u.buyer_id: u for u in buyers}
 
-        # 3. Map dữ liệu
+        # Map dữ liệu
         for conv in conversations:
             pid = conv.seller_id if role == 'buyer' else conv.buyer_id
             user_obj = users_map.get(pid)
@@ -81,6 +95,7 @@ class ChatService:
                 "role": "seller" if role == 'buyer' else "buyer",
                 "name": "Unknown", "avatar": None
             }
+
             if user_obj:
                 if role == 'buyer':
                     partner_info["name"] = user_obj.shop_name
@@ -101,9 +116,13 @@ class ChatService:
 
 
     @staticmethod
-    async def _update_conversation_meta(conversation: Conversation, content: Optional[str],
-                                        has_images: bool, sender_role: str):
-        """Cập nhật metadata hội thoại"""
+    async def _update_conversation_meta(
+            conversation: Conversation,
+            content: Optional[str],
+            has_images: bool,
+            sender_role: str
+    ):
+        """Cập nhật metadata hội thoại """
         preview = content if content else ("[Hình ảnh]" if has_images else "Tin nhắn mới")
 
         conversation.last_message = preview
@@ -123,12 +142,15 @@ class ChatService:
         sender_role = sender_role.lower()
         recipient_role = "seller" if sender_role == "buyer" else "buyer"
 
-        # Validate Recipient (Postgres)
         recipient = None
         if recipient_role == "seller":
-            recipient = self.db.query(Seller).filter(Seller.seller_id == payload.recipient_id).first()
+            stmt = select(Seller).where(Seller.seller_id == payload.recipient_id)
+            result = await self.db.execute(stmt)
+            recipient = result.scalar_one_or_none()
         else:
-            recipient = self.db.query(Buyer).filter(Buyer.buyer_id == payload.recipient_id).first()
+            stmt = select(Buyer).where(Buyer.buyer_id == payload.recipient_id)
+            result = await self.db.execute(stmt)
+            recipient = result.scalar_one_or_none()
 
         if not recipient:
             raise HTTPException(
@@ -136,7 +158,7 @@ class ChatService:
                 detail="Recipient not found"
             )
 
-        # Find Conversation (Mongo)
+        # Find Conversation
         conv = None
         if payload.conversation_id:
             try:
@@ -148,6 +170,7 @@ class ChatService:
             buyer_id = sender_id if sender_role == 'buyer' else payload.recipient_id
             seller_id = payload.recipient_id if sender_role == 'buyer' else sender_id
 
+            # Beanie find_one is async
             conv = await Conversation.find_one(
                 Conversation.buyer_id == buyer_id,
                 Conversation.seller_id == seller_id
@@ -175,23 +198,23 @@ class ChatService:
         )
         await new_msg.insert()
 
-        # 5. Update Meta
         await self._update_conversation_meta(
             conv, payload.content, bool(payload.image_urls), sender_role
         )
 
-        # 6. WebSocket
+        # WebSocket
         ws_data = {
+            "type": "CHAT",
             "conversation_id": str(conv.id),
             "sender": sender_role,
             "content": new_msg.content,
             "images": new_msg.images,
             "created_at": new_msg.created_at.isoformat()
         }
-        await chat_manager.send_personal_message(ws_data, payload.recipient_id, recipient_role)
+
+        await socket_manager.send_to_user(ws_data, payload.recipient_id, recipient_role)
 
         return new_msg
-
 
     @staticmethod
     async def get_history(conversation_id: str, cursor: Optional[str], limit: int):
@@ -225,8 +248,8 @@ class ChatService:
 
         convs = await query.sort("-last_message_at").to_list()
 
-        # Gọi helper (dùng self.db)
-        return self._attach_partner_info(convs, role)
+        # Gọi helper (Async)
+        return await self._attach_partner_info(convs, role)
 
 
     @staticmethod
@@ -238,11 +261,11 @@ class ChatService:
                 detail="Max 5 files"
             )
 
-        # Gọi storage utils (đã có instance storage)
+        # Gọi storage utils (đã có instance storage, async supported)
         results = await storage.upload_many(folder="chat", files=files)
 
         return {"urls": [public_url(r['object_key']) for r in results]}
 
 
-def get_chat_service(db: Session = Depends(get_db)):
+def get_chat_service(db: AsyncSession = Depends(get_db)):
     return ChatService(db)

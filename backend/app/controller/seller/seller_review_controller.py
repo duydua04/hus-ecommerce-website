@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, Query, Path, Body, status
 
 from ...middleware.auth import require_seller
 from ...schemas.common import Page
-from ...schemas.review import ReviewReplyCreate, ReviewReplyResponse, ReviewResponse
+from ...schemas.review import ReviewReplyCreate, ReviewReplyResponse
 
 from ...services.seller.seller_review_service import (
     SellerReviewService,
@@ -18,8 +18,8 @@ router = APIRouter(
 
 @router.get("", response_model=Page)
 async def list_reviews_for_seller(
-        product_name: Optional[str] = Query(None),
-        rating: Optional[int] = Query(None, ge=1, le=5),
+        product_name: Optional[str] = Query(None, description="Lọc theo tên sản phẩm"),
+        rating: Optional[int] = Query(None, ge=1, le=5, description="Lọc theo số sao"),
         page: int = Query(1, ge=1),
         limit: int = Query(10, ge=1, le=100),
         seller_info=Depends(require_seller),
@@ -41,8 +41,8 @@ async def list_reviews_for_seller(
 
 @router.post("/{review_id}/replies", response_model=ReviewReplyResponse, status_code=status.HTTP_201_CREATED)
 async def reply_review(
-        review_id: str = Path(...),
-        body: str = Body(..., embed=True, alias="reply_text"),
+        review_id: str = Path(..., description="ID của Review (MongoDB ObjectId)"),
+        reply_text: str = Body(..., embed=True),
         seller_info=Depends(require_seller),
         service: SellerReviewService = Depends(get_seller_review_service)
 ):
@@ -53,7 +53,7 @@ async def reply_review(
 
     payload = ReviewReplyCreate(
         review_id=review_id,
-        reply_text=body
+        reply_text=reply_text
     )
 
     return await service.reply_review(

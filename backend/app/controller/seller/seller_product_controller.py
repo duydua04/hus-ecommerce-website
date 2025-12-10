@@ -20,7 +20,7 @@ router = APIRouter(
 )
 
 @router.get("/", response_model=Page)
-def list_my_products(
+async def list_my_products(
     q: Optional[str] = Query(None),
     active_only: bool = Query(True),
     limit: int = Query(10, ge=1, le=100),
@@ -28,7 +28,8 @@ def list_my_products(
     seller_info=Depends(require_seller),
     service: SellerProductService = Depends(get_seller_product_service)
 ):
-    return service.get_products(
+
+    return await service.get_products(
         seller_id=seller_info['user'].seller_id,
         search=q,
         active_only=active_only,
@@ -38,37 +39,40 @@ def list_my_products(
 
 
 @router.get("/{product_id}", response_model=ProductDetail)
-def get_product_details(
+async def get_product_details(
     product_id: int,
     seller_info=Depends(require_seller),
     service: SellerProductService = Depends(get_seller_product_service)
 ):
-    return service.get_detail(
+
+    return await service.get_detail(
         seller_id=seller_info["user"].seller_id,
         product_id=product_id
     )
 
 
 @router.post("/", response_model=ProductResponse, status_code=status.HTTP_201_CREATED)
-def create_product(
+async def create_product(
     payload: ProductCreate,
     seller_info=Depends(require_seller),
     service: SellerProductService = Depends(get_seller_product_service)
 ):
-    return service.create_product(
+
+    return await service.create_product(
         seller_id=seller_info['user'].seller_id,
         payload=payload
     )
 
 
 @router.put("/{product_id}", response_model=ProductResponse)
-def update_product(
+async def update_product(
     product_id: int,
     payload: ProductUpdate,
     seller_info=Depends(require_seller),
     service: SellerProductService = Depends(get_seller_product_service)
 ):
-    return service.update_product(
+
+    return await service.update_product(
         seller_id=seller_info['user'].seller_id,
         product_id=product_id,
         payload=payload
@@ -76,25 +80,27 @@ def update_product(
 
 
 @router.delete("/{product_id}")
-def delete_product(
+async def delete_product(
     product_id: int,
     seller_info=Depends(require_seller),
     service: SellerProductService = Depends(get_seller_product_service)
 ):
-    return service.delete_product(
+
+    return await service.delete_product(
         seller_id=seller_info["user"].seller_id,
         product_id=product_id
     )
 
 
 @router.post("/{product_id}/variants", response_model=ProductVariantResponse, status_code=status.HTTP_201_CREATED)
-def create_variant(
+async def create_variant(
     product_id: int,
     payload: ProductVariantCreate,
     seller_info=Depends(require_seller),
     service: SellerProductService = Depends(get_seller_product_service)
 ):
-    return service.create_variant(
+
+    return await service.create_variant(
         seller_id=seller_info["user"].seller_id,
         product_id=product_id,
         payload=payload
@@ -102,14 +108,15 @@ def create_variant(
 
 
 @router.put("/{product_id}/variants/{variant_id}", response_model=ProductVariantResponse)
-def update_variant(
+async def update_variant(
     product_id: int,
     variant_id: int,
     payload: ProductVariantUpdate,
     seller_info=Depends(require_seller),
     service: SellerProductService = Depends(get_seller_product_service)
 ):
-    return service.update_variant(
+
+    return await service.update_variant(
         seller_id=seller_info["user"].seller_id,
         product_id=product_id,
         variant_id=variant_id,
@@ -118,28 +125,29 @@ def update_variant(
 
 
 @router.delete("/{product_id}/variants/{variant_id}")
-def delete_variant(
+async def delete_variant(
     product_id: int,
     variant_id: int,
     seller_info=Depends(require_seller),
     service: SellerProductService = Depends(get_seller_product_service)
 ):
-    return service.delete_variant(
+
+    return await service.delete_variant(
         seller_id=seller_info["user"].seller_id,
         product_id=product_id,
         variant_id=variant_id
     )
 
 
-
 @router.get("/{product_id}/variants/{variant_id}/sizes", response_model=List[ProductSizeResponse])
-def list_sizes(
+async def list_sizes(
     product_id: int,
     variant_id: int,
     seller_info=Depends(require_seller),
     service: SellerProductService = Depends(get_seller_product_service)
 ):
-    return service.get_variant_sizes(
+
+    return await service.get_variant_sizes(
         seller_id=seller_info["user"].seller_id,
         product_id=product_id,
         variant_id=variant_id
@@ -147,14 +155,15 @@ def list_sizes(
 
 
 @router.post("/{product_id}/variants/{variant_id}/sizes", response_model=ProductSizeResponse, status_code=status.HTTP_201_CREATED)
-def create_size(
+async def create_size(
     product_id: int,
     variant_id: int,
     payload: ProductSizeCreate,
     seller_info=Depends(require_seller),
     service: SellerProductService = Depends(get_seller_product_service)
 ):
-    return service.create_size(
+
+    return await service.create_size(
         seller_id=seller_info["user"].seller_id,
         product_id=product_id,
         variant_id=variant_id,
@@ -163,7 +172,7 @@ def create_size(
 
 
 @router.put("/{product_id}/variants/{variant_id}/sizes/{size_id}", response_model=ProductSizeResponse)
-def update_size(
+async def update_size(
     product_id: int,
     variant_id: int,
     size_id: int,
@@ -171,7 +180,7 @@ def update_size(
     seller_info=Depends(require_seller),
     service: SellerProductService = Depends(get_seller_product_service)
 ):
-    return service.update_size(
+    return await service.update_size(
         seller_id=seller_info["user"].seller_id,
         product_id=product_id,
         variant_id=variant_id,
@@ -181,14 +190,14 @@ def update_size(
 
 
 @router.delete("/{product_id}/variants/{variant_id}/sizes/{size_id}")
-def delete_size(
+async def delete_size(
     product_id: int,
     variant_id: int,
     size_id: int,
     seller_info=Depends(require_seller),
     service: SellerProductService = Depends(get_seller_product_service)
 ):
-    return service.delete_size(
+    return await service.delete_size(
         seller_id=seller_info["user"].seller_id,
         product_id=product_id,
         variant_id=variant_id,
@@ -213,13 +222,14 @@ async def upload_images(
 
 
 @router.patch("/{product_id}/images/{image_id}/primary", response_model=ProductImageResponse)
-def set_primary_image(
+async def set_primary_image(
     product_id: int,
     image_id: int,
     seller_info=Depends(require_seller),
     service: SellerProductService = Depends(get_seller_product_service)
 ):
-    return service.set_primary_image(
+
+    return await service.set_primary_image(
         seller_id=seller_info["user"].seller_id,
         product_id=product_id,
         image_id=image_id
@@ -227,13 +237,14 @@ def set_primary_image(
 
 
 @router.delete("/{product_id}/images/{image_id}")
-def delete_image(
+async def delete_image(
     product_id: int,
     image_id: int,
     seller_info=Depends(require_seller),
     service: SellerProductService = Depends(get_seller_product_service)
 ):
-    return service.delete_image(
+
+    return await service.delete_image(
         seller_id=seller_info["user"].seller_id,
         product_id=product_id,
         image_id=image_id

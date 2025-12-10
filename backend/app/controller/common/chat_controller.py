@@ -1,16 +1,15 @@
 from typing import List, Optional
-from fastapi import APIRouter, Depends, Query, WebSocket, WebSocketDisconnect, UploadFile, File, status
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, Depends, Query, UploadFile, File
 
-from ...config.db import get_db
 from ...middleware.auth import get_current_user
 from ...schemas.chat import MessageResponse, ChatHistoryResponse, ConversationResponse, SendMessageRequest
-from ...utils.chat_manager import chat_manager
+
 
 from ...services.common.chat_service import (
     ChatService,
     get_chat_service,
 )
+
 
 router = APIRouter(
     prefix="/chat",
@@ -77,37 +76,9 @@ async def get_messages(
     """
     Lấy lịch sử tin nhắn theo phân trang (Cursor).
     """
+
     return await service.get_history(
         conversation_id=conversation_id,
         cursor=cursor,
         limit=limit
     )
-
-
-@router.websocket("/ws/chat")
-async def chat_socket_endpoint(
-        websocket: WebSocket,
-        token: str = Query(...),
-        db: Session = Depends(get_db),
-
-):
-    """
-    Kết nối WebSocket để nhận tin nhắn Realtime.
-    Auth qua Token trên URL.
-    """
-
-    user_id, role = ChatService.get_user_from_token(token, db)
-
-    if not user_id:
-        await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
-        return
-
-    # 2. Kết nối vào Manager
-    await chat_manager.connect(websocket, user_id, role)
-
-    try:
-        while True:
-            # Giữ kết nối
-            await websocket.receive_text()
-    except WebSocketDisconnect:
-        chat_manager.disconnect(websocket, user_id, role)

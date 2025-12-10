@@ -30,16 +30,16 @@ class MessageResponse(BaseModel):
     created_at: datetime
 
     class Config:
-        populate_by_name = True  # Để Pydantic hiểu alias="_id"
+        populate_by_name = True
         from_attributes = True
 
 
 class ConversationResponse(BaseModel):
-    conversation_id: PyObjectId = Field(..., alias="_id")
+    conversation_id: str
     last_message: Optional[str] = None
     last_message_at: datetime
     unread_counts: Dict[str, int] = {"buyer": 0, "seller": 0}
-    partner: ChatPartner  # Thông tin người chat cùng
+    partner: ChatPartner
 
     class Config:
         populate_by_name = True

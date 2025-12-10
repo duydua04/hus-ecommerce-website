@@ -51,7 +51,6 @@ async def register_seller(
         service: AuthService = Depends(get_auth_service)
 ):
     """Đăng ký Seller"""
-    # [ASYNC] Phải await
     return await service.register_seller(payload)
 
 
@@ -61,7 +60,6 @@ async def login_admin(
         response: Response,
         service: AuthService = Depends(get_auth_service)
 ):
-    # [ASYNC] Phải await
     token_data = await service.login_admin(payload)
     set_auth_cookies(response, token_data.access_token, token_data.refresh_token)
     return token_data
@@ -73,7 +71,6 @@ async def login_buyer(
         response: Response,
         service: AuthService = Depends(get_auth_service)
 ):
-    # [ASYNC] Phải await
     token_data = await service.login_buyer(payload)
     set_auth_cookies(response, token_data.access_token, token_data.refresh_token)
     return token_data
@@ -85,7 +82,6 @@ async def login_seller(
         response: Response,
         service: AuthService = Depends(get_auth_service)
 ):
-    # [ASYNC] Phải await
     token_data = await service.login_seller(payload)
     set_auth_cookies(response, token_data.access_token, token_data.refresh_token)
     return token_data
@@ -105,7 +101,6 @@ async def refresh(
             detail="Refresh token missing in cookie"
         )
 
-    # [ASYNC] Phải await vì cần check user trong DB
     new_token = await service.refresh_access_token(refresh_token)
 
     set_auth_cookies(response, new_token.access_token, new_token.refresh_token)
@@ -221,7 +216,6 @@ async def reset_password(
             detail="Session missing"
         )
 
-    # [ASYNC] Phải await vì cần update password vào DB
     result = await service.reset_password_final(payload.new_password, token)
 
     response.delete_cookie("reset_token")

@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import Optional
 from fastapi import HTTPException, status, Depends
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from .user_query_base import UserQueryBase
 
@@ -14,14 +14,18 @@ from ...schemas.user import SellerResponse, BuyerResponse
 
 class AdminUserManagementService(UserQueryBase):
 
-    def list_buyers(
+    def __init__(self, db: AsyncSession):
+        super().__init__(db)
+
+
+    async def list_buyers(
             self, search_query: Optional[str] = None,
             active_only: bool = True, limit: int = 10,
             offset: int = 0
     ):
         """Lấy danh sách Buyer"""
 
-        total, buyers = self._get_list_query_and_count(
+        total, buyers = await self._get_list_query_and_count(
             model=Buyer,
             search_query=search_query,
             active_only=active_only,
@@ -39,7 +43,8 @@ class AdminUserManagementService(UserQueryBase):
                 lname=b.lname,
                 avt_url=public_url(b.avt_url) if b.avt_url else None,
                 buyer_tier=b.buyer_tier,
-                is_active=b.is_active, created_at=b.created_at,
+                is_active=b.is_active,
+                created_at=b.created_at,
             ) for b in buyers
         ]
 
@@ -53,13 +58,13 @@ class AdminUserManagementService(UserQueryBase):
         )
 
 
-    def list_sellers(
+    async def list_sellers(
             self, search_query: Optional[str] = None,
             active_only: bool = False, limit: int = 10,
             offset: int = 0
     ):
         """Lấy danh sách Seller"""
-        total, sellers = self._get_list_query_and_count(
+        total, sellers = await self._get_list_query_and_count(
             model=Seller,
             search_query=search_query,
             active_only=active_only,
@@ -95,8 +100,8 @@ class AdminUserManagementService(UserQueryBase):
         )
 
 
-    def soft_delete_buyer(self, buyer_id: int):
-        buyer = self.db.query(Buyer).get(buyer_id)
+    async def soft_delete_buyer(self, buyer_id: int):
+        buyer = await self.db.get(Buyer, buyer_id)
         if not buyer:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -104,14 +109,14 @@ class AdminUserManagementService(UserQueryBase):
             )
 
         buyer.is_active = False
-        self.db.commit()
-        self.db.refresh(buyer)
+        await self.db.commit() # [ASYNC] Commit
+        await self.db.refresh(buyer) # [ASYNC] Refresh
 
         return {"deleted": True, "mode": "soft_delete"}
 
 
-    def soft_delete_seller(self, seller_id: int):
-        seller = self.db.query(Seller).get(seller_id)
+    async def soft_delete_seller(self, seller_id: int):
+        seller = await self.db.get(Seller, seller_id)
         if not seller:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -119,11 +124,11 @@ class AdminUserManagementService(UserQueryBase):
             )
 
         seller.is_active = False
-        self.db.commit()
-        self.db.refresh(seller)
+        await self.db.commit()
+        await self.db.refresh(seller)
 
         return {"deleted": True, "mode": "soft_deleted"}
 
 
-def get_admin_user_management_service(db: Session = Depends(get_db)) -> AdminUserManagementService:
+def get_admin_user_management_service(db: AsyncSession = Depends(get_db)):
     return AdminUserManagementService(db)

@@ -65,7 +65,7 @@ class SellerUpdate(BaseModel):
 # Response tu server tra ve thong tin cua nguoi ban
 class SellerResponse(TimestampedOut):
     seller_id: int
-    email: EmailStr
+    email: str
     phone: str | None = None
     fname: str
     lname: str | None = None

@@ -1,51 +1,123 @@
-from dataclasses import dataclass
+import json
 from typing import Dict, List
+from dataclasses import dataclass
+
+import redis.asyncio as redis
 from fastapi import WebSocket
+
+from ..config.settings import settings
+
 
 @dataclass
 class WebSocketConnection:
-    websocket : WebSocket
+    websocket: WebSocket
 
-# Class cha mô tả quản lý các kết nối websocket
-class BaseConnectionManager:
 
-    # Khoi tao voi active connection
+class SocketConnectionManager:
+    """
+    Quản lý tập trung kết nối WebSocket và cơ chế Pub/Sub qua Redis.
+    """
+
     def __init__(self):
+        # Lưu các socket đang kết nối trực tiếp tới Server này
         self.active_connections: Dict[str, List[WebSocketConnection]] = {}
 
+        self.redis_pub: redis.Redis | None = None
+        self.redis_sub: redis.Redis | None = None
+        self.pubsub = None
 
-    async def connect(self, websocket: WebSocket, user_id: int, role: str):
-        # Thuc hien ket noi
+
+    async def connect_redis(self):
+        """Khởi tạo kết nối Redis khi ứng dụng khởi động"""
+        self.redis_pub = redis.from_url(settings.redis_url_cache, decode_responses=True)
+        self.redis_sub = redis.from_url(settings.redis_url_cache, decode_responses=True)
+        self.pubsub = self.redis_sub.pubsub()
+
+
+    async def close_redis(self):
+        """Dọn dẹp kết nối khi ứng dụng tắt"""
+        if self.pubsub: await self.pubsub.close()
+        if self.redis_sub: await self.redis_sub.close()
+        if self.redis_pub: await self.redis_pub.close()
+
+
+    async def connect_socket(self, websocket: WebSocket, user_id: int, role: str):
+        """Lưu kết nối socket vào RAM"""
         await websocket.accept()
         key = self.get_connection_key(user_id, role)
+
         if key not in self.active_connections:
             self.active_connections[key] = []
 
         self.active_connections[key].append(WebSocketConnection(websocket))
 
 
-    def disconnect(self, websocket: WebSocket, user_id: int, role: str):
-        # Thuc hien ngat ket noi
+    def disconnect_socket(self, websocket: WebSocket, user_id: int, role: str):
+        """Xóa kết nối socket khỏi RAM"""
         key = self.get_connection_key(user_id, role)
 
-        # Loc bo cac socket vua ngat ket noi, giu lai cac socket khac
         if key in self.active_connections:
-            self.active_connections[key] = [connection for connection in self.active_connections[key] if connection.websocket != websocket]
+            self.active_connections[key] = [
+                conn for conn in self.active_connections[key]
+                if conn.websocket != websocket
+            ]
+            if not self.active_connections[key]:
+                del self.active_connections[key]
 
-    def get_connection_key(self, user_id: int, role: str) -> str:
-        """Tạo connection key từ user_id và role"""
+
+    @staticmethod
+    def get_connection_key(user_id: int, role: str) -> str:
         return f"{role}_{user_id}"
 
 
-    async def _send_message(self, key: str, message: dict):
-        # Ham thuc hien ban tin nhan toi client
-        if key in self.active_connections:
-            connections = self.active_connections[key]
+    async def send_to_user(self, message: dict, user_id: int, role: str):
+        """
+        Hàm gửi tin. Publish lên Redis channel 'global_socket_channel'.
+        """
+        if not self.redis_pub:
+            print("[SOCKET ERROR] Redis Pub not connected!")
+            return
 
-            for connection in connections:
+        target_key = self.get_connection_key(user_id, role)
+
+        payload = {
+            "target_key": target_key,
+            "message": message
+        }
+
+        # Publish tin nhắn lên Redis
+        await self.redis_pub.publish("global_socket_channel", json.dumps(payload))
+
+
+    async def run_redis_listener(self):
+        """
+        Hàm lắng nghe tin nhắn từ Redis.
+        Nhận tin từ Redis  kiểm tra user có ở server này không -> Gửi xuống socket.
+        """
+        if not self.pubsub:
+            print("[SOCKET ERROR] Redis Sub not ready!")
+            return
+
+        await self.pubsub.subscribe("global_socket_channel")
+        print("[SOCKET] Redis Listener Started...")
+
+        async for message in self.pubsub.listen():
+            if message["type"] == "message":
                 try:
-                    await connection.websocket.send_json(message)
-                except Exception:
-                    print("Error")
-            return True
-        return False
+                    data = json.loads(message["data"])
+                    target_key = data["target_key"]
+                    msg_content = data["message"]
+
+                    # Kiểm tra xem User này có đang kết nối vào Server này khong
+                    if target_key in self.active_connections:
+                        # Nếu có, gửi tin qua WebSocket
+                        for connection in self.active_connections[target_key]:
+                            try:
+                                await connection.websocket.send_json(msg_content)
+                            except Exception as e:
+                                print(f"[SOCKET] Send Error: {e}")
+                except Exception as e:
+                    print(f"[SOCKET] Process Error: {e}")
+
+
+socket_manager = SocketConnectionManager()

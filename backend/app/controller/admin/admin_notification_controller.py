@@ -17,7 +17,7 @@ router = APIRouter(
 @router.get("/", response_model=List[NotificationResponse])
 async def get_admin_notifications(
         limit: int = 20,
-        admin_info=Depends(require_admin),  # Chặn ngay từ cửa
+        admin_info=Depends(require_admin),
         service: AdminNotificationService = Depends(get_admin_notif_service)
 ):
     # Lấy ID admin (admin_id hoặc id)
@@ -34,9 +34,13 @@ async def mark_read(
         service: AdminNotificationService = Depends(get_admin_notif_service)
 ):
     user = admin_info['user']
-    user_id = getattr(user, 'admin_id', getattr(user, 'id', None))
+    user_id = getattr(user, 'admin_id', None)
 
     success = await service.mark_as_read(notif_id, user_id)
-    if not success: raise HTTPException(404, "Not found")
+    if not success:
+        raise HTTPException(
+            status_code=404,
+            detail="Not found"
+        )
     return {"status": "ok"}
 

@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 from .config import settings
-from .config.lifespan import lifespan
+from .lifespan import lifespan
 
 
 
@@ -21,7 +21,7 @@ from .controller.admin.admin_notification_controller import router as admin_noti
 from .controller.seller.seller_address_controller import router as seller_address_router
 from .controller.seller.seller_product_controller import router as seller_product_router
 from .controller.seller.seller_review_controller import router as seller_review_router
-from .controller.seller.seller_order_controller import router as seller_order_router
+#from .controller.seller.seller_order_controller import router as seller_order_router
 from .controller.seller.seller_profile_controller import router as seller_profile_router
 
 
@@ -31,8 +31,8 @@ from .controller.seller.seller_profile_controller import router as seller_profil
 from .controller.common.auth_controller import router as auth_router
 from .controller.common.avatar_controller import router as avatar_router
 from .controller.common.chat_controller import router as chat_router
-from .controller.common.notification_controller import router as notice_router
-
+#from .controller.common.notification_controller import router as notice_router
+from .controller.common.websocket_controller import router as websocket_router
 
 
 
@@ -86,7 +86,7 @@ app.include_router(admin_notify_router)
 app.include_router(seller_address_router)
 app.include_router(seller_product_router)
 app.include_router(seller_review_router)
-app.include_router(seller_order_router)
+#app.include_router(seller_order_router)
 app.include_router(seller_profile_router)
 
 
@@ -98,7 +98,7 @@ app.include_router(seller_profile_router)
 app.include_router(auth_router)
 app.include_router(avatar_router)
 app.include_router(chat_router)
-app.include_router(notice_router)
+app.include_router(websocket_router)
 
 
 

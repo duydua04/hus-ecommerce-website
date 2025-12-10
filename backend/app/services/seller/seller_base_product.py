@@ -1,41 +1,35 @@
 from __future__ import annotations
-from typing import List, Optional
+from typing import Optional
 from abc import ABC
 
-from fastapi import HTTPException, UploadFile, status, Depends
-from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session, joinedload
-from sqlalchemy import func
-
-# Config & Utils
-from ...config.db import get_db
+from fastapi import HTTPException, status
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
+from sqlalchemy import select
 from ...config.s3 import public_url
-from ...utils.storage import storage
 
-# Models
 from ...models.catalog import Category, Product, ProductImage, ProductSize, ProductVariant
 from ...models.order import OrderItem
 
-# Schemas
-from ...schemas.common import Page, PageMeta
 from ...schemas.product import (
-    ProductCreate, ProductDetail, ProductImageResponse, ProductList, ProductResponse,
-    ProductSizeCreate, ProductSizeResponse, ProductSizeUpdate, ProductUpdate,
-    ProductVariantCreate, ProductVariantResponse, ProductVariantUpdate, ProductVariantWithSizesResponse,
+    ProductImageResponse, ProductSizeResponse,
+   ProductVariantWithSizesResponse,
 )
 
 
 class SellerBaseProductService(ABC):
-    def __init__(self, db: Session):
+    def __init__(self, db: AsyncSession):
         self.db = db
 
-    def _ensure_product_ownership(self, seller_id: int, product_id: int) -> Product:
-        """Đảm bảo sản phẩm thuộc về Seller"""
 
-        product = self.db.query(Product).filter(
+    async def _ensure_product_ownership(self, seller_id: int, product_id: int):
+        """Đảm bảo sản phẩm thuộc về Seller"""
+        stmt = select(Product).where(
             Product.product_id == product_id,
             Product.seller_id == seller_id
-        ).first()
+        )
+        result = await self.db.execute(stmt)
+        product = result.scalar_one_or_none()
 
         if not product:
             raise HTTPException(
@@ -45,11 +39,14 @@ class SellerBaseProductService(ABC):
         return product
 
 
-    def _ensure_variant_ownership(self, product_id: int, variant_id: int) -> ProductVariant:
-        variant = self.db.query(ProductVariant).filter(
+    async def _ensure_variant_ownership(self, product_id: int, variant_id: int) -> ProductVariant:
+        stmt = select(ProductVariant).where(
             ProductVariant.variant_id == variant_id,
             ProductVariant.product_id == product_id
-        ).first()
+        )
+        result = await self.db.execute(stmt)
+        variant = result.scalar_one_or_none()
+
         if not variant:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -58,11 +55,14 @@ class SellerBaseProductService(ABC):
 
         return variant
 
-    def _ensure_size_ownership(self, variant_id: int, size_id: int) -> ProductSize:
-        size = self.db.query(ProductSize).filter(
+
+    async def _ensure_size_ownership(self, variant_id: int, size_id: int):
+        stmt = select(ProductSize).where(
             ProductSize.size_id == size_id,
             ProductSize.variant_id == variant_id
-        ).first()
+        )
+        result = await self.db.execute(stmt)
+        size = result.scalar_one_or_none()
 
         if not size:
             raise HTTPException(
@@ -72,29 +72,43 @@ class SellerBaseProductService(ABC):
 
         return size
 
-    def _has_orders(self, model_id: int, id_type: str) -> bool:
+
+    async def _has_orders(self, model_id: int, id_type: str):
         """Kiểm tra ràng buộc khóa ngoại với Order"""
-        query = self.db.query(OrderItem.order_item_id)
+        stmt = select(OrderItem.order_item_id)
 
         if id_type == 'product':
-            query = query.filter(OrderItem.product_id == model_id)
+            stmt = stmt.where(OrderItem.product_id == model_id)
         elif id_type == 'variant':
-            query = query.filter(OrderItem.variant_id == model_id)
+            stmt = stmt.where(OrderItem.variant_id == model_id)
         elif id_type == 'size':
-            query = query.filter(OrderItem.size_id == model_id)
+            stmt = stmt.where(OrderItem.size_id == model_id)
 
-        return query.first() is not None
+        # Limit 1 để tối ưu performance khi check tồn tại
+        stmt = stmt.limit(1)
+        result = await self.db.execute(stmt)
+
+        return result.first() is not None
 
 
-    def _get_category_name(self, category_id: Optional[int]):
+    async def _get_category_name(self, category_id: Optional[int]):
         if not category_id:
             return None
 
-        return self.db.query(Category.category_name).filter(Category.category_id == category_id).scalar()
+        stmt = select(Category.category_name).where(Category.category_id == category_id)
+        result = await self.db.execute(stmt)
 
-    def _get_product_images(self, product_id: int):
-        images = self.db.query(ProductImage).filter(ProductImage.product_id == product_id) \
-            .order_by(ProductImage.is_primary.desc(), ProductImage.product_image_id.asc()).all()
+        return result.scalar()
+
+
+    async def _get_product_images(self, product_id: int):
+        stmt = (
+            select(ProductImage)
+            .where(ProductImage.product_id == product_id)
+            .order_by(ProductImage.is_primary.desc(), ProductImage.product_image_id.asc())
+        )
+        result = await self.db.execute(stmt)
+        images = result.scalars().all()
 
         return [
             ProductImageResponse(
@@ -106,17 +120,27 @@ class SellerBaseProductService(ABC):
             ) for img in images
         ]
 
-    def _get_product_variants(self, product_id: int):
-        variants = self.db.query(ProductVariant).options(joinedload(ProductVariant.sizes)) \
-            .filter(ProductVariant.product_id == product_id).order_by(ProductVariant.variant_id.asc()).all()
 
-        result = []
+    async def _get_product_variants(self, product_id: int):
+        stmt = (
+            select(ProductVariant)
+            .options(selectinload(ProductVariant.sizes))
+            .where(ProductVariant.product_id == product_id)
+            .order_by(ProductVariant.variant_id.asc())
+        )
+        result = await self.db.execute(stmt)
+        variants = result.scalars().all()
+
+        result_list = []
         for v in variants:
             sorted_sizes = sorted(v.sizes or [], key=lambda x: x.size_id)
-            result.append(ProductVariantWithSizesResponse(
-                variant_id=v.variant_id, product_id=v.product_id,
-                variant_name=v.variant_name, price_adjustment=v.price_adjustment,
+
+            result_list.append(ProductVariantWithSizesResponse(
+                variant_id=v.variant_id,
+                product_id=v.product_id,
+                variant_name=v.variant_name,
+                price_adjustment=v.price_adjustment,
                 sizes=[ProductSizeResponse.model_validate(s) for s in sorted_sizes]
             ))
 
-        return result
+        return result_list

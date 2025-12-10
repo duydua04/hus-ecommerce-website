@@ -8,19 +8,27 @@ router = APIRouter(
     tags=["seller-profile"]
 )
 
+
 @router.get("/", response_model=SellerResponse)
-def get_my_profile(
-    seller_info = Depends(require_seller),
-    service: SellerProfileService = Depends(get_seller_profile_service)
+async def get_my_profile(
+        seller_info=Depends(require_seller),
+        service: SellerProfileService = Depends(get_seller_profile_service)
 ):
+    """Lấy thông tin hồ sơ Seller"""
     seller_id = seller_info["user"].seller_id
-    return service.get_info(seller_id)
+
+    # [ASYNC] Thêm await
+    return await service.get_info(seller_id)
+
 
 @router.put("/", response_model=SellerResponse)
-def update_my_profile(
-    payload: SellerUpdate,
-    seller_info = Depends(require_seller),
-    service: SellerProfileService = Depends(get_seller_profile_service)
+async def update_my_profile(
+        payload: SellerUpdate,
+        seller_info=Depends(require_seller),
+        service: SellerProfileService = Depends(get_seller_profile_service)
 ):
+    """Cập nhật thông tin hồ sơ Seller"""
     seller_id = seller_info["user"].seller_id
-    return service.update_info(seller_id, payload)
+
+    # [ASYNC] Thêm await
+    return await service.update_info(seller_id, payload)
