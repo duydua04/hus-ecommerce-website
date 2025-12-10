@@ -22,6 +22,8 @@ router = APIRouter(
 @router.get("/me")
 def get_me(info=Depends(get_current_user)):
     """Lấy thông tin người dùng hiện tại"""
+    # Hàm này chỉ đọc thông tin từ token (dict) đã decode ở middleware
+    # Không gọi DB nên giữ nguyên def thường
     u = info["user"]
     return {
         "role": info["role"],
@@ -38,7 +40,8 @@ async def register_buyer(
         payload: RegisterBuyer,
         service: AuthService = Depends(get_auth_service)
 ):
-    """Đăng ký Buyer (Kèm thông báo Admin)"""
+    """Đăng ký Buyer"""
+    # [ASYNC] Phải await vì service gọi DB async
     return await service.register_buyer(payload)
 
 
@@ -47,45 +50,49 @@ async def register_seller(
         payload: RegisterSeller,
         service: AuthService = Depends(get_auth_service)
 ):
-    """Đăng ký Seller (Kèm thông báo Admin)"""
+    """Đăng ký Seller"""
+    # [ASYNC] Phải await
     return await service.register_seller(payload)
 
 
 @router.post("/login/admin", response_model=OAuth2Token)
-def login_admin(
+async def login_admin(
         payload: Login,
         response: Response,
         service: AuthService = Depends(get_auth_service)
 ):
-    token_data = service.login_admin(payload)
+    # [ASYNC] Phải await
+    token_data = await service.login_admin(payload)
     set_auth_cookies(response, token_data.access_token, token_data.refresh_token)
     return token_data
 
 
 @router.post("/login/buyer", response_model=OAuth2Token)
-def login_buyer(
+async def login_buyer(
         payload: Login,
         response: Response,
         service: AuthService = Depends(get_auth_service)
 ):
-    token_data = service.login_buyer(payload)
+    # [ASYNC] Phải await
+    token_data = await service.login_buyer(payload)
     set_auth_cookies(response, token_data.access_token, token_data.refresh_token)
     return token_data
 
 
 @router.post("/login/seller", response_model=OAuth2Token)
-def login_seller(
+async def login_seller(
         payload: Login,
         response: Response,
         service: AuthService = Depends(get_auth_service)
 ):
-    token_data = service.login_seller(payload)
+    # [ASYNC] Phải await
+    token_data = await service.login_seller(payload)
     set_auth_cookies(response, token_data.access_token, token_data.refresh_token)
     return token_data
 
 
 @router.post("/refresh", response_model=OAuth2Token)
-def refresh(
+async def refresh(
         request: Request,
         response: Response,
         service: AuthService = Depends(get_auth_service)
@@ -98,7 +105,8 @@ def refresh(
             detail="Refresh token missing in cookie"
         )
 
-    new_token = service.refresh_access_token(refresh_token)
+    # [ASYNC] Phải await vì cần check user trong DB
+    new_token = await service.refresh_access_token(refresh_token)
 
     set_auth_cookies(response, new_token.access_token, new_token.refresh_token)
     return new_token
@@ -110,6 +118,8 @@ def logout(
         service: AuthService = Depends(get_auth_service)
 ):
     """Đăng xuất: Xóa cookie"""
+    # Hàm logout trong service là @staticmethod và chỉ xóa cookie, không gọi DB
+    # Nên giữ nguyên def thường để tối ưu
     return service.logout(response)
 
 
@@ -142,10 +152,11 @@ async def google_callback(
 async def forgot_password(
         payload: ForgotPasswordRequest,
         response: Response,
-        # background_tasks: BackgroundTasks,
+        # background_tasks: BackgroundTasks, (Đã bỏ theo logic mới dùng Celery)
         service: AuthService = Depends(get_auth_service)
 ):
     """Gửi OTP qua email"""
+    # [ASYNC] Phải await vì cần tìm user trong DB
     result = await service.forgot_password_request(payload.email, payload.role)
 
     response.set_cookie(
@@ -154,7 +165,7 @@ async def forgot_password(
         httponly=True,
         samesite="lax",
         secure=False,
-        max_age=5 * 60  # 5 phút
+        max_age=5 * 60
     )
     return {"message": "OTP has been sent to your email"}
 
@@ -166,7 +177,7 @@ def verify_otp(
         response: Response,
         service: AuthService = Depends(get_auth_service)
 ):
-    """Kiểm tra OTP, nếu đúng cấp token quyền đổi pass"""
+    """Kiểm tra OTP"""
     token = request.cookies.get("reset_token")
     if not token:
         raise HTTPException(
@@ -174,9 +185,10 @@ def verify_otp(
             detail="Session missing or expired"
         )
 
+    # Hàm này trong Service là @staticmethod và tính toán CPU (hash compare)
+    # Không gọi DB -> Giữ nguyên def thường để FastAPI chạy trong Threadpool
     result = service.verify_otp_for_reset(payload.otp, token)
 
-    # Update Cookie với quyền cao hơn (reset_allowed)
     response.set_cookie(
         key="reset_token",
         value=result["permission_token"],
@@ -189,7 +201,7 @@ def verify_otp(
 
 
 @router.post("/reset-password")
-def reset_password(
+async def reset_password(
         payload: ResetPasswordRequest,
         request: Request,
         response: Response,
@@ -209,9 +221,9 @@ def reset_password(
             detail="Session missing"
         )
 
-    result = service.reset_password_final(payload.new_password, token)
+    # [ASYNC] Phải await vì cần update password vào DB
+    result = await service.reset_password_final(payload.new_password, token)
 
-    # Xóa cookie reset sau khi thành công
     response.delete_cookie("reset_token")
 
     return result

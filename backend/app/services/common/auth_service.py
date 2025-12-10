@@ -1,5 +1,6 @@
-from fastapi import HTTPException, status, Response, Depends, BackgroundTasks
-from sqlalchemy.orm import Session
+from fastapi import HTTPException, status, Response, Depends
+from sqlalchemy.ext.asyncio import AsyncSession  # Đổi import này
+from sqlalchemy import select, or_  # Import cú pháp query mới
 
 from ...config.db import get_db
 from ...config.settings import settings
@@ -17,19 +18,23 @@ from ..admin.admin_notification_service import AdminNotificationService, get_adm
 
 
 class AuthService:
-    def __init__(self, db: Session, notif_service: AdminNotificationService):
+    def __init__(self, db: AsyncSession, notif_service: AdminNotificationService):
         self.db = db
         self.notif_service = notif_service
 
 
-    def _email_or_phone_taken(self, model, email: str, phone: str):
-        return self.db.query(model).filter(
-            (model.email == email) | (model.phone == phone)
-        ).first() is not None
+    async def _email_or_phone_taken(self, model, email: str, phone: str):
+        stmt = select(model).where(
+            or_(model.email == email, model.phone == phone)
+        )
+        result = await self.db.execute(stmt)
+
+        return result.scalar_one_or_none() is not None
 
 
     async def register_buyer(self, payload: RegisterBuyer):
-        if self._email_or_phone_taken(Buyer, payload.email, payload.phone):
+        # Phải await hàm kiểm tra
+        if await self._email_or_phone_taken(Buyer, payload.email, payload.phone):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Email or phone already registered"
@@ -40,17 +45,15 @@ class AuthService:
             password=hash_password(payload.password)
         )
         self.db.add(buyer)
-        self.db.commit()
-        self.db.refresh(buyer)
+        await self.db.commit()  # Async commit
+        await self.db.refresh(buyer)  # Async refresh
 
-        # Gọi Notification Service
         await self.notif_service.notify_new_buyer_registration(buyer)
 
         return BuyerResponse.model_validate(buyer)
 
-
     async def register_seller(self, payload: RegisterSeller):
-        if self._email_or_phone_taken(Seller, payload.email, payload.phone):
+        if await self._email_or_phone_taken(Seller, payload.email, payload.phone):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Email or phone already registered"
@@ -62,19 +65,19 @@ class AuthService:
         )
 
         self.db.add(seller)
-        self.db.commit()
-        self.db.refresh(seller)
+        await self.db.commit()
+        await self.db.refresh(seller)
 
-        # Gọi Notification Service
+
         await self.notif_service.notify_new_seller_registration(seller)
 
         return SellerResponse.model_validate(seller)
 
-
-    def login_admin(self, payload: Login):
-        admin = self.db.query(Admin) \
-                 .filter(Admin.email == payload.email) \
-                 .first()
+    async def login_admin(self, payload: Login):
+        # Chuyển sang async def vì phải await DB
+        stmt = select(Admin).where(Admin.email == payload.email)
+        result = await self.db.execute(stmt)
+        admin = result.scalar_one_or_none()
 
         if not admin or not verify_password(payload.password, admin.password):
             raise HTTPException(
@@ -85,11 +88,10 @@ class AuthService:
         return issue_token(admin.email, "admin")
 
 
-    def login_buyer(self, payload: Login):
-        buyer = (self.db.query(Buyer)
-                 .filter(Buyer.email == payload.email)
-                 .first()
-        )
+    async def login_buyer(self, payload: Login):
+        stmt = select(Buyer).where(Buyer.email == payload.email)
+        result = await self.db.execute(stmt)
+        buyer = result.scalar_one_or_none()
 
         if not buyer or not verify_password(payload.password, buyer.password):
             raise HTTPException(
@@ -100,11 +102,10 @@ class AuthService:
         return issue_token(buyer.email, "buyer")
 
 
-    def login_seller(self, payload: Login):
-        seller = (self.db.query(Seller)
-                  .filter(Seller.email == payload.email)
-                  .first()
-        )
+    async def login_seller(self, payload: Login):
+        stmt = select(Seller).where(Seller.email == payload.email)
+        result = await self.db.execute(stmt)
+        seller = result.scalar_one_or_none()
 
         if not seller or not verify_password(payload.password, seller.password):
             raise HTTPException(
@@ -115,7 +116,7 @@ class AuthService:
         return issue_token(seller.email, "seller")
 
 
-    def refresh_access_token(self, refresh_token: str):
+    async def refresh_access_token(self, refresh_token: str):
         try:
             payload = verify_refresh_token(refresh_token)
         except:
@@ -128,33 +129,49 @@ class AuthService:
 
         # Check User Exist
         user = None
+        stmt = None
 
         if role == 'buyer':
-            user = self.db.query(Buyer).filter(Buyer.email == email).first()
+            stmt = select(Buyer).where(Buyer.email == email)
         elif role == 'seller':
-            user = self.db.query(Seller).filter(Seller.email == email).first()
+            stmt = select(Seller).where(Seller.email == email)
 
-        if not user: raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
-        )
+        # Nếu role admin cũng cần refresh thì thêm vào đây
+        # elif role == 'admin':
+        #     stmt = select(Admin).where(Admin.email == email)
+
+        if stmt is not None:
+            result = await self.db.execute(stmt)
+            user = result.scalar_one_or_none()
+
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found"
+            )
 
         return issue_token(email, role)
 
     @staticmethod
     def logout(response: Response):
+
         response.delete_cookie("access_token", path="/")
         response.delete_cookie("refresh_token", path="/auth/refresh")
 
         return {"message": "Logout successfully"}
 
-
     async def forgot_password_request(self, email: str, role: str):
         user = None
+        stmt = None
+
         if role == 'buyer':
-            user = self.db.query(Buyer).filter(Buyer.email == email).first()
+            stmt = select(Buyer).where(Buyer.email == email)
         elif role == 'seller':
-            user = self.db.query(Seller).filter(Seller.email == email).first()
+            stmt = select(Seller).where(Seller.email == email)
+
+        if stmt is not None:
+            result = await self.db.execute(stmt)
+            user = result.scalar_one_or_none()
 
         if not user:
             raise HTTPException(
@@ -164,6 +181,7 @@ class AuthService:
 
         otp_code = create_otp()
         otp_hash = hash_password(otp_code)
+
         firstname = getattr(user, "fname", email)
 
         send_otp_email_task.delay(email, firstname, otp_code)
@@ -180,6 +198,7 @@ class AuthService:
 
     @staticmethod
     def verify_otp_for_reset(otp_input: str, reset_token: str):
+        # Logic tính toán thuần túy, giữ nguyên Sync
         try:
             payload = decode_token(reset_token)
             if payload.get("type") != "reset_waiting":
@@ -203,7 +222,7 @@ class AuthService:
         }
 
 
-    def reset_password_final(self, new_password: str, permission_token: str):
+    async def reset_password_final(self, new_password: str, permission_token: str):
         try:
             payload = decode_token(permission_token)
             if payload.get("type") != "reset_allowed": raise Exception()
@@ -214,25 +233,32 @@ class AuthService:
             )
 
         email, role = payload.get("sub"), payload.get("role")
+        user = None
+        stmt = None
 
         if role == 'buyer':
-            user = self.db.query(Buyer).filter(Buyer.email == email).first()
+            stmt = select(Buyer).where(Buyer.email == email)
         elif role == 'seller':
-            user = self.db.query(Seller).filter(Seller.email == email).first()
+            stmt = select(Seller).where(Seller.email == email)
+
+        if stmt is not None:
+            result = await self.db.execute(stmt)
+            user = result.scalar_one_or_none()
 
         if not user:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail= "User not found"
+                detail="User not found"
             )
 
         user.password = hash_password(new_password)
-        self.db.commit()
+        await self.db.commit()
+
         return {"message": "Password reset successfully"}
 
 
 def get_auth_service(
-        db: Session = Depends(get_db),
+        db: AsyncSession = Depends(get_db),  # Inject AsyncSession
         notif_service: AdminNotificationService = Depends(get_admin_notif_service)
 ):
     return AuthService(db, notif_service)
