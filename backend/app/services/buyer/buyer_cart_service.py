@@ -5,24 +5,8 @@ from ...schemas.product import ProductResponse
 from ...models import Product, ProductSize, ProductImage, ProductVariant
 from sqlalchemy import and_
 from typing import Optional
-from enum import Enum
 from ...models.cart import ShoppingCart, ShoppingCartItem
 from datetime import datetime
-from ...schemas.product import (
-    ProductCreate,
-    ProductDetail,
-    ProductImageResponse,
-    ProductList,
-    ProductResponse,
-    ProductSizeCreate,
-    ProductSizeResponse,
-    ProductSizeUpdate,
-    ProductUpdate,
-    ProductVariantCreate,
-    ProductVariantResponse,
-    ProductVariantUpdate,
-    ProductVariantWithSizesResponse,
-)
 from ...config.s3 import public_url
 from sqlalchemy.orm import joinedload
 from collections import defaultdict

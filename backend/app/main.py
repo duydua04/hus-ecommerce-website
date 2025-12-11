@@ -41,6 +41,7 @@ from .controller.common.chat_controller import router as chat_router
 from .controller.buyer.buyer_address_controller import router as buyer_address_router
 from .controller.buyer.buyer_cart_controller import router as buyer_cart_router
 from .controller.buyer.buyer_product_controller import router as buyer_product_router
+from .controller.buyer.buyer_order_controller import router as buyer_order_router
 
 
 
@@ -101,3 +102,4 @@ app.include_router(chat_router)
 # APP INCLUDE BUYER ROUTER
 app.include_router(buyer_product_router)
 app.include_router(buyer_cart_router)
+app.include_router(buyer_order_router)
