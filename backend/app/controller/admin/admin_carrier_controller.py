@@ -1,12 +1,11 @@
-from fastapi import APIRouter, Depends, File, status, UploadFile, Query
-from sqlalchemy.orm import Session
-from ...config.db import get_db
+from typing import List, Optional
+from fastapi import APIRouter, Depends, File, Query, UploadFile, status
+
 from ...middleware.auth import require_admin
-from ...schemas.carrier import *
+from ...schemas.carrier import CarrierCreate, CarrierUpdate, CarrierOut
 from ...services.admin.carrier_management_service import (
-    create_carrier, update_carrier,
-    update_carrier_avatar, list_active_carrier,
-    delete_carrier
+    AdminCarrierService,
+    get_admin_carrier_service
 )
 
 router = APIRouter(
@@ -15,46 +14,58 @@ router = APIRouter(
     dependencies=[Depends(require_admin)]
 )
 
-@router.get("/", response_model=list[CarrierOut])
-def admin_list_active_carriers(q: str | None = Query(None), db: Session = Depends(get_db)):
-    """Router list ra danh sach don vi van chuyen"""
-    return list_active_carrier(db, q)
+
+@router.get("/", response_model=List[CarrierOut])
+async def admin_list_carriers(
+    q: Optional[str] = Query(None, description="Search by name"),
+    limit: int = Query(100, ge=1),
+    offset: int = Query(0, ge=0),
+    service: AdminCarrierService = Depends(get_admin_carrier_service)
+):
+    """
+    Lấy danh sách đơn vị vận chuyển.
+    Admin xem được cả active và inactive.
+    """
+    return await service.list_carrier(q=q, limit=limit, offset=offset)
 
 
 @router.post("/", response_model=CarrierOut, status_code=status.HTTP_201_CREATED)
-async def admin_create_carrier(payload: CarrierCreate, db: Session = Depends(get_db)):
-    """Router them don vi van chuyen moi"""
-    return await create_carrier(db, payload)
-
-
-@router.post("/{carrier_id}/upload-avatar", response_model=CarrierOut)
-async def admin_uploada_avatar_carrier(
-        carrier_id: int,
-        avatar: UploadFile = File(...),
-        db: Session = Depends(get_db)
+async def admin_create_carrier(
+    payload: CarrierCreate,
+    service: AdminCarrierService = Depends(get_admin_carrier_service)
 ):
-    """Router update, them anh cua don vi van chuyen"""
-    return await update_carrier_avatar(db, carrier_id, avatar)
+    """Thêm đơn vị vận chuyển mới"""
+    return await service.create_carrier(payload)
 
 
 @router.patch("/{carrier_id}", response_model=CarrierOut)
-def admin_update_carrier(
-        carrier_id: int,
-        payload: CarrierUpdate,
-        db: Session = Depends(get_db)
+async def admin_update_carrier(
+    carrier_id: int,
+    payload: CarrierUpdate,
+    service: AdminCarrierService = Depends(get_admin_carrier_service)
 ):
-    return update_carrier(db, carrier_id, payload)
+    """Cập nhật thông tin"""
+    return await service.update_carrier(carrier_id, payload)
 
 
 @router.post("/{carrier_id}/upload-avatar", response_model=CarrierOut)
-async def admin_upload_avatar_carrier(
-        carrier_id: int,
-        avatar: UploadFile = File(...),
-        db: Session = Depends(get_db)
+async def admin_upload_carrier_avatar(
+    carrier_id: int,
+    avatar: UploadFile = File(...),
+    service: AdminCarrierService = Depends(get_admin_carrier_service)
 ):
-    return await update_carrier_avatar(db, carrier_id, avatar)
+    """Upload Logo/Avatar cho đơn vị vận chuyển"""
+    return await service.upload_carrier_avatar(carrier_id, avatar)
 
 
 @router.delete("/{carrier_id}")
-def admin_delete_carrier(carrier_id: int, db: Session = Depends(get_db)):
-    return delete_carrier(db, carrier_id)
+async def admin_delete_carrier(
+    carrier_id: int,
+    service: AdminCarrierService = Depends(get_admin_carrier_service)
+):
+    """
+    Xóa đơn vị vận chuyển.
+    - Nếu đã có đơn hàng: Xóa mềm (is_active = False).
+    - Nếu chưa có đơn hàng: Xóa cứng khỏi DB.
+    """
+    return await service.delete_carrier(carrier_id)

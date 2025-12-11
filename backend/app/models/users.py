@@ -35,7 +35,6 @@ class Buyer(Base):
     addresses = relationship("BuyerAddress", back_populates="buyer", cascade="all, delete-orphan")
     cart = relationship("ShoppingCart", back_populates="buyer", uselist=False, cascade="all, delete-orphan")
     orders = relationship("Order", back_populates="buyer")
-    reviews = relationship("Review", back_populates="buyer")
 
 # Model người bán
 class Seller(Base):
@@ -57,5 +56,5 @@ class Seller(Base):
 
     addresses = relationship("SellerAddress", back_populates="seller", cascade="all, delete-orphan")
     products = relationship("Product", back_populates="seller", cascade="all, delete-orphan")
-    replies = relationship("ReviewReply", back_populates="seller")
+
 

@@ -1,16 +1,14 @@
-from __future__ import annotations
-from decimal import Decimal
-from typing import Optional, List
-
+from typing import List, Optional
 from fastapi import APIRouter, Depends, Query, Path, Body, status
-from sqlalchemy.orm import Session
 
-from ...config.db import get_db
 from ...middleware.auth import require_seller
-from ...models.users import Seller
 from ...schemas.common import Page
 from ...schemas.review import ReviewReplyCreate, ReviewReplyResponse
-from ...services.seller import seller_review_service
+
+from ...services.seller.seller_review_service import (
+    SellerReviewService,
+    get_seller_review_service
+)
 
 router = APIRouter(
     prefix="/seller/reviews",
@@ -19,48 +17,57 @@ router = APIRouter(
 
 
 @router.get("", response_model=Page)
-def list_reviews_for_seller(
-    product_name: Optional[str] = Query(None),
-    rating_min: Optional[Decimal] = Query(None, ge=0, le=5),
-    rating_max: Optional[Decimal] = Query(None, ge=0, le=5),
-    delivered_only: bool = Query(True),
-    limit: int = Query(20, ge=1, le=100),
-    offset: int = Query(0, ge=0),
-    db: Session = Depends(get_db),
-    auth = Depends(require_seller),
+async def list_reviews_for_seller(
+        product_name: Optional[str] = Query(None, description="Lọc theo tên sản phẩm"),
+        rating: Optional[int] = Query(None, ge=1, le=5, description="Lọc theo số sao"),
+        page: int = Query(1, ge=1),
+        limit: int = Query(10, ge=1, le=100),
+        seller_info=Depends(require_seller),
+        service: SellerReviewService = Depends(get_seller_review_service)
 ):
+    """
+    Lấy danh sách đánh giá của Shop.
+    """
+    seller_id = seller_info["user"].seller_id
 
-    """Router tra ve danh sach danh gia cac san pham cua seller"""
-    seller: Seller = auth["user"]
-    return seller_review_service.list_reviews_for_seller(
-        db=db,
-        seller=seller,
+    return await service.list_my_reviews(
+        seller_id=seller_id,
         product_name=product_name,
-        rating_min=rating_min,
-        rating_max=rating_max,
-        delivered_only=delivered_only,
-        limit=limit,
-        offset=offset,
+        rating=rating,
+        page=page,
+        limit=limit
     )
 
 
 @router.post("/{review_id}/replies", response_model=ReviewReplyResponse, status_code=status.HTTP_201_CREATED)
-def reply_review(
-    review_id: int = Path(..., ge=1),
-    body: ReviewReplyCreate = Body(...),
-    db: Session = Depends(get_db),
-    auth = Depends(require_seller),
+async def reply_review(
+        review_id: str = Path(..., description="ID của Review (MongoDB ObjectId)"),
+        reply_text: str = Body(..., embed=True),
+        seller_info=Depends(require_seller),
+        service: SellerReviewService = Depends(get_seller_review_service)
 ):
-    """Router tao phan hoi """
-    seller: Seller = auth["user"]
-    payload = ReviewReplyCreate(review_id=review_id, seller_id=seller.seller_id, reply_text=body.reply_text)
-    return seller_review_service.create_reply_for_review(db, payload, seller)
+    """
+    Tạo phản hồi cho đánh giá.
+    """
+    seller_id = seller_info["user"].seller_id
+
+    payload = ReviewReplyCreate(
+        review_id=review_id,
+        reply_text=reply_text
+    )
+
+    return await service.reply_review(
+        seller_id=seller_id,
+        payload=payload
+    )
 
 
-@router.get("/{review_id}/replies", response_model=List[ReviewReplyResponse])
-def list_replies(
-    review_id: int = Path(..., ge=1),
-    db: Session = Depends(get_db),
+@router.get("/{review_id}/replies", response_model=List[ReviewReplyResponse], dependencies=[Depends(require_seller)])
+async def list_replies(
+        review_id: str = Path(...),
+        service: SellerReviewService = Depends(get_seller_review_service)
 ):
-    """Tra ve danh sach phan hoi cho san pham"""
-    return seller_review_service.list_replies(db, review_id)
+    """
+    Xem danh sách phản hồi của một đánh giá.
+    """
+    return await service.get_replies(review_id)

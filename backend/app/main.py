@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 from .config import settings
-
+from .lifespan import lifespan
 
 
 
@@ -13,7 +13,7 @@ from .controller.admin.admin_category_controller import router as admin_category
 from .controller.admin.user_management_controller import router as admin_manage_user_router
 from .controller.admin.admin_discount_controller import router as admin_manage_discount_router
 from .controller.admin.admin_carrier_controller import router as admin_manage_carrier_router
-
+from .controller.admin.admin_notification_controller import router as admin_notify_router
 
 
 
@@ -21,7 +21,7 @@ from .controller.admin.admin_carrier_controller import router as admin_manage_ca
 from .controller.seller.seller_address_controller import router as seller_address_router
 from .controller.seller.seller_product_controller import router as seller_product_router
 from .controller.seller.seller_review_controller import router as seller_review_router
-from .controller.seller.seller_order_controller import router as seller_order_router
+#from .controller.seller.seller_order_controller import router as seller_order_router
 from .controller.seller.seller_profile_controller import router as seller_profile_router
 
 
@@ -30,10 +30,9 @@ from .controller.seller.seller_profile_controller import router as seller_profil
 # IMPORT COMMON CONTROLLER
 from .controller.common.auth_controller import router as auth_router
 from .controller.common.avatar_controller import router as avatar_router
-from .controller.common.public_category_controller import router as public_category_router
 from .controller.common.chat_controller import router as chat_router
-
-
+#from .controller.common.notification_controller import router as notice_router
+from .controller.common.websocket_controller import router as websocket_router
 
 
 
@@ -52,7 +51,10 @@ from .controller.buyer.buyer_address_controller import router as buyer_address_r
 
 
 
-app = FastAPI(title="Ecommerce Website")
+app = FastAPI(
+    title="Ecommerce Website",
+    lifespan=lifespan
+)
 
 app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY)
 
@@ -73,7 +75,7 @@ app.include_router(admin_category_router)
 app.include_router(admin_manage_user_router)
 app.include_router(admin_manage_discount_router)
 app.include_router(admin_manage_carrier_router)
-
+app.include_router(admin_notify_router)
 
 
 
@@ -84,7 +86,7 @@ app.include_router(admin_manage_carrier_router)
 app.include_router(seller_address_router)
 app.include_router(seller_product_router)
 app.include_router(seller_review_router)
-app.include_router(seller_order_router)
+#app.include_router(seller_order_router)
 app.include_router(seller_profile_router)
 
 
@@ -95,9 +97,8 @@ app.include_router(seller_profile_router)
 # APP INCLUDE COMMON ROUTER
 app.include_router(auth_router)
 app.include_router(avatar_router)
-app.include_router(public_category_router)
 app.include_router(chat_router)
-
+app.include_router(websocket_router)
 
 
 
