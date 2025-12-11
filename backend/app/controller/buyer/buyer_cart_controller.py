@@ -5,7 +5,7 @@ from ...config.db import get_db
 from ...services.buyer import buyer_cart_service
 from ...models.catalog import Product, ProductImage, ProductSize, ProductVariant
 from ...services.buyer.buyer_product_service import RatingFilter, paginate_simple, get_buyer_product_detail
-from ...services.buyer.buyer_cart_service import UpdateCartItemRequest
+from ...services.buyer.buyer_cart_service import UpdateCartItemRequest, UpdateVariantSizeRequest
 from pydantic import BaseModel
 from decimal import Decimal
 from sqlalchemy.orm import selectinload
@@ -78,7 +78,7 @@ def buyer_cart_summary(request: CartSummaryRequest,db: Session = Depends(get_db)
 
 
 # ====== UPDATE SỐ LƯỢNG SẢN PHẨM TRONG GIỎ HÀNG ======
-@router.put("/cart/item/{item_id}")
+@router.patch("/cart/item/quantity/{item_id}")
 def update_cart_quantity_item(
     item_id: int,
     request: UpdateCartItemRequest,
@@ -88,3 +88,18 @@ def update_cart_quantity_item(
     buyer_id = buyer["user"].buyer_id
     return buyer_cart_service.buyer_update_quantity_item(buyer_id, item_id, request, db)
 
+# UPDATE VARIANT + SIZE CỦA SẢN PHẨM TRONG GIỎ HÀNG
+@router.patch("/cart/item/variant-size/{item_id}")
+def update_cart_item_variant_size(
+    item_id: int,
+    request: UpdateVariantSizeRequest,
+    buyer: dict = Depends(require_buyer),
+    db: Session = Depends(get_db)
+):
+    buyer_id = buyer["user"].buyer_id
+    return buyer_cart_service.update_buyer_variant_size(
+        buyer_id,
+        item_id,
+        request,
+        db
+    )

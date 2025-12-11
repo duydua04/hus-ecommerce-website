@@ -256,3 +256,117 @@ def buyer_update_quantity_item(buyer_id: int, item_id: int, data: UpdateCartItem
         "item_id": item.shopping_cart_item_id,
         "new_quantity": item.quantity
     }
+
+
+# UPDATE VARIANT + SIZE CỦA SẢN PHẨM TRONG GIỎ HÀNG
+class UpdateVariantSizeRequest(BaseModel):
+    new_variant_id: Optional[int] = None
+    new_size_id: Optional[int] = None
+
+def update_buyer_variant_size(
+    buyer_id: int,
+    item_id: int,
+    req: UpdateVariantSizeRequest,
+    db: Session
+):
+    # 1) Không có dữ liệu để cập nhật
+    if not req.new_variant_id and not req.new_size_id:
+        raise HTTPException(400, "Không có dữ liệu để cập nhật")
+
+    # 2) Lấy item đảm bảo đúng buyer
+    item = (
+        db.query(ShoppingCartItem)
+        .join(ShoppingCart)
+        .filter(
+            ShoppingCartItem.shopping_cart_item_id == item_id,
+            ShoppingCart.buyer_id == buyer_id
+        )
+        .first()
+    )
+
+    if not item:
+        raise HTTPException(404, "Item không tồn tại hoặc không thuộc buyer")
+
+    product_id = item.product_id
+
+    # 3) Giữ giá trị cũ nếu không truyền mới
+    variant_id = req.new_variant_id or item.variant_id
+    size_id = req.new_size_id or item.size_id
+
+    # 4) Validate variant
+    variant = (
+        db.query(ProductVariant)
+        .filter(
+            ProductVariant.variant_id == variant_id,
+            ProductVariant.product_id == product_id
+        )
+        .first()
+    )
+    if not variant:
+        raise HTTPException(400, "Variant không hợp lệ cho sản phẩm này")
+
+    # 5) Validate size
+    size = (
+        db.query(ProductSize)
+        .filter(
+            ProductSize.size_id == size_id,
+            ProductSize.variant_id == variant_id
+        )
+        .first()
+    )
+
+    if not size:
+        if req.new_variant_id and not req.new_size_id:
+            raise HTTPException(
+                400,
+                "Size hiện tại không thuộc variant mới — vui lòng chọn size mới"
+            )
+        raise HTTPException(400, "Size không hợp lệ cho variant này")
+
+    # 6) Check tồn kho
+    if not size.in_stock or size.available_units < item.quantity:
+        raise HTTPException(400, "Không đủ hàng trong kho")
+
+    # 7) Check trùng item trong cart để merge
+    duplicate_item = (
+        db.query(ShoppingCartItem)
+        .filter(
+            ShoppingCartItem.shopping_cart_id == item.shopping_cart_id,
+            ShoppingCartItem.product_id == product_id,
+            ShoppingCartItem.variant_id == variant_id,
+            ShoppingCartItem.size_id == size_id,
+            ShoppingCartItem.shopping_cart_item_id != item_id
+        )
+        .first()
+    )
+
+    if duplicate_item:
+        merged_qty = duplicate_item.quantity + item.quantity
+
+        if merged_qty > size.available_units:
+            raise HTTPException(400, "Gộp số lượng vượt tồn kho")
+
+        duplicate_item.quantity = merged_qty
+        db.delete(item)
+        db.commit()
+        db.refresh(duplicate_item)
+
+        return {
+            "message": "Item merged",
+            "item_id": duplicate_item.shopping_cart_item_id,
+            "new_quantity": merged_qty
+        }
+
+    # 8) Không trùng → update trực tiếp
+    item.variant_id = variant_id
+    item.size_id = size_id
+
+    db.commit()
+    db.refresh(item)
+
+    return {
+        "message": "Item updated",
+        "item_id": item.shopping_cart_item_id,
+        "variant_id": variant_id,
+        "size_id": size_id
+    }
