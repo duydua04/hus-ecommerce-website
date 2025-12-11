@@ -60,3 +60,23 @@
   padding: 24px;
   border-top: 1px solid var(--border-color);
 }
+
+/* ELEMENT: toolbar__filter - Nút lọc */
+.toolbar__filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ELEMENT: toolbar__alert - Thông báo */
+.toolbar__alert {
+  margin: 0 24px;
+  margin-top: 16px;
+}
+
+/* ELEMENT: toolbar__loading - Loading state */
+.toolbar__loading {
+  padding: 40px 24px;
+  text-align: center;
+  color: var(--text-secondary);
+}

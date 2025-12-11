@@ -1,44 +1,45 @@
 import axios from "axios";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
-const CARRIERS_ENDPOINT = `${API_URL}/admin/carriers`; // Đúng cú pháp
+const CARRIERS_ENDPOINT = `${API_URL}/admin/carriers`;
 
 const carrierService = {
-  /**
-   * Lấy danh sách các đơn vị vận chuyển hoạt động
-   */
   listCarriers: async (q = null) => {
     try {
-      const response = await axios.get(`${CARRIERS_ENDPOINT}/`, {
-        params: { q },
+      const params = q ? { q } : {};
+
+      const response = await axios.get(CARRIERS_ENDPOINT, {
+        params,
         withCredentials: true,
       });
+
       return response.data;
     } catch (error) {
-      throw error.response?.data || error;
+      if (error.response) {
+        throw {
+          detail: error.response.data?.detail || "Lỗi từ server",
+          status: error.response.status,
+        };
+      } else if (error.request) {
+        throw { detail: "Không thể kết nối đến server" };
+      } else {
+        throw { detail: error.message };
+      }
     }
   },
 
-  /**
-   * Tạo một đơn vị vận chuyển mới
-   */
   createCarrier: async (data) => {
     try {
-      const response = await axios.post(`${CARRIERS_ENDPOINT}/`, data, {
+      const response = await axios.post(CARRIERS_ENDPOINT, data, {
         withCredentials: true,
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
       });
       return response.data;
     } catch (error) {
-      throw error.response?.data || error;
+      throw error.response?.data || { detail: error.message };
     }
   },
 
-  /**
-   * Cập nhật thông tin đơn vị vận chuyển
-   */
   updateCarrier: async (carrierId, data) => {
     try {
       const response = await axios.patch(
@@ -46,20 +47,15 @@ const carrierService = {
         data,
         {
           withCredentials: true,
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
         }
       );
       return response.data;
     } catch (error) {
-      throw error.response?.data || error;
+      throw error.response?.data || { detail: error.message };
     }
   },
 
-  /**
-   * Upload avatar
-   */
   uploadAvatar: async (carrierId, file) => {
     try {
       const formData = new FormData();
@@ -70,20 +66,15 @@ const carrierService = {
         formData,
         {
           withCredentials: true,
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
+          headers: { "Content-Type": "multipart/form-data" },
         }
       );
       return response.data;
     } catch (error) {
-      throw error.response?.data || error;
+      throw error.response?.data || { detail: error.message };
     }
   },
 
-  /**
-   * Xóa carrier
-   */
   deleteCarrier: async (carrierId) => {
     try {
       const response = await axios.delete(`${CARRIERS_ENDPOINT}/${carrierId}`, {
@@ -91,13 +82,10 @@ const carrierService = {
       });
       return response.data;
     } catch (error) {
-      throw error.response?.data || error;
+      throw error.response?.data || { detail: error.message };
     }
   },
 
-  /**
-   * Lấy chi tiết carrier
-   */
   getCarrierDetail: async (carrierId) => {
     try {
       const response = await axios.get(`${CARRIERS_ENDPOINT}/${carrierId}`, {
@@ -105,7 +93,7 @@ const carrierService = {
       });
       return response.data;
     } catch (error) {
-      throw error.response?.data || error;
+      throw error.response?.data || { detail: error.message };
     }
   },
 };

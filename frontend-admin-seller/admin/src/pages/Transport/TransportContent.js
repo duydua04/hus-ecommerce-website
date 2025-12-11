@@ -7,12 +7,13 @@ import Button from "../../components/common/Button/Button";
 import SearchBox from "../../components/common/SearchBox/SearchBox";
 import CarrierModal from "./AddCarrier/AddCarrier";
 import AvatarUploadModal from "../../components/common/AvatarUpload/AvatarUpload";
-import { useCarrier } from "../../hooks/useCarrier";
+import useCarrier from "../../hooks/useCarrier";
 import "./Transport.scss";
 
 export default function TransportContent() {
   const {
     carriers,
+    total,
     loading,
     error,
     fetchCarriers,
@@ -33,20 +34,25 @@ export default function TransportContent() {
 
   const itemsPerPage = 10;
 
+  // Fetch initial data
   useEffect(() => {
-    fetchCarriers();
-  }, [fetchCarriers]);
+    fetchCarriers({
+      searchQuery: "",
+      limit: itemsPerPage,
+      offset: 0,
+    });
+  }, []);
 
-  // Filter carriers by search
-  const filteredCarriers = carriers.filter((c) =>
-    c.carrier_name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Fetch when search or page changes
+  useEffect(() => {
+    fetchCarriers({
+      searchQuery,
+      limit: itemsPerPage,
+      offset: (currentPage - 1) * itemsPerPage,
+    });
+  }, [searchQuery, currentPage]);
 
-  // Pagination
-  const totalPages = Math.ceil(filteredCarriers.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentCarriers = filteredCarriers.slice(startIndex, endIndex);
+  const totalPages = Math.ceil(total / itemsPerPage);
 
   // Toolbar actions
   const handleAddCarrier = () => {
@@ -74,8 +80,15 @@ export default function TransportContent() {
         setSuccessMessage("Thêm đơn vị vận chuyển thành công");
       }
       setIsModalOpen(false);
+
       setTimeout(() => setSuccessMessage(""), 3000);
-      fetchCarriers();
+
+      // Reload data
+      fetchCarriers({
+        searchQuery,
+        limit: itemsPerPage,
+        offset: (currentPage - 1) * itemsPerPage,
+      });
     } catch (err) {
       console.error("Error submit form:", err);
     }
@@ -86,8 +99,14 @@ export default function TransportContent() {
       try {
         await deleteCarrier(carrierId);
         setSuccessMessage("Xóa đơn vị vận chuyển thành công");
+
         setTimeout(() => setSuccessMessage(""), 3000);
-        fetchCarriers();
+
+        fetchCarriers({
+          searchQuery,
+          limit: itemsPerPage,
+          offset: (currentPage - 1) * itemsPerPage,
+        });
       } catch (err) {
         console.error("Error delete carrier:", err);
       }
@@ -98,8 +117,14 @@ export default function TransportContent() {
     try {
       await uploadCarrierAvatar(carrierId, file);
       setSuccessMessage("Tải lên avatar thành công");
+
       setTimeout(() => setSuccessMessage(""), 3000);
-      fetchCarriers();
+
+      fetchCarriers({
+        searchQuery,
+        limit: itemsPerPage,
+        offset: (currentPage - 1) * itemsPerPage,
+      });
     } catch (err) {
       console.error("Error upload avatar:", err);
     }
@@ -172,52 +197,58 @@ export default function TransportContent() {
           />
         </div>
 
+        {/* Actions */}
         <div className="toolbar__actions">
-          <SearchBox
-            placeholder="Tìm kiếm đơn vị vận chuyển..."
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setCurrentPage(1);
-            }}
-          />
-          <button className="toolbar__btn-filter btn btn--secondary">
+          <div className="toolbar__search">
+            <SearchBox
+              placeholder="Tìm kiếm đơn vị vận chuyển..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1);
+              }}
+            />
+          </div>
+          <button className="toolbar__filter btn btn--secondary">
             <i className="bx bx-filter btn__icon"></i>
             <span className="btn__text">Lọc</span>
           </button>
         </div>
+
+        {/* Alerts */}
+        {error && (
+          <div className="toolbar__alert alert alert-error">
+            <span>{error}</span>
+            <button onClick={clearError} className="alert-close">
+              <X size={18} />
+            </button>
+          </div>
+        )}
+        {successMessage && (
+          <div className="toolbar__alert alert alert-success">
+            <Check size={18} />
+            <span>{successMessage}</span>
+          </div>
+        )}
+
+        {loading && <div className="toolbar__loading">Đang tải...</div>}
+
+        {/* Table */}
+        <div className="toolbar__table">
+          <Table columns={columns} data={carriers} actions={actions} />
+        </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="toolbar__pagination">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
+          </div>
+        )}
       </div>
-
-      {/* Alerts */}
-      {error && (
-        <div className="alert alert-error">
-          <span>{error}</span>
-          <button onClick={clearError} className="alert-close">
-            <X size={18} />
-          </button>
-        </div>
-      )}
-      {successMessage && (
-        <div className="alert alert-success">
-          <Check size={18} />
-          <span>{successMessage}</span>
-        </div>
-      )}
-
-      {/* Loading */}
-      {loading && <div className="loading">Đang tải...</div>}
-
-      {/* Table */}
-      <Table columns={columns} data={currentCarriers} actions={actions} />
-
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={setCurrentPage}
-        />
-      )}
 
       {/* Modals */}
       <CarrierModal
@@ -226,6 +257,7 @@ export default function TransportContent() {
         onSubmit={handleFormSubmit}
         carrier={selectedCarrier}
       />
+
       <AvatarUploadModal
         isOpen={isAvatarModalOpen}
         onClose={() => setIsAvatarModalOpen(false)}
