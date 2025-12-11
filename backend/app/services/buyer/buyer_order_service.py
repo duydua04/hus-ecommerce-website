@@ -10,7 +10,7 @@ from datetime import datetime, date
 from ...config.s3 import public_url
 from sqlalchemy.orm import joinedload
 from collections import defaultdict
-from ...models.catalog import Discount
+from ...models.catalog import Discount, Carrier
 
 # =============== BƯỚC ÁP MÃ GIẢM GIÁ ===========================
 class ApplyDiscountRequest(BaseModel):
@@ -58,4 +58,22 @@ def apply_discount_code(db: Session, code: str, order_total: float):
         "percent": discount.discount_percent,
         "discount_amount": float(discount_amount),
         "final_total": float(final_total)
+    }
+
+# =============== BƯỚC CHỌN ĐƠN VỊ VẬN CHUYỂN VÀ TÍNH TỔNG TIỀN ==============
+def calculate_total_with_shipping(db: Session, carrier_id: int, total_weight: float, subtotal: float, discount_amount: float):
+    carrier = db.query(Carrier).get(carrier_id)
+    if not carrier or not carrier.is_active:
+        raise HTTPException(status_code=400, detail="DVVC không hợp lệ")
+    
+    shipping_fee = float(carrier.base_price) + float(carrier.price_per_kg) * total_weight
+    total_payment = subtotal - discount_amount + shipping_fee
+
+    return {
+        "carrier_id": carrier.carrier_id,
+        "carrier_name": carrier.carrier_name,
+        "shipping_fee": shipping_fee,
+        "subtotal": subtotal,
+        "discount_amount": discount_amount,
+        "total_payment": total_payment
     }
