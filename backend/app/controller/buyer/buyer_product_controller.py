@@ -21,7 +21,7 @@ class ProductSummary(BaseModel):
         orm_mode = True   # để có thể đọc từ SQLAlchemy model
 
 router = APIRouter(
-    prefix="/buyer/products",
+    prefix="/buyer/product",
     tags=["buyer-products"]
 )
 
