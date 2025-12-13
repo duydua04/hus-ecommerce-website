@@ -70,7 +70,7 @@ class AdminCarrierService(BaseCarrierService):
         # 4. Map to Response
         response_data = [self._to_response(c) for c in carriers]
 
-        json_data = json.dumps([item.model_dump() for item in response_data])
+        json_data = json.dumps([item.model_dump(mode="json") for item in response_data])
         await self.redis.set(cache_key, json_data, ex=self.TTL)
 
         return response_data
