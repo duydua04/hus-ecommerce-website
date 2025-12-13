@@ -7,6 +7,7 @@ const useCarrier = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // Fetch danh sách carriers với search và pagination
   const fetchCarriers = useCallback(
     async ({ searchQuery = "", limit = 10, offset = 0 } = {}) => {
       setLoading(true);
@@ -19,19 +20,26 @@ const useCarrier = () => {
           offset,
         });
 
-        // Backend trả về object → không dùng Array.isArray
-        if (res && Array.isArray(res.data)) {
+        // Backend trả về array trực tiếp
+        if (Array.isArray(res)) {
+          setCarriers(res);
+          setTotal(res.length);
+        }
+        // Backend trả về object { data: [], total: number }
+        else if (res?.data && Array.isArray(res.data)) {
           setCarriers(res.data);
           setTotal(res.total ?? 0);
-        } else {
+        }
+        // Format không xác định
+        else {
           console.warn("Unexpected response format:", res);
           setCarriers([]);
           setTotal(0);
         }
       } catch (err) {
-        const errorMsg =
-          err.detail || err.message || "Lỗi khi tải danh sách vận chuyển";
-        setError(errorMsg);
+        setError(
+          err.detail || err.message || "Lỗi khi tải danh sách vận chuyển"
+        );
         setCarriers([]);
       } finally {
         setLoading(false);
@@ -40,19 +48,17 @@ const useCarrier = () => {
     []
   );
 
-  const createCarrier = useCallback(
-    async (carrierData) => {
-      setLoading(true);
-      try {
-        await carrierService.createCarrier(carrierData);
-        await fetchCarriers(); // refresh
-      } finally {
-        setLoading(false);
-      }
-    },
-    [fetchCarriers]
-  );
+  // Tạo carrier mới
+  const createCarrier = useCallback(async (carrierData) => {
+    setLoading(true);
+    try {
+      await carrierService.createCarrier(carrierData);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
+  // Cập nhật carrier và tự động update state
   const updateCarrier = useCallback(async (carrierId, carrierData) => {
     setLoading(true);
     try {
@@ -60,17 +66,16 @@ const useCarrier = () => {
         carrierId,
         carrierData
       );
-
       setCarriers((prev) =>
         prev.map((c) => (c.carrier_id === carrierId ? updated : c))
       );
-
       return updated;
     } finally {
       setLoading(false);
     }
   }, []);
 
+  // Xóa carrier và tự động update state
   const deleteCarrier = useCallback(async (carrierId) => {
     setLoading(true);
     try {
@@ -81,6 +86,7 @@ const useCarrier = () => {
     }
   }, []);
 
+  // Upload avatar và tự động update state
   const uploadCarrierAvatar = useCallback(async (carrierId, file) => {
     setLoading(true);
     try {

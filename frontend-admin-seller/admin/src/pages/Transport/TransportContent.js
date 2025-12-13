@@ -10,6 +10,9 @@ import AvatarUploadModal from "../../components/common/AvatarUpload/AvatarUpload
 import useCarrier from "../../hooks/useCarrier";
 import "./Transport.scss";
 
+// Avatar mặc định
+const DEFAULT_AVATAR = "/assets/images/default-avatar.png";
+
 export default function TransportContent() {
   const {
     carriers,
@@ -135,25 +138,46 @@ export default function TransportContent() {
     {
       key: "carrier_avt_url",
       label: "Avatar",
-      render: (value) =>
-        value ? <img src={value} alt="" className="table__avatar" /> : "N/A",
+      className: "table__cell--avatar",
+      render: (value) => (
+        <img
+          src={value || DEFAULT_AVATAR} // Dùng avatar mặc định nếu không có
+          alt="Carrier avatar"
+          className="table__img"
+          onError={(e) => {
+            // Nếu ảnh lỗi thì dùng avatar mặc định
+            e.target.src = DEFAULT_AVATAR;
+          }}
+        />
+      ),
     },
-    { key: "carrier_name", label: "Tên đơn vị" },
+    {
+      key: "carrier_name",
+      label: "Tên đơn vị",
+      className: "table__cell--name",
+    },
     {
       key: "base_price",
       label: "Giá cơ bản",
+      className: "table__cell--price",
       render: (v) => `${Number(v)?.toLocaleString("vi-VN")} ₫`,
     },
     {
       key: "price_per_kg",
       label: "Giá/kg",
+      className: "table__cell--price",
       render: (v) => `${Number(v)?.toLocaleString("vi-VN")} ₫`,
     },
     {
       key: "is_active",
       label: "Trạng thái",
+      className: "table__cell--status",
       render: (v) => (
-        <span className={`status-badge ${v ? "active" : "inactive"}`}>
+        <span
+          className={`status-badge ${
+            v ? "status-badge--active" : "status-badge--inactive"
+          }`}
+        >
           {v ? "Hoạt động" : "Tạm dừng"}
         </span>
       ),
@@ -162,11 +186,17 @@ export default function TransportContent() {
 
   // Table actions
   const actions = [
-    { label: "Sửa", onClick: handleEditCarrier, className: "btn-edit" },
+    {
+      label: "Sửa",
+      icon: "bx bx-edit-alt",
+      onClick: handleEditCarrier,
+      className: "action-btn action-btn--edit",
+    },
     {
       label: "Xóa",
+      icon: "bx bx-trash", //
       onClick: (c) => handleDeleteCarrier(c.carrier_id),
-      className: "btn-delete",
+      className: "action-btn action-btn--delete",
     },
   ];
 
