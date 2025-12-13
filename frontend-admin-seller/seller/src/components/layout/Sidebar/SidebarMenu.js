@@ -12,37 +12,37 @@ const SidebarMenu = () => {
       id: "dashboard",
       icon: "bx bx-grid-alt",
       text: "Dashboard",
-      href: "/dashboard",
+      href: "/seller/dashboard",
     },
     {
       id: "products",
       icon: "bx bx-box",
       text: "Sản phẩm",
-      href: "/products",
+      href: "/seller/products",
     },
     {
       id: "orders",
       icon: "bx bx-shopping-bag",
       text: "Đơn hàng",
-      href: "/orders",
+      href: "/seller/orders",
     },
     {
       id: "locations",
       icon: "bx bx-map",
       text: "Địa chỉ",
-      href: "/locations",
+      href: "/seller/locations",
     },
     {
       id: "profile",
       icon: "bx bx-user-circle",
       text: "Hồ sơ",
-      href: "/profile",
+      href: "/seller/profile",
     },
     {
       id: "reviews",
       icon: "bx bx-star",
       text: "Đánh giá",
-      href: "/reviews",
+      href: "/seller/reviews",
     },
   ];
 

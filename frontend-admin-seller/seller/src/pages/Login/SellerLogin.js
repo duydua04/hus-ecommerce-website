@@ -64,7 +64,8 @@ function SellerLogin() {
         localStorage.setItem("userRole", response.data.scope);
       }
 
-      navigate("/seller/dashboard", { replace: true });
+      // Chuyển đến trang products sau khi đăng nhập thành công
+      navigate("/seller/products", { replace: true });
     } catch (err) {
       const status = err.response?.status;
       const detail = err.response?.data?.detail;
@@ -88,10 +89,9 @@ function SellerLogin() {
   };
 
   const handleGoogleLogin = () => {
-    const nextUrl = "/seller/dashboard";
-    window.location.href = `${API_URL}/auth/google/login?role=seller&next=${encodeURIComponent(
-      nextUrl
-    )}`;
+    // Backend endpoint: /auth/google/login/seller
+    // Không cần truyền role vì đã có trong URL
+    window.location.href = `${API_URL}/auth/google/login/seller`;
   };
 
   const handleForgotPassword = () => {
@@ -107,12 +107,12 @@ function SellerLogin() {
       <div className="seller-login-container">
         <div className="login-banner">
           <i className="bx bxs-store banner-icon"></i>
-          <h1>Chào mừng đến với Seller Portal!</h1>
+          <h1>Chào mừng đến với trang của Seller!</h1>
           <p>Quản lý cửa hàng và sản phẩm của bạn</p>
         </div>
 
         <div className="login-form-section">
-          <h2 className="login-title">Đăng nhập Seller</h2>
+          <h2 className="login-title">Đăng nhập</h2>
           <p className="login-subtitle">Vui lòng nhập thông tin để tiếp tục</p>
 
           {errorMessage && (
@@ -223,7 +223,7 @@ function SellerLogin() {
             >
               Quên mật khẩu?
             </button>
-            <span className="divider-dot">•</span>
+            <span className="divider-dot"> </span>
             <button type="button" className="link-btn" onClick={handleRegister}>
               Đăng ký tài khoản mới
             </button>

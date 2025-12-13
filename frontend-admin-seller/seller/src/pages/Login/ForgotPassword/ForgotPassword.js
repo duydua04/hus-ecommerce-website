@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "../../utils/axiosConfig";
+import axios from "../../../utils/axiosConfig";
 import "./ForgotPassword.scss";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
@@ -23,6 +23,28 @@ function ForgotPassword() {
 
   const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
+  // Helper function to extract error message
+  const getErrorMessage = (err) => {
+    const detail = err.response?.data?.detail;
+
+    // Nếu detail là string, trả về trực tiếp
+    if (typeof detail === "string") {
+      return detail;
+    }
+
+    // Nếu detail là array (validation errors)
+    if (Array.isArray(detail)) {
+      return detail.map((e) => e.msg || JSON.stringify(e)).join(", ");
+    }
+
+    // Nếu detail là object
+    if (typeof detail === "object" && detail !== null) {
+      return detail.msg || detail.message || JSON.stringify(detail);
+    }
+
+    return null;
+  };
+
   // Step 1: Request OTP
   const handleRequestOTP = async (e) => {
     e?.preventDefault();
@@ -41,27 +63,32 @@ function ForgotPassword() {
     setSuccessMessage("");
 
     try {
+      // Backend nhận qua Pydantic model ForgotPasswordRequest
       const response = await axios.post(
         `${API_URL}/auth/forgot-password`,
-        null,
         {
-          params: { email: email.trim(), role: "seller" },
-        }
+          email: email.trim(),
+          role: "seller",
+        },
+        { withCredentials: true } // ← QUAN TRỌNG: Để nhận cookie
       );
 
-      setResetToken(response.data.reset_token);
+      // Backend set reset_token vào cookie, không cần lưu vào state
+      // setResetToken() không cần nữa vì backend quản lý qua cookie
       setSuccessMessage("Mã OTP đã được gửi đến email của bạn!");
       setStep(2);
     } catch (err) {
       const status = err.response?.status;
-      const detail = err.response?.data?.detail;
+      const errorMsg = getErrorMessage(err);
 
       if (status === 404) {
         setErrorMessage("Email không tồn tại trong hệ thống");
       } else if (status === 429) {
         setErrorMessage("Quá nhiều yêu cầu. Vui lòng thử lại sau");
+      } else if (errorMsg) {
+        setErrorMessage(errorMsg);
       } else if (err.response) {
-        setErrorMessage(detail || `Lỗi ${status}: Không thể gửi OTP`);
+        setErrorMessage(`Lỗi ${status}: Không thể gửi OTP`);
       } else if (err.request) {
         setErrorMessage("Không thể kết nối server. Vui lòng kiểm tra mạng");
       } else {
@@ -90,22 +117,29 @@ function ForgotPassword() {
     setSuccessMessage("");
 
     try {
-      const response = await axios.post(`${API_URL}/auth/verify-otp`, {
-        otp: otp.trim(),
-        reset_token: resetToken,
-      });
+      const response = await axios.post(
+        `${API_URL}/auth/verify-otp`,
+        {
+          otp: otp.trim(),
+          reset_token: resetToken, // Backend sẽ bỏ qua field này, lấy từ cookie
+        },
+        { withCredentials: true } // ← QUAN TRỌNG: Gửi cookie
+      );
 
-      setPermissionToken(response.data.permission_token);
+      // Backend cũng set permission_token vào cookie
+      setPermissionToken(response.data.permission_token || "");
       setSuccessMessage("Xác thực thành công! Vui lòng đặt mật khẩu mới");
       setStep(3);
     } catch (err) {
       const status = err.response?.status;
-      const detail = err.response?.data?.detail;
+      const errorMsg = getErrorMessage(err);
 
       if (status === 400) {
         setErrorMessage("Mã OTP không đúng hoặc đã hết hạn");
+      } else if (errorMsg) {
+        setErrorMessage(errorMsg);
       } else if (err.response) {
-        setErrorMessage(detail || `Lỗi ${status}: Xác thực thất bại`);
+        setErrorMessage(`Lỗi ${status}: Xác thực thất bại`);
       } else if (err.request) {
         setErrorMessage("Không thể kết nối server. Vui lòng kiểm tra mạng");
       } else {
@@ -138,10 +172,15 @@ function ForgotPassword() {
     setSuccessMessage("");
 
     try {
-      await axios.post(`${API_URL}/auth/reset-password`, {
-        new_password: newPassword,
-        permission_token: permissionToken,
-      });
+      await axios.post(
+        `${API_URL}/auth/reset-password`,
+        {
+          new_password: newPassword,
+          confirm_password: confirmPassword,
+          permission_token: permissionToken, // Backend sẽ bỏ qua, lấy từ cookie
+        },
+        { withCredentials: true } // ← QUAN TRỌNG: Gửi cookie
+      );
 
       setSuccessMessage("Đặt lại mật khẩu thành công!");
 
@@ -151,12 +190,14 @@ function ForgotPassword() {
       }, 2000);
     } catch (err) {
       const status = err.response?.status;
-      const detail = err.response?.data?.detail;
+      const errorMsg = getErrorMessage(err);
 
       if (status === 400) {
         setErrorMessage("Phiên làm việc đã hết hạn. Vui lòng thử lại");
+      } else if (errorMsg) {
+        setErrorMessage(errorMsg);
       } else if (err.response) {
-        setErrorMessage(detail || `Lỗi ${status}: Không thể đặt lại mật khẩu`);
+        setErrorMessage(`Lỗi ${status}: Không thể đặt lại mật khẩu`);
       } else if (err.request) {
         setErrorMessage("Không thể kết nối server. Vui lòng kiểm tra mạng");
       } else {
