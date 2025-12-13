@@ -39,6 +39,31 @@
   align-items: center;
 }
 
+.table__cell--empty {
+  text-align: center;
+  padding: 80px 20px;
+  color: var(--text-secondary);
+  font-size: 15px;
+  background: var(--bg-primary);
+  position: relative;
+
+  &::before {
+    content: "📭";
+    display: block;
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.6;
+  }
+
+  &::after {
+    content: "Chưa có dữ liệu để hiển thị";
+    display: block;
+    margin-top: 8px;
+    font-size: 15px;
+    color: var(--text-tertiary);
+  }
+}
+
 .table__img {
   width: 56px;
   height: 56px;
