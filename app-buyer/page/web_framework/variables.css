@@ -118,6 +118,13 @@ body {
     padding-top: 80px;
 }
 
+.hr {
+    border: none;
+    height: 1px;
+    background-color: var(--neutral-200);
+    margin: 16px 0;
+}
+
 @media (max-width: 640px) {
     html, body {
         font-size: 16px;
@@ -145,6 +152,17 @@ body {
     padding: 20px;
     border-radius: var(--border-radius-base);
     z-index: 1000;
+}
+
+.header::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 20px;
+    width: 100vw;
+    height: 1px;
+    background-color: var(--neutral-300);
+    transform: translateX(-50%);
 }
 
 .header__left {

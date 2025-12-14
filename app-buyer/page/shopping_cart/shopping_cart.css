@@ -45,9 +45,9 @@
 .toolbar {
     background: white;
     border-radius: 8px;
-    border: 1px solid var(--neutral-300);
+    border: 1px solid var(--neutral-200);
     overflow: hidden;
-    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
     margin-bottom: 10px;
 }
 
@@ -56,7 +56,7 @@ toolbar__header {
     justify-content: space-between;
     align-items: center;
     padding: 24px;
-    border-bottom: 1px solid var(--neutral-300);
+    border-bottom: 1px solid var(--neutral-200);
     gap: 20px;
     flex-wrap: wrap;
 }
@@ -69,13 +69,13 @@ toolbar__header {
     font-size: 18px;
     font-weight: 600;
     margin: 20px;
-    color: black;
+    color: var(--neutral-900);
     margin-bottom: 4px;
 }
 
 .toolbar__subtitle {
     font-size: 14px;
-    color: var(--neutral-500);
+    color: var(--neutral-600);
     margin: 10px 20px;
 }
 
@@ -90,7 +90,7 @@ toolbar__header {
     justify-content: space-between;
     align-items: center;
     padding: 20px 24px;
-    border-bottom: 1px solid var(--neutral-300);
+    border-bottom: 1px solid var(--neutral-200);
     gap: 16px;
     flex-wrap: wrap;
 }
@@ -105,7 +105,7 @@ toolbar__header {
 .toolbar__search-input {
     width: 100%;
     padding: 10px 14px 10px 40px;
-    border: 1px solid var(--neutral-300);
+    border: 1px solid var(--neutral-200);
     border-radius: 8px;
     font-size: 14px;
     outline: none;
@@ -121,13 +121,13 @@ toolbar__header {
     left: 12px;
     top: 50%;
     transform: translateY(-50%);
-    color: var(neutral-300);
+    color: var(--neutral-400);
 }
 
 .toolbar__filter-btn {
     padding: 10px 16px;
     background-color: white;
-    border: 1px solid var(--neutral-300);
+    border: 1px solid var(--neutral-200);
     border-radius: 8px;
     cursor: pointer;
     font-weight: 500;
@@ -135,16 +135,19 @@ toolbar__header {
     display: flex;
     align-items: center;
     gap: 8px;
+    color: var(--neutral-700);
 }
 
 .toolbar__filter-btn:hover {
-    background-color: var(--neutral-100);
+    background-color: var(--neutral-50);
+    border-color: var(--blue-500);
+    color: var(--blue-600);
 }
 
 /* Table Header */
 .toolbar__table-header {
-    background-color: var(--neutral-100);
-    border-bottom: 2px solid var(--neutral-300);
+    background-color: var(--neutral-50);
+    border-bottom: 1px solid var(--neutral-200);
 }
 
 .toolbar__header-row {
@@ -159,8 +162,8 @@ toolbar__header {
 
 .toolbar__header-cell {
     font-size: 0.75rem;
-    font-weight: 700;
-    color: var(--neutral-900);
+    font-weight: 600;
+    color: var(--neutral-600);
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -182,17 +185,17 @@ toolbar__header {
   margin: 30px;
   padding-top: 20px;
   margin-top: 10px;
-  border-top: 1px solid var(--neutral-300);
+  border-top: 1px solid var(--neutral-200);
 }
 
 .pagination__btn {
   min-width: 38px;
   height: 38px;
   padding: 0 12px;
-  border: 1px solid var(--neutral-300);
+  border: 1px solid var(--neutral-200);
   border-radius: 6px;
   background: white;
-  color: var(--neutral-300);
+  color: var(--neutral-600);
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
@@ -203,9 +206,9 @@ toolbar__header {
 }
 
 .pagination__btn:hover {
-  border-color: var(--blue-600);
+  border-color: var(--blue-500);
   color: var(--blue-600);
-  background: var(--blue-200);
+  background: var(--blue-50);
 }
 
 /* Nút trang hiện tại */
@@ -220,13 +223,13 @@ toolbar__header {
 }
 
 .pagination__dots {
-  color: black;
+  color: var(--neutral-600);
   font-size: 14px;
 }
 
 //Seller của sản phẩm
 .seller-group {
-    background-color: var(--neutral-100);
+    background-color: var(--neutral-50);
     border: 1px solid var(--neutral-200);
     padding: 20px;
 }
@@ -241,21 +244,30 @@ toolbar__header {
     align-items: center;
     gap: 12px;
     padding: 12px 24px;
-    background-color: var(--neutral-100);
+    background-color: white;
     border-bottom: 1px solid var(--neutral-200);
+    border-radius: 8px;
+    margin-bottom: 12px;
 }
 
 .seller-group__avatar {
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     object-fit: cover;
     border: 2px solid var(--neutral-200);
     display: flex;
+    overflow: hidden;
     align-items: center;
     justify-content: center;
-    background-color: var(--blue-300);
+    background-color: white;
     font-size: 1.2rem;
+}
+
+.seller-group__avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .seller-group__info {
@@ -273,7 +285,7 @@ toolbar__header {
 .seller-group__name {
     font-size: 0.85rem;
     font-weight: 600;
-    color: var(--blue-900);
+    color: var(--neutral-900);
 }
 
 .seller-group__rating {
@@ -290,11 +302,11 @@ toolbar__header {
 
 .seller-group__score {
     font-weight: 600;
-    color: var(--neutral-900);
+    color: var(--neutral-700);
 }
 
 .seller-group__reviews {
-    color: var(--neutral-600);
+    color: var(--neutral-500);
 }
 
 .seller-group__actions {
@@ -308,7 +320,7 @@ toolbar__header {
 .seller-group__remove {
     width: 32px;
     height: 32px;
-    border: 2px solid var(--neutral-300);
+    border: 1px solid var(--neutral-200);
     background-color: white;
     border-radius: 6px;
     cursor: pointer;
@@ -317,10 +329,11 @@ toolbar__header {
     justify-content: center;
     transition: all 0.3s;
     position: relative;
+    color: var(--neutral-400);
 }
 
 .seller-group__checkbox {
-    border-color: var(--neutral-400);
+    border-color: var(--neutral-200);
 }
 
 .seller-group__checkbox-icon {
@@ -330,22 +343,23 @@ toolbar__header {
 }
 
 .seller-group__checkbox:hover {
-    background-color: var(--blue-200);
-    border-color: var(--blue-600);
+    background-color: var(--blue-50);
+    border-color: var(--blue-500);
+    color: var(--blue-600);
 }
 
 .seller-group__checkbox.selected {
-    background-color: var(--blue-200);
+    background-color: var(--blue-600);
     border-color: var(--blue-600);
 }
 
 .seller-group__checkbox.selected .seller-group__checkbox-icon {
     opacity: 1;
-    stroke: var(--blue-600);
+    stroke: white;
 }
 
 .seller-group__remove:hover {
-    background-color: var(--red-200);
+    background-color: var(--red-50);
     border-color: var(--red-500);
     color: var(--red-500);
 }
@@ -358,21 +372,18 @@ toolbar__header {
     align-items: center;
     transition: background-color 0.2s;
     position: relative;
+    background-color: white;
+    border-radius: 6px;
+    margin-bottom: 8px;
 }
 
 .product-row:hover {
-    background-color: var(--blue-200);
+    background-color: var(--blue-50);
 }
 
  /* Đường kẻ dưới sản phẩm*/
 .product-row::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 5%;
-    right: 5%;
-    height: 1px;
-    background-color: var(--neutral-200);
+    display: none;
 }
 
 .product-row:last-child::after {
@@ -383,12 +394,20 @@ toolbar__header {
 .product__image {
     width: 60px;
     height: 60px;
-    background-color: var(--neutral-100);
+    background-color: var(--neutral-50);
     border-radius: var(--border-radius-base);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 1.8rem;
+    border: 1px solid var(--neutral-200);
+    overflow: hidden;
+}
+
+.product__image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 /* Product Name Column */
@@ -421,12 +440,13 @@ toolbar__header {
 .variant-select__dropdown {
     flex: 1;
     padding: 4px 8px;
-    border: 1px solid var(--neutral-300);
+    border: 1px solid var(--neutral-200);
     border-radius: 4px;
     font-size: 0.875rem;
     background-color: white;
     cursor: pointer;
     outline: none;
+    color: var(--neutral-700);
 }
 
 .variant-select__dropdown:focus {
@@ -437,7 +457,7 @@ toolbar__header {
 .product__quantity {
     display: flex;
     align-items: center;
-    border: 1px solid var(--neutral-300);
+    border: 1px solid var(--neutral-200);
     border-radius: 6px;
     background: white;
     overflow: hidden;
@@ -448,7 +468,7 @@ toolbar__header {
     width: 28px;
     height: 28px;
     border: none;
-    background: var(--neutral-200);
+    background: white;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -459,7 +479,8 @@ toolbar__header {
 }
 
 .quantity__btn:hover:not(:disabled) {
-    background: var(--neutral-100);
+    background: var(--neutral-50);
+    color: var(--blue-600);
 }
 
 .quantity__btn:disabled {
@@ -496,7 +517,7 @@ toolbar__header {
 .action-btn {
     width: 32px;
     height: 32px;
-    border: 2px solid var(--neutral-300);
+    border: 1px solid var(--neutral-200);
     background-color: white;
     border-radius: 6px;
     cursor: pointer;
@@ -504,11 +525,13 @@ toolbar__header {
     align-items: center;
     justify-content: center;
     transition: all 0.3s;
+    color: var(--neutral-400);
 }
 
 .action-btn--checkbox:hover {
-    background-color: var(--blue-600);
-    border-color: var(--blue-600);
+    background-color: var(--blue-50);
+    border-color: var(--blue-500);
+    color: var(--blue-600);
 }
 
 .action-btn--checkbox.selected {
@@ -527,7 +550,7 @@ toolbar__header {
 }
 
 .action-btn--remove:hover {
-    background-color: var(--red-200);
+    background-color: var(--red-50);
     border-color: var(--red-500);
     color: var(--red-500);
 }
@@ -549,31 +572,32 @@ toolbar__header {
 .cart-items__remove-all {
     padding: 10px 20px;
     background-color: white;
-    border: 2px solid var(--neutral-300);
+    border: 1px solid var(--neutral-200);
     border-radius: 6px;
     cursor: pointer;
     display: flex;
     align-items: center;
     gap: 8px;
-    font-weight: 600;
+    font-weight: 500;
     transition: all 0.3s;
     color: var(--neutral-700);
 }
 
 .cart-items__remove-all:hover {
-    background-color: var(--red-200);
+    background-color: var(--red-50);
     border-color: var(--red-500);
     color: var(--red-500);
 }
 
 /* Cart Summary */
 .cart-summary {
-    background-color: var(--blue-100);
-    border: 2px solid var(--neutral-200);
+    background-color: var(--blue-200);
+    border: 1px solid var(--neutral-200);
     border-radius: var(--border-radius-base);
     padding: 24px;
     height: fit-content;
     top: 20px;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
 }
 
 .cart-summary__promo {
@@ -588,7 +612,7 @@ toolbar__header {
 .cart-summary__promo-field {
     flex: 1;
     padding: 10px 14px;
-    border: 1px solid var(--neutral-300);
+    border: 1px solid var(--neutral-200);
     border-radius: 6px;
     font-size: 0.9rem;
     outline: none;
@@ -602,12 +626,13 @@ toolbar__header {
 .cart-summary__promo-btn {
     padding: 10px 20px;
     background-color: white;
-    border: 1px solid var(--neutral-300);
+    border: 1px solid var(--neutral-200);
     border-radius: 6px;
     cursor: pointer;
-    font-weight: 600;
+    font-weight: 500;
     transition: all 0.3s;
     font-size: 0.9rem;
+    color: var(--neutral-700);
 }
 
 .cart-summary__promo-btn:hover {
@@ -624,7 +649,7 @@ toolbar__header {
 }
 
 .cart-summary__label {
-    color: var(--neutral-900);
+    color: var(--neutral-700);
     font-weight: 400;
 }
 
@@ -639,7 +664,7 @@ toolbar__header {
 
 .cart-summary__divider {
     height: 1px;
-    background-color: var(--neutral-300);
+    background-color: var(--neutral-200);
     margin: 16px 0;
 }
 
@@ -661,16 +686,16 @@ toolbar__header {
     border: none;
     border-radius: var(--border-radius-base);
     font-size: 1rem;
-    font-weight: 700;
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.3s;
     margin-bottom: 16px;
 }
 
 .cart-summary__checkout:hover {
-    background-color: var(--blue-500);
+    background-color: var(--blue-700);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(13, 171, 71, 0.3);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 }
 
 .cart-summary__delivery {
@@ -678,14 +703,15 @@ toolbar__header {
     align-items: center;
     gap: 12px;
     padding: 12px;
-    background-color: white;
+    background-color: var(--neutral-50);
     border-radius: var(--border-radius-base);
+    border: 1px solid var(--neutral-200);
 }
 
 .cart-summary__delivery-icon {
     width: 40px;
     height: 40px;
-    background-color: var(--neutral-100);
+    background-color: white;
     border-radius: 6px;
     display: flex;
     align-items: center;
@@ -699,14 +725,14 @@ toolbar__header {
 
 .cart-summary__delivery-label {
     font-size: 0.9rem;
-    color: var(--green-500);
+    color: var(--neutral-700);
     margin-bottom: 2px;
 }
 
 .cart-summary__delivery-location {
     font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--neutral-900);
+    font-weight: 500;
+    color: var(--neutral-600);
 }
 
 /* Responsive */
