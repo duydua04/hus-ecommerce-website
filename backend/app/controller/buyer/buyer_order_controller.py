@@ -11,30 +11,39 @@ from sqlalchemy.orm import selectinload
 from datetime import datetime
 from ...middleware.auth import require_buyer
 from ...models.users import Buyer
+from ...schemas.discount import DiscountResponse
+from ...schemas.common import Page
+from ...services.buyer.buyer_discount_service import (
+    DiscountService,
+    get_discount_service
+)
 router = APIRouter(
     prefix="/buyer/order",
     tags=["buyer_order"]
 )
 
-
-# ==========BƯỚC ÁP MÃ GIẢM GIÁ =============
-@router.post("/apply")
-def apply_discount(data: ApplyDiscountRequest, db: Session = Depends(get_db)):
-    return buyer_order_service.apply_discount_code(db, data.code, data.order_total)
-
-# =============== BƯỚC CHỌN ĐƠN VỊ VẬN CHUYỂN VÀ TÍNH TỔNG TIỀN ==============
-@router.post("/select-carrier")
-def select_carrier(
-    carrier_id: int,
-    total_weight: float,
-    subtotal: float,
-    discount_amount: float = 0,
-    db: Session = Depends(get_db)
+# ================ ĐƯA RA DANH SÁCH MÃ GIẢM GIÁ ==========
+@router.get("/", response_model=Page)
+async def list_discounts(
+    q: Optional[str] = Query(None),
+    limit: int = Query(10, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+    service: DiscountService = Depends(get_discount_service)
 ):
-    """
-    Khi user chọn DVVC, trả về phí ship và tổng thanh toán
-    """
-    return buyer_order_service.calculate_total_with_shipping(db, carrier_id, total_weight, subtotal, discount_amount)
+    return await service.get_list(
+        q=q,
+        limit=limit,
+        offset=offset
+    )
+
+# ============== ĐƯA RA THÔNG TIN CHI TIẾT MÃ GIẢM GIÁ ===============
+@router.get("/{discount_id}", response_model=DiscountResponse)
+async def get_discount_detail(
+    discount_id: int,
+    service: DiscountService = Depends(get_discount_service)
+):
+    return await service.get_detail(discount_id)
+
 
 # ============= GỘP CÁC BƯỚC TRONG THANH TOÁN ====================
 @router.post("/total")
