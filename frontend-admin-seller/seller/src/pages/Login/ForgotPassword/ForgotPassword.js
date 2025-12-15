@@ -186,7 +186,7 @@ function ForgotPassword() {
 
       // Redirect to login after 2 seconds
       setTimeout(() => {
-        navigate("/seller/login");
+        navigate("/login");
       }, 2000);
     } catch (err) {
       const status = err.response?.status;
@@ -209,7 +209,7 @@ function ForgotPassword() {
   };
 
   const handleBackToLogin = () => {
-    navigate("/seller/login");
+    navigate("/login");
   };
 
   const renderStepIndicator = () => (
@@ -241,7 +241,7 @@ function ForgotPassword() {
         </div>
 
         <div className="forgot-form-section">
-          <h2 className="form-title">Khôi phục tài khoản Seller</h2>
+          <h2 className="form-title">Khôi phục tài khoản</h2>
 
           {renderStepIndicator()}
 

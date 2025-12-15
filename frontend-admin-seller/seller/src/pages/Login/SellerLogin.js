@@ -65,7 +65,7 @@ function SellerLogin() {
       }
 
       // Chuyển đến trang products sau khi đăng nhập thành công
-      navigate("/seller/products", { replace: true });
+      navigate("/products", { replace: true });
     } catch (err) {
       const status = err.response?.status;
       const detail = err.response?.data?.detail;
@@ -95,11 +95,11 @@ function SellerLogin() {
   };
 
   const handleForgotPassword = () => {
-    navigate("/seller/forgot-password");
+    navigate("/forgot-password");
   };
 
   const handleRegister = () => {
-    navigate("/seller/register");
+    navigate("/register");
   };
 
   return (
@@ -107,7 +107,7 @@ function SellerLogin() {
       <div className="seller-login-container">
         <div className="login-banner">
           <i className="bx bxs-store banner-icon"></i>
-          <h1>Chào mừng đến với trang của Seller!</h1>
+          <h1>Chào mừng đến với trang của người bán hàng!</h1>
           <p>Quản lý cửa hàng và sản phẩm của bạn</p>
         </div>
 

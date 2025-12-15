@@ -31,19 +31,15 @@ function App() {
     <Router>
       <Routes>
         {/* ===== PUBLIC ROUTES - Authentication ===== */}
-        {/* Các route seller auth có prefix /seller */}
-        <Route path="/seller/login" element={<SellerLogin />} />
-        <Route path="/seller/register" element={<SellerRegister />} />
-        <Route
-          path="/seller/forgot-password"
-          element={<SellerForgotPassword />}
-        />
+        <Route path="/login" element={<SellerLogin />} />
+        <Route path="/register" element={<SellerRegister />} />
+        <Route path="/forgot-password" element={<SellerForgotPassword />} />
 
         {/* ===== PROTECTED ROUTES - CHỈ SELLER ===== */}
 
         {/* Dashboard - Tổng quan */}
         <Route
-          path="/seller/dashboard"
+          path="/dashboard"
           element={
             <ProtectedRoute allowedRoles={["seller"]}>
               <DashboardPage />
@@ -53,7 +49,7 @@ function App() {
 
         {/* Quản lý sản phẩm */}
         <Route
-          path="/seller/products"
+          path="/products"
           element={
             <ProtectedRoute allowedRoles={["seller"]}>
               <ProductPage />
@@ -63,7 +59,7 @@ function App() {
 
         {/* Quản lý đơn hàng */}
         <Route
-          path="/seller/orders"
+          path="/orders"
           element={
             <ProtectedRoute allowedRoles={["seller"]}>
               <OrderPage />
@@ -73,7 +69,7 @@ function App() {
 
         {/* Quản lý địa điểm/kho hàng */}
         <Route
-          path="/seller/locations"
+          path="/locations"
           element={
             <ProtectedRoute allowedRoles={["seller"]}>
               <LocationPage />
@@ -83,7 +79,7 @@ function App() {
 
         {/* Quản lý đánh giá */}
         <Route
-          path="/seller/reviews"
+          path="/reviews"
           element={
             <ProtectedRoute allowedRoles={["seller"]}>
               <ReviewPage />
@@ -93,7 +89,7 @@ function App() {
 
         {/* Hồ sơ cửa hàng */}
         <Route
-          path="/seller/profile"
+          path="/profile"
           element={
             <ProtectedRoute allowedRoles={["seller"]}>
               <ProfilePage />
@@ -101,20 +97,10 @@ function App() {
           }
         />
 
-        {/* Root path "/" redirect về seller login */}
-        <Route path="/" element={<Navigate to="/seller/login" replace />} />
+        {/* Root path "/" redirect về login */}
+        <Route path="/" element={<Navigate to="/login" replace />} />
 
-        {/* Redirect /seller về /seller/products (trang chủ sau khi login) */}
-        <Route
-          path="/seller"
-          element={
-            <ProtectedRoute allowedRoles={["seller"]}>
-              <Navigate to="/seller/products" replace />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* 404 NOT FOUND */}
+        {/* 404 NOT FOUND - Phải đặt cuối cùng */}
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Router>
@@ -145,10 +131,10 @@ function NotFoundPage() {
         Trang không tồn tại
       </h2>
       <p style={{ fontSize: "1.2rem", marginBottom: "2rem", opacity: 0.9 }}>
-        URL bạn truy cập không tồn tại trong hệ thống Seller
+        URL bạn truy cập không tồn tại trong hệ thống
       </p>
       <button
-        onClick={() => (window.location.href = "/seller/login")}
+        onClick={() => (window.location.href = "/login")}
         style={{
           background: "white",
           color: "#667eea",

@@ -140,14 +140,14 @@ function SellerRegister() {
   };
 
   const handleGoogleRegister = () => {
-    const nextUrl = "/seller/dashboard";
+    const nextUrl = "/dashboard";
     window.location.href = `${API_URL}/auth/google/login?role=seller&next=${encodeURIComponent(
       nextUrl
     )}`;
   };
 
   const handleBackToLogin = () => {
-    navigate("/seller/login");
+    navigate("/login");
   };
 
   return (
@@ -155,8 +155,8 @@ function SellerRegister() {
       <div className="seller-register-container">
         <div className="register-banner">
           <i className="bx bxs-store-alt banner-icon"></i>
-          <h1>Tạo cửa hàng của bạn!</h1>
-          <p>Bắt đầu kinh doanh trực tuyến ngay hôm nay</p>
+          <h1>Bắt đầu với cửa hàng của bạn!</h1>
+          <p>Kinh doanh trực tuyến ngay hôm nay</p>
           <div className="feature-list">
             <div className="feature-item">
               <i className="bx bx-check-circle"></i>
@@ -174,8 +174,8 @@ function SellerRegister() {
         </div>
 
         <div className="register-form-section">
-          <h2 className="form-title">Đăng ký tài khoản Seller</h2>
-          <p className="form-subtitle">Điền thông tin để tạo tài khoản mới</p>
+          <h2 className="form-title">Đăng ký tài khoản mới</h2>
+          <p className="form-subtitle">Vui lòng nhập thông tin</p>
 
           {errorMessage && (
             <div className="error-message show">{errorMessage}</div>
