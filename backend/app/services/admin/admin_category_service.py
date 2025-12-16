@@ -3,17 +3,18 @@ from __future__ import annotations
 from fastapi import HTTPException, status, Depends
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from ..common.category_service import BaseCategoryService
+from redis.asyncio import Redis
+from ..common.base_category_service import BaseCategoryService
 from ...config.db import get_db
+from ...config.redis import get_redis_client
 from ...models.catalog import Category, Product
 from ...schemas.category import CategoryCreate, CategoryUpdate, CategoryResponse
 
 
 class AdminCategoryService(BaseCategoryService):
 
-    def __init__(self, db: AsyncSession):
-        super().__init__(db)
+    def __init__(self, db: AsyncSession, redis: Redis):
+        super().__init__(db, redis)
 
 
     async def list(self, q: str | None = None, limit: int = 10, offset: int = 0):
@@ -106,5 +107,5 @@ class AdminCategoryService(BaseCategoryService):
         return {"deleted": True, "category_id": category_id}
 
 
-def get_admin_category_service(db: AsyncSession = Depends(get_db)):
-    return AdminCategoryService(db)
+def get_admin_category_service(db: AsyncSession = Depends(get_db), redis: Redis = Depends(get_redis_client)):
+    return AdminCategoryService(db, redis)

@@ -1,10 +1,10 @@
 from __future__ import annotations
-from abc import ABC, abstractmethod
-from typing import Optional
+from abc import ABC
+from redis.asyncio import Redis
 
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func, desc, asc
+from sqlalchemy import select, func, asc
 from sqlalchemy.sql import Select
 
 from ...models.catalog import Category
@@ -13,8 +13,10 @@ from ...schemas.common import Page, PageMeta
 
 
 class BaseCategoryService(ABC):
-    def __init__(self, db: AsyncSession):
+    def __init__(self, db: AsyncSession, redis: Redis = None):
         self.db = db
+        self.redis = redis
+        self.CACHE_KEY_ALL = "categories:list:all"
 
 
     async def get(self, category_id: int):
@@ -29,6 +31,7 @@ class BaseCategoryService(ABC):
             )
 
         return CategoryResponse.model_validate(cat)
+
 
     async def _build_list_response(self, stmt: Select, limit: int, offset: int):
         """
@@ -58,7 +61,7 @@ class BaseCategoryService(ABC):
             data=data
         )
 
-    @abstractmethod
-    async def list(self, q: str | None, limit: int, offset: int):
-        """Các lớp con phải override hàm này"""
-        pass
+    async def _invalidate_list_cache(self):
+        """Xóa cache danh sách khi dữ liệu thay đổi"""
+        if self.redis:
+            await self.redis.delete(self.CACHE_KEY_ALL)

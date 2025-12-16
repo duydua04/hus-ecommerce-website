@@ -1,5 +1,5 @@
 from sqlalchemy import (
-    Column, Integer, String, Boolean, Numeric, Text, DateTime, ForeignKey,
+    Column, Integer,Numeric, Text, DateTime, ForeignKey,
     CheckConstraint
 )
 from sqlalchemy.orm import relationship
@@ -14,7 +14,7 @@ class Order(Base):
     order_id = Column(Integer, primary_key=True, autoincrement=True)
     buyer_id = Column(Integer, ForeignKey("buyer.buyer_id"), nullable=False)
     buyer_address_id = Column(Integer, ForeignKey("buyer_address.buyer_address_id"), nullable=False)
-    payment_method = Column(PaymentMethodEnum, nullable=False)  # bank_transfer | cod | mim_pay
+    payment_method = Column(PaymentMethodEnum, nullable=False)  # bank_transfer | cod
     subtotal = Column(Numeric(10, 2), nullable=False)
     shipping_price = Column(Numeric(10, 2), nullable=False, default=0)
     discount_amount = Column(Numeric(10, 2), nullable=False, default=0)
