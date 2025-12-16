@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-import { X, Upload } from "lucide-react";
+import React, { useState, useEffect } from "react";
 import "./AvatarUpload.scss";
 
 export default function AvatarUploadModal({
@@ -14,63 +13,43 @@ export default function AvatarUploadModal({
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState("");
 
+  useEffect(() => {
+    if (!isOpen) {
+      setFile(null);
+      setPreview(null);
+      setError("");
+      setIsDragging(false);
+      setIsUploading(false);
+    }
+  }, [isOpen]);
+
   const handleFileSelect = (selectedFile) => {
     setError("");
 
-    if (!selectedFile) {
-      setFile(null);
-      setPreview(null);
-      return;
-    }
+    if (!selectedFile) return;
 
-    // Validate file type
     if (!selectedFile.type.startsWith("image/")) {
       setError("Vui lòng chọn một tệp hình ảnh");
       return;
     }
 
-    // Validate file size (max 2MB)
     if (selectedFile.size > 2 * 1024 * 1024) {
       setError("Kích thước tệp không được vượt quá 2MB");
       return;
     }
 
     setFile(selectedFile);
-
-    // Create preview
     const reader = new FileReader();
-    reader.onload = (e) => {
-      setPreview(e.target.result);
-    };
+    reader.onload = (e) => setPreview(e.target.result);
     reader.readAsDataURL(selectedFile);
   };
 
-  const handleFileChange = (e) => {
-    handleFileSelect(e.target.files?.[0] || null);
-  };
-
-  const handleDragOver = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-  };
-
-  const handleDrop = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-
-    const droppedFile = e.dataTransfer.files?.[0];
-    handleFileSelect(droppedFile);
-  };
-
   const handleUpload = async () => {
+    if (!carrierId) {
+      setError("Không xác định được đơn vị vận chuyển");
+      return;
+    }
+
     if (!file) {
       setError("Vui lòng chọn một tệp");
       return;
@@ -79,12 +58,9 @@ export default function AvatarUploadModal({
     setIsUploading(true);
     try {
       await onUpload(carrierId, file);
-      setFile(null);
-      setPreview(null);
       onClose();
-    } catch (err) {
+    } catch {
       setError("Tải lên thất bại. Vui lòng thử lại.");
-      console.error("Upload error:", err);
     } finally {
       setIsUploading(false);
     }
@@ -96,13 +72,13 @@ export default function AvatarUploadModal({
     <div className="modal-overlay">
       <div className="avatar-modal-content">
         <div className="modal-header">
-          <h2 className="modal-title">Tải lên avatar</h2>
+          <h2 className="modal-title">Cập nhật avatar</h2>
           <button
-            onClick={onClose}
             className="modal-close"
+            onClick={onClose}
             disabled={isUploading}
           >
-            <X size={24} />
+            <i className="bx bx-x"></i>
           </button>
         </div>
 
@@ -110,43 +86,46 @@ export default function AvatarUploadModal({
           {!preview ? (
             <div
               className={`upload-area ${isDragging ? "dragging" : ""}`}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
+              onDragOver={(e) => {
+                e.preventDefault();
+                setIsDragging(true);
+              }}
+              onDragLeave={() => setIsDragging(false)}
+              onDrop={(e) => {
+                e.preventDefault();
+                setIsDragging(false);
+                handleFileSelect(e.dataTransfer.files?.[0]);
+              }}
             >
-              <Upload size={48} className="upload-icon" />
-              <p className="upload-text">Kéo và thả hình ảnh ở đây</p>
+              <i className="bx bx-cloud-upload upload-icon"></i>
+
+              <p className="upload-text">Kéo thả ảnh</p>
               <p className="upload-hint">hoặc</p>
-              <label htmlFor="file-input" className="file-input-label">
-                Chọn tệp từ máy tính
+
+              <label className="file-input-label">
+                Chọn tệp
+                <input
+                  type="file"
+                  accept="image/*"
+                  hidden
+                  onChange={(e) => handleFileSelect(e.target.files?.[0])}
+                />
               </label>
-              <input
-                id="file-input"
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-                className="file-input"
-                disabled={isUploading}
-              />
-              <p className="upload-info">
-                Kích thước tối đa: 2MB. Định dạng: PNG, JPG, GIF...
-              </p>
+
+              <p className="upload-info">Tối đa 2MB</p>
             </div>
           ) : (
             <div className="preview-area">
               <img src={preview} alt="Preview" className="preview-image" />
-              <p className="preview-filename">{file.name}</p>
               <button
-                type="button"
+                className="btn-change"
                 onClick={() => {
                   setFile(null);
                   setPreview(null);
-                  setError("");
                 }}
-                className="btn-change"
                 disabled={isUploading}
               >
-                Thay đổi ảnh
+                Đổi ảnh
               </button>
             </div>
           )}
@@ -155,21 +134,11 @@ export default function AvatarUploadModal({
         </div>
 
         <div className="modal-footer">
-          <button
-            type="button"
-            onClick={onClose}
-            className="btn-secondary"
-            disabled={isUploading}
-          >
+          <button onClick={onClose} disabled={isUploading}>
             Hủy
           </button>
-          <button
-            type="button"
-            onClick={handleUpload}
-            className="btn-primary"
-            disabled={!file || isUploading}
-          >
-            {isUploading ? "Đang tải lên..." : "Tải lên"}
+          <button onClick={handleUpload} disabled={!file || isUploading}>
+            {isUploading ? "Đang tải..." : "Tải lên"}
           </button>
         </div>
       </div>

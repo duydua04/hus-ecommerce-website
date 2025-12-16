@@ -32,7 +32,7 @@ function ForgotPassword() {
       return detail;
     }
 
-    // Nếu detail là array (validation errors)
+    // Nếu detail là array
     if (Array.isArray(detail)) {
       return detail.map((e) => e.msg || JSON.stringify(e)).join(", ");
     }
@@ -70,7 +70,7 @@ function ForgotPassword() {
           email: email.trim(),
           role: "seller",
         },
-        { withCredentials: true } // ← QUAN TRỌNG: Để nhận cookie
+        { withCredentials: true } // Nhan cookie
       );
 
       // Backend set reset_token vào cookie, không cần lưu vào state
@@ -123,7 +123,7 @@ function ForgotPassword() {
           otp: otp.trim(),
           reset_token: resetToken, // Backend sẽ bỏ qua field này, lấy từ cookie
         },
-        { withCredentials: true } // ← QUAN TRỌNG: Gửi cookie
+        { withCredentials: true } // Gửi cookie
       );
 
       // Backend cũng set permission_token vào cookie
@@ -179,7 +179,7 @@ function ForgotPassword() {
           confirm_password: confirmPassword,
           permission_token: permissionToken, // Backend sẽ bỏ qua, lấy từ cookie
         },
-        { withCredentials: true } // ← QUAN TRỌNG: Gửi cookie
+        { withCredentials: true } // Gửi cookie
       );
 
       setSuccessMessage("Đặt lại mật khẩu thành công!");

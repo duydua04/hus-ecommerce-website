@@ -3,9 +3,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--white);
+  background: var(--bg-white);
   padding: 20px;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--front-main);
 }
 
 .seller-login-container {
@@ -15,7 +15,7 @@
   background-color: #fff;
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-sm);
 
   @media (max-width: 768px) {
     flex-direction: column;
@@ -25,19 +25,19 @@
 .login-banner {
   flex: 1;
   min-width: 300px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--blue), var(--purple) 100%);
   padding: 60px 40px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  color: #fff;
+  color: var(--bg-white);
   text-align: center;
 
   .banner-icon {
     font-size: 80px;
     margin-bottom: 20px;
-    animation: float 3s ease-in-out infinite;
+    animation: var(--animation);
   }
 
   h1 {
@@ -80,26 +80,26 @@
   .login-title {
     font-size: 32px;
     font-weight: bold;
-    color: #1a1a1a;
+    color: var(--text-primary);
     margin-bottom: 8px;
   }
 
   .login-subtitle {
     font-size: 14px;
-    color: #666;
+    color: var(--text-secondary);
     margin-bottom: 30px;
   }
 }
 
 .error-message {
-  background-color: #fee;
-  border: 1px solid #fcc;
+  background-color: var(--bg-white);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 12px 16px;
   margin-bottom: 20px;
-  color: #c33;
+  color: var(--red);
   font-size: 14px;
-  animation: slideIn 0.3s ease-out;
+  animation: var(--animation);
 
   &::before {
     content: "⚠️ ";
@@ -114,7 +114,7 @@
     display: block;
     font-size: 14px;
     font-weight: 600;
-    color: #333;
+    color: var(--text-primary);
     margin-bottom: 8px;
   }
 
@@ -122,19 +122,19 @@
     width: 100%;
     padding: 12px 16px;
     font-size: 15px;
-    border: 2px solid #e0e0e0;
+    border: 2px solid var(--border-color);
     border-radius: 8px;
     outline: none;
     transition: all 0.3s ease;
     box-sizing: border-box;
 
     &:focus {
-      border-color: #667eea;
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      border-color: var(--blue);
+      box-shadow: var(--shadow-lg);
     }
 
     &:disabled {
-      background-color: #f5f5f5;
+      background-color: var(--bg-white);
       cursor: not-allowed;
     }
 
@@ -200,8 +200,8 @@
   padding: 14px;
   font-size: 16px;
   font-weight: 600;
-  color: #fff;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: var(--bg-white);
+  background: linear-gradient(135deg, var(--blue) 0%, var(--purple) 100%);
   border: none;
   border-radius: 8px;
   cursor: pointer;
@@ -230,8 +230,8 @@
   .spinner {
     width: 16px;
     height: 16px;
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    border-top: 2px solid #fff;
+    border: 2px solid var(--border-color);
+    border-top: 2px solid var(--bg-white);
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
     display: inline-block;
@@ -251,7 +251,7 @@
     content: "";
     flex: 1;
     height: 1px;
-    background: #e0e0e0;
+    background: var(--bg-white);
   }
 
   &::before {
@@ -268,9 +268,9 @@
   padding: 12px;
   font-size: 15px;
   font-weight: 600;
-  color: #333;
-  background: #fff;
-  border: 2px solid #e0e0e0;
+  color: var(--text-primary);
+  background: var(--bg-white);
+  border: 2px solid var(--border-color);
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -280,10 +280,10 @@
   gap: 10px;
 
   &:hover:not(:disabled) {
-    background: #f9f9f9;
-    border-color: #ccc;
+    background: var(--bg-white);
+    border-color: var(--border-color);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-md);
   }
 
   &:active:not(:disabled) {
@@ -315,7 +315,7 @@
   .link-btn {
     background: none;
     border: none;
-    color: #667eea;
+    color: var(--blue);
     font-weight: 600;
     font-size: 14px;
     cursor: pointer;
@@ -323,7 +323,7 @@
     transition: color 0.2s;
 
     &:hover {
-      color: #764ba2;
+      color: var(--purple);
       text-decoration: underline;
     }
   }

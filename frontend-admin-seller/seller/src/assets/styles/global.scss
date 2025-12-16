@@ -16,28 +16,29 @@ li {
   list-style: none;
 }
 
-/*Biến CSS để dễ tùy chỉnh*/
+/*Biến CSS*/
 :root {
   /*front chữ chính*/
   --font-main: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
 
   /*màu nền*/
-  --bg-primary: #f8fafc; /*màu nền chính*/
+  --bg-primary: #f8fafc;
   --bg-white: #ffffff;
-  --bg-hover: #f1f5f9; /*màu khi hover*/
+  --bg-hover: #f1f5f9;
 
   /*tông màu chủ đạo*/
   --blue: #3b82f6;
   --blue-dark: #2563eb;
   --blue-light: #dbeafe;
+  --purple: #764ba2;
 
   /*màu chữ*/
-  --text-primary: #0f172a; /*màu chữ chính*/
-  --text-secondary: #64748b; /*màu phụ: mô tả, phụ đề*/
-  --text-muted: #94a3b8; /*màu mờ*/
+  --text-primary: #0f172a;
+  --text-secondary: #64748b;
+  --text-muted: #94a3b8;
 
   /*đường viền và đổ bóng*/
-  --border-color: #e2e8f0; /*màu viền*/
+  --border-color: #e2e8f0;
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04); /*cấp độ bóng nhẹ*/
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08); /*bóng trung bình*/
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1); /*cấp độ bóng đậm*/
@@ -55,6 +56,7 @@ li {
 
   /*hiệu ứng chuyển động*/
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --animation: float 3s ease-in-out infinite;
 }
 
 body {

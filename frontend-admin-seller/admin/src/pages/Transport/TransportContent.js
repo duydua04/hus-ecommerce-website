@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Plus, X, Check } from "lucide-react";
+import { X, Check } from "lucide-react";
 import PageHeader from "../../components/common/PageHeader/PageHeader";
 import Table from "../../components/common/Table/Table";
 import Pagination from "../../components/common/Pagination/Pagination";
@@ -11,7 +11,8 @@ import useCarrier from "../../hooks/useCarrier";
 import "./Transport.scss";
 
 // Avatar mặc định
-const DEFAULT_AVATAR = "/assets/images/default-avatar.png";
+import defaultAvatar from "../../assets/images/default-avatar.png";
+const DEFAULT_AVATAR = defaultAvatar;
 
 export default function TransportContent() {
   const {
@@ -29,15 +30,18 @@ export default function TransportContent() {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCarrier, setSelectedCarrier] = useState(null);
+
   const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
   const [selectedCarrierId, setSelectedCarrierId] = useState(null);
+
   const [successMessage, setSuccessMessage] = useState("");
 
   const itemsPerPage = 10;
 
-  // Fetch initial data
+  /* ================= FETCH DATA ================= */
   useEffect(() => {
     fetchCarriers({
       searchQuery: "",
@@ -46,7 +50,6 @@ export default function TransportContent() {
     });
   }, []);
 
-  // Fetch when search or page changes
   useEffect(() => {
     fetchCarriers({
       searchQuery,
@@ -57,7 +60,7 @@ export default function TransportContent() {
 
   const totalPages = Math.ceil(total / itemsPerPage);
 
-  // Toolbar actions
+  /* ================= HANDLERS ================= */
   const handleAddCarrier = () => {
     clearError();
     setSuccessMessage("");
@@ -72,7 +75,6 @@ export default function TransportContent() {
     setIsModalOpen(true);
   };
 
-  // Form submit (create/update)
   const handleFormSubmit = async (formData) => {
     try {
       if (selectedCarrier) {
@@ -82,11 +84,12 @@ export default function TransportContent() {
         await createCarrier(formData);
         setSuccessMessage("Thêm đơn vị vận chuyển thành công");
       }
+
       setIsModalOpen(false);
+      setSelectedCarrier(null);
 
       setTimeout(() => setSuccessMessage(""), 3000);
 
-      // Reload data
       fetchCarriers({
         searchQuery,
         limit: itemsPerPage,
@@ -98,29 +101,33 @@ export default function TransportContent() {
   };
 
   const handleDeleteCarrier = async (carrierId) => {
-    if (window.confirm("Bạn chắc chắn muốn xóa đơn vị vận chuyển này?")) {
-      try {
-        await deleteCarrier(carrierId);
-        setSuccessMessage("Xóa đơn vị vận chuyển thành công");
+    if (!window.confirm("Bạn chắc chắn muốn xóa đơn vị vận chuyển này?"))
+      return;
 
-        setTimeout(() => setSuccessMessage(""), 3000);
+    try {
+      await deleteCarrier(carrierId);
+      setSuccessMessage("Xóa đơn vị vận chuyển thành công");
 
-        fetchCarriers({
-          searchQuery,
-          limit: itemsPerPage,
-          offset: (currentPage - 1) * itemsPerPage,
-        });
-      } catch (err) {
-        console.error("Error delete carrier:", err);
-      }
+      setTimeout(() => setSuccessMessage(""), 3000);
+
+      fetchCarriers({
+        searchQuery,
+        limit: itemsPerPage,
+        offset: (currentPage - 1) * itemsPerPage,
+      });
+    } catch (err) {
+      console.error("Error delete carrier:", err);
     }
   };
 
   const handleAvatarUpload = async (carrierId, file) => {
     try {
       await uploadCarrierAvatar(carrierId, file);
-      setSuccessMessage("Tải lên avatar thành công");
 
+      setIsAvatarModalOpen(false);
+      setSelectedCarrierId(null);
+
+      setSuccessMessage("Tải lên avatar thành công");
       setTimeout(() => setSuccessMessage(""), 3000);
 
       fetchCarriers({
@@ -133,19 +140,23 @@ export default function TransportContent() {
     }
   };
 
-  // Table columns
+  /* ================= TABLE ================= */
   const columns = [
     {
       key: "carrier_avt_url",
       label: "Avatar",
       className: "table__cell--avatar",
-      render: (value) => (
+      render: (value, row) => (
         <img
-          src={value || DEFAULT_AVATAR} // Dùng avatar mặc định nếu không có
+          src={value || DEFAULT_AVATAR}
           alt="Carrier avatar"
-          className="table__img"
+          className="table__img table__img--clickable"
+          title="Click để cập nhật avatar"
+          onClick={() => {
+            setSelectedCarrierId(row.carrier_id);
+            setIsAvatarModalOpen(true);
+          }}
           onError={(e) => {
-            // Nếu ảnh lỗi thì dùng avatar mặc định
             e.target.src = DEFAULT_AVATAR;
           }}
         />
@@ -160,13 +171,13 @@ export default function TransportContent() {
       key: "base_price",
       label: "Giá cơ bản",
       className: "table__cell--price",
-      render: (v) => `${Number(v)?.toLocaleString("vi-VN")} ₫`,
+      render: (v) => `${Number(v).toLocaleString("vi-VN")} ₫`,
     },
     {
       key: "price_per_kg",
       label: "Giá/kg",
       className: "table__cell--price",
-      render: (v) => `${Number(v)?.toLocaleString("vi-VN")} ₫`,
+      render: (v) => `${Number(v).toLocaleString("vi-VN")} ₫`,
     },
     {
       key: "is_active",
@@ -184,7 +195,6 @@ export default function TransportContent() {
     },
   ];
 
-  // Table actions
   const actions = [
     {
       label: "Sửa",
@@ -194,12 +204,13 @@ export default function TransportContent() {
     },
     {
       label: "Xóa",
-      icon: "bx bx-trash", //
+      icon: "bx bx-trash",
       onClick: (c) => handleDeleteCarrier(c.carrier_id),
       className: "action-btn action-btn--delete",
     },
   ];
 
+  /* ================= RENDER ================= */
   return (
     <main className="main">
       <PageHeader
@@ -210,7 +221,6 @@ export default function TransportContent() {
         ]}
       />
 
-      {/* Toolbar */}
       <div className="toolbar">
         <div className="toolbar__header">
           <div className="toolbar__title">
@@ -227,7 +237,6 @@ export default function TransportContent() {
           />
         </div>
 
-        {/* Actions */}
         <div className="toolbar__actions">
           <div className="toolbar__search">
             <SearchBox
@@ -245,7 +254,6 @@ export default function TransportContent() {
           </button>
         </div>
 
-        {/* Alerts */}
         {error && (
           <div className="toolbar__alert alert alert-error">
             <span>{error}</span>
@@ -254,6 +262,7 @@ export default function TransportContent() {
             </button>
           </div>
         )}
+
         {successMessage && (
           <div className="toolbar__alert alert alert-success">
             <Check size={18} />
@@ -263,12 +272,10 @@ export default function TransportContent() {
 
         {loading && <div className="toolbar__loading">Đang tải...</div>}
 
-        {/* Table */}
         <div className="toolbar__table">
           <Table columns={columns} data={carriers} actions={actions} />
         </div>
 
-        {/* Pagination */}
         {totalPages > 1 && (
           <div className="toolbar__pagination">
             <Pagination
@@ -280,19 +287,25 @@ export default function TransportContent() {
         )}
       </div>
 
-      {/* Modals */}
+      {/* ===== MODALS ===== */}
       <CarrierModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedCarrier(null);
+        }}
         onSubmit={handleFormSubmit}
         carrier={selectedCarrier}
       />
 
       <AvatarUploadModal
         isOpen={isAvatarModalOpen}
-        onClose={() => setIsAvatarModalOpen(false)}
-        onUpload={handleAvatarUpload}
         carrierId={selectedCarrierId}
+        onUpload={handleAvatarUpload}
+        onClose={() => {
+          setIsAvatarModalOpen(false);
+          setSelectedCarrierId(null);
+        }}
       />
     </main>
   );
