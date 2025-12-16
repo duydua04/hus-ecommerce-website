@@ -319,6 +319,7 @@ html {
     color: #000;
     position: relative;
     transition: background-color 0.2s, transform 0.15s;
+    z-index: 1001;
 }
 .icon-group__button svg {
     width: 18px;
