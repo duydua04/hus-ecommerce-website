@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, Query, HTTPException
 from typing import List, Optional, Dict, Any
 from sqlalchemy.orm import Session, Query as SAQuery
+from pydantic import BaseModel
 from ...middleware.auth import require_buyer
 from ...schemas.discount import DiscountResponse
 from ...schemas.common import Page
@@ -14,6 +15,15 @@ router = APIRouter(
     tags=["buyer_discount"],
     # dependencies=[Depends(require_buyer)]
 )
+class ValidateDiscountRequest(BaseModel):
+    code: str
+    cart_total: int
+
+class ValidateDiscountResponse(BaseModel):
+    valid: bool
+    discount_amount: int = 0
+    final_total: int
+    message: str
 
 # ================ ĐƯA RA DANH SÁCH MÃ GIẢM GIÁ ==========
 @router.get("/", response_model=Page)
@@ -29,7 +39,7 @@ async def buyer_list_discounts(
         offset=offset
     )
 
-# =============== LẤY DANH SÁCH VOUCHER CÓ THỂ ÁP DỤNG ĐƯỢC ==================
+# =============== ĐƯA RA CÁC MÃ GIẢM GIÁ CÓ THỂ ÁP DỤNG CHO ĐƠN HÀNG ==================
 @router.get("/available", response_model=Page)
 async def get_available_discounts(
     cart_total: int = Query(..., gt=0, description="Tổng tiền giỏ hàng"),
@@ -52,4 +62,15 @@ async def get_discount_detail(
     service: DiscountService = Depends(get_discount_service)
 ):
     return await service.get_detail(discount_id)
+
+# =============== KIỂM TRA MÃ GIẢM GIÁ NGƯỜI DÙNG NHẬP CÓ ÁP DỤNG ĐƯỢC KHÔNG ==============
+@router.post("/validate", response_model=ValidateDiscountResponse)
+async def validate_discount(
+    payload: ValidateDiscountRequest,
+    service: DiscountService = Depends(get_discount_service)
+):
+    return await service.validate_simple(
+        code=payload.code,
+        cart_total=payload.cart_total
+    )
 

@@ -1,6 +1,7 @@
 from typing import Optional
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from decimal import Decimal
 from ..common.discount_service import BaseDiscountService
 from ...models.catalog import Discount
 from ...schemas.discount import DiscountResponse
@@ -11,7 +12,7 @@ from ...schemas.common import Page, PageMeta
 from sqlalchemy import select, func
 
 class DiscountService(BaseDiscountService):
-
+    # =============== ĐƯA RA DANH SÁCH MÃ GIẢM GIÁ =================
     async def list(
         self,
         q: Optional[str],
@@ -31,10 +32,13 @@ class DiscountService(BaseDiscountService):
             offset=offset
         )
 
+    # =================== ĐƯA RA THÔNG TIN CHI TIẾT MÃ GIẢM GIÁ ==================
     async def get_detail(self, discount_id: int):
         discount = await self._get_discount_or_404(discount_id)
         return DiscountResponse.model_validate(discount)
     
+
+    # ===================== ĐƯA RA CÁC MÃ GIẢM GIÁ CÓ THỂ ÁP DỤNG CHO ĐƠN HÀNG ===================
     async def list_available(
         self,
         cart_total: int,
@@ -82,7 +86,60 @@ class DiscountService(BaseDiscountService):
             ),
         data=discounts
         )
+    
+    # ======================== KIỂM TRA MÃ GIẢM GIÁ NGƯỜI DÙNG NHẬP CÓ ÁP DỤNG ĐƯỢC KHÔNG ==================
+    async def validate_simple(self, code: str, cart_total: int):
+        # now = date.today()
+        now = date(2025,9,28)
+        stmt = select(Discount).where(
+            Discount.code == code,
+            Discount.is_active == True
+        )
 
+        result = await self.db.execute(stmt)
+        discount = result.scalar_one_or_none()
+
+        # Không tồn tại
+        if not discount:
+            return {
+                "valid": False,
+                "final_total": cart_total,
+                "message": "Mã giảm giá không tồn tại"
+            }
+
+        # Hết hạn
+        if discount.end_date < now:
+            return {
+                "valid": False,
+                "final_total": cart_total,
+                "message": "Mã giảm giá đã hết hạn"
+            }
+
+        # Chưa đủ tiền
+        if cart_total < discount.min_order_value:
+            return {
+                "valid": False,
+                "final_total": cart_total,
+                "message": f"Đơn hàng tối thiểu {discount.min_order_value}"
+            }
+
+        # Tính tiền giảm (rất đơn giản)
+        percent = Decimal(discount.discount_percent)
+        discount_amount = (Decimal(cart_total) * percent) / Decimal(100)
+
+        if discount.max_discount:
+            discount_amount = min(discount_amount, discount.max_discount)
+
+        final_total = Decimal(cart_total) - discount_amount
+
+        return {
+            "valid": True,
+            "discount_amount": int(discount_amount),
+            "final_total": int(final_total),
+            "message": "Áp dụng mã giảm giá thành công"
+        }
+
+   
 def get_discount_service(
     db: AsyncSession = Depends(get_db)
 ):
