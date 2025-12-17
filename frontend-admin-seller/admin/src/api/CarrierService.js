@@ -4,12 +4,14 @@ const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
 const CARRIERS_ENDPOINT = `${API_URL}/admin/carriers`;
 
 const carrierService = {
-  listCarriers: async (q = null) => {
+  listCarriers: async ({ q = "", limit = 10, offset = 0 } = {}) => {
     try {
-      const params = q ? { q } : {};
-
       const response = await axios.get(CARRIERS_ENDPOINT, {
-        params,
+        params: {
+          q, // string | null
+          limit, // number
+          offset, // number
+        },
         withCredentials: true,
       });
 

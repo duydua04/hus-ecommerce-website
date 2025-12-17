@@ -9,30 +9,20 @@ const useCarrier = () => {
 
   // Fetch danh sách carriers với search và pagination
   const fetchCarriers = useCallback(
-    async ({ searchQuery = "", limit = 10, offset = 0 } = {}) => {
+    async ({ q = "", limit = 10, offset = 0 } = {}) => {
       setLoading(true);
       setError(null);
 
       try {
-        const res = await carrierService.listCarriers({
-          q: searchQuery,
-          limit,
-          offset,
-        });
+        const res = await carrierService.listCarriers({ q, limit, offset });
 
-        // Backend trả về array trực tiếp
         if (Array.isArray(res)) {
           setCarriers(res);
           setTotal(res.length);
-        }
-        // Backend trả về object { data: [], total: number }
-        else if (res?.data && Array.isArray(res.data)) {
+        } else if (Array.isArray(res?.data)) {
           setCarriers(res.data);
           setTotal(res.total ?? 0);
-        }
-        // Format không xác định
-        else {
-          console.warn("Unexpected response format:", res);
+        } else {
           setCarriers([]);
           setTotal(0);
         }
@@ -41,6 +31,7 @@ const useCarrier = () => {
           err.detail || err.message || "Lỗi khi tải danh sách vận chuyển"
         );
         setCarriers([]);
+        setTotal(0);
       } finally {
         setLoading(false);
       }

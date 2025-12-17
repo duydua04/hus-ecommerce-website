@@ -7,6 +7,7 @@ import Button from "../../components/common/Button/Button";
 import SearchBox from "../../components/common/SearchBox/SearchBox";
 import CarrierModal from "./AddCarrier/AddCarrier";
 import AvatarUploadModal from "../../components/common/AvatarUpload/AvatarUpload";
+import ConfirmModal from "../../components/common/ConfirmModal/ConfirmModal";
 import useCarrier from "../../hooks/useCarrier";
 import "./Transport.scss";
 
@@ -37,6 +38,9 @@ export default function TransportContent() {
   const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
   const [selectedCarrierId, setSelectedCarrierId] = useState(null);
 
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [carrierToDelete, setCarrierToDelete] = useState(null);
+
   const [successMessage, setSuccessMessage] = useState("");
 
   const itemsPerPage = 10;
@@ -44,18 +48,22 @@ export default function TransportContent() {
   /* ================= FETCH DATA ================= */
   useEffect(() => {
     fetchCarriers({
-      searchQuery: "",
+      q: "",
       limit: itemsPerPage,
       offset: 0,
     });
   }, []);
 
   useEffect(() => {
-    fetchCarriers({
-      searchQuery,
-      limit: itemsPerPage,
-      offset: (currentPage - 1) * itemsPerPage,
-    });
+    const timer = setTimeout(() => {
+      fetchCarriers({
+        q: searchQuery,
+        limit: itemsPerPage,
+        offset: (currentPage - 1) * itemsPerPage,
+      });
+    }, 500); // Debounce 500ms
+
+    return () => clearTimeout(timer);
   }, [searchQuery, currentPage]);
 
   const totalPages = Math.ceil(total / itemsPerPage);
@@ -91,7 +99,7 @@ export default function TransportContent() {
       setTimeout(() => setSuccessMessage(""), 3000);
 
       fetchCarriers({
-        searchQuery,
+        q: searchQuery,
         limit: itemsPerPage,
         offset: (currentPage - 1) * itemsPerPage,
       });
@@ -101,23 +109,35 @@ export default function TransportContent() {
   };
 
   const handleDeleteCarrier = async (carrierId) => {
-    if (!window.confirm("Bạn chắc chắn muốn xóa đơn vị vận chuyển này?"))
-      return;
+    setCarrierToDelete(carrierId);
+    setIsConfirmModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!carrierToDelete) return;
 
     try {
-      await deleteCarrier(carrierId);
+      await deleteCarrier(carrierToDelete);
       setSuccessMessage("Xóa đơn vị vận chuyển thành công");
 
       setTimeout(() => setSuccessMessage(""), 3000);
 
       fetchCarriers({
-        searchQuery,
+        q: searchQuery,
         limit: itemsPerPage,
         offset: (currentPage - 1) * itemsPerPage,
       });
     } catch (err) {
       console.error("Error delete carrier:", err);
+    } finally {
+      setIsConfirmModalOpen(false);
+      setCarrierToDelete(null);
     }
+  };
+
+  const handleCancelDelete = () => {
+    setIsConfirmModalOpen(false);
+    setCarrierToDelete(null);
   };
 
   const handleAvatarUpload = async (carrierId, file) => {
@@ -131,7 +151,7 @@ export default function TransportContent() {
       setTimeout(() => setSuccessMessage(""), 3000);
 
       fetchCarriers({
-        searchQuery,
+        q: searchQuery,
         limit: itemsPerPage,
         offset: (currentPage - 1) * itemsPerPage,
       });
@@ -241,9 +261,8 @@ export default function TransportContent() {
           <div className="toolbar__search">
             <SearchBox
               placeholder="Tìm kiếm đơn vị vận chuyển..."
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
+              onSearch={(value) => {
+                setSearchQuery(value);
                 setCurrentPage(1);
               }}
             />
@@ -306,6 +325,14 @@ export default function TransportContent() {
           setIsAvatarModalOpen(false);
           setSelectedCarrierId(null);
         }}
+      />
+
+      <ConfirmModal
+        isOpen={isConfirmModalOpen}
+        title="Thông báo"
+        message="Bạn chắc chắn muốn xóa đơn vị vận chuyển này?"
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
       />
     </main>
   );
