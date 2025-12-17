@@ -24,6 +24,9 @@ class ValidateDiscountResponse(BaseModel):
     discount_amount: int = 0
     final_total: int
     message: str
+class DiscountPreviewRequest(BaseModel):
+    discount_id: int
+    cart_total: int
 
 # ================ ĐƯA RA DANH SÁCH MÃ GIẢM GIÁ ==========
 @router.get("/", response_model=Page)
@@ -70,6 +73,17 @@ async def validate_discount(
 ):
     return await service.validate_simple(
         code=payload.code,
+        cart_total=payload.cart_total
+    )
+
+# =================== PREVIEW ÁP DỤNG VOUCHER (DÙNG CHO USER KÍCH VÔ VOUCHER ĐÓ) ==================
+@router.post("/preview")
+async def preview_discount(
+    payload: DiscountPreviewRequest,
+    service: DiscountService = Depends(get_discount_service)
+):
+    return await service.preview_discount(
+        discount_id=payload.discount_id,
         cart_total=payload.cart_total
     )
 

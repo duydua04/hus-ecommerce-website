@@ -10,6 +10,7 @@ from fastapi import Depends
 from datetime import datetime, date
 from ...schemas.common import Page, PageMeta
 from sqlalchemy import select, func
+from fastapi import HTTPException, status
 
 class DiscountService(BaseDiscountService):
     # =============== ĐƯA RA DANH SÁCH MÃ GIẢM GIÁ =================
@@ -176,7 +177,64 @@ class DiscountService(BaseDiscountService):
             "estimated_discount": int(estimate(best))
         }
     
-    
+    # =================== PREVIEW ÁP DỤNG VOUCHER (DÙNG CHO USER KÍCH VÔ VOUCHER ĐÓ) ==================
+    async def preview_discount(self, discount_id: int, cart_total: int):
+        # now = date.today()
+        now = date(2025,9,28)
+        stmt = select(Discount).where(
+            Discount.discount_id == discount_id,
+            Discount.is_active == True
+        )
+        result = await self.db.execute(stmt)
+        discount = result.scalar_one_or_none()
+
+        if not discount:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Mã giảm giá không tồn tại"
+            )
+
+        # Hết hạn
+        if discount.start_date > now or discount.end_date < now:
+            return {
+                "valid": False,
+                "final_total": cart_total,
+                "message": "Mã giảm giá không còn hiệu lực"
+            }
+
+        # Chưa đủ điều kiện đơn hàng
+        if cart_total < discount.min_order_value:
+            return {
+                "valid": False,
+                "final_total": cart_total,
+                "message": f"Đơn hàng tối thiểu {int(discount.min_order_value)}"
+            }
+
+        # Hết lượt
+        if discount.usage_limit <= discount.used_count:
+            return {
+                "valid": False,
+                "final_total": cart_total,
+                "message": "Mã giảm giá đã hết lượt sử dụng"
+            }
+
+        # ===== TÍNH GIẢM GIÁ =====
+        percent = Decimal(discount.discount_percent)
+        discount_amount = (Decimal(cart_total) * percent) / Decimal(100)
+
+        if discount.max_discount:
+            discount_amount = min(discount_amount, discount.max_discount)
+
+        final_total = Decimal(cart_total) - discount_amount
+
+        return {
+            "valid": True,
+            "discount_id": discount.discount_id,
+            "code": discount.code,
+            "discount_amount": int(discount_amount),
+            "final_total": int(final_total),
+            "message": "Có thể áp dụng mã giảm giá"
+        }
    
 def get_discount_service(
     db: AsyncSession = Depends(get_db)
