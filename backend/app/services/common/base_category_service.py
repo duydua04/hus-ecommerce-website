@@ -38,18 +38,14 @@ class BaseCategoryService(ABC):
         Hàm xử lý phân trang
         """
 
-        # 1. Đếm tổng số lượng (Count Query)
         count_stmt = select(func.count()).select_from(stmt.subquery())
         total_result = await self.db.execute(count_stmt)
         total = total_result.scalar() or 0
 
-        # 2. Lấy dữ liệu phân trang (Data Query)
-        # Thêm order_by, limit, offset vào câu lệnh gốc
         paginated_stmt = stmt.order_by(asc(Category.category_name)).limit(limit).offset(offset)
         result = await self.db.execute(paginated_stmt)
         categories = result.scalars().all()
 
-        # 3. Validate Pydantic
         data = [CategoryResponse.model_validate(c) for c in categories]
 
         return Page(

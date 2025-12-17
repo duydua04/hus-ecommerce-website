@@ -46,6 +46,7 @@ class AdminCategoryService(BaseCategoryService):
         self.db.add(cat)
         await self.db.commit()
         await self.db.refresh(cat)
+        await self._invalidate_list_cache()
 
         return CategoryResponse.model_validate(cat)
 
@@ -81,6 +82,7 @@ class AdminCategoryService(BaseCategoryService):
 
         await self.db.commit()
         await self.db.refresh(cat)
+        await self._invalidate_list_cache()
 
         return CategoryResponse.model_validate(cat)
 
@@ -103,6 +105,7 @@ class AdminCategoryService(BaseCategoryService):
 
         await self.db.delete(cat)
         await self.db.commit()
+        await self._invalidate_list_cache()
 
         return {"deleted": True, "category_id": category_id}
 
