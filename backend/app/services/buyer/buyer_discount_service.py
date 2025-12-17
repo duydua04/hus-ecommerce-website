@@ -139,6 +139,44 @@ class DiscountService(BaseDiscountService):
             "message": "Áp dụng mã giảm giá thành công"
         }
 
+    # ================================== GỢI Ý MÃ GIẢM GIÁ TỐT NHẤT =======================
+    async def get_best_discount(self, cart_total: int):
+        # now = date.today()
+        now = date(2025,9,28)
+        stmt = select(Discount).where(
+            Discount.is_active == True,
+            Discount.start_date <= now,
+            Discount.end_date >= now,
+            Discount.min_order_value <= cart_total,
+            Discount.usage_limit > Discount.used_count
+        )
+
+        result = await self.db.execute(stmt)
+        discounts = result.scalars().all()
+
+        if not discounts:
+            return None
+
+        def estimate(d: Discount):
+            discount_amount = (
+                Decimal(cart_total)
+                * Decimal(d.discount_percent)
+                / Decimal(100)
+            )
+            if d.max_discount:
+                discount_amount = min(discount_amount, d.max_discount)
+            return discount_amount
+
+        best = max(discounts, key=estimate)
+
+        return {
+            "discount_id": best.discount_id,
+            "code": best.code,
+            "discount_percent": float(best.discount_percent),
+            "estimated_discount": int(estimate(best))
+        }
+    
+    
    
 def get_discount_service(
     db: AsyncSession = Depends(get_db)

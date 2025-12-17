@@ -54,14 +54,13 @@ async def get_available_discounts(
         limit=limit,
         offset=offset
     )
-
-# ============== ĐƯA RA THÔNG TIN CHI TIẾT MÃ GIẢM GIÁ ===============
-@router.get("/{discount_id}", response_model=DiscountResponse)
-async def get_discount_detail(
-    discount_id: int,
+ # ================================== GỢI Ý MÃ GIẢM GIÁ TỐT NHẤT =======================
+@router.get("/best")
+async def get_best_discount(
+    cart_total: int = Query(..., gt=0),
     service: DiscountService = Depends(get_discount_service)
 ):
-    return await service.get_detail(discount_id)
+    return await service.get_best_discount(cart_total)
 
 # =============== KIỂM TRA MÃ GIẢM GIÁ NGƯỜI DÙNG NHẬP CÓ ÁP DỤNG ĐƯỢC KHÔNG ==============
 @router.post("/validate", response_model=ValidateDiscountResponse)
@@ -73,4 +72,13 @@ async def validate_discount(
         code=payload.code,
         cart_total=payload.cart_total
     )
+
+# ============== ĐƯA RA THÔNG TIN CHI TIẾT MÃ GIẢM GIÁ ===============
+@router.get("/{discount_id}", response_model=DiscountResponse)
+async def get_discount_detail(
+    discount_id: int,
+    service: DiscountService = Depends(get_discount_service)
+):
+    return await service.get_detail(discount_id)
+
 
