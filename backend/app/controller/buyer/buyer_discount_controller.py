@@ -1,8 +1,6 @@
 from fastapi import APIRouter, Depends, Query, HTTPException
 from typing import List, Optional, Dict, Any
 from sqlalchemy.orm import Session, Query as SAQuery
-from pydantic import BaseModel
-from ...middleware.auth import require_buyer
 from ...schemas.discount import DiscountResponse, ValidateDiscountRequest, ValidateDiscountResponse, DiscountPreviewRequest
 from ...schemas.common import Page
 from ...middleware.auth import require_buyer
@@ -13,7 +11,7 @@ from ...services.buyer.buyer_discount_service import (
 router = APIRouter(
     prefix="/buyer/discount",
     tags=["buyer_discount"],
-    # dependencies=[Depends(require_buyer)]
+    dependencies=[Depends(require_buyer)]
 )
 
 # ================ ĐƯA RA DANH SÁCH MÃ GIẢM GIÁ ==========

@@ -25,3 +25,13 @@ class CarrierOut(ORMBase):
     base_price: Decimal
     price_per_kg: Decimal
     is_active: bool
+
+class CarrierCalculateRequest(BaseModel):
+    carrier_id: int
+    cart_total: int
+    weight: float = 0.0
+
+
+class CarrierCalculateResponse(BaseModel):
+    carrier_id: int
+    shipping_fee: int
