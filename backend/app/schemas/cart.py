@@ -29,3 +29,22 @@ class ShoppingCartItemResponse(ORMBase):
     variant_id: int | None = None
     size_id: int | None = None
     quantity: int
+
+from typing import List, Optional
+class CartProduct(BaseModel):
+    product_id: int
+    name: str
+    variant_id: Optional[int]
+    variant_name: Optional[str]
+    size_id: Optional[int]
+    size_name: Optional[str]
+    quantity: int
+    price: float
+    public_image_url: Optional[str]
+
+class SellerCart(BaseModel):
+    seller: str
+    products: List[CartProduct]
+
+class CartSummaryRequest(BaseModel):
+    selected_item_ids: List[int]  # danh sách shopping_cart_item_id

@@ -117,3 +117,29 @@ class ProductImageResponse(ORMBase):
 
 class ProductVariantWithSizesResponse(ProductVariantResponse):
     sizes: List[ProductSizeResponse] = []
+
+from typing import Optional
+class UpdateCartItemRequest(BaseModel):
+    quantity: int | None = None
+    action: str | None = None  # "increase"
+
+class UpdateVariantSizeRequest(BaseModel):
+    new_variant_id: Optional[int] = None
+    new_size_id: Optional[int] = None
+
+class AddToCartRequest(BaseModel):
+    product_id: int
+    variant_id: Optional[int] = None
+    size_id: Optional[int] = None
+    quantity: int = 1
+
+class CartProduct(BaseModel):
+    product_id: int
+    name: str
+    variant_id: Optional[int]
+    variant_name: Optional[str]
+    size_id: Optional[int]
+    size_name: Optional[str]
+    quantity: int
+    price: float
+    public_image_url: Optional[str]

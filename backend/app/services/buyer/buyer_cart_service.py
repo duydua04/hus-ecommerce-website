@@ -1,356 +1,318 @@
-from fastapi import HTTPException, status
+from fastapi import HTTPException, Depends
 from pydantic import BaseModel
-from sqlalchemy.orm import Session, selectinload, Query
-from ...schemas.product import ProductResponse
-from ...models import Product, ProductSize, ProductImage, ProductVariant
-from sqlalchemy import and_
-from typing import Optional
-from ...models.cart import ShoppingCart, ShoppingCartItem
-from datetime import datetime
-from ...config.s3 import public_url
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
 from sqlalchemy.orm import joinedload
 from collections import defaultdict
-
-# === LẤY RA THÔNG TIN ĐỂ NGƯỜI DÙNG CHỌN PHÂN LOẠI TRƯỚC KHI THÊM VÀO GIỎ HÀNG ===
-def get_product_options(product_id: int, db: Session):
-    """
-    Lấy danh sách phân loại (variant), size, và số lượng tồn kho
-    """
-    product = db.query(Product).filter(Product.product_id == product_id).first()
-    if not product:
-        raise HTTPException(status_code=404, detail="Product not found")
-
-    variant_list = []
-    for v in product.variants:  # lặp qua variant
-        sizes_list = [
-            {"size_id": s.size_id, "label": s.size_name, "stock": s.available_units, "in_stock": s.in_stock}
-            for s in v.sizes  # lấy size theo variant
-        ]
-        variant_list.append({
-            "variant_id": v.variant_id,
-            "name": v.variant_name,
-            "sizes": sizes_list
-        })
-
-    return {
-        "product_id": product.product_id,
-        "product_name": product.name,
-        "variants": variant_list
-    }
-
-# ====== TÌM GIỎ HÀNG CỦA NGƯỜI MUA ======
-def find_cart(buyer_id: int, db: Session):
-    cart = db.query(ShoppingCart).filter_by(buyer_id=buyer_id).first()
-    if not cart:
-        return []
-    return cart
+from datetime import datetime
+from typing import Optional
+from decimal import Decimal
+from ...schemas.product import ( UpdateCartItemRequest, UpdateVariantSizeRequest)
+from ...models import (
+    Product, ProductSize, ProductVariant, ShoppingCart, ShoppingCartItem
+)
+from ...config.s3 import public_url
+from redis.asyncio import Redis
+from ...config.db import get_db
+from ...config.redis import get_redis_client
+from sqlalchemy.orm import selectinload
 
 
-# === THÊM SẢN PHẨM VÀO GIỎ HÀNG ====
-def add_to_cart(db: Session, buyer_id: int, product_id: int, variant_id=None, size_id=None, quantity=1):
-    """ 
-    Thêm sản phẩm vào giỏ hàng. 
-    Nếu giỏ hàng hoặc item chưa có thì tạo mới. 
-    Nếu item đã tồn tại thì tăng số lượng. 
-    """
+class CartServiceAsync:
+    def __init__(self, db: AsyncSession):
+        self.db = db
 
-    cart = db.query(ShoppingCart).filter_by(buyer_id=buyer_id).first()
-    if not cart:
-        cart = ShoppingCart(buyer_id=buyer_id)
-        db.add(cart)
-        db.flush()  # shopping_cart_id đã có
-
-    # Kiểm tra variant/size và tồn kho
-    size = None
-    if size_id:
-        size = db.query(ProductSize).filter_by(size_id=size_id).first()
-        if not size:
-            raise Exception("Size không tồn tại")
-        if not size.in_stock or size.available_units < quantity:
-            raise Exception("Số lượng vượt quá tồn kho")
-
-    if variant_id:
-        variant = db.query(ProductVariant).filter_by(variant_id=variant_id).first()
-        if not variant:
-            raise Exception("Variant không tồn tại")
-
-    # Kiểm tra item trong giỏ
-    existing_item = (
-        db.query(ShoppingCartItem)
-        .filter_by(
-            shopping_cart_id=cart.shopping_cart_id,
-            product_id=product_id,
-            variant_id=variant_id,
-            size_id=size_id,
+    # --- Lấy options product trước khi thêm vào giỏ ---
+    async def get_product_options(self, product_id: int):
+        result = await self.db.execute(
+            select(Product)
+            .options(selectinload(Product.variants).selectinload(ProductVariant.sizes))
+            .where(Product.product_id == product_id)
         )
-        .first()
-    )
+        product = result.scalar_one_or_none()
+        if not product:
+            raise HTTPException(404, "Product not found")
 
-    if existing_item:
-        new_qty = existing_item.quantity + quantity
-        if size and new_qty > size.available_units:
-            raise Exception("Không đủ hàng trong kho")
-        existing_item.quantity = new_qty
-    else:
-        new_item = ShoppingCartItem(
-            shopping_cart_id=cart.shopping_cart_id,
-            product_id=product_id,
-            variant_id=variant_id,
-            size_id=size_id,
-            quantity=quantity,
-        )
-        db.add(new_item)
+        variants = []
+        for v in product.variants or []:
+            sizes = [
+                {
+                    "size_id": s.size_id,
+                    "label": s.size_name,
+                    "stock": s.available_units,
+                    "in_stock": s.in_stock
+                } for s in v.sizes or []
+            ]
+            variants.append({"variant_id": v.variant_id, "name": v.variant_name, "sizes": sizes})
 
-    cart.updated_at = datetime.utcnow()
-    db.commit()
-    db.refresh(cart)
-    return cart
+        return {"product_id": product.product_id, "product_name": product.name, "variants": variants}
 
+    # --- Tìm giỏ hàng của buyer ---
+    async def find_cart(self, buyer_id: int):
+        result = await self.db.execute(select(ShoppingCart).where(ShoppingCart.buyer_id == buyer_id))
+        return result.scalar_one_or_none()
 
-
-# === HIỂN THỊ GIỎ HÀNG CỦA NGƯỜI DÙNG ===
-def get_buyer_cart(buyer_id: int, db: Session):
-    cart = find_cart(buyer_id, db)
-    items = (
-        db.query(ShoppingCartItem)
-        .join(Product)
-        .join(ProductVariant, ShoppingCartItem.variant_id == ProductVariant.variant_id)
-        .join(ProductSize, ShoppingCartItem.size_id == ProductSize.size_id)
-        .options(
-            joinedload(ShoppingCartItem.product).joinedload(Product.images),
-            joinedload(ShoppingCartItem.product).joinedload(Product.seller),
-        )
-        .filter(ShoppingCartItem.shopping_cart_id == cart.shopping_cart_id)
-        .all()
-    )
-
-    grouped = defaultdict(list)
-    for item in items:
-        seller_name = item.product.seller.shop_name if item.product.seller else "Unknown Seller"
-
-        # Ảnh public của sản phẩm
-        image_url = None
-        if item.product.images and len(item.product.images) > 0:
-            image_url = public_url(item.product.images[0].image_url)
-
-        # Lấy đúng variant và size đã chọn trong giỏ hàng
-        variant = next((v for v in item.product.variants if v.variant_id == item.variant_id), None)
-        size = None
-        if variant:
-            size = next((s for s in variant.sizes if s.size_id == item.size_id), None)
-
-        grouped[seller_name].append({
-            "product_id": item.product.product_id,
-            "name": item.product.name,
-            "variant_id": variant.variant_id if variant else None,
-            "variant_name": variant.variant_name if variant else None,
-            "size_id": size.size_id if size else None,
-            "size_name": size.size_name if size else None,
-            "quantity": item.quantity,
-            "price": float(item.product.base_price + (variant.price_adjustment if variant else 0)),
-            "public_image_url": image_url
-        })
-
-    return [{"seller": k, "products": v} for k, v in grouped.items()]
-
-
-# ===== XÓA SẢN PHẨM KHỎI GIỎ HÀNG ======
-def buyer_delete_product(buyer_id : int, product_id: int, db: Session):
-    cart = find_cart(buyer_id, db)
-    # Tìm sản phẩm trong giỏ hàng đó
-    item = (
-        db.query(ShoppingCartItem)
-        .filter_by(shopping_cart_id = cart.shopping_cart_id, product_id=product_id)
-        .first()
-    )
-    if not item:
-        return {"message": "Product not found in cart"}
-    
-    # Xóa item ra khỏi DB
-    db.delete(item)
-    db.commit()
-
-    return {"message": "Product removed successfully"}
-    
-
-# ====== TÍNH TỔNG TIỀN SẢN PHẨM ĐỊNH MUA ======
-def cart_summary(buyer_id : int, list_product_id: list[int], db: Session):
-    cart = find_cart(buyer_id, db)
-    if not cart:
-        return {"total price" : 0, "message" : "Cart not found"}
-    
-    # Lấy danh sách item có product nằm trong list được chọn
-    items = (
-        db.query(ShoppingCartItem)
-        .join(Product)  # sử dụng relationship "product"
-        .filter(
-            ShoppingCartItem.shopping_cart_id == cart.shopping_cart_id,
-            ShoppingCartItem.product_id.in_(list_product_id)
-        )
-        .all()
-    )
-
-    # Kiểm tra có sản phẩm trong giỏ không
-    if not items:
-        return {"total_price": 0, "message": "No matching items in cart"}
-
-    # Tính tổng tiền: base_price * quantity
-    total_price = sum(item.product.base_price * item.quantity for item in items)
-
-    return {"total_price": float(total_price)}
-
-class UpdateCartItemRequest(BaseModel):
-    quantity: int | None = None
-    action: str | None = None  # "increase"
-
-# ====== UPDATE SỐ LƯỢNG SẢN PHẨM TRONG GIỎ HÀNG ======
-def buyer_update_quantity_item(buyer_id: int, item_id: int, data: UpdateCartItemRequest, db: Session):
-    cart = find_cart(buyer_id, db)
-
-    item = (
-        db.query(ShoppingCartItem)
-        .filter(
-            ShoppingCartItem.shopping_cart_id == cart.shopping_cart_id,
-            ShoppingCartItem.shopping_cart_item_id == item_id
-        )
-        .first()
-    )
-
-    if not item:
-        return {"message": "Item not found"}
-
-    # --- TH 1: tăng +1 ---
-    if data.action == "increase":
-        item.quantity += 1
-
-    # --- TH 2: nhập quantity mới ---
-    elif data.quantity is not None:
-        if data.quantity <= 0:
-            return {"message": "Quantity must be > 0"}
-        item.quantity = data.quantity
-
-    else:
-        return {"message": "No valid action or quantity provided"}
-
-    db.commit()
-    db.refresh(item)
-
-    return {
-        "message": "Item updated",
-        "item_id": item.shopping_cart_item_id,
-        "new_quantity": item.quantity
-    }
-
-
-# UPDATE VARIANT + SIZE CỦA SẢN PHẨM TRONG GIỎ HÀNG
-class UpdateVariantSizeRequest(BaseModel):
-    new_variant_id: Optional[int] = None
-    new_size_id: Optional[int] = None
-
-def update_buyer_variant_size(
-    buyer_id: int,
-    item_id: int,
-    req: UpdateVariantSizeRequest,
-    db: Session
-):
-    # 1) Không có dữ liệu để cập nhật
-    if not req.new_variant_id and not req.new_size_id:
-        raise HTTPException(400, "Không có dữ liệu để cập nhật")
-
-    # 2) Lấy item đảm bảo đúng buyer
-    item = (
-        db.query(ShoppingCartItem)
-        .join(ShoppingCart)
-        .filter(
-            ShoppingCartItem.shopping_cart_item_id == item_id,
-            ShoppingCart.buyer_id == buyer_id
-        )
-        .first()
-    )
-
-    if not item:
-        raise HTTPException(404, "Item không tồn tại hoặc không thuộc buyer")
-
-    product_id = item.product_id
-
-    # 3) Giữ giá trị cũ nếu không truyền mới
-    variant_id = req.new_variant_id or item.variant_id
-    size_id = req.new_size_id or item.size_id
-
-    # 4) Validate variant
-    variant = (
-        db.query(ProductVariant)
-        .filter(
-            ProductVariant.variant_id == variant_id,
-            ProductVariant.product_id == product_id
-        )
-        .first()
-    )
-    if not variant:
-        raise HTTPException(400, "Variant không hợp lệ cho sản phẩm này")
-
-    # 5) Validate size
-    size = (
-        db.query(ProductSize)
-        .filter(
-            ProductSize.size_id == size_id,
-            ProductSize.variant_id == variant_id
-        )
-        .first()
-    )
-
-    if not size:
-        if req.new_variant_id and not req.new_size_id:
-            raise HTTPException(
-                400,
-                "Size hiện tại không thuộc variant mới — vui lòng chọn size mới"
+    # --- Thêm sản phẩm vào giỏ hàng ---
+    async def add_to_cart(self, buyer_id: int, product_id: int, variant_id: int | None = None, size_id: int | None = None, quantity=1):
+        cart = await self.find_cart(buyer_id)
+        if not cart:
+            cart = ShoppingCart(buyer_id=buyer_id)
+            self.db.add(cart)
+            await self.db.flush()
+        # # Lấy product
+        # result = await self.db.execute(select(Product).where(Product.product_id == product_id))
+        # product = result.scalar_one_or_none()
+        
+        # if not product:
+        #     raise HTTPException(404, "Product not found")
+        # # Nếu product không có variant, ép None
+        # if not product.variants:
+        #     variant_id = None
+        #     size_id = None
+            
+        # Kiểm tra variant
+        if variant_id is not None:
+            result = await self.db.execute(
+                select(ProductVariant).where(
+                    ProductVariant.variant_id == variant_id,
+                    ProductVariant.product_id == product_id
+                )
             )
-        raise HTTPException(400, "Size không hợp lệ cho variant này")
+            variant = result.scalar_one_or_none()
+            if not variant:
+                raise HTTPException(400, "Variant không hợp lệ")
 
-    # 6) Check tồn kho
-    if not size.in_stock or size.available_units < item.quantity:
-        raise HTTPException(400, "Không đủ hàng trong kho")
-
-    # 7) Check trùng item trong cart để merge
-    duplicate_item = (
-        db.query(ShoppingCartItem)
-        .filter(
-            ShoppingCartItem.shopping_cart_id == item.shopping_cart_id,
-            ShoppingCartItem.product_id == product_id,
-            ShoppingCartItem.variant_id == variant_id,
-            ShoppingCartItem.size_id == size_id,
-            ShoppingCartItem.shopping_cart_item_id != item_id
+        # Kiểm tra size
+        if size_id is not None:
+            result = await self.db.execute(
+                select(ProductSize).where(
+                    ProductSize.size_id == size_id,
+                    ProductSize.variant_id == variant_id
+            )
         )
-        .first()
-    )
+        size = result.scalar_one_or_none()
+        if not size:
+            raise HTTPException(400, "Size không hợp lệ hoặc không thuộc variant này")
+        # Kiểm tra item trùng
+        result = await self.db.execute(
+            select(ShoppingCartItem).where(
+                ShoppingCartItem.shopping_cart_id == cart.shopping_cart_id,
+                ShoppingCartItem.product_id == product_id,
+                ShoppingCartItem.variant_id == variant_id,
+                ShoppingCartItem.size_id == size_id
+            )
+        )
+        existing_item = result.scalar_one_or_none()
 
-    if duplicate_item:
-        merged_qty = duplicate_item.quantity + item.quantity
+        if existing_item:
+            existing_item.quantity += quantity
+        else:
+            self.db.add(
+                ShoppingCartItem(
+                    shopping_cart_id=cart.shopping_cart_id,
+                    product_id=product_id,
+                    variant_id=variant_id,
+                    size_id=size_id,
+                    quantity=quantity
+                )
+            )
 
-        if merged_qty > size.available_units:
-            raise HTTPException(400, "Gộp số lượng vượt tồn kho")
+        cart.updated_at = datetime.utcnow()
+        await self.db.commit()
+        await self.db.refresh(cart)
+        return cart
 
-        duplicate_item.quantity = merged_qty
-        db.delete(item)
-        db.commit()
-        db.refresh(duplicate_item)
+    
+    # --- Lấy giỏ hàng của buyer ---
+    async def get_buyer_cart(self, buyer_id: int):
+        cart = await self.find_cart(buyer_id)
+        if not cart:
+            return []
 
-        return {
-            "message": "Item merged",
-            "item_id": duplicate_item.shopping_cart_item_id,
-            "new_quantity": merged_qty
-        }
+        # Lấy tất cả item với product + images + variants
+        result = await self.db.execute(
+            select(ShoppingCartItem)
+            .options(
+                joinedload(ShoppingCartItem.product)
+                .joinedload(Product.images),
+                joinedload(ShoppingCartItem.product)
+                .joinedload(Product.variants)
+                .joinedload(ProductVariant.sizes),
+                joinedload(ShoppingCartItem.product)
+                .joinedload(Product.seller)
+            )
+            .where(ShoppingCartItem.shopping_cart_id == cart.shopping_cart_id)
+        )
+        items = result.unique().scalars().all()# tránh lỗi duplicate object
 
-    # 8) Không trùng → update trực tiếp
-    item.variant_id = variant_id
-    item.size_id = size_id
+        grouped = defaultdict(list)
+        for item in items:
+            product = item.product
+            seller_name = product.seller.shop_name if product.seller else "Unknown Seller"
+            image_url = public_url(product.images[0].image_url) if product.images else None
+            variant = next((v for v in product.variants if v.variant_id == item.variant_id), None)
+            size = next((s for s in variant.sizes if s.size_id == item.size_id), None) if variant else None
 
-    db.commit()
-    db.refresh(item)
+            grouped[seller_name].append({
+                "product_id": product.product_id,
+                "name": product.name,
+                "variant_id": variant.variant_id if variant else None,
+                "variant_name": variant.variant_name if variant else None,
+                "size_id": size.size_id if size else None,
+                "size_name": size.size_name if size else None,
+                "quantity": item.quantity,
+                "price": float(product.base_price + (variant.price_adjustment if variant else 0)),
+                "public_image_url": image_url
+            })
 
-    return {
-        "message": "Item updated",
-        "item_id": item.shopping_cart_item_id,
-        "variant_id": variant_id,
-        "size_id": size_id
-    }
+        # Trả về dạng list JSON nhóm theo seller
+        return [{"seller": seller, "products": products} for seller, products in grouped.items()]
+    
+    # --- Xóa sản phẩm khỏi giỏ hàng ---
+    async def delete_item(self, buyer_id: int, item_id: int):
+        cart = await self.find_cart(buyer_id)
+        if not cart:
+            raise HTTPException(404, "Cart not found")
+
+        result = await self.db.execute(
+            select(ShoppingCartItem).where(
+                ShoppingCartItem.shopping_cart_item_id == item_id,
+                ShoppingCartItem.shopping_cart_id == cart.shopping_cart_id
+            )
+        )
+        item = result.scalar_one_or_none()
+        if not item:
+            raise HTTPException(404, "Item not found in cart")
+
+        await self.db.delete(item)
+        await self.db.commit()
+        return {"message": "Item removed successfully"}
+
+
+    # --- Tính tổng tiền giỏ hàng ---
+    async def cart_total(self, buyer_id: int, selected_item_ids: Optional[list[int]] = None):
+        cart = await self.find_cart(buyer_id)
+        if not cart:
+            return {"subtotal": 0, "total_items": 0}
+
+        result = await self.db.execute(
+            select(ShoppingCartItem)
+            .options(joinedload(ShoppingCartItem.product).joinedload(Product.variants))
+            .where(ShoppingCartItem.shopping_cart_id == cart.shopping_cart_id)
+        )
+
+        # fix duplicate object
+        items = result.unique().scalars().all()
+
+        if selected_item_ids:
+            items = [i for i in items if i.shopping_cart_item_id in selected_item_ids]
+
+        subtotal = Decimal(0)
+        total_items = 0
+        for item in items:
+            variant_adjust = 0
+            variant = next((v for v in item.product.variants if v.variant_id == item.variant_id), None)
+            if variant:
+                variant_adjust = variant.price_adjustment
+            subtotal += (item.product.base_price + variant_adjust) * item.quantity
+            total_items += item.quantity
+
+        return {"subtotal": float(subtotal), "total_items": total_items}
+
+    # --- Update quantity ---
+    async def update_quantity(self, buyer_id: int, item_id: int, data: UpdateCartItemRequest):
+        cart = await self.find_cart(buyer_id)
+        if not cart:
+            raise HTTPException(404, "Cart not found")
+
+        result = await self.db.execute(
+            select(ShoppingCartItem).where(
+                ShoppingCartItem.shopping_cart_id == cart.shopping_cart_id,
+                ShoppingCartItem.shopping_cart_item_id == item_id
+            )
+        )
+        item = result.scalar_one_or_none()
+        if not item:
+            raise HTTPException(404, "Item not found")
+
+        if data.action == "increase":
+            item.quantity += 1
+        elif data.quantity is not None:
+            if data.quantity <= 0:
+                raise HTTPException(400, "Quantity must be > 0")
+            item.quantity = data.quantity
+        else:
+            raise HTTPException(400, "No valid action or quantity provided")
+
+        await self.db.commit()
+        await self.db.refresh(item)
+        return {"message": "Item updated", "item_id": item.shopping_cart_item_id, "new_quantity": item.quantity}
+
+    # --- Update variant + size ---
+    async def update_variant_size(self, buyer_id: int, item_id: int, req: UpdateVariantSizeRequest):
+        if not req.new_variant_id and not req.new_size_id:
+            raise HTTPException(400, "No data to update")
+
+        cart = await self.find_cart(buyer_id)
+        if not cart:
+            raise HTTPException(404, "Cart not found")
+
+        result = await self.db.execute(
+            select(ShoppingCartItem)
+            .join(ShoppingCart)
+            .where(
+                ShoppingCartItem.shopping_cart_item_id == item_id,
+                ShoppingCart.buyer_id == buyer_id
+            )
+        )
+        item = result.scalar_one_or_none()
+        if not item:
+            raise HTTPException(404, "Item not found or not owned by buyer")
+
+        variant_id = req.new_variant_id or item.variant_id
+        size_id = req.new_size_id or item.size_id
+        product_id = item.product_id
+
+        # Check variant
+        result = await self.db.execute(select(ProductVariant).where(ProductVariant.variant_id == variant_id, ProductVariant.product_id == product_id))
+        variant = result.scalar_one_or_none()
+        if not variant:
+            raise HTTPException(400, "Variant not valid")
+
+        # Check size
+        result = await self.db.execute(select(ProductSize).where(ProductSize.size_id == size_id, ProductSize.variant_id == variant_id))
+        size = result.scalar_one_or_none()
+        if not size:
+            raise HTTPException(400, "Size not valid")
+        if not size.in_stock or size.available_units < item.quantity:
+            raise HTTPException(400, "Not enough stock")
+
+        # Merge nếu trùng
+        result = await self.db.execute(
+            select(ShoppingCartItem).where(
+                ShoppingCartItem.shopping_cart_id == cart.shopping_cart_id,
+                ShoppingCartItem.product_id == product_id,
+                ShoppingCartItem.variant_id == variant_id,
+                ShoppingCartItem.size_id == size_id,
+                ShoppingCartItem.shopping_cart_item_id != item_id
+            )
+        )
+        duplicate_item = result.scalar_one_or_none()
+        if duplicate_item:
+            duplicate_item.quantity += item.quantity
+            await self.db.delete(item)
+            await self.db.commit()
+            await self.db.refresh(duplicate_item)
+            return {"message": "Item merged", "item_id": duplicate_item.shopping_cart_item_id, "new_quantity": duplicate_item.quantity}
+
+        # Update trực tiếp
+        item.variant_id = variant_id
+        item.size_id = size_id
+        await self.db.commit()
+        await self.db.refresh(item)
+        return {"message": "Item updated", "item_id": item.shopping_cart_item_id, "variant_id": variant_id, "size_id": size_id}
+
+
+
+def get_cart_service(db: AsyncSession = Depends(get_db)):
+    return CartServiceAsync(db)
