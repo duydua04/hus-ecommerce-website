@@ -24,7 +24,7 @@ class DiscountService(BaseDiscountService):
 
         if q and q.strip():
             stmt = stmt.where(
-                Discount.name.ilike(f"%{q.strip()}%")
+                Discount.code.ilike(f"%{q.strip()}%")
             )
 
         return await self._build_list_response(
@@ -43,7 +43,7 @@ class DiscountService(BaseDiscountService):
     async def list_available(
         self,
         cart_total: int,
-        q: str | None,
+        q: Optional[str],
         limit: int,
         offset: int
     ):
@@ -90,10 +90,9 @@ class DiscountService(BaseDiscountService):
     
     # ======================== KIỂM TRA MÃ GIẢM GIÁ NGƯỜI DÙNG NHẬP CÓ ÁP DỤNG ĐƯỢC KHÔNG ==================
     async def validate_simple(self, code: str, cart_total: int):
-        # now = date.today()
-        now = date(2025,9,28)
+        now = date.today()
         stmt = select(Discount).where(
-            Discount.code == code,
+            Discount.code == code.upper(),
             Discount.is_active == True
         )
 
@@ -142,8 +141,7 @@ class DiscountService(BaseDiscountService):
 
     # ================================== GỢI Ý MÃ GIẢM GIÁ TỐT NHẤT =======================
     async def get_best_discount(self, cart_total: int):
-        # now = date.today()
-        now = date(2025,9,28)
+        now = date.today()
         stmt = select(Discount).where(
             Discount.is_active == True,
             Discount.start_date <= now,
@@ -179,8 +177,7 @@ class DiscountService(BaseDiscountService):
     
     # =================== PREVIEW ÁP DỤNG VOUCHER (DÙNG CHO USER KÍCH VÔ VOUCHER ĐÓ) ==================
     async def preview_discount(self, discount_id: int, cart_total: int):
-        # now = date.today()
-        now = date(2025,9,28)
+        now = date.today()
         stmt = select(Discount).where(
             Discount.discount_id == discount_id,
             Discount.is_active == True

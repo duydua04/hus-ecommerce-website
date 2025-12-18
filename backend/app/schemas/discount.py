@@ -37,3 +37,20 @@ class DiscountResponse(ORMBase):
     usage_limit: int | None = None
     used_count: int
     is_active: bool
+
+# Request dùng để kiểm tra mã giảm giá người dùng nhập.
+class ValidateDiscountRequest(BaseModel):
+    code: str
+    cart_total: int
+
+# Response trả về kết quả kiểm tra mã giảm giá.
+class ValidateDiscountResponse(BaseModel):
+    valid: bool
+    discount_amount: int = 0
+    final_total: int
+    message: str
+
+# Request dùng để xem trước kết quả áp dụng mã giảm giá.
+class DiscountPreviewRequest(BaseModel):
+    discount_id: int
+    cart_total: int
