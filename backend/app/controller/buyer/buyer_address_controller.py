@@ -32,22 +32,28 @@ async def list_addresses(
     """
     return await service.list(buyer["user"].buyer_id)
 
+# ================ TẠO ADRESS MẶC ĐỊNH LIÊN KẾT VỚI BUYER ========================
+@router.post("", status_code=status.HTTP_201_CREATED)
+async def create_address(
+    payload: AddressCreate,
+    is_default: bool = False,
+    label: str | None = None,
+    db: AsyncSession = Depends(get_db),
+    buyer=Depends(require_buyer)
+):
+    """
+        Tạo Address gốc và liên kết với Buyer
+        - Nếu là address đầu tiên → auto default
+        - Nếu is_default=True → bỏ default cũ
+        """
+    service = BuyerAddressService(db)
+    return await service.create_and_link(
+        user_id=buyer["user"].buyer_id,
+        payload=payload,
+        is_default=is_default,
+        label=label
+    )
 
-# @router.post("", status_code=status.HTTP_201_CREATED)
-# async def create_address(
-#     payload: AddressCreate,
-#     is_default: bool = False,
-#     label: str | None = None,
-#     db: AsyncSession = Depends(get_db),
-#     current_buyer=Depends(require_buyer)
-# ):
-#     service = BuyerAddressService(db)
-#     return await service.create_and_link(
-#         user_id=current_buyer.id,
-#         payload=payload,
-#         is_default=is_default,
-#         label=label
-#     )
 # @router.patch("/{link_id}")
 # async def update_address_link(
 #     link_id: int,

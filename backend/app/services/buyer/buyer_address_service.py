@@ -8,7 +8,7 @@ from ...config.db import get_db
 from fastapi import Depends
 
 class BuyerAddressService(BaseAddressService):
-
+    # ============== DANH SÁCH ĐỊA CHỈ CỦA BUYER =======================
     async def list(self, user_id: int):
         """
         Danh sách địa chỉ của buyer
@@ -22,7 +22,7 @@ class BuyerAddressService(BaseAddressService):
         res = await self.db.execute(stmt)
         return res.all()
 
-
+    # ================ TẠO ADRESS MẶC ĐỊNH LIÊN KẾT VỚI BUYER ========================
     async def create_and_link(
         self,
         user_id: int,
@@ -32,8 +32,23 @@ class BuyerAddressService(BaseAddressService):
     ):
         """
         Tạo Address gốc và liên kết với Buyer
+        - Nếu là address đầu tiên → auto default
+        - Nếu is_default=True → bỏ default cũ
         """
-        # Nếu đặt làm default → bỏ default cũ
+
+        # Kiểm tra buyer đã có address chưa
+        result = await self.db.execute(
+            select(BuyerAddress)
+            .where(BuyerAddress.buyer_id == user_id)
+            .limit(1)
+        )
+        has_address = result.scalar_one_or_none() is not None
+
+        # Nếu chưa có address nào → auto default
+        if not has_address:
+            is_default = True
+
+        # Nếu set default → bỏ default cũ
         if is_default:
             await self.db.execute(
                 update(BuyerAddress)
@@ -51,6 +66,7 @@ class BuyerAddressService(BaseAddressService):
             is_default=is_default,
             label=label
         )
+
         self.db.add(buyer_address)
         await self.db.commit()
         await self.db.refresh(buyer_address)
