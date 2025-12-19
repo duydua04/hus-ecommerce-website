@@ -3,24 +3,35 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..common.address_service import BaseAddressService
 from ...models.address import Address, BuyerAddress
-from ...schemas.address import AddressCreate, AddressUpdate
+from ...schemas.address import AddressCreate, AddressUpdate, AddressResponse, BuyerAddressResponse
 from ...config.db import get_db
 from fastapi import Depends
 
 class BuyerAddressService(BaseAddressService):
     # ============== DANH SÁCH ĐỊA CHỈ CỦA BUYER =======================
     async def list(self, user_id: int):
-        """
-        Danh sách địa chỉ của buyer
-        """
         stmt = (
             select(BuyerAddress, Address)
             .join(Address, BuyerAddress.address_id == Address.address_id)
             .where(BuyerAddress.buyer_id == user_id)
             .order_by(BuyerAddress.is_default.desc())
         )
+
         res = await self.db.execute(stmt)
-        return res.all()
+
+        result = []
+        for buyer_address, address in res.all():
+            result.append(
+                BuyerAddressResponse(
+                    buyer_address_id=buyer_address.buyer_address_id,
+                    buyer_id=buyer_address.buyer_id,
+                    address_id=buyer_address.address_id,
+                    is_default=buyer_address.is_default,
+                    label=buyer_address.label
+                )
+            )
+
+        return result
 
     # ================ TẠO ADRESS MẶC ĐỊNH LIÊN KẾT VỚI BUYER ========================
     async def create_and_link(
@@ -141,13 +152,13 @@ class BuyerAddressService(BaseAddressService):
 
         return address
 
-
-    async def delete(self, user_id: int, link_id: int):
+    # ==================== XÓA LIÊN KẾT ĐỊA CHỈ =================
+    async def delete(self, user_id: int, buyer_address_id: int):
         """
         Xóa liên kết BuyerAddress và dọn Address nếu bị orphan
         """
         stmt = select(BuyerAddress).where(
-            BuyerAddress.buyer_address_id == link_id,
+            BuyerAddress.buyer_address_id == buyer_address_id,
             BuyerAddress.buyer_id == user_id
         )
         res = await self.db.execute(stmt)
@@ -166,13 +177,13 @@ class BuyerAddressService(BaseAddressService):
 
         return True
 
-
-    async def set_default(self, user_id: int, link_id: int):
+    # =============== SET ĐỊA CHỈ MẶC ĐỊNH =============
+    async def set_default(self, user_id: int, buyer_address_id: int):
         """
         Set một địa chỉ làm mặc định
         """
         stmt = select(BuyerAddress).where(
-            BuyerAddress.buyer_address_id == link_id,
+            BuyerAddress.buyer_address_id == buyer_address_id,
             BuyerAddress.buyer_id == user_id
         )
         res = await self.db.execute(stmt)

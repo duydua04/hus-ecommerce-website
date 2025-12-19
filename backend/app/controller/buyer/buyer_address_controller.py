@@ -1,12 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-
+from typing import List
 from ...config.db import get_db
 from ...middleware.auth import require_buyer
 from ...schemas.address import (
     AddressCreate,
     AddressUpdate,
-    BuyerAddressUpdate
+    BuyerAddressUpdate,
+    BuyerAddressResponse
 )
 from ...services.buyer.buyer_address_service import BuyerAddressService, get_buyer_address_service
 
@@ -18,18 +19,14 @@ router = APIRouter(
 
 # ========================= LẤY DANH SÁCH ĐỊA CHỈ CỦA BUYER HIỆN TẠI =======================
 
-@router.get("")
+@router.get(
+    "",
+    response_model=List[BuyerAddressResponse]
+)
 async def list_addresses(
     buyer: dict = Depends(require_buyer),
     service: BuyerAddressService = Depends(get_buyer_address_service)
 ):
-    """
-    Lấy danh sách tất cả địa chỉ của buyer hiện tại.
-
-    - Chỉ trả về các địa chỉ thuộc quyền sở hữu của buyer
-    - Bao gồm địa chỉ mặc định (nếu có)
-    - Yêu cầu buyer đã đăng nhập
-    """
     return await service.list(buyer["user"].buyer_id)
 
 # ================ TẠO ADRESS MẶC ĐỊNH LIÊN KẾT VỚI BUYER ========================
@@ -105,40 +102,49 @@ async def update_address_content(
 
     return result
 
-# @router.delete("/{link_id}", status_code=status.HTTP_204_NO_CONTENT)
-# async def delete_address(
-#     link_id: int,
-#     db: AsyncSession = Depends(get_db),
-#     current_buyer=Depends(require_buyer)
-# ):
-#     service = BuyerAddressService(db)
-#     success = await service.delete(
-#         user_id=current_buyer.id,
-#         link_id=link_id
-#     )
+# ==================== XÓA LIÊN KẾT ĐỊA CHỈ =================
+@router.delete("/{link_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_address(
+    buyer_address_id: int,
+    db: AsyncSession = Depends(get_db),
+    buyer=Depends(require_buyer)
+):
+    """
+        Xóa liên kết BuyerAddress và dọn Address nếu bị orphan
+    """
+    service = BuyerAddressService(db)
+    success = await service.delete(
+        user_id=buyer["user"].buyer_id,
+        buyer_address_id=buyer_address_id
+    )
 
-#     if not success:
-#         raise HTTPException(
-#             status_code=status.HTTP_404_NOT_FOUND,
-#             detail="Address not found"
-#         )
+    if not success:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Address not found"
+        )
+    return {"message": f"✅ Xóa địa chỉ thành công"}
 
-# @router.post("/{link_id}/default")
-# async def set_default_address(
-#     link_id: int,
-#     db: AsyncSession = Depends(get_db),
-#     current_buyer=Depends(require_buyer)
-# ):
-#     service = BuyerAddressService(db)
-#     result = await service.set_default(
-#         user_id=current_buyer.id,
-#         link_id=link_id
-#     )
+# =============== SET ĐỊA CHỈ MẶC ĐỊNH =============
+@router.post("/{link_id}/default")
+async def set_default_address(
+    buyer_address_id: int,
+    db: AsyncSession = Depends(get_db),
+    buyer=Depends(require_buyer)
+):
+    """
+        Set một địa chỉ làm mặc định
+    """
+    service = BuyerAddressService(db)
+    result = await service.set_default(
+        user_id=buyer["user"].buyer_id,
+        buyer_address_id=buyer_address_id
+    )
 
-#     if not result:
-#         raise HTTPException(
-#             status_code=status.HTTP_404_NOT_FOUND,
-#             detail="Address not found"
-#         )
+    if not result:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Address not found"
+        )
 
-#     return result
+    return result
