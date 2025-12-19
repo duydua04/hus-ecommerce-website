@@ -52,7 +52,7 @@ class OrderItemResponse(ORMBase):
 
 
 from .address import AddressResponse
-from typing import List
+from typing import List, Optional
 class SellerOrderDetail(ORMBase):
     """
     DTO chi tiết đơn cho seller: gom gọn OrderResponse + địa chỉ + các item của seller.
@@ -64,3 +64,11 @@ class SellerOrderDetail(ORMBase):
     buyer_phone: str | None = None
     carrier_name: str | None = None
     carrier_avt_url: str | None = None
+
+class OrderCreateNew(BaseModel):
+    buyer_address_id: int
+    carrier_id: int
+    payment_method: str
+    discount_id: Optional[int] = None
+    notes: Optional[str] = None
+    cart_item_ids: List[int]  # danh sách sản phẩm muốn mua

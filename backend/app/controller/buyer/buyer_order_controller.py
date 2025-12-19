@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from ...middleware.auth import require_buyer
-from ...schemas.order import OrderCreate, OrderResponse, SellerOrderDetail
+from ...schemas.order import OrderCreate, OrderResponse, SellerOrderDetail, OrderCreateNew
 from ...services.buyer.buyer_order_service import (
     BuyerOrderService,
     get_buyer_order_service
@@ -13,22 +13,34 @@ router = APIRouter(
 )
 
 # ===== TẠO ĐƠN =====
-@router.post("", response_model=OrderResponse, status_code=201)
-async def place_order(
-    payload: OrderCreate,
-    buyer = Depends(require_buyer),
+@router.post(
+    "",
+    response_model=OrderResponse  # trả về order vừa tạo
+)
+async def create_order(
+    payload: OrderCreateNew,
+    buyer=Depends(require_buyer),
     service: BuyerOrderService = Depends(get_buyer_order_service)
 ):
-    return await service.place_order(buyer.buyer_id, payload)
+    """
+    Tạo đơn hàng từ các sản phẩm được chọn trong giỏ hàng.
+
+    - User chỉ cần chọn sản phẩm muốn mua (cart_item_ids)
+    - Backend tự tính subtotal, shipping, discount, total_price
+    - Xóa các sản phẩm đã mua khỏi giỏ hàng
+    """
+    return await service.place_order(
+        buyer_id=buyer["user"].buyer_id,
+        payload=payload
+    )
 
 # ===== LIST =====
 @router.get("", response_model=list[OrderResponse])
 async def list_my_orders(
-    auth = Depends(require_buyer),
+    buyer = Depends(require_buyer),
     service: BuyerOrderService = Depends(get_buyer_order_service),
 ):
-    buyer = auth["user"]
-    return await service.list_my_orders(buyer.buyer_id)
+    return await service.list_my_orders(buyer["user"].buyer_id)
 
 # ===== DETAIL =====
 @router.get("/{order_id}", response_model=SellerOrderDetail)
@@ -37,4 +49,4 @@ async def order_detail(
     buyer = Depends(require_buyer),
     service: BuyerOrderService = Depends(get_buyer_order_service)
 ):
-    return await service.get_order_detail(buyer.buyer_id, order_id)
+    return await service.get_order_detail(buyer["user"].buyer_id, order_id)

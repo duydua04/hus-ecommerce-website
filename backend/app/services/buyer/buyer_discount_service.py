@@ -108,7 +108,8 @@ class DiscountService(BaseDiscountService):
             }
 
         # Hết hạn
-        if discount.end_date < now:
+        if discount.start_date and now < discount.start_date or \
+                discount.end_date and now > discount.end_date:
             return {
                 "valid": False,
                 "final_total": cart_total,
