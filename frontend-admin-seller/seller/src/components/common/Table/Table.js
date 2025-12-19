@@ -12,8 +12,7 @@ const Table = ({ columns = [], data = [], actions = null }) => {
                 key={index}
                 className={`table__header 
                   ${col.hideMobile ? "table__header--hide-mobile" : ""} 
-                  ${col.hideTablet ? "table__header--hide-tablet" : ""}
-                  ${col.isActions ? "table__header--actions" : ""}`}
+                  ${col.hideTablet ? "table__header--hide-tablet" : ""}`}
               >
                 {col.label}
               </th>
@@ -55,16 +54,18 @@ const Table = ({ columns = [], data = [], actions = null }) => {
 
                 {actions && (
                   <td className="table__cell table__cell--actions">
-                    {actions.map((act, i) => (
-                      <button
-                        key={i}
-                        className={act.className}
-                        title={act.label}
-                        onClick={() => act.onClick(item)}
-                      >
-                        <i className={`${act.icon} action-btn__icon`}></i>
-                      </button>
-                    ))}
+                    <div className="table__actions">
+                      {actions.map((act, i) => (
+                        <button
+                          key={i}
+                          className={act.className}
+                          title={act.label}
+                          onClick={() => act.onClick(item)}
+                        >
+                          <i className={`${act.icon} action-btn__icon`} />
+                        </button>
+                      ))}
+                    </div>
                   </td>
                 )}
               </tr>

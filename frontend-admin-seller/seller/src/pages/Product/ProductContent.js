@@ -1,208 +1,273 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { X, Check, Eye } from "lucide-react";
 import PageHeader from "../../components/common/PageHeader/PageHeader";
 import Table from "../../components/common/Table/Table";
 import Pagination from "../../components/common/Pagination/Pagination";
 import Button from "../../components/common/Button/Button";
 import SearchBox from "../../components/common/SearchBox/SearchBox";
-
+import ProductModal from "./AddProduct/AddProduct";
+import ProductDetailModal from "./ProductDetail/ProductDetail";
+import ImageUploadModal from "../../components/common/AvatarUpload/AvatarUpload";
+import ConfirmModal from "../../components/common/ConfirmModal/ConfirmModal";
+import useProduct from "../../hooks/useProduct";
 import "./Product.scss";
 
+// Avatar mặc định
+import defaultImage from "../../assets/images/product-default-image.png";
+const DEFAULT_IMAGE = defaultImage;
+
 export default function ProductContent() {
-  // Mock data sản phẩm
-  const [products, setProducts] = useState([
-    {
-      id: 1,
-      image: "../img/asus-rog-gaming-laptop.png",
-      name: "ASUS ROG Gaming Laptop",
-      category: "Laptop",
-      rating: 4,
-      price: "$2,199",
-      weight: "2.5kg",
-    },
-    {
-      id: 2,
-      image: "../img/airpods-pro-2nd-gen.jpg",
-      name: "Airpods Pro 2nd Gen",
-      category: "Accessories",
-      rating: 5,
-      price: "$839",
-      weight: "200g",
-    },
-    {
-      id: 3,
-      image: "../img/apple-watch-ultra.png",
-      name: "Apple Watch Ultra",
-      category: "Watch",
-      rating: 4,
-      price: "$1,579",
-      weight: "80g",
-    },
-    {
-      id: 4,
-      image: "../img/samsung-galaxy-s23-ultra.png",
-      name: "Samsung Galaxy S23 Ultra",
-      category: "Phone",
-      rating: 5,
-      price: "$1,299",
-      weight: "210g",
-    },
-    {
-      id: 5,
-      image: "../img/sony-wh-1000xm5.jpg",
-      name: "Sony WH-1000XM5",
-      category: "Audio",
-      rating: 5,
-      price: "$399",
-      weight: "250g",
-    },
-    {
-      id: 6,
-      image: "../img/macbook-pro-16.jpg",
-      name: "Macbook 16 Pro",
-      category: "Laptop",
-      rating: 5,
-      price: "$1000",
-      weight: "1.2kg",
-    },
-    {
-      id: 7,
-      image: "../img/dell-xps-15.jpg",
-      name: "Dell XPS 13",
-      category: "Laptop",
-      rating: 4,
-      price: "$999",
-      weight: "1.2kg",
-    },
-    {
-      id: 8,
-      image: "../img/fitbit-charge-6.jpg",
-      name: "Fitbit Charge 5",
-      category: "Watch",
-      rating: 4,
-      price: "$149",
-      weight: "30g",
-    },
-    {
-      id: 9,
-      image: "../img/son-playstation-5.jpg",
-      name: "Sony PlayStation 5",
-      category: "Accessories",
-      rating: 5,
-      price: "$499",
-      weight: "4.5kg",
-    },
-    {
-      id: 10,
-      image: "../img/bose-quietcomfort-earbuds.webp",
-      name: "Bose QuietComfort 35",
-      category: "Audio",
-      rating: 5,
-      price: "$299",
-      weight: "240g",
-    },
-  ]);
+  const {
+    products,
+    total,
+    loading,
+    error,
+    fetchProducts,
+    createProduct,
+    updateProduct,
+    deleteProduct,
+    uploadProductImages,
+    clearError,
+  } = useProduct();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [activeOnly, setActiveOnly] = useState(true);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [detailProduct, setDetailProduct] = useState(null);
+
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [selectedProductId, setSelectedProductId] = useState(null);
+
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [productToDelete, setProductToDelete] = useState(null);
+
+  const [successMessage, setSuccessMessage] = useState("");
 
   const itemsPerPage = 10;
 
-  // Filter theo tên sản phẩm
-  const filtered = products.filter((p) =>
-    p.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  /* FETCH DATA */
+  useEffect(() => {
+    fetchProducts({
+      q: "",
+      active_only: activeOnly,
+      limit: itemsPerPage,
+      offset: 0,
+    });
+  }, []);
 
-  // Pagination
-  const totalPages = Math.ceil(filtered.length / itemsPerPage);
-  const start = (currentPage - 1) * itemsPerPage;
-  const currentItems = filtered.slice(start, start + itemsPerPage);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchProducts({
+        q: searchQuery,
+        active_only: activeOnly,
+        limit: itemsPerPage,
+        offset: (currentPage - 1) * itemsPerPage,
+      });
+    }, 500); // Debounce 500ms
 
-  // Render stars rating
-  const renderRating = (rating) => {
-    const stars = [];
-    for (let i = 1; i <= 5; i++) {
-      stars.push(i <= rating ? "⭐" : "☆");
+    return () => clearTimeout(timer);
+  }, [searchQuery, currentPage, activeOnly]);
+
+  const totalPages = Math.ceil(total / itemsPerPage);
+
+  /* HANDLERS */
+  const handleAddProduct = () => {
+    clearError();
+    setSuccessMessage("");
+    setSelectedProduct(null);
+    setIsModalOpen(true);
+  };
+
+  const handleEditProduct = (product) => {
+    clearError();
+    setSuccessMessage("");
+    setSelectedProduct(product);
+    setIsModalOpen(true);
+  };
+
+  const handleViewDetail = async (product) => {
+    setDetailProduct(product);
+    setIsDetailModalOpen(true);
+  };
+
+  const handleFormSubmit = async (formData) => {
+    try {
+      if (selectedProduct) {
+        await updateProduct(selectedProduct.product_id, formData);
+        setSuccessMessage("Cập nhật sản phẩm thành công");
+      } else {
+        await createProduct(formData);
+        setSuccessMessage("Thêm sản phẩm thành công");
+      }
+
+      setIsModalOpen(false);
+      setSelectedProduct(null);
+
+      setTimeout(() => setSuccessMessage(""), 3000);
+
+      fetchProducts({
+        q: searchQuery,
+        active_only: activeOnly,
+        limit: itemsPerPage,
+        offset: (currentPage - 1) * itemsPerPage,
+      });
+    } catch (err) {
+      console.error("Error submit form:", err);
     }
-    return stars.join("");
   };
 
-  // Toolbar actions
-  const handleAdd = () => {
-    alert("Thêm sản phẩm (chưa implement)");
+  const handleDeleteProduct = async (productId) => {
+    setProductToDelete(productId);
+    setIsConfirmModalOpen(true);
   };
 
-  const handleView = (item) => {
-    alert("Xem sản phẩm: " + item.name);
-  };
+  const handleConfirmDelete = async () => {
+    if (!productToDelete) return;
 
-  const handleEdit = (item) => {
-    alert("Sửa sản phẩm: " + item.name);
-  };
+    try {
+      const result = await deleteProduct(productToDelete);
 
-  const handleDelete = (item) => {
-    if (window.confirm(`Xóa sản phẩm ${item.name}?`)) {
-      setProducts(products.filter((p) => p.id !== item.id));
+      if (result.soft_deleted) {
+        setSuccessMessage("Sản phẩm đã được ngừng hoạt động");
+      } else {
+        setSuccessMessage("Xóa sản phẩm thành công");
+      }
+
+      setTimeout(() => setSuccessMessage(""), 3000);
+
+      fetchProducts({
+        q: searchQuery,
+        active_only: activeOnly,
+        limit: itemsPerPage,
+        offset: (currentPage - 1) * itemsPerPage,
+      });
+    } catch (err) {
+      console.error("Error delete product:", err);
+    } finally {
+      setIsConfirmModalOpen(false);
+      setProductToDelete(null);
     }
   };
 
-  // Định nghĩa columns cho Table
+  const handleCancelDelete = () => {
+    setIsConfirmModalOpen(false);
+    setProductToDelete(null);
+  };
+
+  const handleImageUpload = async (productId, files, primaryIndex) => {
+    try {
+      await uploadProductImages(productId, files, primaryIndex);
+
+      setIsImageModalOpen(false);
+      setSelectedProductId(null);
+
+      setSuccessMessage("Tải lên avatar thành công");
+      setTimeout(() => setSuccessMessage(""), 3000);
+
+      fetchProducts({
+        q: searchQuery,
+        active_only: activeOnly,
+        limit: itemsPerPage,
+        offset: (currentPage - 1) * itemsPerPage,
+      });
+    } catch (err) {
+      console.error("Error upload images:", err);
+    }
+  };
+
+  const handleToggleActiveFilter = () => {
+    setActiveOnly(!activeOnly);
+    setCurrentPage(1);
+  };
+
+  /* TABLE  */
   const columns = [
     {
-      key: "image",
+      key: "public_primary_image_url",
       label: "Hình ảnh",
-      render: (value, item) => (
-        <img src={value} alt={item.name} className="table__img" />
+      className: "table__cell--avatar",
+      render: (value, row) => (
+        <img
+          src={value || DEFAULT_IMAGE}
+          alt="Product"
+          className="table__img table__img--clickable"
+          title="Click để cập nhật hình ảnh"
+          onClick={() => {
+            setSelectedProductId(row.product_id);
+            setIsImageModalOpen(true);
+          }}
+          onError={(e) => {
+            e.target.src = DEFAULT_IMAGE;
+          }}
+        />
       ),
     },
     {
       key: "name",
       label: "Tên sản phẩm",
+      className: "table__cell--name",
     },
     {
-      key: "category",
+      key: "category_name",
       label: "Danh mục",
-      hideMobile: true,
+      className: "table__cell--category",
+      render: (v) => v || "Chưa phân loại",
     },
     {
-      key: "rating",
-      label: "Đánh giá",
-      render: (value) => renderRating(value),
-      hideMobile: true,
-    },
-    {
-      key: "price",
-      label: "Giá",
+      key: "base_price",
+      label: "Giá gốc",
       className: "table__cell--price",
+      render: (v) => `${Number(v).toLocaleString("vi-VN")} ₫`,
     },
     {
-      key: "weight",
-      label: "Cân nặng",
-      hideTablet: true,
+      key: "discount_percent",
+      label: "Giảm giá",
+      className: "table__cell--discount",
+      render: (v) => (v ? `${v}%` : "0%"),
+    },
+    {
+      key: "is_active",
+      label: "Trạng thái",
+      className: "table__cell--status",
+      render: (v) => (
+        <span
+          className={`status-badge ${
+            v ? "status-badge--active" : "status-badge--inactive"
+          }`}
+        >
+          {v ? "Hoạt động" : "Ngừng bán"}
+        </span>
+      ),
     },
   ];
 
-  // Định nghĩa actions cho Table
   const actions = [
     {
-      label: "Xem",
+      label: "Xem chi tiết",
       icon: "bx bx-show",
-      onClick: handleView,
+      onClick: handleViewDetail,
       className: "action-btn action-btn--view",
     },
     {
       label: "Sửa",
-      icon: "bx bx-edit",
-      onClick: handleEdit,
+      icon: "bx bx-edit-alt",
+      onClick: handleEditProduct,
       className: "action-btn action-btn--edit",
     },
     {
       label: "Xóa",
       icon: "bx bx-trash",
-      onClick: handleDelete,
+      onClick: (p) => handleDeleteProduct(p.product_id),
       className: "action-btn action-btn--delete",
     },
   ];
 
+  /* RENDER */
   return (
     <main className="main">
       <PageHeader
@@ -213,49 +278,67 @@ export default function ProductContent() {
         ]}
       />
 
-      {/* Toolbar */}
       <div className="toolbar">
-        {/* Toolbar Header */}
         <div className="toolbar__header">
           <div className="toolbar__title">
-            <h3 className="toolbar__title-text">Danh sách sản phẩm</h3>
+            <h3 className="toolbar__title-text">Quản lý sản phẩm</h3>
             <p className="toolbar__title-desc">
-              Quản lý và theo dõi sản phẩm của cửa hàng
+              Quản lý và theo dõi các sản phẩm của bạn
             </p>
           </div>
-
           <Button
             text="Thêm sản phẩm"
             icon="bx bx-plus"
             variant="primary"
-            onClick={handleAdd}
+            onClick={handleAddProduct}
           />
         </div>
 
-        {/* Toolbar Actions - Search + Filter */}
         <div className="toolbar__actions">
           <div className="toolbar__search">
             <SearchBox
               placeholder="Tìm kiếm sản phẩm..."
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setCurrentPage(1); // Reset về trang 1 khi search
+              onSearch={(value) => {
+                setSearchQuery(value);
+                setCurrentPage(1);
               }}
             />
           </div>
-          <button className="toolbar__btn-filter btn btn--secondary">
+          <button
+            className={`toolbar__filter btn ${
+              activeOnly ? "btn--primary" : "btn--secondary"
+            }`}
+            onClick={handleToggleActiveFilter}
+          >
             <i className="bx bx-filter btn__icon"></i>
-            <span className="btn__text">Lọc</span>
+            <span className="btn__text">
+              {activeOnly ? "Đang hoạt động" : "Tất cả"}
+            </span>
           </button>
         </div>
 
-        {/* Table */}
+        {error && (
+          <div className="toolbar__alert alert alert-error">
+            <span>{error}</span>
+            <button onClick={clearError} className="alert-close">
+              <X size={18} />
+            </button>
+          </div>
+        )}
+
+        {successMessage && (
+          <div className="toolbar__alert alert alert-success">
+            <Check size={18} />
+            <span>{successMessage}</span>
+          </div>
+        )}
+
+        {loading && <div className="toolbar__loading">Đang tải...</div>}
+
         <div className="toolbar__table">
-          <Table columns={columns} data={currentItems} actions={actions} />
+          <Table columns={columns} data={products} actions={actions} />
         </div>
 
-        {/* Pagination */}
         {totalPages > 1 && (
           <div className="toolbar__pagination">
             <Pagination
@@ -266,6 +349,45 @@ export default function ProductContent() {
           </div>
         )}
       </div>
+
+      {/*  MODALS  */}
+      <ProductModal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedProduct(null);
+        }}
+        onSubmit={handleFormSubmit}
+        product={selectedProduct}
+      />
+
+      <ProductDetailModal
+        isOpen={isDetailModalOpen}
+        product={detailProduct}
+        onClose={() => {
+          setIsDetailModalOpen(false);
+          setDetailProduct(null);
+        }}
+      />
+
+      <ImageUploadModal
+        isOpen={isImageModalOpen}
+        productId={selectedProductId}
+        onUpload={handleImageUpload}
+        onClose={() => {
+          setIsImageModalOpen(false);
+          setSelectedProductId(null);
+        }}
+        multiple={true}
+      />
+
+      <ConfirmModal
+        isOpen={isConfirmModalOpen}
+        title="Xác nhận xóa"
+        message="Bạn chắc chắn muốn xóa sản phẩm này?"
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
+      />
     </main>
   );
 }

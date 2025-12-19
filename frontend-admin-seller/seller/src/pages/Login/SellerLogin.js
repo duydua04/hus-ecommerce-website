@@ -52,6 +52,11 @@ function SellerLogin() {
         { withCredentials: true }
       );
 
+      console.log(
+        "Login Response FULL:",
+        JSON.stringify(response.data, null, 2)
+      );
+
       // Lưu email nếu chọn remember
       if (remember) {
         localStorage.setItem("savedSellerEmail", email);
@@ -59,10 +64,26 @@ function SellerLogin() {
         localStorage.removeItem("savedSellerEmail");
       }
 
+      // Lưu access_token
+      if (response.data?.access_token) {
+        localStorage.setItem("access_token", response.data.access_token);
+      }
+
+      // Lưu seller_id
+      if (response.data?.seller_id) {
+        localStorage.setItem("seller_id", response.data.seller_id);
+      }
+
       // Lưu role nếu có
       if (response.data?.scope) {
         localStorage.setItem("userRole", response.data.scope);
       }
+
+      console.log("Đăng nhập thành công! Đã lưu:", {
+        seller_id: localStorage.getItem("seller_id"),
+        token: localStorage.getItem("access_token") ? "Có" : "Không có",
+        role: localStorage.getItem("userRole"),
+      });
 
       // Chuyển đến trang products sau khi đăng nhập thành công
       navigate("/products", { replace: true });
@@ -223,7 +244,7 @@ function SellerLogin() {
             >
               Quên mật khẩu?
             </button>
-            <span className="divider-dot"> </span>
+            <span className="divider-dot">•</span>
             <button type="button" className="link-btn" onClick={handleRegister}>
               Đăng ký tài khoản mới
             </button>
