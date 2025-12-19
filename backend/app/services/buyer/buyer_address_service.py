@@ -73,18 +73,18 @@ class BuyerAddressService(BaseAddressService):
 
         return buyer_address
 
-
+    # ============= CẬP NHẬT THÔNG TIN LIÊN KẾT VỚI ĐỊA CHỈ (LABEL, IS_DEFAULT)==============
     async def update_link(
         self,
         user_id: int,
-        link_id: int,
+        buyer_address_id: int,
         payload
     ):
         """
         Cập nhật thông tin liên kết (label, is_default)
         """
         stmt = select(BuyerAddress).where(
-            BuyerAddress.buyer_address_id == link_id,
+            BuyerAddress.buyer_address_id == buyer_address_id,
             BuyerAddress.buyer_id == user_id
         )
         res = await self.db.execute(stmt)

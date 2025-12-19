@@ -54,27 +54,30 @@ async def create_address(
         label=label
     )
 
-# @router.patch("/{link_id}")
-# async def update_address_link(
-#     link_id: int,
-#     payload: BuyerAddressUpdate,
-#     db: AsyncSession = Depends(get_db),
-#     current_buyer=Depends(require_buyer)
-# ):
-#     service = BuyerAddressService(db)
-#     result = await service.update_link(
-#         user_id=current_buyer.id,
-#         link_id=link_id,
-#         payload=payload
-#     )
+@router.patch("/{link_id}")
+async def update_address_link(
+    buyer_address_id: int,
+    payload: BuyerAddressUpdate,
+    db: AsyncSession = Depends(get_db),
+    buyer=Depends(require_buyer)
+):
+    """
+        Cập nhật thông tin liên kết (label, is_default)
+    """
+    service = BuyerAddressService(db)
+    result = await service.update_link(
+        user_id=buyer["user"].buyer_id,
+        buyer_address_id=buyer_address_id,
+        payload=payload
+    )
 
-#     if not result:
-#         raise HTTPException(
-#             status_code=status.HTTP_404_NOT_FOUND,
-#             detail="Address not found"
-#         )
+    if not result:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Address not found"
+        )
 
-#     return result
+    return result
 
 # @router.put("/{link_id}/content")
 # async def update_address_content(
