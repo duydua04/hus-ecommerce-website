@@ -1,80 +1,131 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from typing import List
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from ...config.db import get_db
 from ...middleware.auth import require_buyer
 from ...schemas.address import (
-    AddressCreate, AddressUpdate,
-    BuyerAddressCreate, BuyerAddressUpdate,
-    BuyerAddressResponse, AddressResponse
+    AddressCreate,
+    AddressUpdate,
+    BuyerAddressUpdate
 )
-from ...services.common import address_service
-from ...schemas.common import BuyerAddressLabel
+from ...services.buyer.buyer_address_service import BuyerAddressService, get_buyer_address_service
 
 router = APIRouter(
     prefix="/buyer/addresses",
-    tags=["buyer_addresses"]
+    tags=["buyer_addresses"],
+    dependencies=[Depends(require_buyer)]
 )
 
-# Chuyen doi 1 doi tuong Buyer Address thanh 1 response duoc tra ve
-def to_buyer_link_response(link):
-    return BuyerAddressResponse(
-        buyer_address_id=link.buyer_address_id,
-        buyer_id=link.buyer_id,
-        address_id=link.address_id,
-        is_default=link.is_default,
-        label=link.label
-    )
+# ========================= LẤY DANH SÁCH ĐỊA CHỈ CỦA BUYER HIỆN TẠI =======================
 
-def to_address_response(address):
-    return AddressResponse.model_validate(address)
+@router.get("")
+async def list_addresses(
+    buyer: dict = Depends(require_buyer),
+    service: BuyerAddressService = Depends(get_buyer_address_service)
+):
+    """
+    Lấy danh sách tất cả địa chỉ của buyer hiện tại.
 
-# Tra ve tat ca danh sach
-@router.get("", response_model=List[BuyerAddressResponse])
-def get_list_buyer_address(info=Depends(require_buyer), db: Session = Depends(get_db)):
-    addresses = address_service.buyer_address_list(db, info["user"].buyer_id)
-    return [to_buyer_link_response(address) for address in addresses]
+    - Chỉ trả về các địa chỉ thuộc quyền sở hữu của buyer
+    - Bao gồm địa chỉ mặc định (nếu có)
+    - Yêu cầu buyer đã đăng nhập
+    """
+    return await service.list(buyer["user"].buyer_id)
 
-# Tao moi va lien ket dia chi voi buyer
-@router.post("/create-and-link", response_model=BuyerAddressResponse)
-def create_and_link_address(payload: AddressCreate, is_default: bool = False, label: BuyerAddressLabel | None = None,
-                            info = Depends(require_buyer), db: Session = Depends(get_db)):
-    link = address_service.buyer_create_and_link_address(db, info["user"].buyer_id, payload, is_default, label)
-    return to_buyer_link_response(link)
 
-# Lien ket dia chi da ton tai voi buyer
-@router.post("/link-existing", response_model=BuyerAddressResponse)
-def link_address_existing(body: BuyerAddressCreate, info = Depends(require_buyer), db: Session = Depends(get_db)):
-    # Neu client truyen buyer_id trong body khac voi buyer_id dang dang nhap thi bao loi
-    if getattr(body, "buyer_id", None) not in (None, info["user"].buyer_id):
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
+# @router.post("", status_code=status.HTTP_201_CREATED)
+# async def create_address(
+#     payload: AddressCreate,
+#     is_default: bool = False,
+#     label: str | None = None,
+#     db: AsyncSession = Depends(get_db),
+#     current_buyer=Depends(require_buyer)
+# ):
+#     service = BuyerAddressService(db)
+#     return await service.create_and_link(
+#         user_id=current_buyer.id,
+#         payload=payload,
+#         is_default=is_default,
+#         label=label
+#     )
+# @router.patch("/{link_id}")
+# async def update_address_link(
+#     link_id: int,
+#     payload: BuyerAddressUpdate,
+#     db: AsyncSession = Depends(get_db),
+#     current_buyer=Depends(require_buyer)
+# ):
+#     service = BuyerAddressService(db)
+#     result = await service.update_link(
+#         user_id=current_buyer.id,
+#         link_id=link_id,
+#         payload=payload
+#     )
 
-    link = address_service.buyer_link_address_existing(db, info["user"].buyer_id, body.address_id, body.is_default, body.label)
+#     if not result:
+#         raise HTTPException(
+#             status_code=status.HTTP_404_NOT_FOUND,
+#             detail="Address not found"
+#         )
 
-    return to_buyer_link_response(link)
+#     return result
 
-# Update lien ket dia chi voi buyer (is_default, label)
-@router.patch("/{buyer_address_id}", response_model=BuyerAddressResponse)
-def update_link(buyer_address_id: int, payload: BuyerAddressUpdate,
-                info = Depends(require_buyer), db: Session = Depends(get_db)):
-    link = address_service.buyer_update_link_address(db, info["user"].buyer_id, buyer_address_id, payload)
-    return to_buyer_link_response(link)
+# @router.put("/{link_id}/content")
+# async def update_address_content(
+#     link_id: int,
+#     payload: AddressUpdate,
+#     db: AsyncSession = Depends(get_db),
+#     current_buyer=Depends(require_buyer)
+# ):
+#     service = BuyerAddressService(db)
+#     result = await service.update_content(
+#         user_id=current_buyer.id,
+#         link_id=link_id,
+#         payload=payload
+#     )
 
-# Sua field dia chi
-@router.patch("/{buyer_address_id}/address", response_model=BuyerAddressResponse)
-def update_address_field(buyer_address_id: int, payload: AddressUpdate,
-                         info = Depends(require_buyer), db: Session = Depends(get_db)):
+#     if not result:
+#         raise HTTPException(
+#             status_code=status.HTTP_404_NOT_FOUND,
+#             detail="Address not found"
+#         )
 
-    link = address_service.buyer_update_address_fields(db, info["user"].buyer_id, buyer_address_id, payload)
-    return to_buyer_link_response(link)
+#     return result
 
-#  Set default
-@router.patch("/{buyer_address_id}/default", response_model=BuyerAddressResponse)
-def set_default(buyer_address_id: int, info = Depends(require_buyer), db: Session = Depends(get_db)):
-    link = address_service.buyer_set_default_address(db, info["user"].buyer_id, buyer_address_id)
-    return to_buyer_link_response(link)
+# @router.delete("/{link_id}", status_code=status.HTTP_204_NO_CONTENT)
+# async def delete_address(
+#     link_id: int,
+#     db: AsyncSession = Depends(get_db),
+#     current_buyer=Depends(require_buyer)
+# ):
+#     service = BuyerAddressService(db)
+#     success = await service.delete(
+#         user_id=current_buyer.id,
+#         link_id=link_id
+#     )
 
-# Xoa lien ket dia chi va don address
-@router.delete("/{buyer_address_id}")
-def delete_my_address(buyer_address_id: int, info = Depends(require_buyer), db: Session = Depends(get_db)):
-    return address_service.buyer_delete_address(db, info["user"].buyer_id, buyer_address_id)
+#     if not success:
+#         raise HTTPException(
+#             status_code=status.HTTP_404_NOT_FOUND,
+#             detail="Address not found"
+#         )
+
+# @router.post("/{link_id}/default")
+# async def set_default_address(
+#     link_id: int,
+#     db: AsyncSession = Depends(get_db),
+#     current_buyer=Depends(require_buyer)
+# ):
+#     service = BuyerAddressService(db)
+#     result = await service.set_default(
+#         user_id=current_buyer.id,
+#         link_id=link_id
+#     )
+
+#     if not result:
+#         raise HTTPException(
+#             status_code=status.HTTP_404_NOT_FOUND,
+#             detail="Address not found"
+#         )
+
+#     return result
