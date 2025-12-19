@@ -109,11 +109,11 @@ class BuyerAddressService(BaseAddressService):
 
         return buyer_address
 
-
+    # ============= CẬP NHẬT NỘI DUNG ĐỊA CHỉ ==============
     async def update_content(
         self,
         user_id: int,
-        link_id: int,
+        buyer_address_id: int,
         payload: AddressUpdate
     ):
         """
@@ -123,7 +123,7 @@ class BuyerAddressService(BaseAddressService):
             select(Address)
             .join(BuyerAddress, BuyerAddress.address_id == Address.address_id)
             .where(
-                BuyerAddress.buyer_address_id == link_id,
+                BuyerAddress.buyer_address_id == buyer_address_id,
                 BuyerAddress.buyer_id == user_id
             )
         )

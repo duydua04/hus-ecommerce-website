@@ -79,27 +79,31 @@ async def update_address_link(
 
     return result
 
-# @router.put("/{link_id}/content")
-# async def update_address_content(
-#     link_id: int,
-#     payload: AddressUpdate,
-#     db: AsyncSession = Depends(get_db),
-#     current_buyer=Depends(require_buyer)
-# ):
-#     service = BuyerAddressService(db)
-#     result = await service.update_content(
-#         user_id=current_buyer.id,
-#         link_id=link_id,
-#         payload=payload
-#     )
+# ============= CẬP NHẬT NỘI DUNG ĐỊA CHỉ ==============
+@router.put("/{link_id}/content")
+async def update_address_content(
+    buyer_address_id: int,
+    payload: AddressUpdate,
+    db: AsyncSession = Depends(get_db),
+    buyer=Depends(require_buyer)
+):
+    """
+        Cập nhật nội dung Address gốc
+        """
+    service = BuyerAddressService(db)
+    result = await service.update_content(
+        user_id=buyer["user"].buyer_id,
+        buyer_address_id=buyer_address_id,
+        payload=payload
+    )
 
-#     if not result:
-#         raise HTTPException(
-#             status_code=status.HTTP_404_NOT_FOUND,
-#             detail="Address not found"
-#         )
+    if not result:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Address not found"
+        )
 
-#     return result
+    return result
 
 # @router.delete("/{link_id}", status_code=status.HTTP_204_NO_CONTENT)
 # async def delete_address(
