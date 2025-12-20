@@ -50,7 +50,7 @@ class BaseCarrierService(ABC):
 
         carr = await self._get_carrier_or_404(carrier_id)
 
-        data = CarrierOut.model_validate(carr)
+        data = self._to_response(carr)
         await self.redis.set(cache_key, data.model_dump_json(), ex=self.TTL)
 
         return data
