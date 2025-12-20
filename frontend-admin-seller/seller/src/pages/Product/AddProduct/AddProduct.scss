@@ -4,7 +4,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: var(--bg-primary);
+  background-color: var(--overlay-modal);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -147,63 +147,5 @@
 
   @media (max-width: 640px) {
     grid-template-columns: 1fr;
-  }
-}
-
-// Buttons
-.btn {
-  padding: 0.625rem 1.25rem;
-  border-radius: 6px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: var(--transition);
-  border: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-
-  &--primary {
-    background-color: var(--blue);
-    color: var(--bg-white);
-
-    &:hover {
-      background-color: var(--blue-dark);
-    }
-
-    &:active {
-      background-color: var(--blue-light);
-    }
-  }
-
-  &--secondary {
-    background-color: var(--bg-white);
-    color: var(--bg-primary);
-
-    &:hover {
-      background-color: #e5e7eb;
-    }
-
-    &:active {
-      background-color: #d1d5db;
-    }
-  }
-
-  &--danger {
-    background-color: #ef4444;
-    color: #fff;
-
-    &:hover {
-      background-color: #dc2626;
-    }
-
-    &:active {
-      background-color: #b91c1c;
-    }
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
   }
 }

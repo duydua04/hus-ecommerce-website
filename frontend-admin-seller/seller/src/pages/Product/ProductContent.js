@@ -23,6 +23,7 @@ export default function ProductContent() {
     loading,
     error,
     fetchProducts,
+    fetchProductDetail,
     createProduct,
     updateProduct,
     deleteProduct,
@@ -91,8 +92,15 @@ export default function ProductContent() {
   };
 
   const handleViewDetail = async (product) => {
-    setDetailProduct(product);
-    setIsDetailModalOpen(true);
+    try {
+      // Gọi API để lấy chi tiết sản phẩm
+      const productDetail = await fetchProductDetail(product.product_id);
+      // Set product detail và mở modal
+      setDetailProduct(productDetail);
+      setIsDetailModalOpen(true);
+    } catch (err) {
+      console.error("Không tải được chi tiết sản phẩm:", err);
+    }
   };
 
   const handleFormSubmit = async (formData) => {
