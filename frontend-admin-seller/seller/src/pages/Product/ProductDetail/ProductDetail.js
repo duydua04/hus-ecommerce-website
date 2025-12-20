@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { X, Plus, Pencil, Trash, Package, DollarSign } from "lucide-react";
 import VariantModal from "./VariantModal/VariantModal";
 import SizeModal from "./SizeModal/SizeModal";
+import ConfirmModal from "../../../components/common/ConfirmModal/ConfirmModal";
 import useProduct from "../../../hooks/useProduct";
 import "./ProductDetail.scss";
 
@@ -13,6 +14,10 @@ export default function ProductDetailModal({ isOpen, product, onClose }) {
   const [variantModal, setVariantModal] = useState(null);
   const [sizeModal, setSizeModal] = useState(null);
   const [productData, setProductData] = useState(null);
+
+  // confirm delete variant
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [pendingVariantId, setPendingVariantId] = useState(null);
 
   // Update productData when product prop changes
   useEffect(() => {
@@ -32,14 +37,24 @@ export default function ProductDetailModal({ isOpen, product, onClose }) {
     }
   };
 
-  const handleDeleteVariant = async (variantId) => {
-    if (window.confirm("Bạn có chắc chắn muốn xóa biến thể này không?")) {
-      try {
-        await deleteVariant(productData.product_id, variantId);
-        await refreshProduct();
-      } catch (error) {
-        console.error("Có lỗi xảy ra khi xóa biến thể:", error);
-      }
+  // open confirm
+  const handleDeleteVariant = (variantId) => {
+    setPendingVariantId(variantId);
+    setConfirmOpen(true);
+  };
+
+  // confirm delete
+  const confirmDeleteVariant = async () => {
+    if (!pendingVariantId) return;
+
+    try {
+      await deleteVariant(productData.product_id, pendingVariantId);
+      await refreshProduct();
+    } catch (error) {
+      console.error("Có lỗi xảy ra khi xóa biến thể:", error);
+    } finally {
+      setConfirmOpen(false);
+      setPendingVariantId(null);
     }
   };
 
@@ -303,6 +318,17 @@ export default function ProductDetailModal({ isOpen, product, onClose }) {
           onSuccess={refreshProduct}
         />
       )}
+
+      <ConfirmModal
+        isOpen={confirmOpen}
+        title="Xóa biến thể"
+        message="Bạn có chắc chắn muốn xóa biến thể này? Hành động này không thể hoàn tác."
+        onCancel={() => {
+          setConfirmOpen(false);
+          setPendingVariantId(null);
+        }}
+        onConfirm={confirmDeleteVariant}
+      />
     </>
   );
 }

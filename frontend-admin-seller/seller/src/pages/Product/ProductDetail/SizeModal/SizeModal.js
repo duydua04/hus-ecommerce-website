@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { X, Plus, Trash } from "lucide-react";
 import useProduct from "../../../../hooks/useProduct";
+import ConfirmModal from "../../../../components/common/ConfirmModal/ConfirmModal";
 import "./SizeModal.scss";
 
 export default function SizeModal({ open, data, onClose, onSuccess }) {
@@ -13,6 +14,10 @@ export default function SizeModal({ open, data, onClose, onSuccess }) {
   const [units, setUnits] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  //Confirm delete state
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [pendingSizeId, setPendingSizeId] = useState(null);
 
   if (!open || !variant || !productId) return null;
 
@@ -77,19 +82,28 @@ export default function SizeModal({ open, data, onClose, onSuccess }) {
     }
   };
 
+  /* Open confirm delete */
+  const handleDeleteSize = (sizeId) => {
+    setPendingSizeId(sizeId);
+    setConfirmOpen(true);
+  };
+
   /* Delete size */
-  const handleDeleteSize = async (sizeId) => {
-    if (!window.confirm("Bạn có chắc chắn muốn xóa kích thước này?")) return;
+  const confirmDeleteSize = async () => {
+    if (!pendingSizeId) return;
 
     try {
-      await deleteSize(productId, variant.variant_id, sizeId);
+      await deleteSize(productId, variant.variant_id, pendingSizeId);
       onSuccess?.();
     } catch (err) {
       setError(parseApiError(err));
+    } finally {
+      setConfirmOpen(false);
+      setPendingSizeId(null);
     }
   };
 
-  /*  Render */
+  /* Render */
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div
@@ -227,6 +241,18 @@ export default function SizeModal({ open, data, onClose, onSuccess }) {
             Đóng
           </button>
         </div>
+
+        {/* Confirm delete modal */}
+        <ConfirmModal
+          isOpen={confirmOpen}
+          title="Xóa kích thước"
+          message="Bạn có chắc chắn muốn xóa kích thước này? Hành động này không thể hoàn tác."
+          onCancel={() => {
+            setConfirmOpen(false);
+            setPendingSizeId(null);
+          }}
+          onConfirm={confirmDeleteSize}
+        />
       </div>
     </div>
   );

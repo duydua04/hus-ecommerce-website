@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { X } from "lucide-react";
+import Select from "react-select";
+import categoryService from "../../../api/CategoryService";
 import "./AddProduct.scss";
 
 export default function ProductModal({ isOpen, onClose, onSubmit, product }) {
@@ -13,18 +15,29 @@ export default function ProductModal({ isOpen, onClose, onSubmit, product }) {
     is_active: true,
   });
 
-  /* LẤY seller_id TỪ localStorage */
-  const getSellerIdFromToken = () => {
-    const sellerId = localStorage.getItem("seller_id");
+  const [categories, setCategories] = useState([]);
+  const [loadingCategories, setLoadingCategories] = useState(false);
 
-    if (!sellerId) {
-      console.error("Không tìm thấy seller_id trong localStorage");
-      return null;
-    }
+  /* Load danh mục */
+  useEffect(() => {
+    if (!isOpen) return;
 
-    return sellerId;
-  };
+    const loadCategories = async () => {
+      setLoadingCategories(true);
+      try {
+        const data = await categoryService.getAllCategories();
+        setCategories(Array.isArray(data) ? data : []);
+      } catch (err) {
+        setCategories([]);
+      } finally {
+        setLoadingCategories(false);
+      }
+    };
 
+    loadCategories();
+  }, [isOpen]);
+
+  /* Fill data khi edit */
   useEffect(() => {
     if (product) {
       setFormData({
@@ -57,38 +70,40 @@ export default function ProductModal({ isOpen, onClose, onSubmit, product }) {
     }));
   };
 
-  /* SUBMIT */
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    const sellerId = getSellerIdFromToken();
+    const sellerId = localStorage.getItem("seller_id");
+    if (!sellerId) return alert("Vui lòng đăng nhập lại");
 
-    if (!sellerId) {
-      alert("Không xác định được người bán. Vui lòng đăng nhập lại.");
-      return;
-    }
-
-    const payload = {
+    onSubmit({
       name: formData.name.trim(),
-      seller_id: Number(sellerId), // Chuyển thành số
+      seller_id: Number(sellerId),
       base_price: Number(formData.base_price),
       discount_percent: Number(formData.discount_percent) || 0,
       category_id: formData.category_id ? Number(formData.category_id) : null,
       description: formData.description?.trim() || null,
       weight: formData.weight ? Number(formData.weight) : null,
       is_active: Boolean(formData.is_active),
-    };
-
-    console.log("SUBMIT PAYLOAD:", payload);
-
-    onSubmit(payload);
+    });
   };
 
   if (!isOpen) return null;
 
+  /* react-select options */
+  const categoryOptions = categories.map((cat) => ({
+    value: cat.category_id,
+    label: cat.category_name,
+  }));
+
+  const selectedCategory =
+    categoryOptions.find((opt) => opt.value === Number(formData.category_id)) ||
+    null;
+
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
+        {/* HEADER */}
         <div className="modal__header">
           <h2 className="modal__title">
             {product ? "Cập nhật sản phẩm" : "Thêm sản phẩm mới"}
@@ -98,36 +113,32 @@ export default function ProductModal({ isOpen, onClose, onSubmit, product }) {
           </button>
         </div>
 
+        {/* BODY */}
         <div className="modal__body">
+          {/* Tên */}
           <div className="form-group">
             <label className="form-group__label">
               Tên sản phẩm <span className="required">*</span>
             </label>
             <input
-              type="text"
               name="name"
               value={formData.name}
               onChange={handleChange}
-              required
               className="form-group__input"
-              placeholder="Nhập tên sản phẩm"
+              required
             />
           </div>
 
+          {/* Giá */}
           <div className="form-row">
             <div className="form-group">
-              <label className="form-group__label">
-                Giá gốc <span className="required">*</span>
-              </label>
+              <label className="form-group__label">Giá gốc *</label>
               <input
                 type="number"
                 name="base_price"
                 value={formData.base_price}
                 onChange={handleChange}
-                required
-                min="0"
                 className="form-group__input"
-                placeholder="0"
               />
             </div>
 
@@ -138,52 +149,47 @@ export default function ProductModal({ isOpen, onClose, onSubmit, product }) {
                 name="discount_percent"
                 value={formData.discount_percent}
                 onChange={handleChange}
-                min="0"
-                max="100"
                 className="form-group__input"
-                placeholder="0"
               />
             </div>
           </div>
 
+          {/* Danh mục */}
           <div className="form-group">
             <label className="form-group__label">Danh mục</label>
-            <input
-              type="number"
-              name="category_id"
-              value={formData.category_id}
-              onChange={handleChange}
-              className="form-group__input"
-              placeholder="ID danh mục"
+
+            <Select
+              classNamePrefix="react-select"
+              isLoading={loadingCategories}
+              options={categoryOptions}
+              value={selectedCategory}
+              onChange={(opt) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  category_id: opt ? opt.value : "",
+                }))
+              }
+              placeholder="Chọn danh mục hoặc tìm nhanh"
+              isClearable
+              isSearchable
+              noOptionsMessage={() => "Không có danh mục"}
+              loadingMessage={() => "Đang tải..."}
+              filterOption={(option, input) =>
+                option.label
+                  .toLowerCase()
+                  .normalize("NFD")
+                  .replace(/[\u0300-\u036f]/g, "")
+                  .includes(
+                    input
+                      .toLowerCase()
+                      .normalize("NFD")
+                      .replace(/[\u0300-\u036f]/g, "")
+                  )
+              }
             />
           </div>
 
-          <div className="form-group">
-            <label className="form-group__label">Mô tả</label>
-            <textarea
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              rows="4"
-              className="form-group__textarea"
-              placeholder="Nhập mô tả sản phẩm"
-            />
-          </div>
-
-          <div className="form-group">
-            <label className="form-group__label">Cân nặng (kg)</label>
-            <input
-              type="number"
-              name="weight"
-              value={formData.weight}
-              onChange={handleChange}
-              step="0.01"
-              min="0"
-              className="form-group__input"
-              placeholder="0.00"
-            />
-          </div>
-
+          {/* Active */}
           <div className="form-group form-group--checkbox">
             <label className="form-group__checkbox">
               <input
@@ -192,26 +198,17 @@ export default function ProductModal({ isOpen, onClose, onSubmit, product }) {
                 checked={formData.is_active}
                 onChange={handleChange}
               />
-              <span className="form-group__checkbox-text">
-                Kích hoạt sản phẩm
-              </span>
+              <span>Kích hoạt sản phẩm</span>
             </label>
           </div>
         </div>
 
+        {/* FOOTER */}
         <div className="modal__footer">
-          <button
-            type="button"
-            className="btn btn--secondary"
-            onClick={onClose}
-          >
+          <button className="btn btn--secondary" onClick={onClose}>
             Hủy
           </button>
-          <button
-            type="button"
-            className="btn btn--primary"
-            onClick={handleSubmit}
-          >
+          <button className="btn btn--primary" onClick={handleSubmit}>
             {product ? "Cập nhật" : "Thêm mới"}
           </button>
         </div>
