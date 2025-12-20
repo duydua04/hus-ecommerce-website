@@ -85,7 +85,11 @@ class AuthService:
                 detail="Invalid email or password"
             )
 
-        return issue_token(admin.email, "admin")
+        token_data = issue_token(admin.email, "admin")
+        admin_id_value = getattr(admin, "admin_id", None)
+        token_data.admin_id = admin_id_value
+
+        return token_data
 
 
     async def login_buyer(self, payload: Login):
@@ -99,7 +103,11 @@ class AuthService:
                 detail="Invalid email or password"
             )
 
-        return issue_token(buyer.email, "buyer")
+        token_data = issue_token(buyer.email, "buyer")
+        buyer_id_value = getattr(buyer, "buyer_id", None)
+        token_data.buyer_id = buyer_id_value
+
+        return token_data
 
 
     async def login_seller(self, payload: Login):
@@ -113,7 +121,11 @@ class AuthService:
                 detail="Invalid email or password"
             )
 
-        return issue_token(seller.email, "seller")
+        token_data = issue_token(seller.email, "seller")
+        seller_id_value = getattr(seller, "seller_id", None)
+        token_data.seller_id = seller_id_value
+
+        return token_data
 
 
     async def refresh_access_token(self, refresh_token: str):
@@ -135,10 +147,8 @@ class AuthService:
             stmt = select(Buyer).where(Buyer.email == email)
         elif role == 'seller':
             stmt = select(Seller).where(Seller.email == email)
-
-        # Nếu role admin cũng cần refresh thì thêm vào đây
-        # elif role == 'admin':
-        #     stmt = select(Admin).where(Admin.email == email)
+        elif role == 'admin':
+            stmt = select(Admin).where(Admin.email == email)
 
         if stmt is not None:
             result = await self.db.execute(stmt)

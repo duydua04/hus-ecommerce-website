@@ -33,7 +33,7 @@ from .controller.common.avatar_controller import router as avatar_router
 from .controller.common.chat_controller import router as chat_router
 #from .controller.common.notification_controller import router as notice_router
 from .controller.common.websocket_controller import router as websocket_router
-
+from .controller.common.public_category_controller import router as public_category_router
 
 
 # IMPORT BUYER CONTROLLER
@@ -101,7 +101,7 @@ app.include_router(auth_router)
 app.include_router(avatar_router)
 app.include_router(chat_router)
 app.include_router(websocket_router)
-
+app.include_router(public_category_router)
 
 
 
