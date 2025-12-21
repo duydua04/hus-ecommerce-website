@@ -12,7 +12,7 @@ from ..config.s3 import get_s3_client
 # Constants
 IMAGE_MIME = {"image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"}
 VIDEO_MIME = {"video/mp4", "video/webm"}
-ALLOWED_FOLDERS = Literal["avatars", "products", "reviews", "chat"]
+ALLOWED_FOLDERS = Literal["avatars", "products", "reviews", "chat", "categories"]
 
 
 class S3Storage:
