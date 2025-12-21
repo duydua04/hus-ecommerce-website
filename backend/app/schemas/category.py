@@ -12,3 +12,4 @@ class CategoryUpdate(BaseModel):
 class CategoryResponse(ORMBase):
     category_id: int
     category_name: str
+    image_url: str

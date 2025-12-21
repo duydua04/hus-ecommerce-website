@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, asc
 from sqlalchemy.sql import Select
 
+from ...config import public_url
 from ...models.catalog import Category
 from ...schemas.category import CategoryResponse
 from ...schemas.common import Page, PageMeta
@@ -18,6 +19,17 @@ class BaseCategoryService(ABC):
         self.redis = redis
         self.CACHE_KEY_ALL = "categories:list:all"
 
+    @staticmethod
+    def _map_to_response(category: Category) -> CategoryResponse:
+        """
+        Chuyển DB Model -> Pydantic Schema
+        và xử lý logic convert image_key -> image_url
+        """
+
+        resp = CategoryResponse.model_validate(category)
+        resp.image_url = public_url(category.image_url)
+
+        return resp
 
     async def get(self, category_id: int):
         stmt = select(Category).where(Category.category_id == category_id)
@@ -30,7 +42,7 @@ class BaseCategoryService(ABC):
                 detail="Category not found"
             )
 
-        return CategoryResponse.model_validate(cat)
+        return self._map_to_response(cat)
 
 
     async def _build_list_response(self, stmt: Select, limit: int, offset: int):
@@ -46,7 +58,7 @@ class BaseCategoryService(ABC):
         result = await self.db.execute(paginated_stmt)
         categories = result.scalars().all()
 
-        data = [CategoryResponse.model_validate(c) for c in categories]
+        data = [self._map_to_response(c) for c in categories]
 
         return Page(
             meta=PageMeta(
