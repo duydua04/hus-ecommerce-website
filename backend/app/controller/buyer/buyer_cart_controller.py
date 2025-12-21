@@ -10,12 +10,12 @@ from ...models.users import Buyer
 
 router = APIRouter(
     prefix="/buyer/cart",
-    tags=["cart"]
+    tags=["buyer_cart"]
 )
 
 
 # ===================== THÊM SẢN PHẨM VÀO GIỎ HÀNG =====================
-@router.post("/add", summary="Thêm sản phẩm vào giỏ hàng", response_model=dict)
+@router.post("/add", response_model=dict)
 async def add_to_cart(
     payload: AddToCartRequest,
     service: CartServiceAsync = Depends(get_cart_service),
@@ -44,7 +44,7 @@ async def add_to_cart(
     }
 
 # ===================== HIỂN THỊ GIỎ HÀNG =====================
-@router.get("/show", summary="Lấy giỏ hàng của người dùng", response_model=List[SellerCart])
+@router.get("/show", response_model=List[SellerCart])
 async def get_buyer_cart(
     service: CartServiceAsync = Depends(get_cart_service),
     buyer: dict = Depends(require_buyer)
@@ -58,7 +58,7 @@ async def get_buyer_cart(
 
 # ===================== XÓA SẢN PHẨM KHỎI GIỎ HÀNG =====================
 # ===================== XÓA SẢN PHẨM KHỎI GIỎ HÀNG =====================
-@router.delete("/product/{item_id}", summary="Xóa item khỏi giỏ hàng", response_model=dict)
+@router.delete("/product/{item_id}", response_model=dict)
 async def delete_item(
     item_id: int,
     service: CartServiceAsync = Depends(get_cart_service),
@@ -73,7 +73,7 @@ async def delete_item(
 
 # ===================== TÍNH TỔNG TIỀN GIỎ HÀNG =====================
 
-@router.post("/summary", summary="Tính tổng tiền các item trong giỏ", response_model=dict)
+@router.post("/summary", response_model=dict)
 async def cart_summary(
     request: CartSummaryRequest,
     service: CartServiceAsync = Depends(get_cart_service),
@@ -87,7 +87,7 @@ async def cart_summary(
 
 
 # ===================== CẬP NHẬT SỐ LƯỢNG SẢN PHẨM =====================
-@router.patch("/item/quantity/{item_id}", summary="Cập nhật số lượng sản phẩm trong giỏ")
+@router.patch("/item/quantity/{item_id}")
 async def update_cart_quantity_item(
     item_id: int,
     request: UpdateCartItemRequest,
@@ -101,7 +101,7 @@ async def update_cart_quantity_item(
 
 
 # ===================== CẬP NHẬT VARIANT + SIZE =====================
-@router.patch("/item/variant-size/{item_id}", summary="Cập nhật variant và size của sản phẩm")
+@router.patch("/item/variant-size/{item_id}")
 async def update_cart_item_variant_size(
     item_id: int,
     request: UpdateVariantSizeRequest,

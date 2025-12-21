@@ -1,161 +1,214 @@
-from fastapi import HTTPException, status
-from sqlalchemy.orm import Session, selectinload, Query
-from ...schemas.product import ProductResponse
-from ...models import Product, ProductSize, ProductImage, ProductVariant
-from sqlalchemy import and_
+from fastapi import HTTPException, status, Depends
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import and_, select, func, asc
+from sqlalchemy.orm import selectinload
 from typing import Optional
 from enum import Enum
-from ...models.cart import ShoppingCart, ShoppingCartItem
-from datetime import datetime
-from ...schemas.product import (
-    ProductCreate,
-    ProductDetail,
-    ProductImageResponse,
-    ProductList,
-    ProductResponse,
-    ProductSizeCreate,
-    ProductSizeResponse,
-    ProductSizeUpdate,
-    ProductUpdate,
-    ProductVariantCreate,
-    ProductVariantResponse,
-    ProductVariantUpdate,
-    ProductVariantWithSizesResponse,
-)
-from ...config.s3 import public_url
-from sqlalchemy.orm import joinedload
 from collections import defaultdict
-
+from ...schemas.common import Page, PageMeta
+from ...models import Product, ProductSize, ProductImage, ProductVariant, Category
+from ...schemas.product import ProductImageResponse
+from ...config.s3 import public_url
+from ...config.db import get_db
+from ...schemas.category import CategoryResponse
 
 class RatingFilter(str, Enum):
-    five = "5"         
-    four_plus = "4plus"  
-    three_plus = "3plus" 
+    five = "5"
+    four_plus = "4plus"
+    three_plus = "3plus"
     two_plus = "2plus"
-    one_plus ="1plus"
+    one_plus = "1plus"
 
-# === LỌC SẢN PHẨM THEO TÊN ====
-def filter_by_keyword(query: Query, keyword: str):
-    # Trường hợp không nhập keyword
-    if not keyword or keyword.strip() == "":
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Vui lòng nhập tên sản phẩm để tìm kiếm"
+
+class BuyerProductService:
+    def __init__(self, db: AsyncSession):
+        self.db = db
+    def base_query(self):
+        return (
+            select(Product)
+            .where(Product.is_active.is_(True))
+            .order_by(Product.created_at.desc())
         )
 
-    # Thêm điều kiện lọc theo keyword
-    query = query.filter(Product.name.ilike(f"%{keyword}%"))
+    # ======================= LỌC THEO KEYWORD =========================
+    async def filter_by_keyword(self, stmt, keyword: str):
+        if not keyword or keyword.strip() == "":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Vui lòng nhập tên sản phẩm để tìm kiếm",
+            )
 
-    # Kiểm tra xem có sản phẩm nào không
-    if query.count() == 0:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Không tìm thấy sản phẩm nào với từ khóa '{keyword}'"
+        stmt = stmt.where(Product.name.ilike(f"%{keyword}%"))
+
+        result = await self.db.execute(
+            stmt.with_only_columns(Product.product_id).limit(1)
         )
+        if result.scalar_one_or_none() is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Không tìm thấy sản phẩm nào với từ khóa '{keyword}'",
+            )
 
-    return query
+        return stmt
 
-# Lọc sản phẩm theo khoảng giá
-def filter_by_price(query: Query, min_price: float = None, max_price: float = None):
-    if min_price is not None and max_price is not None:
-        return query.filter(and_(Product.base_price >= min_price, Product.base_price <= max_price))
-    elif min_price is not None:
-        return query.filter(Product.base_price >= min_price)
-    elif max_price is not None:
-        return query.filter(Product.base_price <= max_price)
-    return query
+    # === LỌC THEO GIÁ ===
+    def filter_by_price(
+        self,
+        stmt,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+    ):
+        if min_price is not None:
+            stmt = stmt.where(Product.base_price >= min_price)
+        if max_price is not None:
+            stmt = stmt.where(Product.base_price <= max_price)
+        return stmt
 
-# Lọc sản phẩm theo mức độ đánh giá
-def filter_by_rating_option(query: Query, rating_filter: Optional[RatingFilter]):
-    if rating_filter is None:
-        # Không truyền filter => giữ nguyên query
-        return query
-    if rating_filter == RatingFilter.one_plus:
-        return query.filter(Product.rating >= 1)
-    elif rating_filter == RatingFilter.two_plus:
-        query = query.filter(Product.rating >= 2)
-    elif rating_filter == RatingFilter.three_plus:
-        query = query.filter(Product.rating >= 3)
-    elif rating_filter == RatingFilter.four_plus:
-        query = query.filter(Product.rating >= 4)
-    else:
-        query = query.filter(Product.rating == 5) 
-    return query
+    # === LỌC THEO RATING ===
+    def filter_by_rating_option(
+        self, stmt, rating_filter: Optional[RatingFilter]
+    ):
+        if rating_filter is None:
+            return stmt
 
-# ==== PHÂN TRANG ====
-def paginate_simple(query, page: int = 1, page_size: int = 12):
-    offset = (page - 1) * page_size # offset là tính số sản phẩm đã được phân trang trước đó để bỏ qua khi ở trang mới
-    return query.offset(offset).limit(page_size).all() # phương thức offset là bỏ qua sản phẩm ban đầu
-
-# === ĐƯA RA THÔNG TIN CHI TIẾT SẢN PHẨM ===
-def get_buyer_product_detail(product_id: int, db: Session ):
-    product = (
-    db.query(Product)
-    .filter(Product.product_id == product_id, Product.is_active == True)
-    # .options(
-    #      # tải sẵn ảnh, variants, sizes
-    #     selectinload(Product.images),
-    #     selectinload(Product.variants).selectinload(ProductVariant.sizes)  
-    # )
-    .first()
-    )
-    
-    if not product:
-        raise HTTPException(status_code=404, detail="Product not found")
-    
-    # Sắp xếp images: primary đứng đầu
-    # Lay hinh anh san pham
-    images = db.query(ProductImage).filter(
-        ProductImage.product_id == product_id
-    ).order_by(
-        ProductImage.is_primary.desc(),
-        ProductImage.product_image_id.asc()
-    ).all()
-
-    image_responses = [
-        ProductImageResponse(
-            product_image_id=img.product_image_id,
-            product_id=img.product_id,
-            image_url=img.image_url,
-            public_image_url=public_url(img.image_url),
-            is_primary=img.is_primary
-        )
-        for img in images
-    ]
-
-    # Phân loại + size
-    variants = [
-        {
-            "variant_id": v.variant_id,
-            "variant_name": v.variant_name,
-            "price_adjustment": float(v.price_adjustment),
-            "sizes": [
-                {
-                    "size_id": s.size_id,
-                     "size_name": s.size_name,
-                    "available_units": s.available_units,
-                    "in_stock": s.in_stock
-                }
-                for s in v.sizes
-            ]
+        rating_map = {
+            RatingFilter.one_plus: 1,
+            RatingFilter.two_plus: 2,
+            RatingFilter.three_plus: 3,
+            RatingFilter.four_plus: 4,
+            RatingFilter.five: 5,
         }
-        for v in product.variants
-    ]
 
-    return {
-        "product_id": product.product_id,
-        "name": product.name,
-        "base_price": float(product.base_price),
-        "discount_percent": float(product.discount_percent),
-        "price_after_discount": float(product.base_price - product.base_price * product.discount_percent / 100),
-        "rating": float(product.rating),
-        "review_count": product.review_count,
-        "sold_quantity": product.sold_quantity,
-        "description": product.description,
-        "weight": float(product.weight) if product.weight else None,
-        "images": image_responses ,
-        "variants": variants
-    }
+        if rating_filter == RatingFilter.five:
+            return stmt.where(Product.rating == 5)
 
+        return stmt.where(Product.rating >= rating_map[rating_filter])
 
+    # === PHÂN TRANG ===
+    async def paginate_simple(self, stmt, page: int = 1, page_size: int = 12):
+        offset = (page - 1) * page_size
+        result = await self.db.execute(
+            stmt.offset(offset).limit(page_size)
+        )
+        return result.scalars().all()
 
+    # =================== CHI TIẾT SẢN PHẨM =======================
+    async def get_buyer_product_detail(self, product_id: int):
+        stmt = (
+            select(Product)
+            .where(
+                Product.product_id == product_id,
+                Product.is_active.is_(True),
+            )
+            .options(
+                selectinload(Product.images),
+                selectinload(Product.variants).selectinload(
+                    ProductVariant.sizes
+                ),
+            )
+        )
+
+        result = await self.db.execute(stmt)
+        product = result.scalar_one_or_none()
+
+        if not product:
+            raise HTTPException(
+                status_code=404, detail="Product not found"
+            )
+
+        # === ẢNH ===
+        images_stmt = (
+            select(ProductImage)
+            .where(ProductImage.product_id == product_id)
+            .order_by(
+                ProductImage.is_primary.desc(),
+                ProductImage.product_image_id.asc(),
+            )
+        )
+        images_result = await self.db.execute(images_stmt)
+        images = images_result.scalars().all()
+
+        image_responses = [
+            ProductImageResponse(
+                product_image_id=img.product_image_id,
+                product_id=img.product_id,
+                image_url=img.image_url,
+                public_image_url=public_url(img.image_url),
+                is_primary=img.is_primary,
+            )
+            for img in images
+        ]
+
+        # === VARIANT + SIZE ===
+        variants = [
+            {
+                "variant_id": v.variant_id,
+                "variant_name": v.variant_name,
+                "price_adjustment": float(v.price_adjustment),
+                "sizes": [
+                    {
+                        "size_id": s.size_id,
+                        "size_name": s.size_name,
+                        "available_units": s.available_units,
+                        "in_stock": s.in_stock,
+                    }
+                    for s in v.sizes
+                ],
+            }
+            for v in product.variants
+        ]
+
+        return {
+            "product_id": product.product_id,
+            "name": product.name,
+            "base_price": float(product.base_price),
+            "discount_percent": float(product.discount_percent),
+            "price_after_discount": float(
+                product.base_price
+                - product.base_price * product.discount_percent / 100
+            ),
+            "rating": float(product.rating),
+            "review_count": product.review_count,
+            "sold_quantity": product.sold_quantity,
+            "description": product.description,
+            "weight": float(product.weight)
+            if product.weight
+            else None,
+            "images": image_responses,
+            "variants": variants,
+        }
+    
+    # =================== LẤY DANH MỤC SẢN PHẨM =======================
+    async def list_categories(
+        self,
+        q: Optional[str],
+        limit: int = 10,
+        offset: int = 0
+    ):
+        stmt = select(Category)
+        if q and q.strip():
+            stmt = stmt.where(
+                Category.category_name.ilike(f"%{q.strip()}%")
+            )
+
+        count_stmt = select(func.count()).select_from(stmt.subquery())
+        total_result = await self.db.execute(count_stmt)
+        total = total_result.scalar() or 0
+
+        paginated_stmt = stmt.order_by(asc(Category.category_name)).limit(limit).offset(offset)
+        result = await self.db.execute(paginated_stmt)
+        categories = result.scalars().all()
+
+        data = [CategoryResponse.model_validate(c) for c in categories]
+
+        return Page(
+            meta=PageMeta(
+                total=total,
+                limit=limit,
+                offset=offset
+            ),
+            data=data
+        )
+
+def get_procdut_service(db: AsyncSession = Depends(get_db)):
+    return BuyerProductService(db)

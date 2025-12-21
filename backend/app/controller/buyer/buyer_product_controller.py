@@ -1,59 +1,77 @@
-from fastapi import APIRouter, Depends, Query, HTTPException
-from typing import List, Optional, Dict, Any
-from sqlalchemy.orm import Session, Query as SAQuery
+from fastapi import APIRouter, Depends, Query
+from sqlalchemy.ext.asyncio import AsyncSession
+from typing import Optional
+from ...schemas.common import Page
 from ...config.db import get_db
-from ...services.buyer import buyer_product_service
-from ...models.catalog import Product, ProductImage, ProductSize, ProductVariant
-from ...services.buyer.buyer_product_service import RatingFilter, paginate_simple, get_buyer_product_detail
-from pydantic import BaseModel
-from decimal import Decimal
-from sqlalchemy.orm import selectinload
-from datetime import datetime
+from ...services.buyer.buyer_product_service import BuyerProductService, RatingFilter, get_procdut_service
+
+router = APIRouter(prefix="/buyer/products", tags=["buyer_products"])
 
 
-class ProductSummary(BaseModel):
-    name: str
-    rating: float
-    base_price: Decimal
-    sold_quantity: int
-
-    class Config:
-        orm_mode = True   # để có thể đọc từ SQLAlchemy model
-
-router = APIRouter(
-    prefix="/buyer/product",
-    tags=["buyer-products"]
-)
-
-#  === LẤY DANH SÁCH SẢN PHẨM CÓ FILTER ===
-@router.get("", response_model=List[ProductSummary])
-def get_filtered_product(
+@router.get("")
+async def get_buyer_products(
     keyword: Optional[str] = Query(None),
-    min_price: Optional[float] = Query(None),
-    max_price: Optional[float] = Query(None),
-    page: int = Query(1, ge=1),  # số trang hiện tại, default page 1
-    rating_filter: Optional[RatingFilter] = Query(
-        None,
-        description="Chọn mức đánh giá: 5⭐  ≥4⭐  ≥3⭐  ≥2⭐  ≥1⭐"
-    ),
-
-    db: Session = Depends(get_db) 
+    min_price: Optional[float] = Query(None, ge=0),
+    max_price: Optional[float] = Query(None, ge=0),
+    rating: Optional[RatingFilter] = Query(None),
+    page: int = Query(1, ge=1),
+    page_size: int = Query(12, ge=1, le=100),
+    db: AsyncSession = Depends(get_db),
 ):
-    query: SAQuery = db.query(Product) # Tạo một Query object bắt đầu từ model Product.
+    """
+    Lấy danh sách sản phẩm cho người mua.
 
-    # gọi từng hàm filter đã viết
-    query = query.filter(Product.is_active == "True")
-    query = buyer_product_service.filter_by_keyword(query, keyword)
-    query = buyer_product_service.filter_by_price(query, min_price, max_price)
-    query = buyer_product_service.filter_by_rating_option(query, rating_filter)
+    - Tìm kiếm theo tên sản phẩm
+    - Lọc theo khoảng giá
+    - Lọc theo mức đánh giá
+    - Hỗ trợ phân trang
+    """
+    service = BuyerProductService(db)
 
-    products = paginate_simple(query, page, page_size=12) # trả về danh sách tất cả theo trang
-    return products
+    stmt = service.base_query()
 
+    if keyword:
+        stmt = await service.filter_by_keyword(stmt, keyword)
 
+    stmt = service.filter_by_price(stmt, min_price, max_price)
+    stmt = service.filter_by_rating_option(stmt, rating)
 
-# === ĐƯA RA THÔNG TIN CHI TIẾT SẢN PHẨM ===
-@router.get("/{product_id}", response_model=Dict[str, Any])
-def get_buyer_product_detail(product_id: int, db: Session = Depends(get_db)):
-  
-    return buyer_product_service.get_buyer_product_detail(product_id, db)
+    products = await service.paginate_simple(stmt, page, page_size)
+
+    return {
+        "page": page,
+        "page_size": page_size,
+        "items": products,
+    }
+
+@router.get("/categories", response_model=Page)
+async def get_categories(
+    q: Optional[str] = Query(None),
+    limit: int = Query(10, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+    service: BuyerProductService = Depends(get_procdut_service)
+):
+    """
+    Lấy danh sách danh mục cho người mua.
+
+    - Tìm kiếm theo tên danh mục
+    - Hỗ trợ tìm kiếm theo từ khóa (q)
+    - Hỗ trợ phân trang
+    """
+    return await service.list_categories(q=q,limit=limit, offset=offset)
+
+@router.get("/{product_id}")
+async def get_buyer_product_detail(
+    product_id: int,
+    service: BuyerProductService = Depends(get_procdut_service),
+):
+    """
+    Lấy thông tin chi tiết của một sản phẩm.
+
+    - Bao gồm hình ảnh, biến thể và size
+    - Chỉ trả về sản phẩm đang bán
+    - Trả 404 nếu không tồn tại
+    """
+
+    return await service.get_buyer_product_detail(product_id)
+
