@@ -44,6 +44,7 @@ async def get_buyer_products(
         "items": products,
     }
 
+# =================== LẤY DANH MỤC SẢN PHẨM =======================
 @router.get("/categories", response_model=Page)
 async def get_categories(
     q: Optional[str] = Query(None),
@@ -60,6 +61,26 @@ async def get_categories(
     """
     return await service.list_categories(q=q,limit=limit, offset=offset)
 
+# =================== LẤY SẢN PHẨM THEO DANH MỤC =======================
+@router.get("/categories/{category_id}")
+async def get_products_by_category(
+    category_id: int,
+    q: Optional[str] = Query(None),
+    limit: int = Query(10, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+    service: BuyerProductService = Depends(get_procdut_service)
+):
+    """
+    Lấy thông tin chi tiết của một danh mục sản phẩm.
+
+    - Trả về thông tin danh mục
+    - Trả 404 nếu không tồn tại
+    """
+
+    return await service.get_products_by_category(category_id, q=q,limit=limit, offset=offset)
+
+
+# =================== CHI TIẾT SẢN PHẨM =======================
 @router.get("/{product_id}")
 async def get_buyer_product_detail(
     product_id: int,

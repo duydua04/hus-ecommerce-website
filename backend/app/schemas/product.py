@@ -143,3 +143,15 @@ class CartProduct(BaseModel):
     quantity: int
     price: float
     public_image_url: Optional[str]
+
+class ProductResponseBuyer(ORMBase):
+    product_id: int
+    name: str
+    base_price: Decimal
+    discount_percent: Decimal
+    rating: float
+    review_count: int
+    sold_quantity: int
+    description: Optional[str]
+    weight: Optional[Decimal]
+    public_image_url: Optional[str]

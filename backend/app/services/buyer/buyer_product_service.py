@@ -1,13 +1,13 @@
 from fastapi import HTTPException, status, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import and_, select, func, asc
+from sqlalchemy import and_, desc, select, func, asc
 from sqlalchemy.orm import selectinload
 from typing import Optional
 from enum import Enum
 from collections import defaultdict
 from ...schemas.common import Page, PageMeta
 from ...models import Product, ProductSize, ProductImage, ProductVariant, Category
-from ...schemas.product import ProductImageResponse
+from ...schemas.product import ProductImageResponse, ProductList, ProductResponseBuyer, ProductResponse
 from ...config.s3 import public_url
 from ...config.db import get_db
 from ...schemas.category import CategoryResponse
@@ -209,6 +209,79 @@ class BuyerProductService:
             ),
             data=data
         )
+    # =================== LẤY SẢN PHẨM CỦA DANH MỤC =======================
+    async def get_products_by_category(
+        self,
+        category_id: int,
+        q: Optional[str],
+        limit: int = 10,
+        offset: int = 0, 
+    ):
+        stmt = (
+            select(Product)
+            .where(
+                and_(
+                    Product.category_id == category_id,
+                    Product.is_active.is_(True)
+                )
+            )
+            .order_by(Product.created_at.desc())
+        )
 
+        if q and q.strip():
+            stmt = stmt.where(
+                Product.name.ilike(f"%{q.strip()}%")
+            )
+
+        count_stmt = select(func.count()).select_from(stmt.subquery())
+        total_res = await self.db.execute(count_stmt)
+        total = total_res.scalar() or 0
+
+        stmt = stmt.order_by(Product.product_id.desc()).limit(limit).offset(offset)
+        result = await self.db.execute(stmt)
+        items = result.scalars().all()
+
+        product_ids = [p.product_id for p in items]
+        primary_map = {}
+
+        if product_ids:
+            img_stmt = select(ProductImage.product_id, ProductImage.image_url).where(
+                ProductImage.product_id.in_(product_ids),
+                ProductImage.is_primary.is_(True)
+            )
+            img_res = await self.db.execute(img_stmt)
+            primary_map = {pid: url for pid, url in img_res.all()}
+
+        data = []
+        for p in items:
+            base = ProductResponse.model_validate(p)
+            data.append(ProductList(
+                **base.model_dump(),
+                public_primary_image_url=public_url(primary_map.get(p.product_id))
+            ))
+
+        return Page(
+            meta=PageMeta(
+                total=total,
+                limit=limit,
+                offset=offset
+            ),
+            data=data
+        )
+
+
+    # =================== TOP SẢN PHẨM MỚI NHẤT =======================
+    async def get_latest_products(self, limit: int = 10):
+        stmt = (
+            select(Product)
+            .where(Product.is_active.is_(True))
+            .order_by(Product.created_at.desc())
+            .limit(limit)
+        )
+
+        result = await self.db.execute(stmt)
+        products = result.scalars().all()
+
+        return products
 def get_procdut_service(db: AsyncSession = Depends(get_db)):
     return BuyerProductService(db)
