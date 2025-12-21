@@ -3,46 +3,41 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Optional
 from ...schemas.common import Page
 from ...config.db import get_db
-from ...services.buyer.buyer_product_service import BuyerProductService, RatingFilter, get_procdut_service
-
+from ...services.buyer.buyer_product_service import BuyerProductService, RatingFilter, get_procdut_service, ProductSort
+from ...schemas.product import ProductImageResponse, ProductList, ProductResponseBuyer, ProductResponse
 router = APIRouter(prefix="/buyer/products", tags=["buyer_products"])
 
 
-@router.get("")
-async def get_buyer_products(
-    keyword: Optional[str] = Query(None),
-    min_price: Optional[float] = Query(None, ge=0),
-    max_price: Optional[float] = Query(None, ge=0),
-    rating: Optional[RatingFilter] = Query(None),
-    page: int = Query(1, ge=1),
-    page_size: int = Query(12, ge=1, le=100),
-    db: AsyncSession = Depends(get_db),
+@router.get("/products", response_model=Page)
+async def get_products(
+    q: Optional[str] = None,
+    min_price: Optional[float] = None,
+    max_price: Optional[float] = None,
+    rating_filter: Optional[RatingFilter] = None,
+    sort: Optional[ProductSort] = Query(
+        ProductSort.newest,
+        description="Cách sắp xếp sản phẩm"
+    ),
+    limit: int = 12,
+    offset: int = 0,
+    service: BuyerProductService = Depends(get_procdut_service),
 ):
     """
     Lấy danh sách sản phẩm cho người mua.
 
-    - Tìm kiếm theo tên sản phẩm
-    - Lọc theo khoảng giá
+    - Tìm kiếm theo tên (q)
+    - Lọc theo khoảng giá (min_price, max_price)
     - Lọc theo mức đánh giá
     - Hỗ trợ phân trang
     """
-    service = BuyerProductService(db)
-
-    stmt = service.base_query()
-
-    if keyword:
-        stmt = await service.filter_by_keyword(stmt, keyword)
-
-    stmt = service.filter_by_price(stmt, min_price, max_price)
-    stmt = service.filter_by_rating_option(stmt, rating)
-
-    products = await service.paginate_simple(stmt, page, page_size)
-
-    return {
-        "page": page,
-        "page_size": page_size,
-        "items": products,
-    }
+    return await service.get_buyer_products(
+        q=q,
+        min_price=min_price,
+        max_price=max_price,
+        rating_filter=rating_filter,
+        limit=limit,
+        offset=offset,
+    )
 
 # =================== LẤY DANH MỤC SẢN PHẨM =======================
 @router.get("/categories", response_model=Page)
@@ -60,6 +55,22 @@ async def get_categories(
     - Hỗ trợ phân trang
     """
     return await service.list_categories(q=q,limit=limit, offset=offset)
+
+# =================== TOP SẢN PHẨM MỚI NHẤT =======================
+@router.get("/latest_products", response_model=Page)
+async def get_latest_products(
+    limit: int = Query(10, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+    service: BuyerProductService = Depends(get_procdut_service)
+):
+    """
+    Lấy danh sách sản phẩm mới nhất.
+
+    - Sắp xếp theo thời gian tạo sản phẩm (mới nhất trước)
+    - Hỗ trợ phân trang
+    """
+
+    return await service.get_latest_products(limit=limit, offset=offset)
 
 # =================== LẤY SẢN PHẨM THEO DANH MỤC =======================
 @router.get("/categories/{category_id}")
