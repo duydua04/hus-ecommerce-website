@@ -66,7 +66,7 @@ class BaseNotificationService:
             unread_only: bool = False
     ):
         """
-        Lấy danh sách thông báo (Async Beanie).
+        Lấy danh sách thông báo
         """
         query = Notification.find(
             Notification.recipient_id == user_id,

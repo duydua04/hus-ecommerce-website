@@ -1,8 +1,7 @@
-from typing import List
-from fastapi import APIRouter, Depends, HTTPException
-
+from typing import List, Optional
+from fastapi import APIRouter, Depends, HTTPException, Query
 from ...middleware.auth import require_buyer
-from ...schemas.notification import NotificationResponse
+
 from ...services.buyer.buyer_notification_service import (
     BuyerNotificationService, get_buyer_notif_service
 )
@@ -13,23 +12,24 @@ router = APIRouter(
 )
 
 
-@router.get("/", response_model=List[NotificationResponse])
-async def get_buyer_notifications(
-        limit: int = 20,
-        unread_only: bool = False,
-        buyer_info=Depends(require_buyer),
+@router.get("/", response_model=List)
+async def get_my_notifications(
+        limit: int = Query(default=20),
+        cursor: Optional[str] = Query(...),
+        unread_only: bool = Query(False),
+        buyer_info: dict = Depends(require_buyer),
         service: BuyerNotificationService = Depends(get_buyer_notif_service)
 ):
     """
-    Lấy danh sách thông báo của Buyer đang đăng nhập.
+    API lấy thông báo
     """
     user = buyer_info['user']
-    # user là object SQLAlchemy, lấy id từ user.buyer_id
 
     return await service.get_notifications(
         user_id=user.buyer_id,
         role="buyer",
         limit=limit,
+        cursor=cursor,
         unread_only=unread_only
     )
 

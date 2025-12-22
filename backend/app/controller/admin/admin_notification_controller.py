@@ -1,5 +1,5 @@
-from typing import List
-from fastapi import APIRouter, Depends, HTTPException
+from typing import List, Optional
+from fastapi import APIRouter, Depends, HTTPException, Query
 
 from ...middleware.auth import require_admin
 from ...schemas.notification import NotificationResponse
@@ -14,17 +14,26 @@ router = APIRouter(
 )
 
 
-@router.get("/", response_model=List[NotificationResponse])
-async def get_admin_notifications(
-        limit: int = 20,
-        admin_info=Depends(require_admin),
+@router.get("/", response_model=List)
+async def get_my_notifications(
+        limit: int = Query(default=20),
+        cursor: Optional[str] = Query(...),
+        unread_only: bool = Query(False),
+        buyer_info: dict = Depends(require_admin),
         service: AdminNotificationService = Depends(get_admin_notif_service)
 ):
-    # Lấy ID admin (admin_id hoặc id)
-    user = admin_info['user']
-    user_id = getattr(user, 'admin_id', None)
+    """
+    API lấy thông báo
+    """
+    user = buyer_info['user']
 
-    return await service.get_notifications(user_id, "admin", limit=limit)
+    return await service.get_notifications(
+        user_id=user.buyer_id,
+        role="buyer",
+        limit=limit,
+        cursor=cursor,
+        unread_only=unread_only
+    )
 
 
 @router.put("/{notif_id}/read")
