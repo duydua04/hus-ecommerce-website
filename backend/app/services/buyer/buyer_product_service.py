@@ -86,7 +86,7 @@ class BuyerProductService:
 
         return stmt
     # =================== LẤY DANH SÁCH SẢN PHẨM CÓ CHỌN LỌC =======================
-    async def get_buyer_products(
+    async def get_buyer_products_filter(
         self,
         q: Optional[str] = None,
         min_price: Optional[float] = None,

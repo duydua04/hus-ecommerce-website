@@ -9,7 +9,7 @@ router = APIRouter(prefix="/buyer/products", tags=["buyer_products"])
 
 
 @router.get("/products", response_model=Page)
-async def get_products(
+async def get_products_filter(
     q: Optional[str] = None,
     min_price: Optional[float] = None,
     max_price: Optional[float] = None,
@@ -30,7 +30,7 @@ async def get_products(
     - Lọc theo mức đánh giá
     - Hỗ trợ phân trang
     """
-    return await service.get_buyer_products(
+    return await service.get_buyer_products_filter(
         q=q,
         min_price=min_price,
         max_price=max_price,
