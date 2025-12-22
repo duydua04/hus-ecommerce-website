@@ -5,11 +5,22 @@ from typing import List, Optional
 
 from ...schemas.common import Page
 from ...config.db import get_db
-from ...services.buyer.buyer_product_service import BuyerProductService, RatingFilter, get_procdut_service, ProductSort
-from ...schemas.product import ProductImageResponse, ProductVariantLiteResponse, ProductVariantWithSizesResponse
+from ...services.buyer.buyer_product_service import (
+    BuyerProductService,
+    RatingFilter,
+    get_procdut_service,
+    ProductSort,
+)
+from ...schemas.product import (
+    ProductImageResponse,
+    ProductVariantLiteResponse,
+    ProductVariantWithSizesResponse,
+    ProductPriceRequest,
+    ProductPriceResponse,
+)
 router = APIRouter(prefix="/buyer/products", tags=["buyer_products"])
 
-
+# =================== LẤY DANH SÁCH SẢN PHẨM VỚI BỘ LỌC =======================
 @router.get("/products", response_model=Page)
 async def get_products_filter(
     q: Optional[str] = None,
@@ -41,21 +52,19 @@ async def get_products_filter(
         offset=offset,
     )
 
-# =================== TOP SẢN PHẨM MỚI NHẤT =======================
-@router.get("/latest_products", response_model=Page)
-async def get_latest_products(
-    limit: int = Query(10, ge=1, le=100),
-    offset: int = Query(0, ge=0),
-    service: BuyerProductService = Depends(get_procdut_service)
+# =================== LẤY GIÁ SẢN PHẨM THEO BIẾN THỂ VÀ KÍCH THƯỚC =======================
+@router.post("/product/price", response_model=ProductPriceResponse)
+async def product_price(
+    payload: ProductPriceRequest,
+    db: AsyncSession = Depends(get_db),
 ):
-    """
-    Lấy danh sách sản phẩm mới nhất.
+    service = BuyerProductService(db)
+    return await service.get_product_price(
+        product_id=payload.product_id,
+        variant_id=payload.variant_id,
+        size_id=payload.size_id,
+    )
 
-    - Sắp xếp theo thời gian tạo sản phẩm (mới nhất trước)
-    - Hỗ trợ phân trang
-    """
-
-    return await service.get_latest_products(limit=limit, offset=offset)
 
 # =================== LẤY SẢN PHẨM THEO DANH MỤC =======================
 @router.get("/categories/{category_id}")
@@ -91,6 +100,7 @@ async def get_buyer_product_detail(
     """
 
     return await service.get_buyer_product_detail(product_id)
+
 
 # =================== LẤY VARIANTS CỦA SẢN PHẨM =======================
 @router.get("/{product_id}/variants", response_model=list[ProductVariantLiteResponse])

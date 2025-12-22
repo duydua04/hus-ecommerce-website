@@ -79,3 +79,28 @@ class OrderDetailResponse(BaseModel):
     shipping_address: AddressResponse
     items: List[OrderItemResponse]
     carrier: CarrierResponse
+
+class OrderTrackingFirstItem(BaseModel):
+    product_id: int
+    product_name: str
+    public_url: str | None
+
+    variant_name: str | None
+    size_name: str | None
+
+    quantity: int
+    unit_price: Decimal
+
+class BuyerOrderTrackingItem(BaseModel):
+    order_id: int
+    order_status: str
+
+    shop_name: str
+
+    first_item: OrderTrackingFirstItem
+    total_items: int
+
+    subtotal: Decimal
+    total_price: Decimal
+
+    order_date: datetime

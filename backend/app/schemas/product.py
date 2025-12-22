@@ -159,3 +159,36 @@ class ProductResponseBuyer(ORMBase):
 class ProductVariantLiteResponse(ORMBase):
     variant_id: int
     variant_name: str
+
+from datetime import datetime
+class ProductResponseBuyer(TimestampedOut):
+    product_id: int
+    created_at: datetime | None 
+    name: str
+    seller_id: int
+
+    base_price: Decimal
+    discount_percent: Decimal
+
+    sale_price: Decimal  
+
+    rating: float
+    review_count: int
+    sold_quantity: int
+    category_id: int | None = None
+    description: str | None = None
+    is_active: bool
+
+class ProductPriceRequest(BaseModel):
+    product_id: int
+    variant_id: int | None = None  # Nếu không chọn variant thì dùng base price
+    size_id: int | None = None     # Chọn size (thường không ảnh hưởng price)
+
+class ProductPriceResponse(ORMBase):
+    product_id: int
+    variant_id: int | None
+    size_id: int | None
+    base_price: float
+    price_adjustment: float | None
+    discount_percent: float
+    sale_price: float
