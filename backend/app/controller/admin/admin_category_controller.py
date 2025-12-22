@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, Query, status, File, UploadFile
 from typing import Optional
 
 from ...middleware.auth import require_admin
@@ -63,3 +63,14 @@ async def api_delete_category(
 ):
     """API xoa category"""
     return await service.delete(category_id)
+
+@router.post("/upload-image", status_code=status.HTTP_201_CREATED)
+async def upload_category_image(
+    category_id: int,
+    file: UploadFile = File(...),
+    service: AdminCategoryService = Depends(get_admin_category_service)
+):
+    """
+    API upload ảnh category.
+    """
+    return await service.upload_image(category_id, file)

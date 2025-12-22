@@ -15,6 +15,7 @@ class Category(Base):
 
     category_id = Column(Integer, primary_key=True, autoincrement=True)
     category_name = Column(String(255), nullable=False, unique=True)
+    image_url = Column(String(255), nullable=True)
 
     products = relationship("Product", back_populates="category")
 
@@ -100,6 +101,7 @@ class ProductImage(Base):
     is_primary = Column(Boolean, nullable=False, default=False)
 
     product = relationship("Product", back_populates="images")
+
 class Discount(Base):
     """
     Mã giảm giá kiểu phần trăm, có thời gian hiệu lực và giới hạn
