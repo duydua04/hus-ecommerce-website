@@ -90,7 +90,7 @@ app.include_router(admin_notify_router)
 app.include_router(seller_address_router)
 app.include_router(seller_product_router)
 app.include_router(seller_review_router)
-#app.include_router(seller_order_router)
+app.include_router(seller_order_router)
 app.include_router(seller_profile_router)
 
 
@@ -118,3 +118,4 @@ app.include_router(buyer_cart_router)
 app.include_router(buyer_discount_router)
 app.include_router(buyer_carrier_router)
 app.include_router(buyer_order_router)
+app.include_router(buyer_notify_router)

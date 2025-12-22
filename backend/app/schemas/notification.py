@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, BeforeValidator
-from typing import Dict, Any, Annotated
+from typing import Dict, Any, Annotated, List, Optional
 from datetime import datetime
 
 
@@ -19,3 +19,8 @@ class NotificationResponse(BaseModel):
     class Config:
         populate_by_name = True  # Cho phép map theo tên field hoặc alias
         from_attributes = True  # Cho phép đọc dữ liệu từ Object (ORM mode)
+
+class NotificationCursorPage(BaseModel):
+    items: List
+    next_cursor: Optional[str] = None
+    has_more: bool = False

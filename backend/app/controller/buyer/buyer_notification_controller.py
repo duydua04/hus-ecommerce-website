@@ -14,7 +14,7 @@ router = APIRouter(
 
 
 @router.get("/", response_model=List[NotificationResponse])
-async def get_my_notifications(
+async def get_buyer_notifications(
         limit: int = 20,
         unread_only: bool = False,
         buyer_info=Depends(require_buyer),
