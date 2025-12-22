@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Depends
+
+from ...schemas.address import AddressUpdate
 from ...middleware.auth import require_buyer
-from ...schemas.order import OrderCreate, OrderResponse, SellerOrderDetail, OrderCreateNew
+from ...schemas.order import OrderCreate, OrderDetailResponse, OrderResponse, SellerOrderDetail, OrderCreateNew
 from ...services.buyer.buyer_order_service import (
     BuyerOrderService,
     get_buyer_order_service
@@ -43,10 +45,27 @@ async def list_my_orders(
     return await service.list_my_orders(buyer["user"].buyer_id)
 
 # ===== DETAIL =====
-@router.get("/{order_id}", response_model=SellerOrderDetail)
+@router.get("/{order_id}", response_model=OrderDetailResponse)
 async def order_detail(
     order_id: int,
     buyer = Depends(require_buyer),
     service: BuyerOrderService = Depends(get_buyer_order_service)
 ):
     return await service.get_order_detail(buyer["user"].buyer_id, order_id)
+
+# ===== UPDATE ĐỊA CHỈ GIAO HÀNG CỦA ĐƠN =====
+@router.patch(
+    "/{order_id}/shipping-address",
+    status_code=200
+)
+async def update_order_shipping_address(
+    order_id: int,
+    payload: AddressUpdate,
+    buyer = Depends(require_buyer),
+    service: BuyerOrderService = Depends(get_buyer_order_service)
+):
+    return await service.update_order_shipping_address(
+        buyer_id=buyer["user"].buyer_id,
+        order_id=order_id,
+        payload=payload
+    )   

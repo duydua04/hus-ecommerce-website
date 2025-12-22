@@ -18,8 +18,8 @@ from ...models import (
     BuyerAddress,
     Address
 )
-from ...schemas.order import OrderCreate, OrderItemResponse, OrderResponse
-from ...schemas.address import AddressResponse
+from ...schemas.order import OrderCreate, OrderDetailResponse, OrderItemResponse, OrderResponse
+from ...schemas.address import AddressResponse, AddressUpdate
 from ...schemas.carrier import CarrierCalculateResponse, CarrierResponse
 from ...schemas.common import OrderStatus, PaymentStatus
 
@@ -167,86 +167,102 @@ class BuyerOrderService:
    # ===================== CHI TIẾT ĐƠN HÀNG =====================
     async def get_order_detail(self, buyer_id: int, order_id: int):
         stmt = (
-            select(Order, Address, Carrier)  # join cả Address + Carrier
+            select(Order, Address, Carrier)
             .join(BuyerAddress, Order.buyer_address_id == BuyerAddress.buyer_address_id)
             .join(Address, BuyerAddress.address_id == Address.address_id)
             .join(Carrier, Order.carrier_id == Carrier.carrier_id)
-            .options(
-                selectinload(Order.items)  # load list OrderItem
-            )
+            .options(selectinload(Order.items))
             .where(
                 Order.order_id == order_id,
                 Order.buyer_id == buyer_id
             )
         )
-        
+
         result = await self.db.execute(stmt)
         row = result.first()
-        
+
         if not row:
             raise HTTPException(404, "Không tìm thấy đơn hàng")
-        
-        order, shipping_address_obj, carrier_obj = row  # unpack tuple
-        
-        # Map shipping address
-        shipping_address = AddressResponse(
-            address_id=shipping_address_obj.address_id,
-            fullname=shipping_address_obj.fullname,
-            street=shipping_address_obj.street,
-            ward=shipping_address_obj.ward,
-            district=shipping_address_obj.district,
-            province=shipping_address_obj.province,
-            phone=shipping_address_obj.phone
-        )
-        
-        # Map order items
+
+        order, shipping_address_obj, carrier_obj = row
+
+        shipping_address = AddressResponse.model_validate(shipping_address_obj)
+
         items = [
-            OrderItemResponse(
-                order_item_id=item.order_item_id,
-                order_id=item.order_id,
-                product_id=item.product_id,
-                variant_id=item.variant_id,
-                size_id=item.size_id,
-                quantity=item.quantity,
-                unit_price=item.unit_price,
-                total_price=item.total_price
-            ) for item in order.items
+            OrderItemResponse.model_validate(i)
+            for i in order.items
         ]
-        
-        # Map carrier info
+
         carrier = CarrierResponse(
             carrier_id=carrier_obj.carrier_id,
             carrier_name=carrier_obj.carrier_name,
             carrier_avt_url=carrier_obj.carrier_avt_url,
             shipping_fee=order.shipping_price
         )
-        
-        # Map order
-        order_response = OrderResponse(
-            order_id=order.order_id,
-            buyer_id=order.buyer_id,
-            buyer_address_id=order.buyer_address_id,
-            payment_method=order.payment_method,
-            subtotal=order.subtotal,
-            shipping_price=order.shipping_price,
-            discount_amount=order.discount_amount,
-            total_price=order.total_price,
-            order_date=order.order_date,
-            delivery_date=order.delivery_date,
-            order_status=order.order_status,
-            payment_status=order.payment_status,
-            discount_id=order.discount_id,
-            carrier_id=order.carrier_id,
-            notes=order.notes
+
+        order_response = OrderResponse.model_validate(order)
+
+        return OrderDetailResponse(
+            order=order_response,
+            shipping_address=shipping_address,
+            items=items,
+            carrier=carrier
         )
+    # ==================== UPDATE ĐỊA CHỈ KHI ĐƠN HÀNG ĐANG CHỜ XỬ LÝ ===================
+    async def update_order_shipping_address(
+        self,
+        buyer_id: int,
+        order_id: int,
+        payload: AddressUpdate
+    ):
+        stmt = (
+            select(Order)
+            .where(
+                Order.order_id == order_id,
+                Order.buyer_id == buyer_id
+            )
+        )
+
+        result = await self.db.execute(stmt)
+        order = result.scalar_one_or_none()
+
+        if not order:
+            raise HTTPException(404, "Không tìm thấy đơn hàng")
+
+        # Check trạng thái
+        if order.order_status != "pending":
+            raise HTTPException(
+                400,
+                "Chỉ có thể thay đổi địa chỉ khi đơn hàng chưa xử lý"
+            )
+
+        # Lấy buyer_address hiện tại
+        stmt = (
+            select(BuyerAddress)
+            .where(BuyerAddress.buyer_address_id == order.buyer_address_id)
+        )
+        result = await self.db.execute(stmt)
+        buyer_address = result.scalar_one()
+
+        # Update address
+        stmt = (
+            select(Address)
+            .where(Address.address_id == buyer_address.address_id)
+        )
+        result = await self.db.execute(stmt)
+        address = result.scalar_one()
+
+        address.fullname = payload.fullname
+        address.phone = payload.phone
+        address.province = payload.province
+        address.district = payload.district
+        address.ward = payload.ward
+        address.street = payload.street
+
+        await self.db.commit()
+
+        return {"message": "Cập nhật địa chỉ giao hàng thành công"}
         
-        return {
-            "order": order_response,
-            "shipping_address": shipping_address,
-            "items": items,
-            "carrier": carrier
-        }
-    
 def get_buyer_order_service(
     db: AsyncSession = Depends(get_db),
 ):

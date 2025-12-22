@@ -72,3 +72,10 @@ class OrderCreateNew(BaseModel):
     discount_id: Optional[int] = None
     notes: Optional[str] = None
     cart_item_ids: List[int]  # danh sách sản phẩm muốn mua
+
+from .carrier import CarrierResponse
+class OrderDetailResponse(BaseModel):
+    order: OrderResponse
+    shipping_address: AddressResponse
+    items: List[OrderItemResponse]
+    carrier: CarrierResponse
