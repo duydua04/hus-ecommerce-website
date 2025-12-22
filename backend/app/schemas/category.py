@@ -1,4 +1,7 @@
 from __future__ import annotations
+
+from typing import Optional
+
 from pydantic import BaseModel, Field
 from .common import ORMBase
 
@@ -12,4 +15,4 @@ class CategoryUpdate(BaseModel):
 class CategoryResponse(ORMBase):
     category_id: int
     category_name: str
-    image_url: str
+    image_url: Optional[str] = None

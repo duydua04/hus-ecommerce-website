@@ -26,7 +26,7 @@ class PublicCategoryService(BaseCategoryService):
         result = await self.db.execute(stmt)
         categories = result.scalars().all()
 
-        response_data = [CategoryResponse.model_validate(c).model_dump() for c in categories]
+        response_data = [self._map_to_response(c).model_dump() for c in categories]
 
         # 3. Lưu vào Redis (Cache 1 ngày - 86400s)
         if self.redis:
