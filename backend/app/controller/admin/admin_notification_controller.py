@@ -14,7 +14,7 @@ router = APIRouter(
 )
 
 
-@router.get("/", response_model=List)
+@router.get("/")
 async def get_my_notifications(
         limit: int = Query(default=20),
         cursor: Optional[str] = Query(...),

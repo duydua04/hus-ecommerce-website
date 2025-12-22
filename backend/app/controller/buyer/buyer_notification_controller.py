@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from ...middleware.auth import require_buyer
 
@@ -12,7 +12,7 @@ router = APIRouter(
 )
 
 
-@router.get("/", response_model=List)
+@router.get("/")
 async def get_my_notifications(
         limit: int = Query(default=20),
         cursor: Optional[str] = Query(...),
