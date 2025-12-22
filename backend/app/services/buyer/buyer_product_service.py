@@ -7,10 +7,9 @@ from enum import Enum
 from collections import defaultdict
 from ...schemas.common import Page, PageMeta
 from ...models import Product, ProductSize, ProductImage, ProductVariant, Category
-from ...schemas.product import ProductImageResponse, ProductList, ProductResponseBuyer, ProductResponse
+from ...schemas.product import ProductImageResponse, ProductList, ProductResponseBuyer, ProductResponse, ProductVariantLiteResponse, ProductVariantWithSizesResponse
 from ...config.s3 import public_url
 from ...config.db import get_db
-from ...schemas.category import CategoryResponse
 
 class RatingFilter(str, Enum):
     five = "5"
@@ -150,37 +149,6 @@ class BuyerProductService:
             data=data
         )
     
-    # =================== LẤY DANH MỤC SẢN PHẨM =======================
-    async def list_categories(
-        self,
-        q: Optional[str],
-        limit: int = 10,
-        offset: int = 0
-    ):
-        stmt = select(Category)
-        if q and q.strip():
-            stmt = stmt.where(
-                Category.category_name.ilike(f"%{q.strip()}%")
-            )
-
-        count_stmt = select(func.count()).select_from(stmt.subquery())
-        total_result = await self.db.execute(count_stmt)
-        total = total_result.scalar() or 0
-
-        paginated_stmt = stmt.order_by(asc(Category.category_name)).limit(limit).offset(offset)
-        result = await self.db.execute(paginated_stmt)
-        categories = result.scalars().all()
-
-        data = [CategoryResponse.model_validate(c) for c in categories]
-
-        return Page(
-            meta=PageMeta(
-                total=total,
-                limit=limit,
-                offset=offset
-            ),
-            data=data
-        )
     # =================== LẤY SẢN PHẨM CỦA DANH MỤC =======================
     async def get_products_by_category(
         self,
@@ -189,7 +157,7 @@ class BuyerProductService:
         limit: int = 10,
         offset: int = 0, 
     ):
-        stmt = self.base_query()
+        stmt = select(Product) .where(Product.is_active.is_(True)).where(Product.category_id == category_id) .order_by(Product.created_at.desc())
 
         if q and q.strip():
             stmt = stmt.where(
@@ -235,7 +203,7 @@ class BuyerProductService:
 
     # =================== TOP SẢN PHẨM MỚI NHẤT =======================
     async def get_latest_products(self, limit: int = 10, offset: int = 0):
-        sstmt = self.base_query()
+        stmt = self.base_query()
 
         count_stmt = select(func.count()).select_from(stmt.subquery())
         total_res = await self.db.execute(count_stmt)
@@ -272,7 +240,7 @@ class BuyerProductService:
             ),
             data=data
         )
-        
+     # =================== LẤY CHI TIẾT SẢN PHẨM =======================   
     async def get_buyer_product_detail(self, product_id: int):
         stmt = (
             select(Product)
@@ -357,5 +325,36 @@ class BuyerProductService:
             "images": image_responses,
             "variants": variants,
         }
+    # =================== LẤY VARIANTS CỦA SẢN PHẨM =======================
+    async def get_product_variants(self, product_id: int):
+        stmt = (
+            select(ProductVariant)
+            .where(ProductVariant.product_id == product_id)
+            .order_by(asc(ProductVariant.variant_id))
+        )
+        result = await self.db.execute(stmt)
+        variants = result.scalars().all()
+
+        return [
+            ProductVariantLiteResponse.model_validate(v)
+            for v in variants
+        ]
+
+    # =================== LẤY SIZE THEO VARIANTS CỦA SẢN PHẨM =======================
+    async def get_variant_sizes(self, variant_id: int):
+        stmt = (
+            select(ProductVariant)
+            .where(ProductVariant.variant_id == variant_id)
+            .options(selectinload(ProductVariant.sizes))
+        )
+
+        result = await self.db.execute(stmt)
+        variant = result.scalar_one_or_none()
+
+        if not variant:
+            raise HTTPException(status_code=404, detail="Variant not found")
+
+        return ProductVariantWithSizesResponse.model_validate(variant)
+    
 def get_procdut_service(db: AsyncSession = Depends(get_db)):
     return BuyerProductService(db)

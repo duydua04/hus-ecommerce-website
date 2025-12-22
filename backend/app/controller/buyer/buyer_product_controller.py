@@ -1,10 +1,12 @@
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import Optional
+from typing import List, Optional
+
+
 from ...schemas.common import Page
 from ...config.db import get_db
 from ...services.buyer.buyer_product_service import BuyerProductService, RatingFilter, get_procdut_service, ProductSort
-from ...schemas.product import ProductImageResponse, ProductList, ProductResponseBuyer, ProductResponse
+from ...schemas.product import ProductImageResponse, ProductVariantLiteResponse, ProductVariantWithSizesResponse
 router = APIRouter(prefix="/buyer/products", tags=["buyer_products"])
 
 
@@ -38,23 +40,6 @@ async def get_products_filter(
         limit=limit,
         offset=offset,
     )
-
-# =================== LẤY DANH MỤC SẢN PHẨM =======================
-@router.get("/categories", response_model=Page)
-async def get_categories(
-    q: Optional[str] = Query(None),
-    limit: int = Query(10, ge=1, le=100),
-    offset: int = Query(0, ge=0),
-    service: BuyerProductService = Depends(get_procdut_service)
-):
-    """
-    Lấy danh sách danh mục cho người mua.
-
-    - Tìm kiếm theo tên danh mục
-    - Hỗ trợ tìm kiếm theo từ khóa (q)
-    - Hỗ trợ phân trang
-    """
-    return await service.list_categories(q=q,limit=limit, offset=offset)
 
 # =================== TOP SẢN PHẨM MỚI NHẤT =======================
 @router.get("/latest_products", response_model=Page)
@@ -107,3 +92,33 @@ async def get_buyer_product_detail(
 
     return await service.get_buyer_product_detail(product_id)
 
+# =================== LẤY VARIANTS CỦA SẢN PHẨM =======================
+@router.get("/{product_id}/variants", response_model=list[ProductVariantLiteResponse])
+async def get_product_variants(
+    product_id: int,
+    service: BuyerProductService = Depends(get_procdut_service),
+):
+    """
+    Lấy các biến thể (variants) của một sản phẩm.
+
+    - Trả về danh sách biến thể 
+    - Trả 404 nếu sản phẩm không tồn tại
+    """
+
+    return await service.get_product_variants(product_id)
+
+# =================== LẤY SIZE THEO VARIANTS CỦA SẢN PHẨM =======================
+@router.get("/{product_id}/variants/{variant_id}/sizes", response_model= ProductVariantWithSizesResponse)
+async def get_variant_sizes(
+    product_id: int,
+    variant_id: int,
+    service: BuyerProductService = Depends(get_procdut_service),
+):
+    """
+    Lấy các kích thước (sizes) của một biến thể sản phẩm.
+
+    - Trả về danh sách kích thước
+    - Trả 404 nếu biến thể không tồn tại
+    """
+
+    return await service.get_variant_sizes(variant_id)      

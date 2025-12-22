@@ -155,3 +155,7 @@ class ProductResponseBuyer(ORMBase):
     description: Optional[str]
     weight: Optional[Decimal]
     public_image_url: Optional[str]
+
+class ProductVariantLiteResponse(ORMBase):
+    variant_id: int
+    variant_name: str

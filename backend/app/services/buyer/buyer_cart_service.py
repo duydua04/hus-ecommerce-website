@@ -22,7 +22,7 @@ class CartServiceAsync:
     def __init__(self, db: AsyncSession):
         self.db = db
 
-    # --- Lấy options product trước khi thêm vào giỏ ---
+    # =================== LẤY OPTION SẢN PHẨM =======================
     async def get_product_options(self, product_id: int):
         result = await self.db.execute(
             select(Product)
@@ -59,17 +59,6 @@ class CartServiceAsync:
             cart = ShoppingCart(buyer_id=buyer_id)
             self.db.add(cart)
             await self.db.flush()
-        # # Lấy product
-        # result = await self.db.execute(select(Product).where(Product.product_id == product_id))
-        # product = result.scalar_one_or_none()
-        
-        # if not product:
-        #     raise HTTPException(404, "Product not found")
-        # # Nếu product không có variant, ép None
-        # if not product.variants:
-        #     variant_id = None
-        #     size_id = None
-            
         # Kiểm tra variant
         if variant_id is not None:
             result = await self.db.execute(
@@ -122,8 +111,8 @@ class CartServiceAsync:
         await self.db.refresh(cart)
         return cart
 
-    
-    # --- Lấy giỏ hàng của buyer ---
+
+    # =================== LẤY GIỎ HÀNG CỦA BUYER =======================
     async def get_buyer_cart(self, buyer_id: int):
         cart = await self.find_cart(buyer_id)
         if not cart:
@@ -167,8 +156,8 @@ class CartServiceAsync:
 
         # Trả về dạng list JSON nhóm theo seller
         return [{"seller": seller, "products": products} for seller, products in grouped.items()]
-    
-    # --- Xóa sản phẩm khỏi giỏ hàng ---
+
+    # =================== XÓA SẢN PHẨM KHỎI GIỎ HÀNG =======================
     async def delete_item(self, buyer_id: int, item_id: int):
         cart = await self.find_cart(buyer_id)
         if not cart:
@@ -189,7 +178,7 @@ class CartServiceAsync:
         return {"message": "Item removed successfully"}
 
 
-    # --- Tính tổng tiền giỏ hàng ---
+    # =================== TÍNH TỔNG TIỀN GIỎ HÀNG =======================
     async def cart_total(self, buyer_id: int, selected_item_ids: Optional[list[int]] = None):
         cart = await self.find_cart(buyer_id)
         if not cart:
@@ -219,7 +208,7 @@ class CartServiceAsync:
 
         return {"subtotal": float(subtotal), "total_items": total_items}
 
-    # --- Update quantity ---
+    # =================== CẬP NHẬT SỐ LƯỢNG =======================
     async def update_quantity(self, buyer_id: int, item_id: int, data: UpdateCartItemRequest):
         cart = await self.find_cart(buyer_id)
         if not cart:
@@ -248,7 +237,7 @@ class CartServiceAsync:
         await self.db.refresh(item)
         return {"message": "Item updated", "item_id": item.shopping_cart_item_id, "new_quantity": item.quantity}
 
-    # --- Update variant + size ---
+    # =================== CẬP NHẬT VARIANT + SIZE =======================
     async def update_variant_size(self, buyer_id: int, item_id: int, req: UpdateVariantSizeRequest):
         if not req.new_variant_id and not req.new_size_id:
             raise HTTPException(400, "No data to update")
