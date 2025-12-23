@@ -1,48 +1,49 @@
-from sqlalchemy import Column, Integer, String, Boolean, Numeric, Text, DateTime, ForeignKey, UniqueConstraint, CheckConstraint
-from sqlalchemy.orm import relationship
-from sqlalchemy.sql import func
-from ..config.db import Base
+from typing import List, Optional
+from datetime import datetime
+from beanie import Document
+from pydantic import BaseModel, Field
+from pymongo import IndexModel, ASCENDING, DESCENDING
 
-class Review(Base):
-    __tablename__ = "review"
 
-    review_id = Column(Integer, primary_key=True, autoincrement=True)
-    product_id = Column(Integer, ForeignKey("product.product_id"), nullable=False)
-    buyer_id = Column(Integer, ForeignKey("buyer.buyer_id"), nullable=False)
-    order_id = Column(Integer, ForeignKey("order.order_id"), nullable=False)
-    review_text = Column(Text)
-    rating = Column(Numeric(2, 1), nullable=False)
-    is_verified = Column(Boolean, nullable=False, default=False)
-    review_date = Column(DateTime, server_default=func.now())
+class ReviewReply(BaseModel):
+    seller_id: int
+    reply_text: str
+    reply_date: datetime = Field(default_factory=datetime.utcnow)
 
-    __table_args__ = (
-        UniqueConstraint("product_id", "buyer_id", "order_id", name="ux_review_once_per_order"),
-        CheckConstraint("rating >= 0 AND rating <= 5", name="ck_review_rating_range"),
-    )
 
-    product = relationship("Product")
-    buyer = relationship("Buyer", back_populates="reviews")
-    order = relationship("Order")
-    images = relationship("ReviewImage", back_populates="review", cascade="all, delete-orphan")
-    replies = relationship("ReviewReply", back_populates="review", cascade="all, delete-orphan")
+class ReviewerSnapshot(BaseModel):
+    id: int
+    name: str
+    avatar: Optional[str] = None
 
-class ReviewImage(Base):
-    __tablename__ = "review_image"
 
-    review_image_id = Column(Integer, primary_key=True, autoincrement=True)
-    review_id = Column(Integer, ForeignKey("review.review_id"), nullable=False)
-    image_url = Column(String(500), nullable=False)
+class Review(Document):
+    product_id: int
+    order_id: int
+    seller_id: int
+    buyer_id: int
 
-    review = relationship("Review", back_populates="images")
+    reviewer: ReviewerSnapshot
 
-class ReviewReply(Base):
-    __tablename__ = "review_reply"
+    rating: int = Field(..., ge=1, le=5)
+    review_text: Optional[str] = None
+    images: List[str] = []  # Mảng URL ảnh
 
-    review_reply_id = Column(Integer, primary_key=True, autoincrement=True)
-    review_id = Column(Integer, ForeignKey("review.review_id"), nullable=False)
-    seller_id = Column(Integer, ForeignKey("seller.seller_id"), nullable=False)
-    reply_text = Column(Text, nullable=False)
-    reply_date = Column(DateTime, server_default=func.now())
+    replies: List[ReviewReply] = []
 
-    review = relationship("Review", back_populates="replies")
-    seller = relationship("Seller", back_populates="replies")
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+    class Settings:
+        name = "reviews"
+        indexes = [
+            IndexModel(
+                [("product_id", ASCENDING), ("created_at", DESCENDING)]
+            ),
+            IndexModel(
+                [("seller_id", ASCENDING), ("created_at", DESCENDING)]
+            ),
+            IndexModel(
+                [("order_id", ASCENDING), ("product_id", ASCENDING)],
+                unique=True
+            )
+        ]

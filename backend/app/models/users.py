@@ -22,7 +22,7 @@ class Buyer(Base):
     __tablename__ = "buyer"
 
     buyer_id = Column(Integer, primary_key=True, autoincrement=True)
-    email = Column(String(255), nullable=False, unique=True)
+    email = Column(String(255), nullable=True, unique=True)
     phone = Column(String(20), nullable=False, unique=True)
     fname = Column(String(255), nullable=False)
     lname = Column(String(255))
@@ -35,7 +35,6 @@ class Buyer(Base):
     addresses = relationship("BuyerAddress", back_populates="buyer", cascade="all, delete-orphan")
     cart = relationship("ShoppingCart", back_populates="buyer", uselist=False, cascade="all, delete-orphan")
     orders = relationship("Order", back_populates="buyer")
-    reviews = relationship("Review", back_populates="buyer")
 
 # Model người bán
 class Seller(Base):
@@ -43,7 +42,7 @@ class Seller(Base):
 
     seller_id = Column(Integer, primary_key=True, autoincrement=True)
     email = Column(String(255), nullable=False, unique=True)
-    phone = Column(String(20), nullable=False, unique=True)
+    phone = Column(String(20), nullable=True, unique=True)
     fname = Column(String(255), nullable=False)
     lname = Column(String(255))
     password = Column(String(255), nullable=False)
@@ -57,5 +56,5 @@ class Seller(Base):
 
     addresses = relationship("SellerAddress", back_populates="seller", cascade="all, delete-orphan")
     products = relationship("Product", back_populates="seller", cascade="all, delete-orphan")
-    replies = relationship("ReviewReply", back_populates="seller")
+
 

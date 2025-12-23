@@ -1,0 +1,517 @@
+
+<!DOCTYPE html>
+<html lang = "vi">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+        <meta name="description" content="The largest e-commerce site in Vietnam">
+        <title>HOME</title>
+        <Link rel="stylesheet" href="../web_framework/variables.css">
+        <link rel="stylesheet" href="home.css">
+    </head>
+    <body>
+        <!-----HEADER ROW---->
+        <header class="header">
+            <!--Brand name anh logo-->
+            <div class="header__left">
+                <div class="brand">
+                    <a href="#" class="brand__link">
+                        <div class="brand__logo">🐳</div>
+                        <span class="brand__name">BrandName</span>
+                    </a>
+                </div>
+            </div>
+            <!--------Search bar-------->
+            <div class="header__center">
+                <form class="search" action="/search" method="get" role="search">
+                    <input class="search__input" type="search" name="q" placeholder="Search Product of e-commerce store" aria-label="Search products or e-commerce store">
+                    <button class="search__button" type="submit" aria-label="search">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"/>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        </svg>
+                    </button>
+                </form>
+            </div>
+
+            <div class="header__right">
+
+                <!-----Icon group-------->
+                <div class="icon-group">
+                    <!---------My Order-------->
+                    <div class="icon-group__button" data-tooltip="My Order" role="button" tabindex="0" aria-label="My Order">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20.198 3H3.802C3.05147 3 2.6762 3 2.41637 3.17726C2.28768 3.26505 2.18133 3.38109 2.10567 3.51627C1.9529 3.78921 1.99024 4.15793 2.06493 4.89537C2.18958 6.12624 2.2519 6.74168 2.57823 7.18168C2.74084 7.40095 2.94701 7.58519 3.18414 7.72315C3.65999 8 4.28635 8 5.53908 8H18.4609C19.7136 8 20.34 8 20.8159 7.72315C21.053 7.58519 21.2592 7.40095 21.4218 7.18168C21.7481 6.74168 21.8104 6.12624 21.9351 4.89537C22.0098 4.15793 22.0471 3.78921 21.8943 3.51627C21.8187 3.38109 21.7123 3.26505 21.5836 3.17726C21.3238 3 20.9485 3 20.198 3Z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                            <path d="M3 8L3 13.0408C3 16.7928 3 18.6688 4.17157 19.8344C5.34315 21 7.22876 21 11 21H13C16.7712 21 18.6569 21 19.8284 19.8344C21 18.6688 21 16.7928 21 13.0408V8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                            <path d="M10 11H14" stroke-width="1.5" stroke-linecap="round"></path>
+                        </svg>
+                    </div>
+                    <!---------My Cart-------->
+                    <div class="icon-group__button" data-tooltip="My Cart" role="button" tabindex="0" aria-label="My Cart">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M8 16L16.7201 15.2733C19.4486 15.046 20.0611 14.45 20.3635 11.7289L21 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+                            <path d="M6 6H22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+                            <circle cx="6" cy="20" r="2" stroke="currentColor" stroke-width="1.5"></circle>
+                            <circle cx="17" cy="20" r="2" stroke="currentColor" stroke-width="1.5"></circle>
+                            <path d="M8 20L15 20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+                            <path d="M2 2H2.966C3.91068 2 4.73414 2.62459 4.96326 3.51493L7.93852 15.0765C8.08887 15.6608 7.9602 16.2797 7.58824 16.7616L6.63213 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+                        </svg>
+                    </div>
+
+                    <!---------Sign In-------->
+                    <div class="icon-group__button" data-tooltip="Sign In" role="button" tabindex="0" aria-label="Sign In">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z" stroke="currentColor" stroke-width="1.5" />
+                            <path d="M15 10C15 11.6569 13.6569 13 12 13C10.3431 13 9 11.6569 9 10C9 8.34315 10.3431 7 12 7C13.6569 7 15 8.34315 15 10Z" stroke="currentColor" stroke-width="1.5" />
+                            <path d="M5.49994 19.0001L6.06034 18.0194C6.95055 16.4616 8.60727 15.5001 10.4016 15.5001H13.5983C15.3926 15.5001 17.0493 16.4616 17.9395 18.0194L18.4999 19.0001" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" stroke-linejoin="round" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+
+        <!---------Product Catalog-------->
+        <section class="product-catalog" aria-label="Product categories">
+            <header class="product-catalog__header">
+                <h2>Product Catalog</h2>
+            </header>
+            <div class="product-catalog__row">
+                <a class="product-catalog__item" href="#">
+                    <img src="../../accets/product-catalog/fashion.jpg" alt="Fashion" class="product-catalog__image" />
+                    <p class="product-catalog__label">Fashion</p>
+                </a>
+
+                <a class="product-catalog__item" href="#">
+                    <img src="../../accets/product-catalog/household-appliances.jpg" alt="Household Appliances" class="product-catalog__image" />
+                    <p class="product-catalog__label">Household Appliances</p>
+                </a>
+
+                <a class="product-catalog__item" href="#">
+                    <img src="../../accets/product-catalog/electronics.jpg" alt="Electronics" class="product-catalog__image" />
+                    <p class="product-catalog__label">Electronics</p>
+                </a>
+
+                <a class="product-catalog__item" href="#">
+                    <img src="../../accets/product-catalog/books-stationery.jpg" alt="Books & Stationery" class="product-catalog__image" />
+                    <p class="product-catalog__label">Books & Stationery</p>
+                </a>
+
+                <a class="product-catalog__item" href="#">
+                    <img src="../../accets/product-catalog/mother-baby.jpg" alt="Mother & Baby" class="product-catalog__image" />
+                    <p class="product-catalog__label">Mother & Baby</p>
+                </a>
+
+                <a class="product-catalog__item" href="#">
+                    <img src="../../accets/product-catalog/interior.png" alt="Interior" class="product-catalog__image" />
+                    <p class="product-catalog__label">Interior</p>
+                </a>
+
+                <a class="product-catalog__item" href="#">
+                    <img src="../../accets/product-catalog/health-beauty.png" alt="Health & Beauty" class="product-catalog__image" />
+                    <p class="product-catalog__label">Health & Beauty</p>
+                </a>
+            </div>
+        </section>
+
+        <!---------New trending-------->
+        <section class="banner">
+            <div class="banner__container">
+                <div class="banner__row">
+                <!-- Banner chính -->
+                <main class="banner__main">
+                    <article class="banner__large relative rounded overflow-hidden">
+                    <div class="banner__content">
+                        <h2 class="banner__title">New trending <br> Interior decorations</h2>
+                        <p class="banner__subtitle">Hot summer discounts ending soon</p>
+                        <a href="#" class="banner__button">Get Deals Now &gt;</a>
+                    </div>
+                    <img src="../../accets/banners/main-interior.png" alt="Main banner" class="banner__image">
+                    </article>
+                </main>
+
+                <!-- Banner nhỏ -->
+                <aside class="banner__small">
+                    <article class="banner__small-inner">
+                    <img src="../../accets/banners/small-interior.png" alt="Small banner" class="banner__bg-image">
+                    <div class="banner__caption">
+                        <h5 class="banner__caption-title">Custom interiors</h5>
+                        <a href="#" class="banner__outline-button">Order Now</a>
+                    </div>
+                    </article>
+                </aside>
+                </div>
+            </div>
+            </section>
+
+
+        <!---------Most popular categories-------->
+        <section class="popular" aria-label="Most popular categories">
+            <div class="popular__grid">
+                <header class="popular__header">
+                    <h2 class="popular__title">Most Popular Categories</h2>
+                </header>
+
+                <article class="popular__card">
+                <img src="../../accets/categories/sanpham1.png" alt="Popular 1" class="popular__image">
+                <p class="popular__label">Category A</p>
+                </article>
+
+                <article class="popular__card">
+                <img src="../../accets/categories/sanpham2.png" alt="Popular 2" class="popular__image">
+                <p class="popular__label">Category B</p>
+                </article>
+
+                <article class="popular__card">
+                <img src="../../accets/categories/sanpham3.png" alt="Popular 3" class="popular__image">
+                <p class="popular__label">Category C</p>
+                </article>
+
+                <article class="popular__card">
+                <img src="../../accets/categories/sanpham4.png" alt="Popular 4" class="popular__image">
+                <p class="popular__label">Category D</p>
+                </article>
+
+                <article class="popular__card">
+                <img src="../../accets/categories/sanpham5.png" alt="Popular 5" class="popular__image">
+                <p class="popular__label">Category D</p>
+                </article>
+
+                <article class="popular__card">
+                <img src="../../accets/categories/sanpham6.png" alt="Popular 6" class="popular__image">
+                <p class="popular__label">Category D</p>
+                </article>
+
+                <article class="popular__card">
+                <img src="../../accets/categories/sanpham7.png" alt="Popular 7" class="popular__image">
+                <p class="popular__label">Category D</p>
+                </article>
+
+                <article class="popular__card">
+                <img src="../../accets/categories/sanpham8.png" alt="Popular 8" class="popular__image">
+                <p class="popular__label">Category D</p>
+                </article>
+
+                <article class="popular__card">
+                <img src="../../accets/categories/sanpham9.png" alt="Popular 9" class="popular__image">
+                <p class="popular__label">Category D</p>
+                </article>
+
+                <article class="popular__card">
+                <img src="../../accets/categories/sanpham10.png" alt="Popular 10" class="popular__image">
+                <p class="popular__label">Category D</p>
+                </article>
+            </div>
+        </section>
+
+        <!---------Today's big deals-------->
+        <section class="deals" aria-label="Today's big deals">
+            <div class="deals__grid">
+                <header class="deals__header" aria-label="Today's big deals">
+                    <h2 class="deals__title">Today's big deals</h2>
+                </header>
+
+                <div class="product-card">
+                <img src="../../accets/bigdeals/sanpham1.png" alt="Product 1" class="product-card__image">
+                <button class="product-card__heart" aria-label="Add to wishlist">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 20.5C12 20.5 2 14.5 2 8.7C2 5.8 4.1 3.5 7 3.5C8.5 3.5 10 4 12 6C14 4 15.5 3.5 17 3.5C19.9 3.5 22 5.8 22 8.7C22 14.5 12 20.5 12 20.5Z"/>
+                    </svg>
+                </button>
+                <div class="product-card__info">
+                    <p class="product-card__name">Coffee and Tea Cup with Plate</p>
+                    <p class="product-card__price">$50.00 <span class="product-card__originalprice">$128.00</span></p>
+                    <p class="product-card__badge">freeship</p>
+                </div>
+                </div>
+                <div class="product-card">
+                <img src="../../accets/bigdeals/sanpham2.png" alt="Product 2" class="product-card__image">
+                <button class="product-card__heart" aria-label="Add to wishlist">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 20.5C12 20.5 2 14.5 2 8.7C2 5.8 4.1 3.5 7 3.5C8.5 3.5 10 4 12 6C14 4 15.5 3.5 17 3.5C19.9 3.5 22 5.8 22 8.7C22 14.5 12 20.5 12 20.5Z"/>
+                    </svg>
+                </button>
+                <div class="product-card__info">
+                    <p class="product-card__name">Name of the product</p>
+                    <p class="product-card__price">$60.00 <span class="product-card__originalprice">$92.00</span></p>
+                    <p class="product-card__badge">freeship</p>
+                </div>
+                </div>
+                <div class="product-card">
+                <img src="../../accets/bigdeals/sanpham3.png" alt="Product 3" class="product-card__image">
+                <button class="product-card__heart" aria-label="Add to wishlist">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 20.5C12 20.5 2 14.5 2 8.7C2 5.8 4.1 3.5 7 3.5C8.5 3.5 10 4 12 6C14 4 15.5 3.5 17 3.5C19.9 3.5 22 5.8 22 8.7C22 14.5 12 20.5 12 20.5Z"/>
+                    </svg>
+                </button>
+                <div class="product-card__info">
+                    <p class="product-card__name">Name of the product</p>
+                    <p class="product-card__price">$79.00 <span class="product-card__originalprice">$121.00</span></p>
+                    <p class="product-card__badge">freeship</p>
+                </div>
+                </div>
+                <div class="product-card">
+                <img src="../../accets/bigdeals/sanpham4.png" alt="Product 4" class="product-card__image">
+                <button class="product-card__heart" aria-label="Add to wishlist">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 20.5C12 20.5 2 14.5 2 8.7C2 5.8 4.1 3.5 7 3.5C8.5 3.5 10 4 12 6C14 4 15.5 3.5 17 3.5C19.9 3.5 22 5.8 22 8.7C22 14.5 12 20.5 12 20.5Z"/>
+                    </svg>
+                </button>
+                <div class="product-card__info">
+                    <p class="product-card__name">Name of the product</p>
+                    <p class="product-card__price">$12.00 <span class="product-card__originalprice">$81.00</span></p>
+                    <p class="product-card__badge">freeship</p>
+                </div>
+                </div>
+                <div class="product-card">
+                <img src="../../accets/bigdeals/sanpham5.png" alt="Product 5" class="product-card__image">
+                <button class="product-card__heart" aria-label="Add to wishlist">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 20.5C12 20.5 2 14.5 2 8.7C2 5.8 4.1 3.5 7 3.5C8.5 3.5 10 4 12 6C14 4 15.5 3.5 17 3.5C19.9 3.5 22 5.8 22 8.7C22 14.5 12 20.5 12 20.5Z"/>
+                    </svg>
+                </button>
+                <div class="product-card__info">
+                    <p class="product-card__name">Name of the product</p>
+                    <p class="product-card__price">$77.00 <span class="product-card__originalprice">$158.00</span></p>
+                    <p class="product-card__badge">freeship</p>
+                </div>
+                </div>
+                <div class="product-card">
+                <img src="../../accets/bigdeals/sanpham6.png" alt="Product 6" class="product-card__image">
+                <button class="product-card__heart" aria-label="Add to wishlist">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 20.5C12 20.5 2 14.5 2 8.7C2 5.8 4.1 3.5 7 3.5C8.5 3.5 10 4 12 6C14 4 15.5 3.5 17 3.5C19.9 3.5 22 5.8 22 8.7C22 14.5 12 20.5 12 20.5Z"/>
+                    </svg>
+                </button>
+                <div class="product-card__info">
+                    <p class="product-card__name">Name of the product</p>
+                    <p class="product-card__price">$93.00 <span class="product-card__originalprice">$152.00</span></p>
+                    <p class="product-card__badge">freeship</p>
+                </div>
+                </div>
+                <div class="product-card">
+                <img src="../../accets/bigdeals/sanpham7.png" alt="Product 7" class="product-card__image">
+                <button class="product-card__heart" aria-label="Add to wishlist">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 20.5C12 20.5 2 14.5 2 8.7C2 5.8 4.1 3.5 7 3.5C8.5 3.5 10 4 12 6C14 4 15.5 3.5 17 3.5C19.9 3.5 22 5.8 22 8.7C22 14.5 12 20.5 12 20.5Z"/>
+                    </svg>
+                </button>
+                <div class="product-card__info">
+                    <p class="product-card__name">Name of the product</p>
+                    <p class="product-card__price">$85.00 <span class="product-card__originalprice">$182.00</span></p>
+                    <p class="product-card__badge">freeship</p>
+                </div>
+                </div>
+                <div class="product-card">
+                <img src="../../accets/bigdeals/sanpham8.png" alt="Product 8" class="product-card__image">
+                <button class="product-card__heart" aria-label="Add to wishlist">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 20.5C12 20.5 2 14.5 2 8.7C2 5.8 4.1 3.5 7 3.5C8.5 3.5 10 4 12 6C14 4 15.5 3.5 17 3.5C19.9 3.5 22 5.8 22 8.7C22 14.5 12 20.5 12 20.5Z"/>
+                    </svg>
+                </button>
+                <div class="product-card__info">
+                    <p class="product-card__name">Name of the product</p>
+                    <p class="product-card__price">$7.00 <span class="product-card__originalprice">$24.00</span></p>
+                    <p class="product-card__badge">freeship</p>
+                </div>
+                </div>
+                <div class="product-card">
+                <img src="../../accets/bigdeals/sanpham9.png" alt="Product 9" class="product-card__image">
+                <button class="product-card__heart" aria-label="Add to wishlist">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 20.5C12 20.5 2 14.5 2 8.7C2 5.8 4.1 3.5 7 3.5C8.5 3.5 10 4 12 6C14 4 15.5 3.5 17 3.5C19.9 3.5 22 5.8 22 8.7C22 14.5 12 20.5 12 20.5Z"/>
+                    </svg>
+                </button>
+                <div class="product-card__info">
+                    <p class="product-card__name">Name of the product</p>
+                    <p class="product-card__price">$63.00 <span class="product-card__originalprice">$88.00</span></p>
+                    <p class="product-card__badge">freeship</p>
+                </div>
+                </div>
+
+                <div class="product-card">
+                <img src="../../accets/bigdeals/sanpham10.png" alt="Product 10" class="product-card__image">
+                <button class="product-card__heart" aria-label="Add to wishlist">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 20.5C12 20.5 2 14.5 2 8.7C2 5.8 4.1 3.5 7 3.5C8.5 3.5 10 4 12 6C14 4 15.5 3.5 17 3.5C19.9 3.5 22 5.8 22 8.7C22 14.5 12 20.5 12 20.5Z"/>
+                    </svg>
+                </button>
+                <div class="product-card__info">
+                    <p class="product-card__name">Name of the product</p>
+                    <p class="product-card__price">$63.00 <span class="product-card__originalprice">$72.00</span></p>
+                    <p class="product-card__badge">freeship</p>
+                </div>
+                </div>
+            </div>
+            <!---Show More-->
+            <div class="show-more">
+                Show More Products
+            </div>
+        </section>
+
+
+        <!---------Video Reviews-------->
+        <section class="video-reviews">
+            <div class="video-reviews__container">
+                <div class="video-reviews__grid">
+                    <!-- Editors' Picks -->
+                    <div class="video-reviews__editors-pick">
+                        <article class="card card--editors-pick">
+                            <div class="card__body">
+                                <p class="card__text-primary">Editors' Picks</p>
+                                <h3 class="card__title">Video Reviews</h3>
+                                <p class="card__description">
+                                    Want to add that personal touch? These sellers specialize in embroidery, engraving, illustrating, and more.
+                                </p>
+                                <a href="#" class="card__button">Shop these findings</a>
+                            </div>
+                        </article>
+                    </div>
+
+                    <!-- Video Cards -->
+                    <div>
+                        <article class="video-thumbnail">
+                            <a href="#" class="video-thumbnail__link">
+                                <img src="../../accets/product-interior/review-1.png" class="video-thumbnail__image" alt="">
+                                <button class="video-thumbnail__play-button">
+                                    <svg width="15" height="20" viewBox="0 0 15 20">
+                                        <path d="M0 0V20L15 10L0 0Z" />
+                                    </svg>
+                                </button>
+                            </a>
+                        </article>
+                    </div>
+                    <div>
+                        <article class="video-thumbnail">
+                            <a href="#" class="video-thumbnail__link">
+                                <img src="../../accets/product-interior/review-2.png" class="video-thumbnail__image" alt="">
+                                <button class="video-thumbnail__play-button">
+                                    <svg width="15" height="20" viewBox="0 0 15 20">
+                                        <path d="M0 0V20L15 10L0 0Z" />
+                                    </svg>
+                                </button>
+                            </a>
+                        </article>
+                    </div>
+                    <div>
+                        <article class="video-thumbnail">
+                            <a href="#" class="video-thumbnail__link">
+                                <img src="../../accets/product-interior/review-3.png" class="video-thumbnail__image" alt="">
+                                <button class="video-thumbnail__play-button">
+                                    <svg width="15" height="20" viewBox="0 0 15 20">
+                                        <path d="M0 0V20L15 10L0 0Z" />
+                                    </svg>
+                                </button>
+                            </a>
+                        </article>
+                    </div>
+                    <div>
+                        <article class="video-thumbnail">
+                            <a href="#" class="video-thumbnail__link">
+                                <img src="../../accets/product-interior/review-4.png" class="video-thumbnail__image" alt="">
+                                <button class="video-thumbnail__play-button">
+                                    <svg width="15" height="20" viewBox="0 0 15 20">
+                                        <path d="M0 0V20L15 10L0 0Z" />
+                                    </svg>
+                                </button>
+                            </a>
+                        </article>
+                    </div>
+                    <div>
+                        <article class="video-thumbnail">
+                            <a href="#" class="video-thumbnail__link">
+                                <img src="../../accets/product-interior/review-5.png" class="video-thumbnail__image" alt="">
+                                <button class="video-thumbnail__play-button">
+                                    <svg width="15" height="20" viewBox="0 0 15 20">
+                                        <path d="M0 0V20L15 10L0 0Z" />
+                                    </svg>
+                                </button>
+                            </a>
+                        </article>
+                    </div>
+                    <div>
+                        <article class="video-thumbnail">
+                            <a href="#" class="video-thumbnail__link">
+                                <img src="../../accets/product-interior/review-6.png" class="video-thumbnail__image" alt="">
+                                <button class="video-thumbnail__play-button">
+                                    <svg width="15" height="20" viewBox="0 0 15 20">
+                                        <path d="M0 0V20L15 10L0 0Z" />
+                                    </svg>
+                                </button>
+                            </a>
+                        </article>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!---------Footer-------->
+        <footer class="footer" role="contentinfo">
+            <div class="footer__container">
+                <div class="footer__grid">
+                    <div class="footer__column">
+                    <h6 class="footer__column-title">Company</h6>
+                    <ul class="footer__list">
+                        <li class="footer__list-item"><a href="#" class="footer__link">About Us</a></li>
+                        <li class="footer__list-item"><a href="#" class="footer__link">Investors</a></li>
+                        <li class="footer__list-item"><a href="#" class="footer__link">Careers</a></li>
+                        <li class="footer__list-item"><a href="#" class="footer__link">Blogs and news</a></li>
+                        <li class="footer__list-item"><a href="#" class="footer__link">Example</a></li>
+                    </ul>
+                    </div>
+
+                    <div class="footer__column">
+                    <h6 class="footer__column-title">Buyers</h6>
+                    <ul class="footer__list">
+                        <li class="footer__list-item"><a href="#" class="footer__link">Find store</a></li>
+                        <li class="footer__list-item"><a href="#" class="footer__link">Registration</a></li>
+                        <li class="footer__list-item"><a href="#" class="footer__link">Partnerships</a></li>
+                        <li class="footer__list-item"><a href="#" class="footer__link">Gift vouchers</a></li>
+                        <li class="footer__list-item"><a href="#" class="footer__link">Example</a></li>
+                    </ul>
+                    </div>
+
+                    <div class="footer__column">
+                    <h6 class="footer__column-title">Help</h6>
+                    <ul class="footer__list">
+                        <li class="footer__list-item"><a href="#" class="footer__link">Contact us</a></li>
+                        <li class="footer__list-item"><a href="#" class="footer__link">Live chat</a></li>
+                        <li class="footer__list-item"><a href="#" class="footer__link">Documentation</a></li>
+                        <li class="footer__list-item"><a href="#" class="footer__link">Download</a></li>
+                        <li class="footer__list-item"><a href="#" class="footer__link">Versions</a></li>
+                    </ul>
+                    </div>
+
+                    <div class="footer__column">
+                    <h6 class="footer__column-title">Service</h6>
+                    <ul class="footer__list">
+                        <li class="footer__list-item"><a href="#" class="footer__link">Safe purchase</a></li>
+                        <li class="footer__list-item"><a href="#" class="footer__link">Logistics service</a></li>
+                        <li class="footer__list-item"><a href="#" class="footer__link">Refund</a></li>
+                        <li class="footer__list-item"><a href="#" class="footer__link">Example link</a></li>
+                        <li class="footer__list-item"><a href="#" class="footer__link">Something</a></li>
+                    </ul>
+                    </div>
+
+                    <div class="footer__column">
+                    <h6 class="footer__column-title">Language</h6>
+                    <ul class="footer__list">
+                        <li class="footer__list-item"><a href="#" class="footer__link">Español</a></li>
+                        <li class="footer__list-item"><a href="#" class="footer__link">Português</a></li>
+                        <li class="footer__list-item"><a href="#" class="footer__link">Deutsch</a></li>
+                        <li class="footer__list-item"><a href="#" class="footer__link">日本語</a></li>
+                    </ul>
+                    </div>
+                </div>
+
+                <hr class="footer__divider">
+
+                <div class="footer__bottom">
+                    <p>Copyright © 2025 - 2027 DTHN</p>
+                </div>
+            </div>
+        </footer>
+    </body>
+</html>
+

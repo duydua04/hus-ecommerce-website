@@ -1,105 +1,223 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Request
-from fastapi.security import OAuth2PasswordRequestForm
-from sqlalchemy.orm import Session
-from ...config.db import get_db
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, BackgroundTasks, status
+from ...config import public_url
 from ...middleware.auth import get_current_user
-from ...schemas import RefreshTokenRequest
-from ...schemas.auth import RegisterBuyer, RegisterSeller, Login, OAuth2Token
+
+from ...schemas.auth import (
+    RegisterBuyer, RegisterSeller, Login, OAuth2Token,
+    ForgotPasswordRequest, VerifyOTPRequest, ResetPasswordRequest
+)
 from ...schemas.user import BuyerResponse, SellerResponse
-from ...services.common import auth_service, gg_auth_service
-from ...models.users import Admin, Seller, Buyer
-from ...utils.security import verify_password
+
+from ...services.common.auth_service import AuthService, get_auth_service
+from ...services.common.gg_auth_service import GoogleAuthService, get_google_auth_service
+
+from ...utils.security import set_auth_cookies
 
 router = APIRouter(
     prefix="/auth",
     tags=["auth"]
 )
 
-# Router tra ve thong tin nguoi dung hien tai
+
 @router.get("/me")
-def get_me(info = Depends(get_current_user)):
+def get_me(info=Depends(get_current_user)):
+    """Lấy thông tin người dùng hiện tại"""
+    # Hàm này chỉ đọc thông tin từ token (dict) đã decode ở middleware
+    # Không gọi DB nên giữ nguyên def thường
     u = info["user"]
     return {
         "role": info["role"],
         "email": u.email,
         "fname": u.fname,
         "lname": getattr(u, "lname", None),
-        "avt_url": getattr(u, "avt_url", None),
+        "avt_url": public_url(getattr(u, "avt_url", None)),
+        "id": getattr(u, "buyer_id", getattr(u, "seller_id", getattr(u, "admin_id", None)))
     }
-# Router dang ky/tao buyer moi
+
+
 @router.post("/register/buyer", response_model=BuyerResponse)
-def register_buyer(payload: RegisterBuyer, db: Session = Depends(get_db)):
-    return auth_service.register_buyer(db, payload)
+async def register_buyer(
+        payload: RegisterBuyer,
+        service: AuthService = Depends(get_auth_service)
+):
+    """Đăng ký Buyer"""
+    # [ASYNC] Phải await vì service gọi DB async
+    return await service.register_buyer(payload)
 
-# Router dang ky/tao seller moi
+
 @router.post("/register/seller", response_model=SellerResponse)
-def register_seller(payload: RegisterSeller, db: Session = Depends(get_db)):
-    return auth_service.register_seller(db, payload)
+async def register_seller(
+        payload: RegisterSeller,
+        service: AuthService = Depends(get_auth_service)
+):
+    """Đăng ký Seller"""
+    return await service.register_seller(payload)
 
-# Cac router dang nhap deu tra ve token de biet la ai
-#Router dang nhap cho admin
+
 @router.post("/login/admin", response_model=OAuth2Token)
-def login_admin(payload: Login, db: Session = Depends(get_db)):
-    return auth_service.login_admin(db, payload)
+async def login_admin(
+        payload: Login,
+        response: Response,
+        service: AuthService = Depends(get_auth_service)
+):
+    token_data = await service.login_admin(payload)
+    set_auth_cookies(response, token_data.access_token, token_data.refresh_token)
+    return token_data
 
-#Router dang nhap cho buyer
+
 @router.post("/login/buyer", response_model=OAuth2Token)
-def login_buyer(payload: Login, db: Session = Depends(get_db)):
-    return auth_service.login_buyer(db, payload)
+async def login_buyer(
+        payload: Login,
+        response: Response,
+        service: AuthService = Depends(get_auth_service)
+):
+    token_data = await service.login_buyer(payload)
+    set_auth_cookies(response, token_data.access_token, token_data.refresh_token)
+    return token_data
 
-#Router dang nhap cho seller
+
 @router.post("/login/seller", response_model=OAuth2Token)
-def login_seller(payload: Login, db: Session = Depends(get_db)):
-    return auth_service.login_seller(db, payload)
+async def login_seller(
+        payload: Login,
+        response: Response,
+        service: AuthService = Depends(get_auth_service)
+):
+    token_data = await service.login_seller(payload)
+    set_auth_cookies(response, token_data.access_token, token_data.refresh_token)
+    return token_data
 
-# ===== Router de test tren swagger =====
-@router.post("/token", response_model=OAuth2Token)
-def oauth2_password(form: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    """
-    Dành cho Swagger "Authorize":
-    - form.username: email
-    - form.password: mật khẩu
-    - form.scopes  : ["admin"] / ["seller"] / ["buyer"] (mặc định: buyer nếu trống)
-    """
-    email = form.username
-    password = form.password
-    role = "buyer"
-    if "admin" in form.scopes:
-        role = "admin"
-    elif "seller" in form.scopes:
-        role = "seller"
 
-    # Xác thực người dùng theo role đã chọn
-    user = None
-    if role == "admin":
-        user = db.query(Admin).filter(Admin.email == email).first()
-    elif role == "seller":
-        user = db.query(Seller).filter(Seller.email == email).first()
-    else:
-        user = db.query(Buyer).filter(Buyer.email == email).first()
-
-    if user is None or not verify_password(password, user.password):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                            detail="Invalid email or password",
-                            headers={"WWW-Authenticate": "Bearer"})
-    return auth_service.issue_token(email=email, role=role)
-
-# ===== Refresh =====
 @router.post("/refresh", response_model=OAuth2Token)
-def refresh(payload: RefreshTokenRequest, db: Session = Depends(get_db)):
-    return auth_service.refresh_access_token(db, payload.refresh_token)
+async def refresh(
+        request: Request,
+        response: Response,
+        service: AuthService = Depends(get_auth_service)
+):
+    """Cấp lại Access Token mới từ Refresh Token"""
+    refresh_token = request.cookies.get("refresh_token")
+    if not refresh_token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Refresh token missing in cookie"
+        )
 
-# Google Login — router riêng
+    new_token = await service.refresh_access_token(refresh_token)
+
+    set_auth_cookies(response, new_token.access_token, new_token.refresh_token)
+    return new_token
+
+
+@router.post("/logout")
+def logout(
+        response: Response,
+        service: AuthService = Depends(get_auth_service)
+):
+    """Đăng xuất: Xóa cookie"""
+    # Hàm logout trong service là @staticmethod và chỉ xóa cookie, không gọi DB
+    # Nên giữ nguyên def thường để tối ưu
+    return service.logout(response)
+
+
 @router.get("/google/login/buyer")
-async def google_login_buyer(request: Request):
-    """Dang nhap bang gg cho buyer"""
-    return await gg_auth_service.google_login_start(request, role="buyer")
+async def google_login_buyer(
+        request: Request,
+        service: GoogleAuthService = Depends(get_google_auth_service)
+):
+    return await service.login_start(request, role="buyer")
+
 
 @router.get("/google/login/seller")
-async def google_login_seller(request: Request):
-    """Router dang nhap bang gg cho seller"""
-    return await gg_auth_service.google_login_start(request, role="seller")
+async def google_login_seller(
+        request: Request,
+        service: GoogleAuthService = Depends(get_google_auth_service)
+):
+    return await service.login_start(request, role="seller")
+
 
 @router.get("/google/callback")
-async def google_callback(request: Request, db: Session = Depends(get_db)):
-    return await gg_auth_service.google_login_callback(request, db)
+async def google_callback(
+        request: Request,
+        background_tasks: BackgroundTasks,
+        service: GoogleAuthService = Depends(get_google_auth_service)
+):
+    return await service.login_callback(request, background_tasks)
+
+
+@router.post("/forgot-password")
+async def forgot_password(
+        payload: ForgotPasswordRequest,
+        response: Response,
+        # background_tasks: BackgroundTasks, (Đã bỏ theo logic mới dùng Celery)
+        service: AuthService = Depends(get_auth_service)
+):
+    """Gửi OTP qua email"""
+    # [ASYNC] Phải await vì cần tìm user trong DB
+    result = await service.forgot_password_request(payload.email, payload.role)
+
+    response.set_cookie(
+        key="reset_token",
+        value=result["reset_token"],
+        httponly=True,
+        samesite="lax",
+        secure=False,
+        max_age=5 * 60
+    )
+    return {"message": "OTP has been sent to your email"}
+
+
+@router.post("/verify-otp")
+def verify_otp(
+        payload: VerifyOTPRequest,
+        request: Request,
+        response: Response,
+        service: AuthService = Depends(get_auth_service)
+):
+    """Kiểm tra OTP"""
+    token = request.cookies.get("reset_token")
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Session missing or expired"
+        )
+
+    # Hàm này trong Service là @staticmethod và tính toán CPU (hash compare)
+    # Không gọi DB -> Giữ nguyên def thường để FastAPI chạy trong Threadpool
+    result = service.verify_otp_for_reset(payload.otp, token)
+
+    response.set_cookie(
+        key="reset_token",
+        value=result["permission_token"],
+        httponly=True,
+        samesite="lax",
+        secure=False,
+        max_age=5 * 60
+    )
+    return {"message": "OTP valid, you can now reset password"}
+
+
+@router.post("/reset-password")
+async def reset_password(
+        payload: ResetPasswordRequest,
+        request: Request,
+        response: Response,
+        service: AuthService = Depends(get_auth_service)
+):
+    """Đổi mật khẩu mới"""
+    if payload.new_password != payload.confirm_password:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Passwords do not match"
+        )
+
+    token = request.cookies.get("reset_token")
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Session missing"
+        )
+
+    result = await service.reset_password_final(payload.new_password, token)
+
+    response.delete_cookie("reset_token")
+
+    return result

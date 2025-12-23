@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thanh Toán</title>
+    <link rel="stylesheet" href="../web_framework/variables.css">
+    <link rel="stylesheet" href="order-payment.css">
+
+</head>
+<body>
+    <!-----HEADER ROW---->
+    <header class="header">
+        <!--Brand name anh logo-->
+        <div class="header__left">
+            <div class="brand">
+                <a href="#" class="brand__link">
+                    <div class="brand__logo">🐳</div>
+                    <span class="brand__name">BrandName</span>
+                </a>
+            </div>
+        </div>
+        <!--------Search bar-------->
+        <div class="header__center">
+            <form class="search" action="/search" method="get" role="search">
+                <input class="search__input" type="search" name="q" placeholder="Search Product of e-commerce store" aria-label="Search products or e-commerce store">
+                <button class="search__button" type="submit" aria-label="search">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                </button>
+            </form>
+        </div>
+
+        <div class="header__right">
+
+            <!-----Icon group-------->
+            <div class="icon-group">
+                <!---------My Order-------->
+                <div class="icon-group__button" data-tooltip="My Order" role="button" tabindex="0" aria-label="My Order">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20.198 3H3.802C3.05147 3 2.6762 3 2.41637 3.17726C2.28768 3.26505 2.18133 3.38109 2.10567 3.51627C1.9529 3.78921 1.99024 4.15793 2.06493 4.89537C2.18958 6.12624 2.2519 6.74168 2.57823 7.18168C2.74084 7.40095 2.94701 7.58519 3.18414 7.72315C3.65999 8 4.28635 8 5.53908 8H18.4609C19.7136 8 20.34 8 20.8159 7.72315C21.053 7.58519 21.2592 7.40095 21.4218 7.18168C21.7481 6.74168 21.8104 6.12624 21.9351 4.89537C22.0098 4.15793 22.0471 3.78921 21.8943 3.51627C21.8187 3.38109 21.7123 3.26505 21.5836 3.17726C21.3238 3 20.9485 3 20.198 3Z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                        <path d="M3 8L3 13.0408C3 16.7928 3 18.6688 4.17157 19.8344C5.34315 21 7.22876 21 11 21H13C16.7712 21 18.6569 21 19.8284 19.8344C21 18.6688 21 16.7928 21 13.0408V8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                        <path d="M10 11H14" stroke-width="1.5" stroke-linecap="round"></path>
+                    </svg>
+                </div>
+                <!---------My Cart-------->
+                <div class="icon-group__button" data-tooltip="My Cart" role="button" tabindex="0" aria-label="My Cart">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M8 16L16.7201 15.2733C19.4486 15.046 20.0611 14.45 20.3635 11.7289L21 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+                        <path d="M6 6H22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+                        <circle cx="6" cy="20" r="2" stroke="currentColor" stroke-width="1.5"></circle>
+                        <circle cx="17" cy="20" r="2" stroke="currentColor" stroke-width="1.5"></circle>
+                        <path d="M8 20L15 20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+                        <path d="M2 2H2.966C3.91068 2 4.73414 2.62459 4.96326 3.51493L7.93852 15.0765C8.08887 15.6608 7.9602 16.2797 7.58824 16.7616L6.63213 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+                    </svg>
+                </div>
+
+                <!---------Sign In-------->
+                <div class="icon-group__button" data-tooltip="Sign In" role="button" tabindex="0" aria-label="Sign In">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z" stroke="currentColor" stroke-width="1.5" />
+                        <path d="M15 10C15 11.6569 13.6569 13 12 13C10.3431 13 9 11.6569 9 10C9 8.34315 10.3431 7 12 7C13.6569 7 15 8.34315 15 10Z" stroke="currentColor" stroke-width="1.5" />
+                        <path d="M5.49994 19.0001L6.06034 18.0194C6.95055 16.4616 8.60727 15.5001 10.4016 15.5001H13.5983C15.3926 15.5001 17.0493 16.4616 17.9395 18.0194L18.4999 19.0001" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" stroke-linejoin="round" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="checkout-container">
+        <div class="checkout-layout">
+            <div class="checkout-main">
+                <!-- Address Section -->
+                <section class="address-section">
+                    <div class="address-header">
+                        <span class="address-icon">📍</span>
+                        <span>Địa Chỉ Nhận Hàng</span>
+                    </div>
+                    <div class="address-info">
+                        <div class="address-label">Trang Thu (+84) 896 581 162</div>
+                        <div class="address-details">
+                            334 Nguyễn Trãi, Phuường Thanh Xuân Trung, Quận Thanh Xuân, Hà Nội
+                            <span class="address-badge">Mặc Định</span>
+                        </div>
+                        <a href="#" class="address-change">Thay Đổi</a>
+                    </div>
+                </section>
+
+                <!-- Product Section -->
+                <section class="product-section">
+                    <div class="product-header">
+                        <div>Sản phẩm</div>
+                        <div style="text-align: center;">Đơn giá</div>
+                        <div style="text-align: center;">Số lượng</div>
+                        <div style="text-align: center;">Thành tiền</div>
+                    </div>
+
+                    <div class="store-info">
+                        <span class="store-name">Bo Decor</span>
+                        <a href="#" class="chat-button">
+                            💬 Chat ngay
+                        </a>
+                    </div>
+
+                    <div class="product-item">
+                        <div class="product-info">
+                            <img src="../../accets/product-catalog/fashion.jpg" alt="Product" class="product-image">
+                            <div class="product-details">
+                                <div class="product-name">Bộ ga gối 3 món poly coton Bo decor 1m6x2m và</div>
+                                <div class="product-variant">Phân loại: Thổ lim,1m6x2m</div>
+                            </div>
+                        </div>
+                        <div class="product-price">59.000₫</div>
+                        <div class="product-quantity">1</div>
+                        <div class="product-total">59.000₫</div>
+                    </div>
+
+                    <div class="message-section">
+                        <label class="message-label">Lời nhắn:</label>
+                        <input type="text" class="message-input" placeholder="Lưu ý cho Người bán...">
+                    </div>
+                </section>
+
+                <!-- Shipping Section -->
+                <section class="shipping-section">
+                    <div class="shipping-header">Đơn vị vận chuyển</div>
+                    <div class="shipping-option">
+                        <div class="shipping-method">
+                            <span class="shipping-label">Nhanh</span>
+                            <span class="shipping-badge">₫ 9.111Đ</span>
+                            <div class="shipping-note">
+                                Nhận Voucher trị giá 15.000₫ nếu đơn hàng được giao đến bạn sau ngày 1 Tháng 12 2025.
+                            </div>
+                        </div>
+                        <div>
+                            <a href="#" class="shipping-change">Thay Đổi</a>
+                            <div class="shipping-fee">12.800₫</div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Payment Section -->
+                <section class="payment-section">
+                    <div class="payment-header">Phương thức thanh toán</div>
+                    <div class="payment-options">
+                        <label class="payment-option active">
+                            <input type="radio" name="payment" class="payment-radio" checked>
+                            <div class="payment-info">
+                                <div class="payment-icon">💵</div>
+                                <div class="payment-details">
+                                    <div class="payment-name">Thanh toán khi nhận hàng</div>
+                                    <div class="payment-description">Thanh toán bằng tiền mặt khi nhận hàng</div>
+                                </div>
+                            </div>
+                        </label>
+
+                        <label class="payment-option">
+                            <input type="radio" name="payment" class="payment-radio">
+                            <div class="payment-info">
+                                <div class="payment-icon">💳</div>
+                                <div class="payment-details">
+                                    <div class="payment-name">Thẻ Tín dụng/Ghi nợ</div>
+                                    <div class="payment-description">Thanh toán qua thẻ ngân hàng</div>
+                                </div>
+                            </div>
+                        </label>
+
+                        <label class="payment-option">
+                            <input type="radio" name="payment" class="payment-radio">
+                            <div class="payment-info">
+                                <div class="payment-icon">🏦</div>
+                                <div class="payment-details">
+                                    <div class="payment-name">Chuyển khoản ngân hàng</div>
+                                    <div class="payment-description">Thanh toán qua chuyển khoản</div>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Summary Section -->
+            <aside class="summary-section">
+                <div class="summary-row">
+                    <span>Tổng số tiền (1 sản phẩm):</span>
+                    <span>71.800₫</span>
+                </div>
+                <div class="summary-total">
+                    <span class="summary-total-label">Tổng thanh toán:</span>
+                    <span class="summary-total-amount">71.800₫</span>
+                </div>
+                <button class="checkout-button">Đặt Hàng</button>
+            </aside>
+        </div>
+    </div>
+
+    <!---------Footer-------->
+    <footer class="footer" role="contentinfo">
+        <div class="footer__container">
+            <div class="footer__grid">
+                <div class="footer__column">
+                <h6 class="footer__column-title">Company</h6>
+                <ul class="footer__list">
+                    <li class="footer__list-item"><a href="#" class="footer__link">About Us</a></li>
+                    <li class="footer__list-item"><a href="#" class="footer__link">Investors</a></li>
+                    <li class="footer__list-item"><a href="#" class="footer__link">Careers</a></li>
+                    <li class="footer__list-item"><a href="#" class="footer__link">Blogs and news</a></li>
+                    <li class="footer__list-item"><a href="#" class="footer__link">Example</a></li>
+                </ul>
+                </div>
+
+                <div class="footer__column">
+                <h6 class="footer__column-title">Buyers</h6>
+                <ul class="footer__list">
+                    <li class="footer__list-item"><a href="#" class="footer__link">Find store</a></li>
+                    <li class="footer__list-item"><a href="#" class="footer__link">Registration</a></li>
+                    <li class="footer__list-item"><a href="#" class="footer__link">Partnerships</a></li>
+                    <li class="footer__list-item"><a href="#" class="footer__link">Gift vouchers</a></li>
+                    <li class="footer__list-item"><a href="#" class="footer__link">Example</a></li>
+                </ul>
+                </div>
+
+                <div class="footer__column">
+                <h6 class="footer__column-title">Help</h6>
+                <ul class="footer__list">
+                    <li class="footer__list-item"><a href="#" class="footer__link">Contact us</a></li>
+                    <li class="footer__list-item"><a href="#" class="footer__link">Live chat</a></li>
+                    <li class="footer__list-item"><a href="#" class="footer__link">Documentation</a></li>
+                    <li class="footer__list-item"><a href="#" class="footer__link">Download</a></li>
+                    <li class="footer__list-item"><a href="#" class="footer__link">Versions</a></li>
+                </ul>
+                </div>
+
+                <div class="footer__column">
+                <h6 class="footer__column-title">Service</h6>
+                <ul class="footer__list">
+                    <li class="footer__list-item"><a href="#" class="footer__link">Safe purchase</a></li>
+                    <li class="footer__list-item"><a href="#" class="footer__link">Logistics service</a></li>
+                    <li class="footer__list-item"><a href="#" class="footer__link">Refund</a></li>
+                    <li class="footer__list-item"><a href="#" class="footer__link">Example link</a></li>
+                    <li class="footer__list-item"><a href="#" class="footer__link">Something</a></li>
+                </ul>
+                </div>
+
+                <div class="footer__column">
+                <h6 class="footer__column-title">Language</h6>
+                <ul class="footer__list">
+                    <li class="footer__list-item"><a href="#" class="footer__link">Español</a></li>
+                    <li class="footer__list-item"><a href="#" class="footer__link">Português</a></li>
+                    <li class="footer__list-item"><a href="#" class="footer__link">Deutsch</a></li>
+                    <li class="footer__list-item"><a href="#" class="footer__link">日本語</a></li>
+                </ul>
+                </div>
+            </div>
+
+            <hr class="footer__divider">
+
+            <div class="footer__bottom">
+                <p>Copyright © 2025 - 2027 DTHN</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="order-payment.js"></script>
+
+</body>
+</html>

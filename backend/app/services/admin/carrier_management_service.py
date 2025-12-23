@@ -1,125 +1,128 @@
 from __future__ import annotations
-from typing import Optional, Iterable, Tuple, List, Literal
-from fastapi import HTTPException, status, UploadFile
-from sqlalchemy.orm import Session
-from sqlalchemy import select, func, asc, desc, exists
+import json
+
+from fastapi import HTTPException, status, UploadFile, Depends
+from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.ext.asyncio import AsyncSession
+from redis.asyncio import Redis
 
-from ...models import Carrier
-from ...models import Order
+from ..common.carrier_service import BaseCarrierService
+from ...config.db import get_db
+from ...config.redis import get_redis_client
+from ...models import Carrier, Order
 from ...schemas.carrier import CarrierCreate, CarrierUpdate, CarrierOut
-from ...services.common.storage_service import upload_via_backend
-from ...config.s3 import public_url
+from ...utils.storage import storage
 
-def ensure_unique_name(db: Session, name: str, exclude_id: int | None = None):
-    """
-    Đảm bảo không có carrier nào đang active trùng tên (không phân biệt hoa thường).
-    exclude_id: bỏ qua carrier_id này khi update
-    """
-    query = db.query(Carrier).filter(
-        func.lower(Carrier.carrier_name) == func.lower(name),
-        Carrier.is_active == True
-    )
-    if exclude_id:
-        query = query.filter(Carrier.carrier_id != exclude_id)
 
-    dup = query.first()
-    if dup:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Carrier name already exists"
+class AdminCarrierService(BaseCarrierService):
+
+    def __init__(self, db: AsyncSession, redis: Redis):
+        super().__init__(db, redis)
+
+    async def _ensure_unique_name(self, name: str, exclude_id: int = None):
+        stmt = select(Carrier).where(
+            func.lower(Carrier.carrier_name) == func.lower(name),
+            Carrier.is_active.is_(True)
         )
 
-def carrier_to_out_public(c: Carrier):
-    return CarrierOut(
-        carrier_id=c.carrier_id,
-        carrier_name=c.carrier_name,
-        carrier_avt_url=public_url(c.carrier_avt_url) if c.carrier_avt_url else None,
-        base_price=c.base_price,
-        price_per_kg=c.price_per_kg,
-        is_active=c.is_active,
-    )
+        if exclude_id:
+            stmt = stmt.where(Carrier.carrier_id != exclude_id)
 
-def get_carrier_or_404(db: Session, carrier_id: int):
-    """Tra ve don vi van chuyen hien tai hoac bao loi"""
-    carr = db.get(Carrier, carrier_id)
-    if not carr:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Carrier not found"
-        )
+        result = await self.db.execute(stmt)
+        if result.scalar_one_or_none():
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Carrier name exists"
+            )
 
-    return carr
 
-def carrier_has_order(db: Session, carrier_id: int):
-    """Kiem tra nha van chuyen nay co don hang nao khong"""
-    return (db.query(Order.order_id)
-            .filter(Order.carrier_id == carrier_id)
-    ).first() is not None
+    async def _has_orders(self, carrier_id: int):
+        """Kiem tra don vi van chuyen co order hay khong"""
+        stmt = select(Order.order_id).where(Order.carrier_id == carrier_id).limit(1)
+        result = await self.db.execute(stmt)
 
-def list_active_carrier(db: Session, q: str | None = None):
-    """List ra danh sach cac don vi van chuyen dang duoc hoat dong"""
-    query = db.query(Carrier).filter(Carrier.is_active == True)
-    if q:
-        query = query.filter(Carrier.carrier_name.ilike(f"%{q.strip()}%"))
+        return result.first() is not None
 
-    carriers = query.order_by(Carrier.carrier_name.asc()).all()
-    return [carrier_to_out_public(carrier) for carrier in carriers]
 
-async def create_carrier(
-        db: Session,
-        payload: CarrierCreate,
-):
-    """
-    Ham them don vi van chuyen moi
-    """
-    # Bat buoc dien ten
-    name = payload.carrier_name.strip()
-    if not name:
-        raise HTTPException(
-            status_code=400,
-            detail="Carrier name is required"
-        )
+    async def list_carrier(self, q: str | None = None, limit: int = 10, offset: int = 0):
+        """
+        Admin xem được cả đơn vị đã ẩn.
+        """
 
-    # Kiem tra co trung ten hay khong
-    ensure_unique_name(db, name)
+        # Tạo Cache Key
+        cache_key = f"carrier:list:ADMIN:{q or 'all'}:{limit}:{offset}"
 
-    # Tao va them carrier vao database
-    carrier = Carrier(
-        carrier_name=name,
-        carrier_avt_url=None,
-        base_price=payload.base_price,
-        price_per_kg=payload.price_per_kg,
-        is_active=True if payload.is_active is None else payload.is_active
-    )
+        # 2. Check Cache
+        if cached := await self.redis.get(cache_key):
+            data_list = json.loads(cached)
+            return [CarrierOut(**item) for item in data_list]
 
-    try:
-        db.add(carrier)
-        db.commit()
-        db.refresh(carrier)
-    except IntegrityError:
-        db.rollback()
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Create carrier failed")
+        stmt = select(Carrier)
+        if q and q.strip():
+            stmt = stmt.where(Carrier.carrier_name.ilike(f"%{q.strip()}%"))
 
-    return carrier_to_out_public(carrier)
+        stmt = stmt.order_by(Carrier.carrier_name.asc()).limit(limit).offset(offset)
 
-def update_carrier(db: Session, carrier_id: int, payload: CarrierUpdate):
-    carrier = get_carrier_or_404(db, carrier_id)
+        result = await self.db.execute(stmt)
+        carriers = result.scalars().all()
 
-    # Tien hanh kiem tra va update
-    if payload.carrier_name is not None:
-        new_name = payload.carrier_name.strip()
-        if not new_name:
+        # 4. Map to Response
+        response_data = [self._to_response(c) for c in carriers]
+
+        json_data = json.dumps([item.model_dump() for item in response_data])
+        await self.redis.set(cache_key, json_data, ex=self.TTL)
+
+        return response_data
+
+
+    async def create_carrier(self, payload: CarrierCreate):
+        name = payload.carrier_name.strip()
+        if not name:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Carrier name cannot be empty"
+                detail="Name required"
             )
-        # Kiem tra ten update co trung voi ten da ton tai ko
-        if new_name.lower() != carrier.carrier_name.lower():
-           ensure_unique_name(db, new_name, exclude_id=carrier.carrier_id)
-           carrier.carrier_name = new_name
+
+        await self._ensure_unique_name(name)
+
+        carrier = Carrier(
+            carrier_name=name,
+            base_price=payload.base_price,
+            price_per_kg=payload.price_per_kg,
+            is_active=payload.is_active if payload.is_active is not None else True
+        )
+        try:
+            self.db.add(carrier)
+            await self.db.commit()
+            await self.db.refresh(carrier)
+
+            # Xóa cache list để cập nhật item mới
+            await self._clear_cache()
+
+        except IntegrityError:
+            await self.db.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Create failed"
+            )
+
+        return self._to_response(carrier)
+
+
+    async def update_carrier(self, carrier_id: int, payload: CarrierUpdate):
+        carrier = await self._get_carrier_or_404(carrier_id)
+
+        if payload.carrier_name:
+            name = payload.carrier_name.strip()
+            if not name: raise HTTPException(
+                status_code=400,
+                detail="Name empty"
+            )
+
+            if name.lower() != carrier.carrier_name.lower():
+                await self._ensure_unique_name(name, exclude_id=carrier_id)
+                carrier.carrier_name = name
 
         if payload.base_price is not None:
             carrier.base_price = payload.base_price
@@ -128,45 +131,49 @@ def update_carrier(db: Session, carrier_id: int, payload: CarrierUpdate):
         if payload.is_active is not None:
             carrier.is_active = payload.is_active
 
-        db.commit()
-        db.refresh(carrier)
+        await self.db.commit()
+        await self.db.refresh(carrier)
+        await self._clear_cache(carrier_id)
 
-        return carrier_to_out_public(carrier)
+        return self._to_response(carrier)
 
-async def update_carrier_avatar(
-    db: Session,
-    carrier_id: int,
-    avatar_file: UploadFile,
-    max_avt_size: int = 2,
+
+    async def upload_carrier_avatar(self, carrier_id: int, file: UploadFile):
+        carrier = await self._get_carrier_or_404(carrier_id)
+
+        # Upload S3
+        res = await storage.upload_file("avatars", file, max_size_mb=2)
+        carrier.carrier_avt_url = res["object_key"]
+
+        await self.db.commit()
+        await self.db.refresh(carrier)
+        await self._clear_cache(carrier_id)
+
+        return self._to_response(carrier)
+
+
+    async def delete_carrier(self, carrier_id: int):
+        carrier = await self._get_carrier_or_404(carrier_id)
+
+        result = {}
+        if await self._has_orders(carrier_id):
+            # Xóa mềm
+            carrier.is_active = False
+            await self.db.commit()
+            result = {"deleted": False, "soft_deleted": True, "id": carrier_id}
+        else:
+            # Xóa cứng
+            await self.db.delete(carrier)
+            await self.db.commit()
+            result = {"deleted": True, "id": carrier_id}
+
+        await self._clear_cache(carrier_id)
+
+        return result
+
+
+def get_admin_carrier_service(
+        db: AsyncSession = Depends(get_db),
+        redis: Redis = Depends(get_redis_client)
 ):
-    """Upload avatar cua don vi van chuyen"""
-    c = get_carrier_or_404(db, carrier_id)
-    res = await upload_via_backend("avatars", avatar_file, max_size_mb=max_avt_size)
-    c.carrier_avt_url = res["object_key"]  # Lưu KEY
-    db.commit()
-    db.refresh(c)
-    return carrier_to_out_public(c)
-
-def delete_carrier(db: Session, carrier_id: int):
-    """Neu chua co don hang thi xoa cung, co thi xoa mem"""
-    carrier = get_carrier_or_404(db, carrier_id)
-
-    if carrier_has_order(db, carrier_id):
-        carrier.is_active = False
-        db.commit()
-        return {
-            "deleted": True,
-            "soft_deleted": True,
-            "carrier_id": carrier.carrier_id,
-            "is_active": carrier.is_active
-        }
-
-    db.delete(carrier)
-    db.commit()
-
-    return {
-        "deleted": True,
-        "soft_delete":False,
-        "carrier_id": carrier_id
-    }
-
+    return AdminCarrierService(db, redis)

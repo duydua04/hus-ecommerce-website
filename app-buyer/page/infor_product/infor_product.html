@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Details infomation</title>
+
+    <link rel="stylesheet" href="../web_framework/variables.css">
+    <link rel="stylesheet" href="infor_product.css">
+
+</head>
+<body>
+    <header class="header">
+            <!--Brand name anh logo-->
+            <div class="header__left">
+                <div class="brand">
+                    <a href="#" class="brand__link">
+                        <div class="brand__logo">🐳</div>
+                        <span class="brand__name">Brandname</span>
+                    </a>
+                </div>
+            </div>
+            <!--------Search bar-------->
+            <div class="header__center">
+                <form class="search" action="/search" method="get" role="search">
+                    <input class="search__input" type="search" name="q" placeholder="Search Product of e-commerce store" aria-label="Search products or e-commerce store">
+                    <button class="search__button" type="submit" aria-label="search">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"/>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        </svg>
+                    </button>
+                </form>
+            </div>
+
+            <div class="header__right">
+
+                <!-----Icon group-------->
+                <div class="icon-group">
+                    <!---------My Order-------->
+                    <div class="icon-group__button" data-tooltip="My Order" role="button" tabindex="0" aria-label="My Order">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20.198 3H3.802C3.05147 3 2.6762 3 2.41637 3.17726C2.28768 3.26505 2.18133 3.38109 2.10567 3.51627C1.9529 3.78921 1.99024 4.15793 2.06493 4.89537C2.18958 6.12624 2.2519 6.74168 2.57823 7.18168C2.74084 7.40095 2.94701 7.58519 3.18414 7.72315C3.65999 8 4.28635 8 5.53908 8H18.4609C19.7136 8 20.34 8 20.8159 7.72315C21.053 7.58519 21.2592 7.40095 21.4218 7.18168C21.7481 6.74168 21.8104 6.12624 21.9351 4.89537C22.0098 4.15793 22.0471 3.78921 21.8943 3.51627C21.8187 3.38109 21.7123 3.26505 21.5836 3.17726C21.3238 3 20.9485 3 20.198 3Z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                            <path d="M3 8L3 13.0408C3 16.7928 3 18.6688 4.17157 19.8344C5.34315 21 7.22876 21 11 21H13C16.7712 21 18.6569 21 19.8284 19.8344C21 18.6688 21 16.7928 21 13.0408V8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                            <path d="M10 11H14" stroke-width="1.5" stroke-linecap="round"></path>
+                        </svg>
+                    </div>
+                    <!---------My Cart-------->
+                    <div class="icon-group__button" data-tooltip="My Cart" role="button" tabindex="0" aria-label="My Cart">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M8 16L16.7201 15.2733C19.4486 15.046 20.0611 14.45 20.3635 11.7289L21 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+                            <path d="M6 6H22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+                            <circle cx="6" cy="20" r="2" stroke="currentColor" stroke-width="1.5"></circle>
+                            <circle cx="17" cy="20" r="2" stroke="currentColor" stroke-width="1.5"></circle>
+                            <path d="M8 20L15 20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+                            <path d="M2 2H2.966C3.91068 2 4.73414 2.62459 4.96326 3.51493L7.93852 15.0765C8.08887 15.6608 7.9602 16.2797 7.58824 16.7616L6.63213 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+                        </svg>
+                    </div>
+                </div>
+
+                <!---------Sign in-------->
+                <div class="icon-group__button" data-tooltip="Sign In" role="button" tabindex="0" aria-label="Sign In">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z" stroke="currentColor" stroke-width="1.5" />
+                        <path d="M15 10C15 11.6569 13.6569 13 12 13C10.3431 13 9 11.6569 9 10C9 8.34315 10.3431 7 12 7C13.6569 7 15 8.34315 15 10Z" stroke="currentColor" stroke-width="1.5" />
+                        <path d="M5.49994 19.0001L6.06034 18.0194C6.95055 16.4616 8.60727 15.5001 10.4016 15.5001H13.5983C15.3926 15.5001 17.0493 16.4616 17.9395 18.0194L18.4999 19.0001" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" stroke-linejoin="round" />
+                    </svg>
+                </div>
+            </div>
+        </header>
+
+    <!-- Product Detail -->
+    <main class="product">
+        <div class="product__container">
+            <!-- Product Gallery -->
+            <div class="product__gallery">
+                <div class="gallery">
+                    <div class="gallery__main">🐢</div>
+                    <div class="gallery__thumbnails">
+                        <input type="radio" name="gallery" id="thumb-1" class="gallery__input" checked>
+                        <label for="thumb-1" class="gallery__thumbnail">🐢</label>
+
+                        <input type="radio" name="gallery" id="thumb-2" class="gallery__input">
+                        <label for="thumb-2" class="gallery__thumbnail">🐽</label>
+
+                        <input type="radio" name="gallery" id="thumb-3" class="gallery__input">
+                        <label for="thumb-3" class="gallery__thumbnail">🐢</label>
+
+                        <input type="radio" name="gallery" id="thumb-4" class="gallery__input">
+                        <label for="thumb-4" class="gallery__thumbnail">🐽</label>
+
+                        <input type="radio" name="gallery" id="thumb-5" class="gallery__input">
+                        <label for="thumb-5" class="gallery__thumbnail">🐢</label>
+
+                        <input type="radio" name="gallery" id="thumb-6" class="gallery__input">
+                        <label for="thumb-6" class="gallery__thumbnail">🐽</label>
+
+
+                        <input type="radio" name="gallery" id="thumb-7" class="gallery__input">
+                        <label for="thumb-7" class="gallery__thumbnail">🐢</label>
+
+                        <input type="radio" name="gallery" id="thumb-8" class="gallery__input">
+                        <label for="thumb-8" class="gallery__thumbnail">🐽</label>
+
+                        <input type="radio" name="gallery" id="thumb-9" class="gallery__input">
+                        <label for="thumb-9" class="gallery__thumbnail">🐢</label>
+
+                        <input type="radio" name="gallery" id="thumb-10" class="gallery__input">
+                        <label for="thumb-10" class="gallery__thumbnail">🐽</label>
+
+                        <input type="radio" name="gallery" id="thumb-11" class="gallery__input">
+                        <label for="thumb-11" class="gallery__thumbnail">🐢</label>
+
+                        <input type="radio" name="gallery" id="thumb-12" class="gallery__input">
+                        <label for="thumb-12" class="gallery__thumbnail">🐽</label>
+
+                        <input type="radio" name="gallery" id="thumb-13" class="gallery__input">
+                        <label for="thumb-13" class="gallery__thumbnail">🐢</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product Info -->
+            <div class="product__info">
+                <div class="product-info">
+                    <h1 class="product-info__title">Ghế mây basic hình heo con decord bếp</h1>
+
+                    <div class="product-info__rating">
+                        <div class="rating">
+                            <span class="rating__stars">★★★★★</span>
+                            <span class="rating__score">4.5</span>
+                            <span class="rating__reviews">52 Đánh giá</span>
+                            <span class="rating__orders">15,154 Lượt mua</span>
+                        </div>
+                    </div>
+
+                    <div class="product-info__stock">
+                        <span class="stock stock--available">Còn hàng</span>
+                    </div>
+
+                    <ul class="product-info__features">
+                        <li class="product-info__feature">Chất liệu: Leather</li>
+                        <li class="product-info__feature">Màu sắc: Nâu</li>
+                        <li class="product-info__feature">Kích cỡ: 23 inch x 31 inch</li>
+                        <li class="product-info__feature">Cân nặng: 1.500 kg</li>
+                    </ul>
+
+                    <div class="product-info__options">
+                        <div class="product-option">
+                            <label class="product-option__label">Màu sắc:</label>
+                            <select class="product-option__select">
+                                <option>Choose...</option>
+                                <option>Nâu</option>
+                                <option>Đen</option>
+                                <option>Trắng</option>
+                                <option>Hồng</option>
+                            </select>
+                        </div>
+
+                        <div class="product-option">
+                            <label class="product-option__label">Size:</label>
+                            <div class="product-option__buttons">
+                                <input type="radio" name="size" id="size-large" class="product-option__input" checked>
+                                <label for="size-large" class="product-option__button">L</label>
+
+                                <input type="radio" name="size" id="size-medium" class="product-option__input">
+                                <label for="size-medium" class="product-option__button">M</label>
+
+                                <input type="radio" name="size" id="size-small" class="product-option__input">
+                                <label for="size-small" class="product-option__button">S</label>
+
+                                <input type="radio" name="size" id="size-tiny" class="product-option__input">
+                                <label for="size-tiny" class="product-option__button">XS</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product Purchase -->
+            <div class="product__purchase">
+                <div class="purchase">
+                    <div class="purchase__seller">
+                        <div class="purchase__seller-header">
+                            <div class="purchase__seller-face">🪺</div>
+                            <div class="purchase__seller-infor">
+                                <div class="purchase__seller-name-row">
+                                    <h3 class="purchase__seller-name">Nhà Sách Fusaha</h3>
+                                </div>
+                                <div class="purchase__seller-rank">
+                                    <span class="purchase__seller-stars">★</span>
+                                    <span class="purchase__seller-score">4.8</span>
+                                    <span class="purchase__seller-reviews">(420k+ đánh giá)</span>
+                                </div>
+                            </div>
+                            <button class="purchase__seller-messenger" aria-label="Chat with seller">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <p class="purchase__text">Số lượng</p>
+                    <div class="purchase__quantity">
+                        <button class="purchase__quantity-btn" id="decreaseBtn">−</button>
+                        <input type="number" class="purchase__quantity-input" id="quantityInput" value="1" min="1">
+                        <button class="purchase__quantity-btn" id="increaseBtn">+</button>
+                    </div>
+                    <p class="purchase__text">Tạm Tính</p>
+
+                    <div class="purchase__price">
+                        <span class="purchase__current-price">98.000₫</span>
+                        <span class="purchase__original-price">128.000₫</span>
+                    </div>
+
+                    <button class="purchase__add-to-cart">
+                        🛒 Thêm Vào Giỏ Hàng
+                    </button>
+
+                    <button class="purchase__buy-now">Mua ngay</button>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Product Details and Reviews Grid -->
+        <div class="product-details-grid">
+            <!-- Detailed Information Section -->
+            <section class="detail-info">
+                <div class="detail-info__container">
+                    <h2 class="detail-info__title">Thông tin sản phẩm</h2>
+
+                    <div class="detail-info__description">
+                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</br>
+                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</br>
+                        Memory size : 128GB</br>
+                        Material type: Plastic and metall<br>
+                        Screen resolution: 12.5 inch</br>
+                        Power source: Electricity</br>
+                        Compatibility: Android OS, Windows
+                    </div>
+                </div>
+            </section>
+
+            <!-- Reviews Section -->
+            <section class="reviews">
+                <div class="reviews__container">
+                    <h2 class="reviews__title">Đánh giá</h2>
+
+                    <div class="reviews__list">
+                        <div class="review">
+                            <div class="review__header">
+                                <div class="review__avatar">JD</div>
+                                <div class="review__user-info">
+                                    <h3 class="review__name">John Doe</h3>
+                                    <div class="review__rating">
+                                        <span class="review__stars">★★★★★</span>
+                                        <span class="review__score">5.0</span>
+                                        <span class="review__badge">Verified Buyer</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="review__text-container">
+                                <p class="review__text">Great product! Exactly as described.</p>
+                            </div>
+
+                            <div class="review__photos">
+                                <div class="review__photo">📷</div>
+                                <div class="review__photo">📷</div>
+                                <div class="review__photo">📷</div>
+                            </div>
+                        </div>
+
+                        <div class="review">
+                            <div class="review__header">
+                                <div class="review__avatar">MJ</div>
+                                <div class="review__user-info">
+                                    <h3 class="review__name">Michael Jonathan</h3>
+                                    <div class="review__rating">
+                                        <span class="review__stars">★★★★★</span>
+                                        <span class="review__score">4.5</span>
+                                        <span class="review__badge">Verified Buyer</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="review__text-container">
+                                <p class="review__text">This is an absolutely fantastic product that exceeded all of my expectations! When I first ordered it, I was a bit skeptical about whether it would live up to the advertised quality, but I'm thrilled to say that it did and then some. The build quality is exceptional, with attention to detail that you don't often see in products at this price point. The materials used feel premium and durable, and the craftsmanship is evident in every aspect of the design. I've been using it daily for the past few weeks, and it has proven to be incredibly reliable and functional. However, I did notice a few minor issues with the printing quality on some pages - there are occasional instances where the text starts too close to the edge, making it slightly difficult to read. Despite this small flaw, I would absolutely recommend this product to anyone looking for great value and quality.</p>
+                            </div>
+
+                            <div class="review__photos">
+                                <div class="review__photo">📷</div>
+                                <div class="review__photo">📷</div>
+                                <div class="review__photo">📷</div>
+                                <div class="review__photo">📷</div>
+                                <div class="review__photo">📷</div>
+                                <div class="review__photo">📷</div>
+                                <div class="review__photo">📷</div>
+                                <div class="review__photo">📷</div>
+                            </div>
+                        </div>
+
+                    <button class="reviews__view-all">View all 22 comments</button>
+                </div>
+             </div>
+            </section>
+        </div>
+    </main>
+
+    <!---------Footer-------->
+        <footer class="footer" role="contentinfo">
+            <div class="footer__container">
+                <div class="footer__grid">
+                    <div class="footer__column">
+                    <h6 class="footer__column-title">Company</h6>
+                    <ul class="footer__list">
+                        <li class="footer__list-item"><a href="#" class="footer__link">About Us</a></li>
+                        <li class="footer__list-item"><a href="#" class="footer__link">Investors</a></li>
+                        <li class="footer__list-item"><a href="#" class="footer__link">Careers</a></li>
+                        <li class="footer__list-item"><a href="#" class="footer__link">Blogs and news</a></li>
+                        <li class="footer__list-item"><a href="#" class="footer__link">Example</a></li>
+                    </ul>
+                    </div>
+
+                    <div class="footer__column">
+                    <h6 class="footer__column-title">Buyers</h6>
+                    <ul class="footer__list">
+                        <li class="footer__list-item"><a href="#" class="footer__link">Find store</a></li>
+                        <li class="footer__list-item"><a href="#" class="footer__link">Registration</a></li>
+                        <li class="footer__list-item"><a href="#" class="footer__link">Partnerships</a></li>
+                        <li class="footer__list-item"><a href="#" class="footer__link">Gift vouchers</a></li>
+                        <li class="footer__list-item"><a href="#" class="footer__link">Example</a></li>
+                    </ul>
+                    </div>
+
+                    <div class="footer__column">
+                    <h6 class="footer__column-title">Help</h6>
+                    <ul class="footer__list">
+                        <li class="footer__list-item"><a href="#" class="footer__link">Contact us</a></li>
+                        <li class="footer__list-item"><a href="#" class="footer__link">Live chat</a></li>
+                        <li class="footer__list-item"><a href="#" class="footer__link">Documentation</a></li>
+                        <li class="footer__list-item"><a href="#" class="footer__link">Download</a></li>
+                        <li class="footer__list-item"><a href="#" class="footer__link">Versions</a></li>
+                    </ul>
+                    </div>
+
+                    <div class="footer__column">
+                    <h6 class="footer__column-title">Service</h6>
+                    <ul class="footer__list">
+                        <li class="footer__list-item"><a href="#" class="footer__link">Safe purchase</a></li>
+                        <li class="footer__list-item"><a href="#" class="footer__link">Logistics service</a></li>
+                        <li class="footer__list-item"><a href="#" class="footer__link">Refund</a></li>
+                        <li class="footer__list-item"><a href="#" class="footer__link">Example link</a></li>
+                        <li class="footer__list-item"><a href="#" class="footer__link">Something</a></li>
+                    </ul>
+                    </div>
+
+                    <div class="footer__column">
+                    <h6 class="footer__column-title">Language</h6>
+                    <ul class="footer__list">
+                        <li class="footer__list-item"><a href="#" class="footer__link">Español</a></li>
+                        <li class="footer__list-item"><a href="#" class="footer__link">Português</a></li>
+                        <li class="footer__list-item"><a href="#" class="footer__link">Deutsch</a></li>
+                        <li class="footer__list-item"><a href="#" class="footer__link">日本語</a></li>
+                    </ul>
+                    </div>
+                </div>
+
+                <hr class="footer__divider">
+
+                <div class="footer__bottom">
+                    <p>Copyright © 2025 - 2027 DTHN</p>
+                </div>
+            </div>
+        </footer>
+    <script src="infor_product.js"></script>
+</body>
+</html>

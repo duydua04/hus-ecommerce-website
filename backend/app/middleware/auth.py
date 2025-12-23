@@ -1,23 +1,32 @@
-from fastapi import Depends, HTTPException, status, Security
-from fastapi.security import OAuth2PasswordBearer, SecurityScopes
+from fastapi import Request, HTTPException, status, Security, Depends
+from fastapi.security import SecurityScopes
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 from jwt import ExpiredSignatureError, InvalidTokenError
-from sqlalchemy.orm import Session
+
 from ..config.db import get_db
-from ..utils.security import decode_token, verify_access_token
+from ..utils.security import verify_access_token
 from ..models.users import Admin, Buyer, Seller
 
-oauth2_scheme = OAuth2PasswordBearer(
-    tokenUrl="/auth/token", # URL endpoint để lấy token
-    scopes={"admin": "Admin", "seller": "Seller", "buyer": "Buyer"},
-    auto_error=False
-)
 
-def get_current_user(security_scopes: SecurityScopes,
-                     token: str = Depends(oauth2_scheme),
-                     db: Session = Depends(get_db)):
+async def get_current_user(
+        security_scopes: SecurityScopes,
+        request: Request,
+        db: AsyncSession = Depends(get_db)
+):
     """
-    Kiem tra va tra ve nguoi dung hient ai dang truy cap
+    Kiểm tra và trả về người dùng hiện tại (Async version).
     """
+    # 1. Lấy token từ cookies
+    token = request.cookies.get("access_token")
+
+    # 2. Nếu không có trong Cookie, thử tìm trong Header (Authorization: Bearer ...)
+    if not token:
+        auth_header = request.headers.get("Authorization")
+        if auth_header and auth_header.startswith("Bearer "):
+            token = auth_header.split(" ")[1]
+
+    # 3. Báo lỗi "Missing access token" nếu không tìm thấy
     if token is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -25,6 +34,7 @@ def get_current_user(security_scopes: SecurityScopes,
             headers={"WWW-Authenticate": f'Bearer scope="{security_scopes.scope_str}"'}
         )
 
+    # 4. Giải mã token
     try:
         payload = verify_access_token(token)
     except ExpiredSignatureError:
@@ -43,6 +53,7 @@ def get_current_user(security_scopes: SecurityScopes,
     role = payload.get('role')
     sub = payload.get('sub')
 
+    # 5. Kiểm tra Scope (Role)
     if security_scopes.scopes and role not in security_scopes.scopes:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -50,13 +61,20 @@ def get_current_user(security_scopes: SecurityScopes,
             headers={"WWW-Authenticate": f'Bearer scope="{security_scopes.scope_str}"'}
         )
 
+    # 6. Query DB để lấy user (Async)
     user = None
+    stmt = None
+
     if role == 'admin':
-        user = db.query(Admin).filter(Admin.email == sub).first()
+        stmt = select(Admin).where(Admin.email == sub)
     elif role == 'buyer':
-        user = db.query(Buyer).filter(Buyer.email == sub).first()
+        stmt = select(Buyer).where(Buyer.email == sub)
     elif role == 'seller':
-        user = db.query(Seller).filter(Seller.email == sub).first()
+        stmt = select(Seller).where(Seller.email == sub)
+
+    if stmt is not None:
+        result = await db.execute(stmt)
+        user = result.scalar_one_or_none()
 
     if user is None:
         raise HTTPException(
@@ -67,12 +85,14 @@ def get_current_user(security_scopes: SecurityScopes,
 
     return {"role": role, "sub": sub, "user": user}
 
-# Các hàm dùng làm depends router cần giới hạn quyền, code 403 may chu tu choi xac thuc
-def require_admin(info = Security(get_current_user, scopes=["admin"])):
+
+def require_admin(info=Security(get_current_user, scopes=["admin"])):
     return info
 
-def require_buyer(info = Security(get_current_user, scopes=["buyer"])):
+
+def require_buyer(info=Security(get_current_user, scopes=["buyer"])):
     return info
 
-def require_seller(info = Security(get_current_user, scopes=["seller"])):
+
+def require_seller(info=Security(get_current_user, scopes=["seller"])):
     return info

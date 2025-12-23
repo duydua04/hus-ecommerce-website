@@ -1,83 +1,64 @@
+from __future__ import annotations
+from abc import ABC, abstractmethod
+from typing import Optional
+
 from fastapi import HTTPException, status
-from sqlalchemy.orm import Session
-from sqlalchemy import func
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, func, desc, asc
+from sqlalchemy.sql import Select
+
 from ...models.catalog import Category
-from ...schemas.category import CategoryCreate, CategoryUpdate, CategoryResponse
+from ...schemas.category import CategoryResponse
 from ...schemas.common import Page, PageMeta
 
-# Ham tao danh muc san pham
-def create_category(db: Session, payload: CategoryCreate):
-    # Lay ten danh muc va loai bo khoang trang dau cuoi, neu rong tra ve loi
-    name = payload.category_name.strip()
-    if not name:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="category name is required")
 
-    # Kiem tra danh muc da trung chua
-    exists = db.query(Category).filter(name.lower() == func.lower(Category.category_name)).first()
-    if exists:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Category name already exists")
+class BaseCategoryService(ABC):
+    def __init__(self, db: AsyncSession):
+        self.db = db
 
-    cat = Category(category_name=name)
-    db.add(cat)
-    db.commit()
-    db.refresh(cat)
 
-    return CategoryResponse.model_validate(cat)
+    async def get(self, category_id: int):
+        stmt = select(Category).where(Category.category_id == category_id)
+        result = await self.db.execute(stmt)
+        cat = result.scalar_one_or_none()
 
-def list_categories(db: Session, q: str | None = None, limit: int = 10, offset: int = 0):
-    query = db.query(Category)
-    # Ap dung tim kiem theo tu khoa neu co(
-    if q:
-        query = query.filter(Category.category_name.ilike(f"%{q.strip}%"))
+        if not cat:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Category not found"
+            )
 
-    total = query.count() # Dem record
-    categories = query.order_by(Category.category_name.asc()).limit(limit).offset(offset).all()
+        return CategoryResponse.model_validate(cat)
 
-    data = [CategoryResponse.model_validate(category) for category in categories]
-    meta = PageMeta(total=total, limit=limit, offset=offset)
-    return Page(meta=meta, data=data)
+    async def _build_list_response(self, stmt: Select, limit: int, offset: int):
+        """
+        Hàm xử lý phân trang
+        """
 
-def get_category_or_404(db: Session, category_id: int):
-    cat = db.query(Category).filter(Category.category_id == category_id).first()
-    if cat is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Category not found")
-    return cat
+        # 1. Đếm tổng số lượng (Count Query)
+        count_stmt = select(func.count()).select_from(stmt.subquery())
+        total_result = await self.db.execute(count_stmt)
+        total = total_result.scalar() or 0
 
-def get_category(db: Session, category_id: int):
-    category = get_category_or_404(db, category_id)
-    return CategoryResponse.model_validate(category)
+        # 2. Lấy dữ liệu phân trang (Data Query)
+        # Thêm order_by, limit, offset vào câu lệnh gốc
+        paginated_stmt = stmt.order_by(asc(Category.category_name)).limit(limit).offset(offset)
+        result = await self.db.execute(paginated_stmt)
+        categories = result.scalars().all()
 
-def update_category(db: Session, category_id: int, payload: CategoryUpdate):
-    cat = get_category_or_404(db, category_id)
-    # Chi update neu payload co category_name
-    if payload.category_name is not None:
-        name = payload.category_name.strip()
-        if not name:
-            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Category name cannot be empty")
+        # 3. Validate Pydantic
+        data = [CategoryResponse.model_validate(c) for c in categories]
 
-        # Kiem tra trung ten
-        duplicate = db.query(Category).filter(
-            name.lower() == func.lower(Category.category_name),
-            Category.category_id != cat.category_id
-        ).first()
-        if duplicate:
-            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Category name already exists")
-        cat.category_name = name
+        return Page(
+            meta=PageMeta(
+                total=total,
+                limit=limit,
+                offset=offset
+            ),
+            data=data
+        )
 
-    db.add(cat)
-    db.commit()
-    db.refresh(cat)
-
-    return CategoryResponse.model_validate(cat)
-
-def delete_category(db: Session, category_id: int):
-    cat = get_category_or_404(db, category_id)
-    try:
-        db.delete(cat)
-        db.commit()
-    except IntegrityError:
-        db.rollback()
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Cannot delete category")
-
-    return {"deleted": True, "category_id": category_id}
+    @abstractmethod
+    async def list(self, q: str | None, limit: int, offset: int):
+        """Các lớp con phải override hàm này"""
+        pass
