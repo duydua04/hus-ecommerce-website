@@ -1,0 +1,256 @@
+/*Style cho các trang cụ thể: page header, toolbar, responsive*/
+
+/*BLOCK: page-header - Tiêu đề trang*/
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.page-header__title {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/*BLOCK: toolbar - Khung chứa bảng dữ liệu*/
+.toolbar {
+  background: var(--bg-white);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+/* ELEMENT: toolbar__header - Header của toolbar */
+.toolbar__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px;
+  border-bottom: 1px solid var(--border-color);
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+/* ELEMENT: toolbar__title - Tiêu đề toolbar */
+.toolbar__title-text {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.toolbar__title-desc {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+/* ELEMENT: toolbar__actions - Thanh tìm kiếm và lọc */
+.toolbar__actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border-color);
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+/* ELEMENT: toolbar__search - Search box trong toolbar */
+.toolbar__search {
+  flex: 1;
+  min-width: 200px;
+  max-width: 400px;
+}
+
+/* ELEMENT: toolbar__table - Container chứa bảng */
+.toolbar__table {
+  padding: 24px;
+  overflow-x: auto;
+}
+
+/* ELEMENT: toolbar__pagination - Phân trang */
+.toolbar__pagination {
+  padding: 24px;
+  border-top: 1px solid var(--border-color);
+}
+
+/*RESPONSIVE - Tối ưu cho các thiết bị khác nhau*/
+
+/*TABLET (≤1024px)*/
+@media screen and (max-width: 1024px) {
+  :root {
+    --sidebar-width: 240px; /* Thu nhỏ sidebar */
+  }
+
+  .navbar__search {
+    min-width: 200px; /* Thu nhỏ search box */
+  }
+
+  /* MODIFIER: Ẩn trên tablet */
+  .table__header--hide-tablet,
+  .table__cell--hide-tablet,
+  .pagination__btn--hide-tablet {
+    display: none !important;
+  }
+
+  .page-header__title {
+    font-size: 24px; /* Giảm cỡ tiêu đề */
+  }
+}
+
+/*MOBILE LARGE (≤768px)*/
+@media screen and (max-width: 768px) {
+  /* Sidebar tự động thu gọn */
+  .sidebar {
+    width: var(--sidebar-collapsed);
+  }
+
+  .sidebar__brand-text,
+  .sidebar__menu-text {
+    display: none; /* Ẩn text, chỉ hiện icon */
+  }
+
+  .sidebar__menu-link {
+    justify-content: center;
+    padding: 12px;
+  }
+
+  /* Content đẩy sát sidebar nhỏ */
+  .content {
+    margin-left: var(--sidebar-collapsed);
+  }
+
+  /* Navbar */
+  .navbar {
+    padding: 0 16px;
+  }
+
+  .navbar__search {
+    display: none; /* Ẩn search box để tiết kiệm không gian */
+  }
+
+  /* Main */
+  .main {
+    padding: 20px 16px;
+  }
+
+  /* Page header xếp dọc */
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  /* Toolbar header xếp dọc */
+  .toolbar__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  /* Nút full width */
+  .toolbar__btn-add {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Toolbar actions */
+  .toolbar__actions {
+    padding: 16px;
+  }
+
+  .toolbar__search {
+    max-width: 100%; /* Full width */
+  }
+
+  /* Table */
+  .toolbar__table {
+    padding: 16px;
+  }
+
+  .table__header,
+  .table__cell {
+    padding: 12px 8px;
+    font-size: 13px;
+  }
+
+  .table__img {
+    width: 48px;
+    height: 48px;
+  }
+
+  /* MODIFIER: Ẩn trên mobile */
+  .table__header--hide-mobile,
+  .table__cell--hide-mobile,
+  .pagination__btn--hide-mobile,
+  .pagination__dots--hide-mobile {
+    display: none !important;
+  }
+
+  /* Action buttons xếp dọc */
+  .table__cell--actions {
+    flex-direction: column;
+  }
+
+  /* Pagination */
+  .toolbar__pagination {
+    padding: 16px;
+  }
+}
+
+/*MOBILE SMALL (≤480px)*/
+@media screen and (max-width: 480px) {
+  /* Tiêu đề */
+  .page-header__title {
+    font-size: 20px;
+  }
+
+  /* Toolbar */
+  .toolbar__header {
+    padding: 16px;
+  }
+
+  .toolbar__title-text {
+    font-size: 16px;
+  }
+
+  /* Ẩn text trong nút, chỉ giữ icon */
+  .btn__text {
+    display: none;
+  }
+
+  .btn {
+    padding: 10px 12px;
+  }
+
+  /* Table */
+  .table__header,
+  .table__cell {
+    padding: 10px 6px;
+    font-size: 12px;
+  }
+
+  /* Action buttons nhỏ hơn */
+  .action-btn {
+    width: 32px;
+    height: 32px;
+  }
+
+  .action-btn__icon {
+    font-size: 16px;
+  }
+
+  /* Pagination */
+  .pagination__btn {
+    min-width: 34px;
+    height: 34px;
+    font-size: 13px;
+  }
+
+  .pagination__icon {
+    font-size: 16px;
+  }
+}

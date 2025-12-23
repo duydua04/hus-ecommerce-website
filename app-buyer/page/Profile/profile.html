@@ -1,12 +1,11 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đơn Mua_chờ vận chuyển</title>
+    <title>Hồ Sơ Của Tôi</title>
 
     <Link rel="stylesheet" href="../web_framework/variables.css">
-    <link rel="stylesheet" href="order_tracking.css">
+    <link rel="stylesheet" href="profile.css">
 </head>
 <body>
     <!-----HEADER ROW---->
@@ -68,7 +67,6 @@
             </div>
         </div>
     </header>
-
     <!-- Main Container -->
     <div class="main-container">
         <!-- Sidebar -->
@@ -95,13 +93,18 @@
                     </a>
                 </li>
                 <li class="sidebar-menu__item">
-                    <a href="../Profile/profile.html" class="sidebar-menu__link">
+                    <a href="#" class="sidebar-menu__link active" onclick="toggleSubmenu(event)">
                         <span>👤</span>
-                        <span>Hồ sơ của tôi</span>
+                        <span>Tài Khoản Của Tôi</span>
                     </a>
+                    <ul class="submenu show">
+                        <li><a href="#" class="submenu__link active" onclick="showSection(event, 'profile')">Hồ Sơ</a></li>
+                        <li><a href="#" class="submenu__link" onclick="showSection(event, 'address')">Địa Chỉ</a></li>
+                        <li><a href="#" class="submenu__link" onclick="showSection(event, 'password')">Đổi Mật Khẩu</a></li>
+                    </ul>
                 </li>
                 <li class="sidebar-menu__item">
-                    <a href="#" class="sidebar-menu__link active">
+                    <a href="../order_tracking/order_tracking.html" class="sidebar-menu__link">
                         <span>📄</span>
                         <span>Đơn Mua</span>
                     </a>
@@ -109,31 +112,108 @@
             </ul>
         </aside>
 
-        <!-- Content -->
+    <!-- Content -->
         <main class="content">
-            <!-- Tabs -->
-            <div class="tabs">
-                <button class="tab active" data-status="all">Tất cả</button>
-                <button class="tab" data-status="pending">Chờ xác nhận</button>
-                <button class="tab" data-status="shipping">Vận chuyển</button>
-                <button class="tab" data-status="delivering">Chờ giao hàng</button>
-                <button class="tab" data-status="completed">Hoàn thành</button>
-                <button class="tab" data-status="cancelled">Đã hủy</button>
-                <button class="tab" data-status="refund">Trả hàng/Hoàn tiền</button>
+            <!-- Profile Section -->
+            <div id="profile" class="content-section active">
+                <h2 class="section-title">Hồ Sơ Của Tôi</h2>
+                <p class="section-subtitle">Quản lý thông tin hồ sơ để bảo mật tài khoản</p>
+
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <div>
+                        <input type="text" class="form-input" value="loyal123@gmail.com" disabled>
+                        <p class="form-note">Email chỉ có thể thay đổi một lần.</p>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Tên</label>
+                    <input type="text" class="form-input" value="DTHN" placeholder="Nhập tên của bạn">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Số điện thoại</label>
+                    <div>
+                        <input type="text" class="form-input" value="*********62" disabled>
+                        <a href="#" style="color: var(--blue-600); font-size: 0.9rem; text-decoration: none;">Thay Đổi</a>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Ngày sinh</label>
+                    <div class="date-group">
+                        <select class="date-select">
+                            <option>Ngày</option>
+                            <option>1</option>
+                            <option>2</option>
+                            <option>3</option>
+                        </select>
+                        <select class="date-select">
+                            <option>Tháng</option>
+                            <option>1</option>
+                            <option>2</option>
+                            <option>3</option>
+                        </select>
+                        <select class="date-select">
+                            <option>Năm</option>
+                            <option>2000</option>
+                            <option>2001</option>
+                            <option>2002</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label"></label>
+                    <div class="avatar-section">
+                        <div class="avatar-preview">
+                            <img id="avatarImg" src="" alt="" style="display: none;">
+                            <span id="avatarPlaceholder">👤</span>
+                        </div>
+                        <div class="avatar-info">
+                            <input type="file" id="avatarInput" accept="image/jpeg,image/png" style="display: none;" onchange="previewAvatar(event)">
+                            <button class="avatar-button" onclick="document.getElementById('avatarInput').click()">Chọn Ảnh</button>
+                            <p class="avatar-note">Dung lượng file tối đa 1 MB<br>Định dạng: JPEG, PNG</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-save">Lưu</button>
+                </div>
             </div>
 
-            <!-- Search Bar -->
-            <div class="search-bar">
-                <input type="text" class="search-bar__input" placeholder="Bạn có thể tìm kiếm theo tên Shop, Mã đơn hàng hoặc Tên Sản phẩm">
+            <!-- Address Section -->
+            <div id="address" class="content-section">
+                <h2 class="section-title">Địa Chỉ Của Tôi</h2>
+                <p class="section-subtitle">Quản lý địa chỉ giao hàng</p>
+                <p style="color: var(--neutral-600); padding: 40px 0; text-align: center;">Chưa có địa chỉ nào được lưu.</p>
             </div>
 
-            <!-- Orders Container -->
-            <div id="ordersContainer"></div>
+            <!-- Password Section -->
+            <div id="password" class="content-section">
+                <h2 class="section-title">Đổi Mật Khẩu</h2>
+                <p class="section-subtitle">Để bảo mật tài khoản, vui lòng không chia sẻ mật khẩu cho người khác</p>
 
-            <!-- Empty State -->
-            <div class="empty-state" id="emptyState">
-                <div class="empty-state__icon">📦</div>
-                <div class="empty-state__text">Chưa có đơn hàng</div>
+                <div class="form-group">
+                    <label class="form-label">Mật khẩu hiện tại</label>
+                    <input type="password" class="form-input" placeholder="Nhập mật khẩu hiện tại">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Mật khẩu mới</label>
+                    <input type="password" class="form-input" placeholder="Nhập mật khẩu mới">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Xác nhận mật khẩu</label>
+                    <input type="password" class="form-input" placeholder="Nhập lại mật khẩu mới">
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-save">Xác Nhận</button>
+                </div>
             </div>
         </main>
     </div>
@@ -205,6 +285,6 @@
         </div>
     </footer>
 
-    <script src="order_tracking.js"></script>
+    <script src="profile.js"></script>
 </body>
 </html>
