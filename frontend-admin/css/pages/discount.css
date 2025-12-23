@@ -1,0 +1,26 @@
+.table__cell--code {
+  font-weight: 600;
+  color: var(--blue);
+}
+
+.table__cell--discount {
+  font-weight: 600;
+  color: var(--green);
+}
+
+.table__cell--price {
+  color: var(--text-secondary);
+}
+
+.table__cell--date {
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.table__header--actions {
+  text-align: center;
+}
+.table__cell--actions {
+  text-align: right;
+  padding-right: 5px;
+}

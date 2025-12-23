@@ -12,7 +12,8 @@
     <link rel="stylesheet" href="../css/base.css" />
     <link rel="stylesheet" href="../css/layout.css" />
     <link rel="stylesheet" href="../css/components.css" />
-    <link rel="stylesheet" href="../css/pages.css" />
+    <link rel="stylesheet" href="../css/pages/pages.css" />
+    <link rel="stylesheet" href="../css/pages/locations.css" />
 
     <title>SellerHub</title>
   </head>
@@ -120,7 +121,7 @@
           <!-- Element: toolbar__header -->
           <div class="toolbar__header">
             <div class="toolbar__title">
-              <h3 class="toolbar__title-text">Địa chỉ đơn hàng</h3>
+              <h3 class="toolbar__title-text">Địa chỉ của tôi</h3>
               <p class="toolbar__title-desc">
                 Quản lý và theo dõi sản phẩm của cửa hàng
               </p>
@@ -131,65 +132,150 @@
             </button>
           </div>
 
-          <!-- Element: toolbar__actions -->
-          <div class="toolbar__actions">
-            <div class="toolbar__search search-box">
-              <i class="bx bx-search search-box__icon"></i>
-              <input
-                type="text"
-                class="search-box__input"
-                placeholder="Tìm kiếm địa chỉ..."
-              />
-            </div>
-            <button class="toolbar__btn-filter btn btn--secondary">
-              <i class="bx bx-filter btn__icon"></i>
-              <span class="btn__text">Lọc</span>
-            </button>
-          </div>
-
           <!-- Element: toolbar__table -->
           <div class="toolbar__table">
-            <table class="table">
-              <thead class="table__head">
-                <tr class="table__row">
-                  <th class="table__header">Cột 1</th>
-                  <th class="table__header">Cột 2</th>
-                  <th class="table__header table__header--hide-mobile">
-                    Cột 3
-                  </th>
-                  <th class="table__header table__header--hide-mobile">
-                    Cột 4
-                  </th>
-                  <th class="table__header table__header--hide-tablet">
-                    Cột 5
-                  </th>
-                  <th class="table__header table__header--actions">Cột 6</th>
-                </tr>
-              </thead>
-              <tbody class="table__body"></tbody>
-            </table>
-          </div>
+            <!-- Address Card 1 -->
+            <div class="address-card">
+              <div class="address-card__header">
+                <div>
+                  <span class="address-card__name">Kiều Na</span>
+                  <span class="address-card__phone">(+84) 362 719 509</span>
+                </div>
+                <div class="address-card__actions">
+                  <a href="#" class="address-card__action-link">Cập nhật</a>
+                </div>
+              </div>
+              <div class="address-card__body">
+                <div class="address-card__address">Số 33, Ngõ 1 Nhân Hòa</div>
+                <div class="address-card__address">
+                  Phường Nhân Chính, Quận Thanh Xuân, Hà Nội
+                </div>
+              </div>
+              <div class="address-card__footer">
+                <span class="address-card__badge">Mặc định</span>
+              </div>
+            </div>
 
-          <!-- Element: toolbar__pagination -->
-          <div class="toolbar__pagination pagination">
-            <button class="pagination__btn">
-              <i class="bx bx-chevron-left pagination__icon"></i>
-            </button>
-            <button class="pagination__btn pagination__btn--active">1</button>
-            <button class="pagination__btn">2</button>
-            <button class="pagination__btn">3</button>
-            <button class="pagination__btn pagination__btn--hide-mobile">
-              4
-            </button>
-            <span class="pagination__dots pagination__dots--hide-mobile"
-              >...</span
-            >
-            <button class="pagination__btn pagination__btn--hide-mobile">
-              10
-            </button>
-            <button class="pagination__btn">
-              <i class="bx bx-chevron-right pagination__icon"></i>
-            </button>
+            <!-- Address Card 2 -->
+            <div class="address-card">
+              <div class="address-card__header">
+                <div>
+                  <span class="address-card__name">Na</span>
+                  <span class="address-card__phone">(+84) 362 719 509</span>
+                </div>
+                <div class="address-card__actions">
+                  <a href="#" class="address-card__action-link">Cập nhật</a>
+                  <a href="#" class="address-card__action-link">Xóa</a>
+                </div>
+              </div>
+              <div class="address-card__body">
+                <div class="address-card__address">TT Yên Lập</div>
+                <div class="address-card__address">
+                  TT Yên Lập, Huyện Yên Lập, Phú Thọ
+                </div>
+              </div>
+              <div class="address-card__footer">
+                <button class="address-card__set-default">
+                  Thiết lập mặc định
+                </button>
+              </div>
+            </div>
+            <!-- Address Card 3 -->
+            <div class="address-card">
+              <div class="address-card__header">
+                <div>
+                  <span class="address-card__name">Đinh Kiều Na</span>
+                  <span class="address-card__phone">(+84) 362 719 509</span>
+                </div>
+                <div class="address-card__actions">
+                  <a href="#" class="address-card__action-link">Cập nhật</a>
+                  <a href="#" class="address-card__action-link">Xóa</a>
+                </div>
+              </div>
+              <div class="address-card__body">
+                <div class="address-card__address">334 Nguyễn Trãi</div>
+                <div class="address-card__address">
+                  Thanh Xuân Trung, Quận Thanh Xuân, Hà Nội
+                </div>
+              </div>
+              <div class="address-card__footer">
+                <button class="address-card__set-default">
+                  Thiết lập mặc định
+                </button>
+              </div>
+            </div>
+            <!-- Address Card 4 -->
+            <div class="address-card">
+              <div class="address-card__header">
+                <div>
+                  <span class="address-card__name">Nguyễn Hòa</span>
+                  <span class="address-card__phone">(+84) ..</span>
+                </div>
+                <div class="address-card__actions">
+                  <a href="#" class="address-card__action-link">Cập nhật</a>
+                  <a href="#" class="address-card__action-link">Xóa</a>
+                </div>
+              </div>
+              <div class="address-card__body">
+                <div class="address-card__address">334 Nguyễn Trãi</div>
+                <div class="address-card__address">
+                  Thanh Xuân Trung, Quận Thanh Xuân, Hà Nội
+                </div>
+              </div>
+              <div class="address-card__footer">
+                <button class="address-card__set-default">
+                  Thiết lập mặc định
+                </button>
+              </div>
+            </div>
+            <!-- Address Card 5 -->
+            <div class="address-card">
+              <div class="address-card__header">
+                <div>
+                  <span class="address-card__name">Lê Trang Thu</span>
+                  <span class="address-card__phone">(+84) ..</span>
+                </div>
+                <div class="address-card__actions">
+                  <a href="#" class="address-card__action-link">Cập nhật</a>
+                  <a href="#" class="address-card__action-link">Xóa</a>
+                </div>
+              </div>
+              <div class="address-card__body">
+                <div class="address-card__address">334 Nguyễn Trãi</div>
+                <div class="address-card__address">
+                  Thanh Xuân Trung, Quận Thanh Xuân, Hà Nội
+                </div>
+              </div>
+              <div class="address-card__footer">
+                <button class="address-card__set-default">
+                  Thiết lập mặc định
+                </button>
+              </div>
+            </div>
+            <!-- Address Card 3 -->
+            <div class="address-card">
+              <div class="address-card__header">
+                <div>
+                  <span class="address-card__name">Hoàng Đình Duy</span>
+                  <span class="address-card__phone">(+84) ..</span>
+                </div>
+                <div class="address-card__actions">
+                  <a href="#" class="address-card__action-link">Cập nhật</a>
+                  <a href="#" class="address-card__action-link">Xóa</a>
+                </div>
+              </div>
+              <div class="address-card__body">
+                <div class="address-card__address">334 Nguyễn Trãi</div>
+                <div class="address-card__address">
+                  Thanh Xuân Trung, Quận Thanh Xuân, Hà Nội
+                </div>
+              </div>
+              <div class="address-card__footer">
+                <button class="address-card__set-default">
+                  Thiết lập mặc định
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </main>

@@ -1,0 +1,78 @@
+/* BLOCK: btn - Nút bấm chung */
+.btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+  white-space: nowrap;
+}
+
+.btn__icon {
+  font-size: 18px;
+  transition: var(--transition);
+}
+
+.btn__text {
+  position: relative;
+  z-index: 1;
+}
+
+/* MODIFIER: btn--primary */
+.btn--primary {
+  background: var(--blue);
+  color: white;
+  box-shadow: var(--shadow-md);
+  position: relative;
+
+  &::after {
+    content: "";
+    position: absolute;
+    opacity: 0;
+    transition: var(--transition);
+    border-radius: 8px;
+  }
+
+  &:hover {
+    background: var(--blue-dark);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+
+    &::after {
+      opacity: 1;
+    }
+  }
+
+  &:active {
+    transform: translateY(-1px) scale(0.97);
+    box-shadow: var(--shadow-lg);
+  }
+}
+
+/* MODIFIER: btn--secondary */
+.btn--secondary {
+  background: var(--bg-white);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  box-shadow: var(--shadow-sm);
+
+  &:hover {
+    border-color: var(--blue);
+    color: var(--blue);
+    transform: translateY(-3px);
+
+    &::after {
+      opacity: 1;
+    }
+  }
+
+  &:active {
+    transform: translateY(-1px) scale(0.97);
+    box-shadow: var(--shadow-md);
+  }
+}

@@ -1,4 +1,7 @@
 from __future__ import annotations
+
+from typing import Optional
+
 from pydantic import BaseModel, EmailStr, Field
 
 # Class request gửi lên server đăng ký người mua
@@ -28,6 +31,11 @@ class OAuth2Token(BaseModel):
     token_type: str = "bearer"
     expires_in: int  # seconds
     scope: str
+
+    buyer_id: Optional[int] = None
+    seller_id: Optional[int] = None
+    admin_id: Optional[int] = None
+
 
 class RefreshTokenRequest(BaseModel):
     refresh_token: str

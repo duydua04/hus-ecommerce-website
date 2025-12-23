@@ -1,0 +1,38 @@
+/*BLOCK: sidebar - Menu bên trái trang*/
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: var(--sidebar-width);
+  height: 100vh;
+  background: linear-gradient(180deg, #ffffff 0%, #f8f9ff 100%);
+  border-right: 1px solid var(--border-color);
+  z-index: 1000;
+  transition: var(--transition);
+  overflow-x: hidden;
+  overflow-y: auto;
+  box-shadow: var(--shadow-md);
+
+  /* Custom scrollbar */
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #cbd5e0;
+    border-radius: 10px;
+
+    &:hover {
+      background: #a0aec0;
+    }
+  }
+}
+
+/* MODIFIER: sidebar--collapsed - Sidebar thu gọn */
+.sidebar--collapsed {
+  width: var(--sidebar-collapsed);
+}

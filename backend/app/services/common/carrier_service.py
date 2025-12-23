@@ -1,6 +1,5 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
-
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from redis.asyncio import Redis
@@ -15,6 +14,7 @@ class BaseCarrierService(ABC):
         self.db = db
         self.redis = redis
         self.TTL = 3600
+        self.CACHE_KEY_LIST = "carriers:list:public"
 
 
     async def _get_carrier_or_404(self, carrier_id: int): # <--- async def
@@ -36,6 +36,7 @@ class BaseCarrierService(ABC):
             is_active=c.is_active,
         )
 
+
     async def get_carrier(self, carrier_id: int):
         """
         Lấy chi tiết Carrier.
@@ -49,25 +50,20 @@ class BaseCarrierService(ABC):
 
         carr = await self._get_carrier_or_404(carrier_id)
 
-        data = CarrierOut.model_validate(carr)
+        data = self._to_response(carr)
         await self.redis.set(cache_key, data.model_dump_json(), ex=self.TTL)
 
         return data
 
-    async def _clear_cache(self, carrier_id: int = None):
-        """Hàm xóa cache dùng chung"""
-        if carrier_id:
-            await self.redis.delete(f"carrier:{carrier_id}")
 
-        # Xóa tất cả các loại list (của admin lẫn buyer)
-        keys = []
-        async for key in self.redis.scan_iter("carrier:list:*"):
-            keys.append(key)
-        if keys:
-            await self.redis.delete(*keys)
+    async def _invalidate_cache(self, carrier_id: int = None):
+        """
+        Xóa cache khi Admin can thiệp.
+        """
+        if self.redis:
+            keys_to_delete = [self.CACHE_KEY_LIST]
+            if carrier_id:
+                keys_to_delete.append(f"carrier:{carrier_id}")
 
-
-    @abstractmethod
-    async def list_carrier(self, q: str | None, limit: int, offset: int):
-        pass
+            await self.redis.delete(*keys_to_delete)
 

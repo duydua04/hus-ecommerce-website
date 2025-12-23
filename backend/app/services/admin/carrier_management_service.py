@@ -1,11 +1,11 @@
 from __future__ import annotations
-import json
 
 from fastapi import HTTPException, status, UploadFile, Depends
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from redis.asyncio import Redis
+from sqlalchemy.sql.expression import asc
 
 from ..common.carrier_service import BaseCarrierService
 from ...config.db import get_db
@@ -46,34 +46,19 @@ class AdminCarrierService(BaseCarrierService):
 
 
     async def list_carrier(self, q: str | None = None, limit: int = 10, offset: int = 0):
-        """
-        Admin xem được cả đơn vị đã ẩn.
-        """
-
-        # Tạo Cache Key
-        cache_key = f"carrier:list:ADMIN:{q or 'all'}:{limit}:{offset}"
-
-        # 2. Check Cache
-        if cached := await self.redis.get(cache_key):
-            data_list = json.loads(cached)
-            return [CarrierOut(**item) for item in data_list]
-
         stmt = select(Carrier)
+
         if q and q.strip():
             stmt = stmt.where(Carrier.carrier_name.ilike(f"%{q.strip()}%"))
 
-        stmt = stmt.order_by(Carrier.carrier_name.asc()).limit(limit).offset(offset)
+        stmt = stmt.order_by(asc(Carrier.carrier_id))
+
+        stmt = stmt.limit(limit).offset(offset)
 
         result = await self.db.execute(stmt)
         carriers = result.scalars().all()
 
-        # 4. Map to Response
-        response_data = [self._to_response(c) for c in carriers]
-
-        json_data = json.dumps([item.model_dump() for item in response_data])
-        await self.redis.set(cache_key, json_data, ex=self.TTL)
-
-        return response_data
+        return [CarrierOut.model_validate(c) for c in carriers]
 
 
     async def create_carrier(self, payload: CarrierCreate):
@@ -98,7 +83,7 @@ class AdminCarrierService(BaseCarrierService):
             await self.db.refresh(carrier)
 
             # Xóa cache list để cập nhật item mới
-            await self._clear_cache()
+            await self._invalidate_cache()
 
         except IntegrityError:
             await self.db.rollback()
@@ -133,7 +118,7 @@ class AdminCarrierService(BaseCarrierService):
 
         await self.db.commit()
         await self.db.refresh(carrier)
-        await self._clear_cache(carrier_id)
+        await self._invalidate_cache(carrier_id)
 
         return self._to_response(carrier)
 
@@ -147,7 +132,7 @@ class AdminCarrierService(BaseCarrierService):
 
         await self.db.commit()
         await self.db.refresh(carrier)
-        await self._clear_cache(carrier_id)
+        await self._invalidate_cache(carrier_id)
 
         return self._to_response(carrier)
 
@@ -155,7 +140,6 @@ class AdminCarrierService(BaseCarrierService):
     async def delete_carrier(self, carrier_id: int):
         carrier = await self._get_carrier_or_404(carrier_id)
 
-        result = {}
         if await self._has_orders(carrier_id):
             # Xóa mềm
             carrier.is_active = False
@@ -167,7 +151,7 @@ class AdminCarrierService(BaseCarrierService):
             await self.db.commit()
             result = {"deleted": True, "id": carrier_id}
 
-        await self._clear_cache(carrier_id)
+        await self._invalidate_cache(carrier_id)
 
         return result
 

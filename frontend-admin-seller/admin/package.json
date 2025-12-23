@@ -1,0 +1,53 @@
+{
+  "name": "admin",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@reduxjs/toolkit": "^2.5.0",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^13.5.0",
+    "axios": "^1.7.9",
+    "boxicons": "^2.1.4",
+    "cra-template": "1.2.0",
+    "jwt-decode": "^4.0.0",
+    "lucide-react": "^0.554.0",
+    "query-string": "^9.1.1",
+    "react": "^19.2.0",
+    "react-datepicker": "^7.5.0",
+    "react-dom": "^19.2.0",
+    "react-range": "^1.10.0",
+    "react-redux": "^9.2.0",
+    "react-router-dom": "^6.15.0",
+    "react-scripts": "5.0.1",
+    "sass": "^1.94.1",
+    "sweetalert2": "^11.26.3",
+    "swiper": "^11.2.0",
+    "web-vitals": "^2.1.4"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}

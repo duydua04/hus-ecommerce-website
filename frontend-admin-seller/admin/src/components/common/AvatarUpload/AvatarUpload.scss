@@ -1,0 +1,195 @@
+.avatar-modal-content {
+  background-color: var(--bg-white);
+  border-radius: 0.75rem;
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 26rem;
+  animation: scaleIn 0.2s ease-out;
+
+  /* HEADER */
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid var(--border-color);
+
+    .modal-title {
+      font-size: 25px;
+      font-weight: bold;
+      color: var(--text-primary);
+    }
+
+    .modal-close {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: var(--transition);
+      color: var(--text-muted);
+
+      i.bx {
+        font-size: 30px;
+      }
+
+      &:hover {
+        background-color: var(--bg-hover);
+        color: var(--blue);
+      }
+
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+    }
+  }
+
+  /* BODY */
+  .modal-body {
+    padding: 2rem 1.5rem;
+
+    .upload-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2.5rem 2rem;
+      border: 2px dashed var(--border-color);
+      border-radius: 0.75rem;
+      text-align: center;
+      cursor: pointer;
+      transition: var(--transition);
+
+      &:hover,
+      &.dragging {
+        border-color: var(--blue);
+        background-color: var(--blue-light);
+        transform: scale(1.01);
+      }
+
+      .upload-icon {
+        font-size: 3.2rem;
+        color: var(--blue);
+        margin-bottom: 1rem;
+      }
+
+      .upload-text {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+
+      .upload-hint {
+        margin: 0.5rem 0 0.75rem;
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+      }
+
+      .file-input-label {
+        padding: 0.5rem 1.5rem;
+        background-color: var(--blue);
+        color: #fff;
+        border-radius: 9999px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+
+        &:hover {
+          background-color: var(--blue-dark);
+          transform: translateY(-1px);
+        }
+      }
+
+      .upload-info {
+        margin-top: 1rem;
+        font-size: 0.75rem;
+        color: var(--text-muted);
+      }
+    }
+
+    .preview-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+
+      .preview-image {
+        width: 9rem;
+        height: 9rem;
+        border-radius: 10px;
+        object-fit: cover;
+        border: 3px solid var(--blue-light);
+        box-shadow: var(--shadow-md);
+        background-color: var(--bg-white);
+      }
+
+      .btn-change {
+        padding: 0.45rem 1.5rem;
+        background-color: var(--blue);
+        color: #fff;
+        border: none;
+        border-radius: 9999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+
+        &:hover {
+          background-color: var(--blue-dark);
+        }
+
+        &:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+      }
+    }
+
+    .error-message {
+      margin-top: 1rem;
+      padding: 0.75rem 1rem;
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      text-align: center;
+      color: #fff;
+      background-color: var(--red);
+    }
+  }
+
+  /* FOOTER */
+  .modal-footer {
+    display: flex;
+    gap: 1rem;
+    padding: 1.25rem 1.5rem;
+    border-top: 1px solid var(--border-color);
+    background-color: var(--bg-primary);
+
+    button {
+      flex: 1;
+      padding: 0.55rem 1rem;
+      border-radius: 0.5rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: var(--transition);
+      background-color: var(--blue);
+      color: #fff;
+
+      &:hover:not(:disabled) {
+        background-color: var(--blue-dark);
+      }
+
+      &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+    }
+  }
+}
