@@ -1,0 +1,116 @@
+/* BLOCK: table */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table__head {
+  background: var(--bg-primary);
+}
+
+.table__header {
+  padding: 14px 16px;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.table__body .table__row:hover {
+  background: var(--bg-hover);
+}
+
+.table__row {
+  padding: 16px;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 14px;
+  color: var(--text-primary);
+  transition: var(--transition);
+}
+
+.table__cell {
+  padding: 16px;
+  font-size: 14px;
+  color: var(--text-primary);
+  vertical-align: middle;
+}
+
+.table__img {
+  width: 56px;
+  height: 56px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid var(--border-color);
+}
+
+/* MODIFIER: price */
+.table__cell--price {
+  font-weight: 600;
+  color: var(--blue);
+}
+
+/* MODIFIER: actions */
+.table__cell--actions {
+  text-align: center;
+  white-space: nowrap;
+}
+
+.table__actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* ACTION BUTTON */
+.action-btn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--bg-white);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.action-btn__icon {
+  font-size: 18px;
+  color: var(--text-secondary);
+}
+
+.action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.action-btn--view:hover {
+  background: var(--blue-light);
+  border-color: var(--blue);
+}
+
+.action-btn--view:hover .action-btn__icon {
+  color: var(--blue);
+}
+
+.action-btn--edit:hover {
+  background: #fef3c7;
+  border-color: var(--yellow);
+}
+
+.action-btn--edit:hover .action-btn__icon {
+  color: var(--yellow);
+}
+
+.action-btn--delete:hover {
+  background: #fee2e2;
+  border-color: var(--red);
+}
+
+.action-btn--delete:hover .action-btn__icon {
+  color: var(--red);
+}

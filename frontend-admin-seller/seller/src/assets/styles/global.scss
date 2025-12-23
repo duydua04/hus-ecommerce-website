@@ -1,0 +1,68 @@
+/*Import font chữ từ Google Fonts*/
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+
+/*RESET CSS - Xóa style mặc định của trình duyệt*/
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+a {
+  text-decoration: none;
+}
+
+li {
+  list-style: none;
+}
+
+/*Biến CSS*/
+:root {
+  /*front chữ chính*/
+  --font-main: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+
+  /*màu nền*/
+  --bg-primary: #f8fafc;
+  --bg-white: #ffffff;
+  --bg-hover: #f1f5f9;
+
+  /*tông màu chủ đạo*/
+  --blue: #3b82f6;
+  --blue-dark: #2563eb;
+  --blue-light: #dbeafe;
+  --purple: #764ba2;
+  --overlay-modal: rgba(15, 23, 42, 0.65);
+
+  /*màu chữ*/
+  --text-primary: #0f172a;
+  --text-secondary: #64748b;
+  --text-muted: #94a3b8;
+
+  /*đường viền và đổ bóng*/
+  --border-color: #e2e8f0;
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04); /*cấp độ bóng nhẹ*/
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08); /*bóng trung bình*/
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1); /*cấp độ bóng đậm*/
+
+  /*màu thông báo trạng thái*/
+  --green: #10b981;
+  --red: #ef4444;
+  --orange: #f97316;
+  --yellow: #eab308;
+
+  /*kích thước layout*/
+  --sidebar-width: 280px; /*chiều rộng thanh side bar khi mở*/
+  --sidebar-collapsed: 80px; /*chiều rộng khi thu gọn sidebar*/
+  --navbar-height: 70px; /*chiều cao thanh điều hướng bên trên*/
+
+  /*hiệu ứng chuyển động*/
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --animation: float 3s ease-in-out infinite;
+}
+
+body {
+  background: var(--bg-primary);
+  font-family: var(--font-main);
+  color: var(--text-primary);
+  line-height: 1.6;
+}

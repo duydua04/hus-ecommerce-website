@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Plus, X, Check } from "lucide-react";
+import { X, Check } from "lucide-react";
 import PageHeader from "../../components/common/PageHeader/PageHeader";
 import Table from "../../components/common/Table/Table";
 import Pagination from "../../components/common/Pagination/Pagination";
@@ -7,12 +7,18 @@ import Button from "../../components/common/Button/Button";
 import SearchBox from "../../components/common/SearchBox/SearchBox";
 import CarrierModal from "./AddCarrier/AddCarrier";
 import AvatarUploadModal from "../../components/common/AvatarUpload/AvatarUpload";
-import { useCarrier } from "../../hooks/useCarrier";
+import ConfirmModal from "../../components/common/ConfirmModal/ConfirmModal";
+import useCarrier from "../../hooks/useCarrier";
 import "./Transport.scss";
+
+// Avatar mặc định
+import defaultAvatar from "../../assets/images/default-avatar.png";
+const DEFAULT_AVATAR = defaultAvatar;
 
 export default function TransportContent() {
   const {
     carriers,
+    total,
     loading,
     error,
     fetchCarriers,
@@ -25,30 +31,44 @@ export default function TransportContent() {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCarrier, setSelectedCarrier] = useState(null);
+
   const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
   const [selectedCarrierId, setSelectedCarrierId] = useState(null);
+
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [carrierToDelete, setCarrierToDelete] = useState(null);
+
   const [successMessage, setSuccessMessage] = useState("");
 
   const itemsPerPage = 10;
 
+  /* ================= FETCH DATA ================= */
   useEffect(() => {
-    fetchCarriers();
-  }, [fetchCarriers]);
+    fetchCarriers({
+      q: "",
+      limit: itemsPerPage,
+      offset: 0,
+    });
+  }, []);
 
-  // Filter carriers by search
-  const filteredCarriers = carriers.filter((c) =>
-    c.carrier_name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchCarriers({
+        q: searchQuery,
+        limit: itemsPerPage,
+        offset: (currentPage - 1) * itemsPerPage,
+      });
+    }, 500); // Debounce 500ms
 
-  // Pagination
-  const totalPages = Math.ceil(filteredCarriers.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentCarriers = filteredCarriers.slice(startIndex, endIndex);
+    return () => clearTimeout(timer);
+  }, [searchQuery, currentPage]);
 
-  // Toolbar actions
+  const totalPages = Math.ceil(total / itemsPerPage);
+
+  /* ================= HANDLERS ================= */
   const handleAddCarrier = () => {
     clearError();
     setSuccessMessage("");
@@ -63,7 +83,6 @@ export default function TransportContent() {
     setIsModalOpen(true);
   };
 
-  // Form submit (create/update)
   const handleFormSubmit = async (formData) => {
     try {
       if (selectedCarrier) {
@@ -73,78 +92,145 @@ export default function TransportContent() {
         await createCarrier(formData);
         setSuccessMessage("Thêm đơn vị vận chuyển thành công");
       }
+
       setIsModalOpen(false);
+      setSelectedCarrier(null);
+
       setTimeout(() => setSuccessMessage(""), 3000);
-      fetchCarriers();
+
+      fetchCarriers({
+        q: searchQuery,
+        limit: itemsPerPage,
+        offset: (currentPage - 1) * itemsPerPage,
+      });
     } catch (err) {
       console.error("Error submit form:", err);
     }
   };
 
   const handleDeleteCarrier = async (carrierId) => {
-    if (window.confirm("Bạn chắc chắn muốn xóa đơn vị vận chuyển này?")) {
-      try {
-        await deleteCarrier(carrierId);
-        setSuccessMessage("Xóa đơn vị vận chuyển thành công");
-        setTimeout(() => setSuccessMessage(""), 3000);
-        fetchCarriers();
-      } catch (err) {
-        console.error("Error delete carrier:", err);
-      }
+    setCarrierToDelete(carrierId);
+    setIsConfirmModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!carrierToDelete) return;
+
+    try {
+      await deleteCarrier(carrierToDelete);
+      setSuccessMessage("Xóa đơn vị vận chuyển thành công");
+
+      setTimeout(() => setSuccessMessage(""), 3000);
+
+      fetchCarriers({
+        q: searchQuery,
+        limit: itemsPerPage,
+        offset: (currentPage - 1) * itemsPerPage,
+      });
+    } catch (err) {
+      console.error("Error delete carrier:", err);
+    } finally {
+      setIsConfirmModalOpen(false);
+      setCarrierToDelete(null);
     }
+  };
+
+  const handleCancelDelete = () => {
+    setIsConfirmModalOpen(false);
+    setCarrierToDelete(null);
   };
 
   const handleAvatarUpload = async (carrierId, file) => {
     try {
       await uploadCarrierAvatar(carrierId, file);
+
+      setIsAvatarModalOpen(false);
+      setSelectedCarrierId(null);
+
       setSuccessMessage("Tải lên avatar thành công");
       setTimeout(() => setSuccessMessage(""), 3000);
-      fetchCarriers();
+
+      fetchCarriers({
+        q: searchQuery,
+        limit: itemsPerPage,
+        offset: (currentPage - 1) * itemsPerPage,
+      });
     } catch (err) {
       console.error("Error upload avatar:", err);
     }
   };
 
-  // Table columns
+  /* ================= TABLE ================= */
   const columns = [
     {
       key: "carrier_avt_url",
       label: "Avatar",
-      render: (value) =>
-        value ? <img src={value} alt="" className="table__avatar" /> : "N/A",
+      className: "table__cell--avatar",
+      render: (value, row) => (
+        <img
+          src={value || DEFAULT_AVATAR}
+          alt="Carrier avatar"
+          className="table__img table__img--clickable"
+          title="Click để cập nhật avatar"
+          onClick={() => {
+            setSelectedCarrierId(row.carrier_id);
+            setIsAvatarModalOpen(true);
+          }}
+          onError={(e) => {
+            e.target.src = DEFAULT_AVATAR;
+          }}
+        />
+      ),
     },
-    { key: "carrier_name", label: "Tên đơn vị" },
+    {
+      key: "carrier_name",
+      label: "Tên đơn vị",
+      className: "table__cell--name",
+    },
     {
       key: "base_price",
       label: "Giá cơ bản",
-      render: (v) => `${Number(v)?.toLocaleString("vi-VN")} ₫`,
+      className: "table__cell--price",
+      render: (v) => `${Number(v).toLocaleString("vi-VN")} ₫`,
     },
     {
       key: "price_per_kg",
       label: "Giá/kg",
-      render: (v) => `${Number(v)?.toLocaleString("vi-VN")} ₫`,
+      className: "table__cell--price",
+      render: (v) => `${Number(v).toLocaleString("vi-VN")} ₫`,
     },
     {
       key: "is_active",
       label: "Trạng thái",
+      className: "table__cell--status",
       render: (v) => (
-        <span className={`status-badge ${v ? "active" : "inactive"}`}>
+        <span
+          className={`status-badge ${
+            v ? "status-badge--active" : "status-badge--inactive"
+          }`}
+        >
           {v ? "Hoạt động" : "Tạm dừng"}
         </span>
       ),
     },
   ];
 
-  // Table actions
   const actions = [
-    { label: "Sửa", onClick: handleEditCarrier, className: "btn-edit" },
+    {
+      label: "Sửa",
+      icon: "bx bx-edit-alt",
+      onClick: handleEditCarrier,
+      className: "action-btn action-btn--edit",
+    },
     {
       label: "Xóa",
+      icon: "bx bx-trash",
       onClick: (c) => handleDeleteCarrier(c.carrier_id),
-      className: "btn-delete",
+      className: "action-btn action-btn--delete",
     },
   ];
 
+  /* ================= RENDER ================= */
   return (
     <main className="main">
       <PageHeader
@@ -155,7 +241,6 @@ export default function TransportContent() {
         ]}
       />
 
-      {/* Toolbar */}
       <div className="toolbar">
         <div className="toolbar__header">
           <div className="toolbar__title">
@@ -173,64 +258,81 @@ export default function TransportContent() {
         </div>
 
         <div className="toolbar__actions">
-          <SearchBox
-            placeholder="Tìm kiếm đơn vị vận chuyển..."
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setCurrentPage(1);
-            }}
-          />
-          <button className="toolbar__btn-filter btn btn--secondary">
+          <div className="toolbar__search">
+            <SearchBox
+              placeholder="Tìm kiếm đơn vị vận chuyển..."
+              onSearch={(value) => {
+                setSearchQuery(value);
+                setCurrentPage(1);
+              }}
+            />
+          </div>
+          <button className="toolbar__filter btn btn--secondary">
             <i className="bx bx-filter btn__icon"></i>
             <span className="btn__text">Lọc</span>
           </button>
         </div>
+
+        {error && (
+          <div className="toolbar__alert alert alert-error">
+            <span>{error}</span>
+            <button onClick={clearError} className="alert-close">
+              <X size={18} />
+            </button>
+          </div>
+        )}
+
+        {successMessage && (
+          <div className="toolbar__alert alert alert-success">
+            <Check size={18} />
+            <span>{successMessage}</span>
+          </div>
+        )}
+
+        {loading && <div className="toolbar__loading">Đang tải...</div>}
+
+        <div className="toolbar__table">
+          <Table columns={columns} data={carriers} actions={actions} />
+        </div>
+
+        {totalPages > 1 && (
+          <div className="toolbar__pagination">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
+          </div>
+        )}
       </div>
 
-      {/* Alerts */}
-      {error && (
-        <div className="alert alert-error">
-          <span>{error}</span>
-          <button onClick={clearError} className="alert-close">
-            <X size={18} />
-          </button>
-        </div>
-      )}
-      {successMessage && (
-        <div className="alert alert-success">
-          <Check size={18} />
-          <span>{successMessage}</span>
-        </div>
-      )}
-
-      {/* Loading */}
-      {loading && <div className="loading">Đang tải...</div>}
-
-      {/* Table */}
-      <Table columns={columns} data={currentCarriers} actions={actions} />
-
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={setCurrentPage}
-        />
-      )}
-
-      {/* Modals */}
+      {/* ===== MODALS ===== */}
       <CarrierModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedCarrier(null);
+        }}
         onSubmit={handleFormSubmit}
         carrier={selectedCarrier}
       />
+
       <AvatarUploadModal
         isOpen={isAvatarModalOpen}
-        onClose={() => setIsAvatarModalOpen(false)}
-        onUpload={handleAvatarUpload}
         carrierId={selectedCarrierId}
+        onUpload={handleAvatarUpload}
+        onClose={() => {
+          setIsAvatarModalOpen(false);
+          setSelectedCarrierId(null);
+        }}
+      />
+
+      <ConfirmModal
+        isOpen={isConfirmModalOpen}
+        title="Thông báo"
+        message="Bạn chắc chắn muốn xóa đơn vị vận chuyển này?"
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
       />
     </main>
   );

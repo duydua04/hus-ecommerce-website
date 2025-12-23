@@ -2,8 +2,10 @@
 .table {
   width: 100%;
   border-collapse: collapse;
+  background: var(--bg-white);
 }
 
+/* HEAD */
 .table__head {
   background: var(--bg-primary);
 }
@@ -16,27 +18,41 @@
   color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.table__header--actions {
+  text-align: center;
+  width: 120px;
+}
+
+/* BODY */
+.table__body {
+  background: var(--bg-white);
+}
+
+.table__row {
+  border-bottom: 1px solid var(--border-color);
+  transition: var(--transition);
 }
 
 .table__body .table__row:hover {
   background: var(--bg-hover);
 }
 
-.table__row {
+/* CELL */
+.table__cell {
   padding: 16px;
-  border-bottom: 1px solid var(--border-color);
   font-size: 14px;
   color: var(--text-primary);
-  transition: var(--transition);
+  vertical-align: middle;
+  line-height: 1.5;
 }
 
-.table__cell {
-  margin-top: 16px;
-  margin-bottom: 16px;
-  padding: 16px;
-  font-size: 14px;
-  color: var(--text-primary);
-  align-items: center;
+/* CELL: Avatar */
+.table__cell--avatar {
+  width: 80px;
+  padding: 12px 16px;
 }
 
 .table__img {
@@ -45,21 +61,86 @@
   border-radius: 8px;
   object-fit: cover;
   border: 1px solid var(--border-color);
+  display: block;
 }
 
-/* MODIFIER: price */
+/* CELL: Name */
+.table__cell--name {
+  font-weight: 500;
+  color: var(--text-primary);
+  min-width: 150px;
+}
+
+/* CELL: Price */
 .table__cell--price {
   font-weight: 600;
   color: var(--blue);
+  white-space: nowrap;
 }
 
-/* MODIFIER: actions */
+/* CELL: Status */
+.table__cell--status {
+  min-width: 120px;
+}
+
+/* STATUS BADGE */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  line-height: 1;
+}
+
+.status-badge--active {
+  background: var(--bg-primary);
+  color: var(--green);
+}
+
+.status-badge--inactive {
+  background: var(--bg-primary);
+  color: var(--red);
+}
+
+/* CELL: Actions */
 .table__cell--actions {
   display: flex;
   gap: 8px;
+  justify-content: center;
+  align-items: center;
+  width: 120px;
+  padding: 12px 16px;
 }
 
-/* ACTION BUTTON */
+/* CELL: Empty */
+.table__cell--empty {
+  text-align: center;
+  padding: 80px 20px;
+  color: var(--text-secondary);
+  font-size: 15px;
+  background: var(--bg-primary);
+
+  &::before {
+    content: "📭";
+    display: block;
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.6;
+  }
+
+  &::after {
+    content: "Chưa có dữ liệu để hiển thị";
+    display: block;
+    margin-top: 8px;
+    font-size: 15px;
+    color: var(--text-secondary);
+  }
+}
+
+/* ACTION BUTTONS */
 .action-btn {
   width: 36px;
   height: 36px;
@@ -71,11 +152,13 @@
   background: var(--bg-white);
   cursor: pointer;
   transition: var(--transition);
+  padding: 0;
 }
 
 .action-btn__icon {
   font-size: 18px;
   color: var(--text-secondary);
+  line-height: 1;
 }
 
 .action-btn:hover {
@@ -83,17 +166,8 @@
   box-shadow: var(--shadow-md);
 }
 
-.action-btn--view:hover {
-  background: var(--blue-light);
-  border-color: var(--blue);
-}
-
-.action-btn--view:hover .action-btn__icon {
-  color: var(--blue);
-}
-
 .action-btn--edit:hover {
-  background: #fef3c7;
+  background: var(--bg-primary);
   border-color: var(--yellow);
 }
 
@@ -102,10 +176,22 @@
 }
 
 .action-btn--delete:hover {
-  background: #fee2e2;
+  background: var(--bg-primary);
   border-color: var(--red);
 }
 
 .action-btn--delete:hover .action-btn__icon {
   color: var(--red);
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .table__header--hide-mobile,
+  .table__cell--hide-mobile {
+    display: none;
+  }
+
+  .table__cell {
+    padding: 12px 8px;
+  }
 }
