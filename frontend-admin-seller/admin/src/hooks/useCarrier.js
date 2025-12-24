@@ -1,123 +1,99 @@
 import { useState, useCallback } from "react";
 import carrierService from "../api/CarrierService";
 
-/**
- * Custom hook quản lý logic carrier
- */
-export const useCarrier = () => {
+const useCarrier = () => {
   const [carriers, setCarriers] = useState([]);
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  /**
-   * Lấy danh sách carriers
-   */
-  const fetchCarriers = useCallback(async (searchQuery = null) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await carrierService.listCarriers(searchQuery);
-      setCarriers(Array.isArray(data) ? data : []);
-    } catch (err) {
-      setError(err.detail || "Lỗi khi lấy danh sách đơn vị vận chuyển");
-      console.error("Fetch carriers error:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  // Fetch danh sách carriers với search và pagination
+  const fetchCarriers = useCallback(
+    async ({ q = "", limit = 10, offset = 0 } = {}) => {
+      setLoading(true);
+      setError(null);
 
-  /**
-   * Tạo carrier mới
-   */
+      try {
+        const res = await carrierService.listCarriers({ q, limit, offset });
+
+        if (Array.isArray(res)) {
+          setCarriers(res);
+          setTotal(res.length);
+        } else if (Array.isArray(res?.data)) {
+          setCarriers(res.data);
+          setTotal(res.total ?? 0);
+        } else {
+          setCarriers([]);
+          setTotal(0);
+        }
+      } catch (err) {
+        setError(
+          err.detail || err.message || "Lỗi khi tải danh sách vận chuyển"
+        );
+        setCarriers([]);
+        setTotal(0);
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
+
+  // Tạo carrier mới
   const createCarrier = useCallback(async (carrierData) => {
     setLoading(true);
-    setError(null);
     try {
-      const result = await carrierService.createCarrier(carrierData);
-      setCarriers((prev) => [...prev, result]);
-      return result;
-    } catch (err) {
-      const errorMsg = err.detail || "Lỗi khi thêm đơn vị vận chuyển";
-      setError(errorMsg);
-      throw err;
+      await carrierService.createCarrier(carrierData);
     } finally {
       setLoading(false);
     }
   }, []);
 
-  /**
-   * Cập nhật carrier
-   */
+  // Cập nhật carrier và tự động update state
   const updateCarrier = useCallback(async (carrierId, carrierData) => {
     setLoading(true);
-    setError(null);
     try {
-      const result = await carrierService.updateCarrier(carrierId, carrierData);
-      setCarriers((prev) =>
-        prev.map((c) => (c.carrier_id === carrierId ? result : c))
+      const updated = await carrierService.updateCarrier(
+        carrierId,
+        carrierData
       );
-      return result;
-    } catch (err) {
-      const errorMsg = err.detail || "Lỗi khi cập nhật đơn vị vận chuyển";
-      setError(errorMsg);
-      throw err;
+      setCarriers((prev) =>
+        prev.map((c) => (c.carrier_id === carrierId ? updated : c))
+      );
+      return updated;
     } finally {
       setLoading(false);
     }
   }, []);
 
-  /**
-   * Xóa carrier
-   */
+  // Xóa carrier và tự động update state
   const deleteCarrier = useCallback(async (carrierId) => {
     setLoading(true);
-    setError(null);
     try {
-      const result = await carrierService.deleteCarrier(carrierId);
-      if (result.deleted) {
-        setCarriers((prev) => prev.filter((c) => c.carrier_id !== carrierId));
-      }
-      return result;
-    } catch (err) {
-      const errorMsg = err.detail || "Lỗi khi xóa đơn vị vận chuyển";
-      setError(errorMsg);
-      throw err;
+      await carrierService.deleteCarrier(carrierId);
+      setCarriers((prev) => prev.filter((c) => c.carrier_id !== carrierId));
     } finally {
       setLoading(false);
     }
   }, []);
 
-  /**
-   * Upload avatar
-   */
+  // Upload avatar và tự động update state
   const uploadCarrierAvatar = useCallback(async (carrierId, file) => {
     setLoading(true);
-    setError(null);
     try {
-      const result = await carrierService.uploadAvatar(carrierId, file);
+      const updated = await carrierService.uploadAvatar(carrierId, file);
       setCarriers((prev) =>
-        prev.map((c) => (c.carrier_id === carrierId ? result : c))
+        prev.map((c) => (c.carrier_id === carrierId ? updated : c))
       );
-      return result;
-    } catch (err) {
-      const errorMsg = err.detail || "Lỗi khi tải lên avatar";
-      setError(errorMsg);
-      throw err;
+      return updated;
     } finally {
       setLoading(false);
     }
-  }, []);
-
-  /**
-   * Xóa lỗi
-   */
-  const clearError = useCallback(() => {
-    setError(null);
   }, []);
 
   return {
     carriers,
-    setCarriers,
+    total,
     loading,
     error,
     fetchCarriers,
@@ -125,6 +101,8 @@ export const useCarrier = () => {
     updateCarrier,
     deleteCarrier,
     uploadCarrierAvatar,
-    clearError,
+    clearError: () => setError(null),
   };
 };
+
+export default useCarrier;

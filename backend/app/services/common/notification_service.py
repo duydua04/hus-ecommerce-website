@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from typing import Dict, Any, List
+from typing import Dict, Any, Optional
 
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -62,10 +62,11 @@ class BaseNotificationService:
             user_id: int,
             role: str,
             limit: int = 20,
+            cursor: Optional[str] = None,
             unread_only: bool = False
     ):
         """
-        Lấy danh sách thông báo (Async Beanie).
+        Lấy danh sách thông báo
         """
         query = Notification.find(
             Notification.recipient_id == user_id,
@@ -75,7 +76,35 @@ class BaseNotificationService:
         if unread_only:
             query = query.find(Notification.is_read == False)
 
-        return await query.sort("-created_at").limit(limit).to_list()
+        if cursor:
+            try:
+                obj_id = PydanticObjectId(cursor)
+                query = query.find(Notification.id < obj_id)
+            except Exception:
+                pass
+
+        results = await query.sort("-id").limit(limit).to_list()
+
+        next_cursor = None
+        has_more = False
+
+        if results:
+            last_item = results[-1]
+            next_cursor = str(last_item.id)
+
+            count_remaining = await Notification.find(
+                Notification.recipient_id == user_id,
+                Notification.recipient_role == role,
+                Notification.id < last_item.id
+            ).count()
+
+            has_more = count_remaining > 0
+
+        return {
+            "items": results,
+            "next_cursor": next_cursor,
+            "has_more": has_more
+        }
 
 
     @staticmethod

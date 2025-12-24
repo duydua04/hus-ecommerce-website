@@ -1,0 +1,179 @@
+:root {
+    /*color*/
+    --neutral-0: #fff;
+    --neutral-50: #f8fafc;
+    --neutral-100: #f1f5f9;
+    --neutral-200: #e2e8f0;
+    --neutral-300: #cbd5e1;
+    --neutral-400: #A3B0C2;
+    --neutral-500: #6B7C94;
+    --neutral-600: #52637A;
+    --neutral-700: #334155;
+    --neutral-800: #1e293b;
+    --neutral-900: #0f172a;
+    --neutral-1000: #000;
+    --primary-100: #e0e7ff;
+    --primary-200: #c7d2fe;
+    --primary-300: #a5b4fc;
+    --primary-400: #818cf8;
+    --primary-500: #6163fe;
+    --primary-600: #4f46e5;
+    --primary-700: #4338ca;
+    --primary-800: #3730a3;
+    --primary-900: #312e81;
+    --blue-100: #dbeafe;
+    --blue-200: #bfdbfe;
+    --blue-300: #93c5fd;
+    --blue-400: #60a5fa;
+    --blue-500: #3780f6;
+    --blue-600: #2563eb;
+    --blue-700: #1d4ed8;
+    --blue-800: #1e40af;
+    --blue-900: #112a6e;
+    --red-100: #fee2e2;
+    --red-200: #fecaca;
+    --red-300: #fca5a5;
+    --red-400: #f87171;
+    --red-500: #ef3232;
+    --red-600: #d11616;
+    --red-700: #b91c1c;
+    --red-800: #991b1b;
+    --red-900: #671010;
+    --green-100: #DBFFE1;
+    --green-200: #bbf7d0;
+    --green-300: #86efac;
+    --green-400: #4ade80;
+    --green-500: #0dab47;
+    --green-600: #0d923e;
+    --green-700: #15803d;
+    --green-800: #166534;
+    --green-900: #0a4321;
+    --orange-100: #ffedd5;
+    --orange-200: #fed7aa;
+    --orange-300: #fdba74;
+    --orange-400: #fb923c;
+    --orange-500: #f97316;
+    --orange-600: #d14f09;
+    --orange-700: #b13606;
+    --orange-800: #87290a;
+    --orange-900: #5e1a04;
+    --yellow-100: #fff6a5;
+    --yellow-200: #ffed4a;
+    --yellow-300: #ffe11e;
+    --yellow-400: #fed507;
+    --yellow-500: #E5B800;
+    --yellow-600: #D6A400;
+    --yellow-700: #B88700;
+    --yellow-800: #996B00;
+    --yellow-900: #855800;
+    --purple-100: #f3e8ff;
+    --purple-200: #e9d5ff;
+    --purple-300: #d8b4fe;
+    --purple-400: #c084fc;
+    --purple-500: #a855f7;
+    --purple-600: #9333ea;
+    --purple-700: #7e22ce;
+    --purple-800: #6b21a8;
+    --purple-900: #3f0b68;
+    --teal-100: #ccfbf1;
+    --teal-200: #99f6e4;
+    --teal-300: #5eead4;
+    --teal-400: #2dd4bf;
+    --teal-500: #14b8a6;
+    --teal-600: #0d9488;
+    --teal-700: #0f766e;
+    --teal-800: #115e59;
+    --teal-900: #0c4844;
+    --alpha-1: rgba(0,20,60,.06);
+    --alpha-2: rgba(0,20,60,.10);
+    --alpha-3: rgba(0,20,60,.15);
+    --alpha-4: rgba(0,20,60,.2);
+    --alpha-5: rgba(0,20,60,.3);
+    --alpha-6: rgba(0,20,60,.4);
+    --alpha-7: rgba(0,20,60,.5);
+    --alpha-8: rgba(0,20,60,.6);
+    --alpha-9: rgba(0,20,60,.7);
+
+    /*main*/
+    --font-family: Calibri, sans-serif;
+    --bg-color-base: #fff;
+    --border-radius-base: 8px;
+}
+
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-family);
+    font-weight: normal;
+    font-optical-sizing: auto;
+    line-height: 1.4;
+    -webkit-text-size-adjust: 100%;
+    background-color: var(--neutral-50);
+    color: black;
+    padding-top: 80px;
+}
+
+.hr {
+    border: none;
+    height: 1px;
+    background-color: var(--neutral-200);
+    margin: 16px 0;
+}
+
+@media (max-width: 640px) {
+    html, body {
+        font-size: 16px;
+        font-weight: 500;
+    }
+}
+
+html {
+    scroll-behavior: smooth;
+    font-size: var(--font-size-default, 15px);
+}
+
+/* Dropdown Block */
+.dropdown {
+    position: relative;
+}
+.dropdown__button {
+    background-color: var(--blue-400);
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    color: black;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 1em;
+}
+.dropdown__content {
+    display: none;
+    position: absolute;
+    top: 35px;
+    left: 0;
+    background-color: var(--blue-300);
+    min-width: 150px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    border-radius: 5px;
+    z-index: 10;
+}
+.dropdown__item {
+    display: block;
+    padding: 8px 12px;
+    text-decoration: none;
+    color: black;
+}
+.dropdown__item:hover {
+    background-color: var(--blue-500);
+}
+.dropdown:hover .dropdown__content {display: block;}
+.dropdown__button:hover {
+    background-color: var(--blue-700);
+    color: #fff;
+}

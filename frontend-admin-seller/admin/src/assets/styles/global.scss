@@ -38,8 +38,8 @@ li {
 
   /*đường viền và đổ bóng*/
   --border-color: #e2e8f0; /*màu viền*/
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /*cấp độ bóng nhẹ*/
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1); /*bóng trung bình*/
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04); /*cấp độ bóng nhẹ*/
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08); /*bóng trung bình*/
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1); /*cấp độ bóng đậm*/
 
   /*màu thông báo trạng thái*/
@@ -49,12 +49,12 @@ li {
   --yellow: #eab308;
 
   /*kích thước layout*/
-  --sidebar-width: 260px; /*chiều rộng thanh side bar khi mở*/
-  --sidebar-collapsed: 70px; /*chiều rộng khi thu gọn sidebar*/
-  --navbar-height: 64px; /*chiều cao thanh điều hướng bên trên*/
+  --sidebar-width: 280px; /*chiều rộng thanh side bar khi mở*/
+  --sidebar-collapsed: 80px; /*chiều rộng khi thu gọn sidebar*/
+  --navbar-height: 70px; /*chiều cao thanh điều hướng bên trên*/
 
   /*hiệu ứng chuyển động*/
-  --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 body {

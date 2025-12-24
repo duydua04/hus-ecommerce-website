@@ -48,6 +48,7 @@ async def get_products_filter(
         min_price=min_price,
         max_price=max_price,
         rating_filter=rating_filter,
+        sort=sort,   # ✅ DÒNG QUAN TRỌNG
         limit=limit,
         offset=offset,
     )

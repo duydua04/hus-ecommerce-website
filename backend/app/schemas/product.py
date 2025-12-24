@@ -167,7 +167,6 @@ class ProductResponseBuyer(TimestampedOut):
     name: str
     seller_id: int
 
-    base_price: Decimal
     discount_percent: Decimal
 
     sale_price: Decimal  

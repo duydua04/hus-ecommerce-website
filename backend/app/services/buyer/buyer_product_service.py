@@ -3,6 +3,7 @@ from unittest import result
 from fastapi import HTTPException, status, Depends
 from decimal import Decimal
 
+
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import and_, desc, select, func, asc, cast, Numeric
 from sqlalchemy.orm import selectinload
@@ -34,21 +35,14 @@ class BuyerProductService:
         self.db = db
     def base_query(self): 
         return ( select(Product) .where(Product.is_active.is_(True)) .order_by(Product.created_at.desc()) )
-    def filter_by_price(self, stmt, min_price: float | None = None, max_price: float | None = None):
-        """
-        Lọc sản phẩm theo sale_price nhỏ nhất trong các variant:
-        sale_price = (base_price + adjustment) * 100 / (100 - discount_percent)
-        """
-        # Biểu thức tính sale_price
-        # sale_price_expr = (base + adjustment) * (100 - discount) / 100
-        sale_price_expr = ((Product.base_price + func.min(func.coalesce(ProductVariant.price_adjustment, 0))) 
-                        * (100 - Product.discount_percent) / 100)
-
+    
+    def filter_by_price(self, stmt, price_subq, min_price=None, max_price=None):
         if min_price is not None:
-            stmt = stmt.having(sale_price_expr >= cast(min_price, Numeric(12,2)))
+            stmt = stmt.where(price_subq.c.sale_price >= cast(min_price, Numeric(12, 2)))
 
         if max_price is not None:
-            stmt = stmt.having(sale_price_expr <= cast(max_price, Numeric(12,2)))
+            stmt = stmt.where(price_subq.c.sale_price <= cast(max_price, Numeric(12, 2)))
+
         return stmt
     def filter_by_rating_option(
         self,
@@ -70,23 +64,27 @@ class BuyerProductService:
             return stmt.where(Product.rating == 5)
 
         return stmt.where(Product.rating >= rating_map[rating_filter])
-    def apply_sort(self, stmt, sort: Optional[ProductSort]):
-        if sort is None or sort == ProductSort.newest:
+    def apply_sort(
+        self,
+        stmt,
+        price_subq,
+        sort: Optional[ProductSort],
+    ):
+        # mặc định: newest
+        if not sort or sort == ProductSort.newest:
             return stmt.order_by(Product.created_at.desc())
 
-        if sort in [ProductSort.price_asc, ProductSort.price_desc]:
-            # Giả sử stmt đã select min_variant_adjust:
-            # select(Product, func.min(func.coalesce(ProductVariant.price_adjustment, 0)).label("min_variant_adjust"))
-            sale_price_expr = (Product.base_price + stmt.c.min_variant_adjust) * (100 - Product.discount_percent) / 100
-            if sort == ProductSort.price_asc:
-                return stmt.order_by(sale_price_expr.asc())
-            else:
-                return stmt.order_by(sale_price_expr.desc())
+        if sort == ProductSort.price_asc:
+            return stmt.order_by(price_subq.c.sale_price.asc())
+
+        if sort == ProductSort.price_desc:
+            return stmt.order_by(price_subq.c.sale_price.desc())
 
         if sort == ProductSort.best_seller:
             return stmt.order_by(Product.sold_quantity.desc())
 
-        return stmt
+        # fallback an toàn
+        return stmt.order_by(Product.created_at.desc())
     # =================== LẤY DANH SÁCH SẢN PHẨM CÓ CHỌN LỌC =======================
     async def get_buyer_products_filter(
         self,
@@ -100,14 +98,33 @@ class BuyerProductService:
     ):
         
         #  base query
+        price_subq = (
+            select(
+                Product.product_id.label("product_id"),
+                func.min(
+                    Product.base_price + func.coalesce(ProductVariant.price_adjustment, 0)
+                ).label("min_base_price"),
+                func.max(
+                    Product.base_price + func.coalesce(ProductVariant.price_adjustment, 0)
+                ).label("max_base_price"),
+                (
+                    func.min(
+                        Product.base_price + func.coalesce(ProductVariant.price_adjustment, 0)
+                    ) * (100 - Product.discount_percent) / 100
+                ).label("sale_price"),
+            )
+            .join(ProductVariant, ProductVariant.product_id == Product.product_id)
+            .group_by(Product.product_id)
+        ).subquery()
         stmt = (
             select(
                 Product,
-                func.min(Product.base_price + ProductVariant.price_adjustment).label("min_variant_price")
+                price_subq.c.min_base_price,
+                price_subq.c.max_base_price,
+                price_subq.c.sale_price,
             )
-            .join(ProductVariant, ProductVariant.product_id == Product.product_id)
-            .where(Product.is_active == True)
-            .group_by(Product.product_id)
+            .join(price_subq, price_subq.c.product_id == Product.product_id)
+            .where(Product.is_active.is_(True))
         )
 
         # filter theo keyword (nếu có)
@@ -115,13 +132,12 @@ class BuyerProductService:
             stmt = stmt.where(Product.name.ilike(f"%{q.strip()}%"))
 
         # filter theo giá
-        stmt = self.filter_by_price(stmt, min_price, max_price)
-
+        stmt = self.filter_by_price(stmt, price_subq, min_price, max_price)
         # filter theo rating
         stmt = self.filter_by_rating_option(stmt, rating_filter)
 
         # áp dụng sort
-        stmt = self.apply_sort(stmt, sort)
+        stmt = self.apply_sort(stmt, price_subq, sort)
         # total
         count_stmt = select(func.count()).select_from(stmt.subquery())
         total_result = await self.db.execute(count_stmt)
@@ -131,29 +147,30 @@ class BuyerProductService:
         result = await self.db.execute(
             stmt.limit(limit).offset(offset)
         )
-        rows = result.all()  # mỗi row = (Product, min_variant_price)
-        product_ids = [product.product_id for product, _ in rows]  # ✅ lấy từ rows
+        rows = result.all()  # (Product, min_base_price, max_base_price)
+
+        product_ids = [product.product_id for product, _, _, _ in rows]
         primary_map = {}
 
         if product_ids:
-            img_stmt = select(ProductImage.product_id, ProductImage.image_url).where(
+            img_stmt = select(
+                ProductImage.product_id,
+                ProductImage.image_url
+            ).where(
                 ProductImage.product_id.in_(product_ids),
                 ProductImage.is_primary.is_(True)
             )
             img_res = await self.db.execute(img_stmt)
             primary_map = {pid: url for pid, url in img_res.all()}
-            
-        # map response
+
         data = []
-        for product, min_variant_price in rows:
-            sale_price = min_variant_price * (Decimal(100) - product.discount_percent) / Decimal(100)
-            
+        for product, min_base_price, max_base_price, sale_price in rows:
+
             base = ProductResponseBuyer(
                 product_id=product.product_id,
                 created_at=product.created_at,
                 name=product.name,
                 seller_id=product.seller_id,
-                base_price=product.base_price,
                 discount_percent=product.discount_percent,
                 sale_price=sale_price,
                 rating=product.rating,
@@ -164,8 +181,15 @@ class BuyerProductService:
                 is_active=product.is_active
             )
 
-            # Thêm ảnh public
-            item = {**base.model_dump(), "public_primary_image_url": public_url(primary_map.get(product.product_id))}
+            item = {
+                **base.model_dump(),
+                "public_primary_image_url": public_url(
+                    primary_map.get(product.product_id)
+                ),
+                "min_price": float(min_base_price),
+                "max_price": float(max_base_price),
+            }
+
             data.append(item)
 
         return Page(
