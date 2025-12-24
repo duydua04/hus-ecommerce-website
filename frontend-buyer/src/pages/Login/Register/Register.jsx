@@ -14,7 +14,7 @@ function BuyerRegister() {
     phone: "",
     fname: "",
     lname: "",
-    shopName: "",
+    acountName: "",
     password: "",
     confirmPassword: "",
   });

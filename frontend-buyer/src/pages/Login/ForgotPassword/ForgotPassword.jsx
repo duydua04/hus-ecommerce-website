@@ -1,20 +1,21 @@
+// src/pages/Login/ForgotPassword/ForgotPassword.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from '../../../services/api';
 import "./ForgotPassword.css";
 
-const API_URL = 'http://localhost:8000';
+const API_BASE_URL = 'http://localhost:8000';
 
 function ForgotPassword() {
   const navigate = useNavigate();
 
   const [step, setStep] = useState(1); // 1: Email, 2: OTP, 3: New Password
   const [email, setEmail] = useState("");
+  const [role, setRole] = useState("buyer");
   const [otp, setOtp] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [resetToken, setResetToken] = useState("");
-  const [permissionToken, setPermissionToken] = useState("");
+  
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [loading, setLoading] = useState(false);
@@ -22,28 +23,6 @@ function ForgotPassword() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-
-  // Helper function to extract error message
-  const getErrorMessage = (err) => {
-    const detail = err.response?.data?.detail;
-
-    // Nếu detail là string, trả về trực tiếp
-    if (typeof detail === "string") {
-      return detail;
-    }
-
-    // Nếu detail là array
-    if (Array.isArray(detail)) {
-      return detail.map((e) => e.msg || JSON.stringify(e)).join(", ");
-    }
-
-    // Nếu detail là object
-    if (typeof detail === "object" && detail !== null) {
-      return detail.msg || detail.message || JSON.stringify(detail);
-    }
-
-    return null;
-  };
 
   // Step 1: Request OTP
   const handleRequestOTP = async (e) => {
@@ -63,36 +42,36 @@ function ForgotPassword() {
     setSuccessMessage("");
 
     try {
-      // Backend nhận qua Pydantic model ForgotPasswordRequest
-      const response = await axios.post(
-        `${API_URL}/auth/forgot-password`,
-        {
-          email: email.trim(),
-          role: "seller",
+      // API call với fetch (vì backend dùng cookie)
+      const response = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
-        { withCredentials: true } // Nhan cookie
-      );
+        credentials: 'include',
+        body: JSON.stringify({
+          email: email.trim(),
+          role: role,
+        }),
+      });
 
-      // Backend set reset_token vào cookie, không cần lưu vào state
-      // setResetToken() không cần nữa vì backend quản lý qua cookie
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Failed to send OTP');
+      }
+
+      const data = await response.json();
       setSuccessMessage("Mã OTP đã được gửi đến email của bạn!");
       setStep(2);
     } catch (err) {
-      const status = err.response?.status;
-      const errorMsg = getErrorMessage(err);
-
-      if (status === 404) {
+      console.error('Forgot password error:', err);
+      
+      if (err.message.includes("404") || err.message.includes("not found")) {
         setErrorMessage("Email không tồn tại trong hệ thống");
-      } else if (status === 429) {
+      } else if (err.message.includes("429")) {
         setErrorMessage("Quá nhiều yêu cầu. Vui lòng thử lại sau");
-      } else if (errorMsg) {
-        setErrorMessage(errorMsg);
-      } else if (err.response) {
-        setErrorMessage(`Lỗi ${status}: Không thể gửi OTP`);
-      } else if (err.request) {
-        setErrorMessage("Không thể kết nối server. Vui lòng kiểm tra mạng");
       } else {
-        setErrorMessage("Có lỗi xảy ra. Vui lòng thử lại");
+        setErrorMessage(err.message || "Không thể gửi OTP. Vui lòng thử lại");
       }
     } finally {
       setLoading(false);
@@ -117,34 +96,27 @@ function ForgotPassword() {
     setSuccessMessage("");
 
     try {
-      const response = await axios.post(
-        `${API_URL}/auth/verify-otp`,
-        {
-          otp: otp.trim(),
-          reset_token: resetToken, // Backend sẽ bỏ qua field này, lấy từ cookie
+      const response = await fetch(`${API_BASE_URL}/auth/verify-otp`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
-        { withCredentials: true } // Gửi cookie
-      );
+        credentials: 'include', // Send cookies
+        body: JSON.stringify({
+          otp: otp.trim(),
+        }),
+      });
 
-      // Backend cũng set permission_token vào cookie
-      setPermissionToken(response.data.permission_token || "");
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'OTP verification failed');
+      }
+
       setSuccessMessage("Xác thực thành công! Vui lòng đặt mật khẩu mới");
       setStep(3);
     } catch (err) {
-      const status = err.response?.status;
-      const errorMsg = getErrorMessage(err);
-
-      if (status === 400) {
-        setErrorMessage("Mã OTP không đúng hoặc đã hết hạn");
-      } else if (errorMsg) {
-        setErrorMessage(errorMsg);
-      } else if (err.response) {
-        setErrorMessage(`Lỗi ${status}: Xác thực thất bại`);
-      } else if (err.request) {
-        setErrorMessage("Không thể kết nối server. Vui lòng kiểm tra mạng");
-      } else {
-        setErrorMessage("Có lỗi xảy ra. Vui lòng thử lại");
-      }
+      console.error('Verify OTP error:', err);
+      setErrorMessage(err.message || "Mã OTP không đúng hoặc đã hết hạn");
     } finally {
       setLoading(false);
     }
@@ -172,15 +144,22 @@ function ForgotPassword() {
     setSuccessMessage("");
 
     try {
-      await axios.post(
-        `${API_URL}/auth/reset-password`,
-        {
+      const response = await fetch(`${API_BASE_URL}/auth/reset-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include', // Send cookies
+        body: JSON.stringify({
           new_password: newPassword,
           confirm_password: confirmPassword,
-          permission_token: permissionToken, // Backend sẽ bỏ qua, lấy từ cookie
-        },
-        { withCredentials: true } // Gửi cookie
-      );
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Reset password failed');
+      }
 
       setSuccessMessage("Đặt lại mật khẩu thành công!");
 
@@ -189,20 +168,8 @@ function ForgotPassword() {
         navigate("/login");
       }, 2000);
     } catch (err) {
-      const status = err.response?.status;
-      const errorMsg = getErrorMessage(err);
-
-      if (status === 400) {
-        setErrorMessage("Phiên làm việc đã hết hạn. Vui lòng thử lại");
-      } else if (errorMsg) {
-        setErrorMessage(errorMsg);
-      } else if (err.response) {
-        setErrorMessage(`Lỗi ${status}: Không thể đặt lại mật khẩu`);
-      } else if (err.request) {
-        setErrorMessage("Không thể kết nối server. Vui lòng kiểm tra mạng");
-      } else {
-        setErrorMessage("Có lỗi xảy ra. Vui lòng thử lại");
-      }
+      console.error('Reset password error:', err);
+      setErrorMessage(err.message || "Không thể đặt lại mật khẩu. Vui lòng thử lại");
     } finally {
       setLoading(false);
     }
@@ -235,9 +202,11 @@ function ForgotPassword() {
     <div className="forgot-password-wrapper">
       <div className="forgot-password-container">
         <div className="forgot-banner">
-          <i className="bx bxs-lock-open banner-icon"></i>
-          <h1>Quên mật khẩu?</h1>
-          <p>Đừng lo lắng! Chúng tôi sẽ giúp bạn lấy lại tài khoản</p>
+          <div className="banner-content">
+            <div className="brand-logo">🔐</div>
+            <h1>Quên mật khẩu?</h1>
+            <p>Đừng lo lắng! Chúng tôi sẽ giúp bạn lấy lại tài khoản</p>
+          </div>
         </div>
 
         <div className="forgot-form-section">
@@ -246,11 +215,11 @@ function ForgotPassword() {
           {renderStepIndicator()}
 
           {errorMessage && (
-            <div className="error-message show">{errorMessage}</div>
+            <div className="error-message">{errorMessage}</div>
           )}
 
           {successMessage && (
-            <div className="success-message show">{successMessage}</div>
+            <div className="success-message">{successMessage}</div>
           )}
 
           {/* Step 1: Request OTP */}
@@ -268,7 +237,6 @@ function ForgotPassword() {
                   placeholder="Nhập email..."
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleRequestOTP(e)}
                   autoComplete="email"
                   disabled={loading}
                 />
@@ -307,7 +275,6 @@ function ForgotPassword() {
                   onChange={(e) =>
                     setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))
                   }
-                  onKeyDown={(e) => e.key === "Enter" && handleVerifyOTP(e)}
                   maxLength="6"
                   disabled={loading}
                 />
@@ -347,7 +314,7 @@ function ForgotPassword() {
 
               <div className="form-group">
                 <label htmlFor="new-password">Mật khẩu mới</label>
-                <div className="input-wrapper">
+                <div className="password-input">
                   <input
                     id="new-password"
                     type={showPassword ? "text" : "password"}
@@ -370,16 +337,13 @@ function ForgotPassword() {
 
               <div className="form-group">
                 <label htmlFor="confirm-password">Xác nhận mật khẩu</label>
-                <div className="input-wrapper">
+                <div className="password-input">
                   <input
                     id="confirm-password"
                     type={showConfirmPassword ? "text" : "password"}
                     placeholder="Nhập lại mật khẩu..."
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    onKeyDown={(e) =>
-                      e.key === "Enter" && handleResetPassword(e)
-                    }
                     autoComplete="new-password"
                     disabled={loading}
                   />
@@ -387,9 +351,7 @@ function ForgotPassword() {
                     type="button"
                     className="password-toggle"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    aria-label={
-                      showConfirmPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"
-                    }
+                    aria-label={showConfirmPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
                   >
                     {showConfirmPassword ? "🙈" : "👁️"}
                   </button>
