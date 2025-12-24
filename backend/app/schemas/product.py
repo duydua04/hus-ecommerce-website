@@ -191,3 +191,10 @@ class ProductPriceResponse(ORMBase):
     price_adjustment: float | None
     discount_percent: float
     sale_price: float
+
+class ShopInfoResponse(BaseModel):
+    seller_id: int
+    shop_name: str
+    avt_url: str | None
+    average_rating: float
+    rating_count: int

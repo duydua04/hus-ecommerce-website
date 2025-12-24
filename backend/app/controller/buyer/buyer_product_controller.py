@@ -8,7 +8,7 @@ from ...config.db import get_db
 from ...services.buyer.buyer_product_service import (
     BuyerProductService,
     RatingFilter,
-    get_procdut_service,
+    get_procduct_service,
     ProductSort,
 )
 from ...schemas.product import (
@@ -17,6 +17,7 @@ from ...schemas.product import (
     ProductVariantWithSizesResponse,
     ProductPriceRequest,
     ProductPriceResponse,
+    ShopInfoResponse,
 )
 router = APIRouter(prefix="/buyer/products", tags=["buyer_products"])
 
@@ -33,7 +34,7 @@ async def get_products_filter(
     ),
     limit: int = 12,
     offset: int = 0,
-    service: BuyerProductService = Depends(get_procdut_service),
+    service: BuyerProductService = Depends(get_procduct_service),
 ):
     """
     Lấy danh sách sản phẩm cho người mua.
@@ -65,6 +66,19 @@ async def product_price(
         variant_id=payload.variant_id,
         size_id=payload.size_id,
     )
+# =================== LẤY THÔNG TIN SHOP THEO SẢN PHẨM =======================
+@router.get(
+    "/products/{product_id}/shop",
+    response_model=ShopInfoResponse,
+)
+async def get_shop_info(
+    product_id: int,
+    service: BuyerProductService = Depends(get_procduct_service),
+):
+    """
+    Lấy thông tin shop hiển thị trong trang chi tiết sản phẩm
+    """
+    return await service.get_shop_info_by_product(product_id)
 
 
 # =================== LẤY SẢN PHẨM THEO DANH MỤC =======================
@@ -74,7 +88,7 @@ async def get_products_by_category(
     q: Optional[str] = Query(None),
     limit: int = Query(10, ge=1, le=100),
     offset: int = Query(0, ge=0),
-    service: BuyerProductService = Depends(get_procdut_service)
+    service: BuyerProductService = Depends(get_procduct_service)
 ):
     """
     Lấy thông tin chi tiết của một danh mục sản phẩm.
@@ -90,7 +104,7 @@ async def get_products_by_category(
 @router.get("/{product_id}")
 async def get_buyer_product_detail(
     product_id: int,
-    service: BuyerProductService = Depends(get_procdut_service),
+    service: BuyerProductService = Depends(get_procduct_service),
 ):
     """
     Lấy thông tin chi tiết của một sản phẩm.
@@ -107,7 +121,7 @@ async def get_buyer_product_detail(
 @router.get("/{product_id}/variants", response_model=list[ProductVariantLiteResponse])
 async def get_product_variants(
     product_id: int,
-    service: BuyerProductService = Depends(get_procdut_service),
+    service: BuyerProductService = Depends(get_procduct_service),
 ):
     """
     Lấy các biến thể (variants) của một sản phẩm.
@@ -123,7 +137,7 @@ async def get_product_variants(
 async def get_variant_sizes(
     product_id: int,
     variant_id: int,
-    service: BuyerProductService = Depends(get_procdut_service),
+    service: BuyerProductService = Depends(get_procduct_service),
 ):
     """
     Lấy các kích thước (sizes) của một biến thể sản phẩm.
@@ -132,4 +146,5 @@ async def get_variant_sizes(
     - Trả 404 nếu biến thể không tồn tại
     """
 
-    return await service.get_variant_sizes(variant_id)      
+    return await service.get_variant_sizes(variant_id)    
+

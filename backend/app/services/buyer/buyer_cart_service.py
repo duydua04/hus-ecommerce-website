@@ -1,7 +1,7 @@
 from fastapi import HTTPException, Depends
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
+from sqlalchemy import and_, desc, select, func, asc, cast, Numeric, or_
 from sqlalchemy.orm import joinedload
 from collections import defaultdict
 from datetime import datetime
@@ -9,14 +9,14 @@ from typing import Optional
 from decimal import Decimal
 from ...schemas.product import ( UpdateCartItemRequest, UpdateVariantSizeRequest)
 from ...models import (
-    Product, ProductSize, ProductVariant, ShoppingCart, ShoppingCartItem
+    Product, ProductSize, ProductVariant, ShoppingCart, ShoppingCartItem, Seller
 )
 from ...config.s3 import public_url
 from redis.asyncio import Redis
 from ...config.db import get_db
 from ...config.redis import get_redis_client
 from sqlalchemy.orm import selectinload
-
+from ...schemas.common import Page, PageMeta
 
 class CartServiceAsync:
     def __init__(self, db: AsyncSession):
@@ -118,44 +118,91 @@ class CartServiceAsync:
         if not cart:
             return []
 
-        # Lấy tất cả item với product + images + variants
-        result = await self.db.execute(
+        stmt = (
             select(ShoppingCartItem)
             .options(
                 joinedload(ShoppingCartItem.product)
                 .joinedload(Product.images),
+
                 joinedload(ShoppingCartItem.product)
                 .joinedload(Product.variants)
                 .joinedload(ProductVariant.sizes),
-                joinedload(ShoppingCartItem.product)
-                .joinedload(Product.seller)
-            )
-            .where(ShoppingCartItem.shopping_cart_id == cart.shopping_cart_id)
-        )
-        items = result.unique().scalars().all()# tránh lỗi duplicate object
 
-        grouped = defaultdict(list)
+                joinedload(ShoppingCartItem.product)
+                .joinedload(Product.seller),
+            )
+            .where(
+                ShoppingCartItem.shopping_cart_id == cart.shopping_cart_id
+            )
+        )
+
+        result = await self.db.execute(stmt)
+        items = result.unique().scalars().all()
+
+        grouped: dict[str, list] = defaultdict(list)
+
         for item in items:
             product = item.product
-            seller_name = product.seller.shop_name if product.seller else "Unknown Seller"
-            image_url = public_url(product.images[0].image_url) if product.images else None
-            variant = next((v for v in product.variants if v.variant_id == item.variant_id), None)
-            size = next((s for s in variant.sizes if s.size_id == item.size_id), None) if variant else None
+            seller = product.seller
+            seller_name = seller.shop_name if seller else "Unknown Seller"
 
-            grouped[seller_name].append({
-                "product_id": product.product_id,
-                "name": product.name,
-                "variant_id": variant.variant_id if variant else None,
-                "variant_name": variant.variant_name if variant else None,
-                "size_id": size.size_id if size else None,
-                "size_name": size.size_name if size else None,
-                "quantity": item.quantity,
-                "price": float(product.base_price + (variant.price_adjustment if variant else 0)),
-                "public_image_url": image_url
-            })
+            image_url = (
+                public_url(product.images[0].image_url)
+                if product.images
+                else None
+            )
 
-        # Trả về dạng list JSON nhóm theo seller
-        return [{"seller": seller, "products": products} for seller, products in grouped.items()]
+            variant = next(
+                (v for v in product.variants if v.variant_id == item.variant_id),
+                None,
+            )
+
+            size = (
+                next((s for s in variant.sizes if s.size_id == item.size_id), None)
+                if variant
+                else None
+            )
+
+            # ===== GIÁ SAU DISCOUNT =====
+            base_price = product.base_price + (variant.price_adjustment if variant else 0)
+            sale_price = (
+                base_price * (100 - product.discount_percent) / 100
+            )
+
+            # ===== CÂN NẶNG =====
+            unit_weight = float(product.weight or 0)
+            total_weight = unit_weight * item.quantity
+
+            grouped[seller_name].append(
+                {
+                    "shopping_cart_item_id": item.shopping_cart_item_id,
+                    "product_id": product.product_id,
+                    "name": product.name,
+
+                    "variant_id": variant.variant_id if variant else None,
+                    "variant_name": variant.variant_name if variant else None,
+
+                    "size_id": size.size_id if size else None,
+                    "size_name": size.size_name if size else None,
+
+                    "quantity": item.quantity,
+                    "price": float(sale_price),
+
+                    # 🔑 FE dùng trực tiếp
+                    "weight": unit_weight,
+                    "total_weight": total_weight,
+
+                    "public_image_url": image_url,
+                }
+            )
+
+        return [
+            {
+                "seller": seller_name,
+                "products": products,
+            }
+            for seller_name, products in grouped.items()
+        ]
 
     # =================== XÓA SẢN PHẨM KHỎI GIỎ HÀNG =======================
     async def delete_item(self, buyer_id: int, item_id: int):
@@ -300,6 +347,59 @@ class CartServiceAsync:
         await self.db.commit()
         await self.db.refresh(item)
         return {"message": "Item updated", "item_id": item.shopping_cart_item_id, "variant_id": variant_id, "size_id": size_id}
+
+    # =================== TÌM KIẾM SẢN PHẨM TRONG GIỎ HÀNG =======================
+    async def search_buyer_cart_items(
+        self,
+        buyer_id: int,
+        q: str,
+        limit: int = 10,
+    ):
+        if not q or not q.strip():
+            return []
+
+        cart = await self.find_cart(buyer_id)
+        if not cart:
+            return []
+
+        keyword = f"%{q.strip().lower()}%"
+
+        stmt = (
+            select(
+                ShoppingCartItem.shopping_cart_item_id,
+                Product.product_id,
+                Product.name.label("product_name"),
+                ProductVariant.variant_name,
+                Seller.shop_name.label("seller_name"),
+            )
+            .join(Product, ShoppingCartItem.product_id == Product.product_id)
+            .outerjoin(
+                ProductVariant,
+                ShoppingCartItem.variant_id == ProductVariant.variant_id,
+            )
+            .outerjoin(Seller, Product.seller_id == Seller.seller_id)
+            .where(
+                ShoppingCartItem.shopping_cart_id == cart.shopping_cart_id,
+                or_(
+                    Product.name.ilike(keyword),
+                    func.coalesce(ProductVariant.variant_name, "").ilike(keyword),
+                ),
+            )
+            .limit(limit)
+        )
+
+        result = await self.db.execute(stmt)
+
+        return [
+            {
+                "shopping_cart_item_id": r.shopping_cart_item_id,
+                "product_id": r.product_id,
+                "product_name": r.product_name,
+                "variant_name": r.variant_name,
+                "seller_name": r.seller_name,
+            }
+            for r in result.all()
+        ]
 
 
 
