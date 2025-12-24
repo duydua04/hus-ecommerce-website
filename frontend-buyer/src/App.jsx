@@ -7,8 +7,8 @@ import Header from './components/header.jsx';
 import Footer from './components/footer.jsx';
 
 // Import Pages
-import Login from './pages/Login/Buyerlogin.jsx';
-import Register from './pages/Login/Register/Register.jsx';
+import BuyerLogin from './pages/Login/Buyerlogin.jsx';
+import BuyerRegister from './pages/Login/Register/Register.jsx';
 import ForgotPassword from './pages/Login/ForgotPassword/ForgotPassword.jsx';
 import Home from './pages/Home/home.jsx';
 import Detail from './pages/Detail/detail.jsx';
@@ -60,7 +60,7 @@ function App() {
           path="/login"
           element={
             <PublicRoute>
-              <Login />
+              <BuyerLogin />
             </PublicRoute>
           }
         />
@@ -68,7 +68,7 @@ function App() {
           path="/register"
           element={
             <PublicRoute>
-              <Register />
+              <BuyerRegister />
             </PublicRoute>
           }
         />

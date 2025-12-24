@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import './BuyerLogin.css';
 
-// const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 const API_URL = 'http://localhost:8000';
 
 function BuyerLogin() {
@@ -29,7 +28,7 @@ function BuyerLogin() {
     }
   }, []);
 
-  // Check if user is already logged in
+  // đăng nhập rồi thì chuyển đén trang home
   useEffect(() => {
     const checkAuth = async () => {
       try {
@@ -38,19 +37,19 @@ function BuyerLogin() {
           navigate('/home', { replace: true });
         }
       } catch (err) {
-        // User not logged in, stay on login page
+        // Chưa đăng nhập thì ở trang login
         console.log('Not authenticated');
       }
     };
     checkAuth();
   }, [navigate]);
 
-  // Email validation
+  // Email hợp lệ
   const validateEmail = (email) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
 
-  // Handle login
+  // Đăng nhập thủ công
   const handleLogin = async (e) => {
     e?.preventDefault();
 
@@ -72,11 +71,11 @@ function BuyerLogin() {
     setErrorMessage('');
 
     try {
-      const response = await api.auth.loginBuyer(email.trim(), password);
+        const response = await api.auth.loginBuyer(email.trim(), password);
 
-      console.log('Login successful:', response);
+      console.log('Login successful');
 
-      // Save email if remember is checked
+      // Lưu email nếu chọn checkbox
       if (remember) {
         localStorage.setItem('savedBuyerEmail', email);
       } else {
@@ -91,7 +90,7 @@ function BuyerLogin() {
       // Store user role
       localStorage.setItem('userRole', 'buyer');
 
-      // Redirect to home page
+      // chuyển đến trang home
       navigate('/', { replace: true });
     } catch (err) {
       console.error('Login error:', err);
@@ -122,12 +121,12 @@ function BuyerLogin() {
     window.location.href = `${API_URL}/auth/google/login/buyer`;
   };
 
-  // Navigate to register page
+  // Link đến trang đăng ký
   const handleRegister = () => {
     navigate('/register');
   };
 
-  // Navigate to forgot password
+  // Link đến trang quên mật khẩu
   const handleForgotPassword = () => {
     navigate('/forgot-password');
   };

@@ -67,19 +67,17 @@ export const authAPI = {
 // CATEGORY APIs
 // ============================================
 export const categoryAPI = {
-  // Get all categories (using admin endpoint temporarily)
-  // TODO: Replace with public buyer endpoint when available
   getAll: (params = {}) => {
     const query = new URLSearchParams({
       limit: params.limit || 20,
       offset: params.offset || 0,
       ...(params.q && { q: params.q }),
     });
-    return apiCall(`/admin/categories?${query}`);
+    return apiCall(`/buyer/categories?${query}`);
   },
 
   // Get category by ID
-  getById: (categoryId) => apiCall(`/admin/categories/${categoryId}`),
+  getById: (categoryId) => apiCall(`/buyer/categories/${categoryId}`),
 };
 
 // ============================================
@@ -95,11 +93,11 @@ export const productAPI = {
       active_only: params.active_only !== false, // Default true
       ...(params.q && { q: params.q }),
     });
-    return apiCall(`/seller/products?${query}`);
+    return apiCall(`/buyer/products?${query}`);
   },
 
   // Get product details
-  getById: (productId) => apiCall(`/seller/products/${productId}`),
+  getById: (productId) => apiCall(`/buyer/products/${productId}`),
 
   // Search products (same as getAll but with search query)
   search: (searchQuery, params = {}) => {
@@ -122,7 +120,6 @@ export const productAPI = {
     return productAPI.getAll({
       limit: params.limit || 10,
       offset: 0,
-      // TODO: Add sort by discount or special flag when backend supports it
       ...params,
     });
   },

@@ -287,34 +287,14 @@
     object-fit: cover;
     display: block;
 }
-.product-card__heart {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    border: 2px solid transparent;
-    background: transparent;
-    color: transparent;
-    font-size: 26px;
-    line-height: 36px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.5s ease;
-    pointer-events: none;
-}
-.product-card:hover .product-card__heart {
+.product-card:hover {
     color: var(--blue-600);
     background-color: transparent;
     border-color: transparent;
     transform: scale(1.1);
     opacity: 1;
 }
-.product-card:not(:hover) .product-card__heart {
+.product-card:not(:hover) {
     color: var(--blue-600);
     background-color: transparent;
     border-color: var(--blue-600);

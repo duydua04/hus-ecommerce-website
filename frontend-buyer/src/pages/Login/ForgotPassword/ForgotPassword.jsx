@@ -9,7 +9,7 @@ const API_BASE_URL = 'http://localhost:8000';
 function ForgotPassword() {
   const navigate = useNavigate();
 
-  const [step, setStep] = useState(1); // 1: Email, 2: OTP, 3: New Password
+  const [step, setStep] = useState(1); //
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("buyer");
   const [otp, setOtp] = useState("");
@@ -42,7 +42,6 @@ function ForgotPassword() {
     setSuccessMessage("");
 
     try {
-      // API call với fetch (vì backend dùng cookie)
       const response = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
         method: 'POST',
         headers: {
@@ -61,6 +60,7 @@ function ForgotPassword() {
       }
 
       const data = await response.json();
+      console.log("DEBUG DATA STEP 1:", data);
       setSuccessMessage("Mã OTP đã được gửi đến email của bạn!");
       setStep(2);
     } catch (err) {
@@ -103,6 +103,7 @@ function ForgotPassword() {
         },
         credentials: 'include', // Send cookies
         body: JSON.stringify({
+          email: email.trim(),
           otp: otp.trim(),
         }),
       });
@@ -151,6 +152,7 @@ function ForgotPassword() {
         },
         credentials: 'include', // Send cookies
         body: JSON.stringify({
+          email: email.trim(),
           new_password: newPassword,
           confirm_password: confirmPassword,
         }),

@@ -177,6 +177,154 @@
     outline-offset: 3px;
 }
 
+/* menu thông tin đăng nhập*/
+.user-menu__backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: transparent;
+    z-index: 1100;
+    cursor: default;
+}
+.user-menu {
+    position: relative;
+}
+
+.user-menu__dropdown {
+    position: absolute;
+    top: 130%;
+    right: 0;
+    width: max-content;
+    min-width: 220px;
+    max-width: 350px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    padding: 8px 0;
+    border: 1px solid var(--neutral-300);
+    z-index: 1200;
+    animation: slideDown 0.2s ease-out;
+    transform-origin: top right;
+}
+
+/* Header thông tin user*/
+.user-menu__header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background-color: white;
+}
+
+.user-menu__avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: var(--blue-200);
+    color: var(--blue-700);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    overflow: hidden;
+}
+
+.user-menu__avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.user-menu__info {
+    flex: 1;
+    overflow: hidden;
+}
+
+.user-menu__name {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #333;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.user-menu__email {
+    font-size: 0.8rem;
+    color: var(--neutral-600);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Các đường kẻ chia cách */
+.user-menu__divider {
+    height: 1px;
+    background-color: #eee;
+    margin: 6px 0;
+}
+
+/* Các mục trong menu */
+.user-menu__item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    color: #333;
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: background-color 0.2s;
+    background: none;
+    border: none;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+}
+
+.user-menu__item:hover {
+    background-color: #f5f5f5;
+    color: var(--blue-600, #2196f3);
+}
+
+.user-menu__item svg {
+    color: #888;
+}
+
+.user-menu__item:hover svg {
+    color: var(--blue-600, #2196f3);
+}
+
+/* Nút đăng xuất*/
+.user-menu__item--logout {
+    color: #dc3545;
+}
+
+.user-menu__item--logout:hover {
+    background-color: #fff5f5;
+    color: #c82333;
+}
+
+.user-menu__item--logout svg {
+    color: #dc3545;
+}
+
+.user-menu__item--logout:hover svg {
+    color: #c82333;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
 @media (max-width: 948px) {
     .header__left {
         order: 1;
