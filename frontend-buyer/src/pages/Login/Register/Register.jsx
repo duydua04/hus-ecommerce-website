@@ -65,7 +65,7 @@ function BuyerRegister() {
       setErrorMessage("Vui lòng nhập tên");
       return;
     }
-    if (!formData.shopName.trim()) {
+    if (!formData.acountName.trim()) {
       setErrorMessage("Vui lòng nhập tên tài khoản");
       return;
     }
