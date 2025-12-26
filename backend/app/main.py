@@ -43,7 +43,7 @@ from .controller.buyer.buyer_cart_controller import router as buyer_cart_router
 from .controller.buyer.buyer_discount_controller import router as buyer_discount_router
 from .controller.buyer.buyer_carrier_controller import router as buyer_carrier_router
 from .controller.buyer.buyer_order_controller import router as buyer_order_router
-
+from .controller.buyer.buyer_profile_controller import router as buyer_profile_router
 
 
 
@@ -119,3 +119,4 @@ app.include_router(buyer_discount_router)
 app.include_router(buyer_carrier_router)
 app.include_router(buyer_order_router)
 app.include_router(buyer_notify_router)
+app.include_router(buyer_profile_router)
