@@ -53,16 +53,18 @@ const Table = ({ columns = [], data = [], actions = null }) => {
 
                 {actions && (
                   <td className="table__cell table__cell--actions">
-                    {actions.map((act, i) => (
-                      <button
-                        key={i}
-                        className={act.className}
-                        title={act.label}
-                        onClick={() => act.onClick(item)}
-                      >
-                        <i className={`${act.icon} action-btn__icon`}></i>
-                      </button>
-                    ))}
+                    <div className="action-buttons">
+                      {actions.map((act, i) => (
+                        <button
+                          key={i}
+                          className={act.className}
+                          title={act.label}
+                          onClick={() => act.onClick(item)}
+                        >
+                          <i className={`${act.icon} action-btn__icon`} />
+                        </button>
+                      ))}
+                    </div>
                   </td>
                 )}
               </tr>

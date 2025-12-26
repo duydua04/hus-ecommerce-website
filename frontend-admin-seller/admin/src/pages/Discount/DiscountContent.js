@@ -1,143 +1,251 @@
 import React, { useState, useEffect } from "react";
+import { X, Check } from "lucide-react";
 import PageHeader from "../../components/common/PageHeader/PageHeader";
 import Table from "../../components/common/Table/Table";
 import Pagination from "../../components/common/Pagination/Pagination";
 import Button from "../../components/common/Button/Button";
 import SearchBox from "../../components/common/SearchBox/SearchBox";
-
+import DiscountModal from "./AddDiscount/AddDiscount";
+import ConfirmModal from "../../components/common/ConfirmModal/ConfirmModal";
+import useDiscount from "../../hooks/useDiscount";
 import "./Discount.scss";
 
 export default function DiscountContent() {
-  // Mock data (chưa gọi API)
-  const [discounts, setDiscounts] = useState([
-    {
-      code: "ABC123",
-      rate: 10,
-      minOrder: 100000,
-      maxDiscount: 100000,
-      startDate: "27/09/2025",
-      endDate: "30/09/2025",
-    },
-    {
-      code: "MNP123",
-      rate: 50,
-      minOrder: 50000,
-      maxDiscount: 1000000,
-      startDate: "27/09/2025",
-      endDate: "29/10/2025",
-    },
-  ]);
+  const {
+    discounts,
+    total,
+    loading,
+    error,
+    fetchDiscounts,
+    createDiscount,
+    updateDiscount,
+    deleteDiscount,
+    setStatus,
+    clearError,
+  } = useDiscount();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedDiscount, setSelectedDiscount] = useState(null);
+
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [discountToDelete, setDiscountToDelete] = useState(null);
+
+  const [successMessage, setSuccessMessage] = useState("");
+
   const itemsPerPage = 10;
 
-  // Filter
-  const filtered = discounts.filter((d) =>
-    d.code.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  /* FETCH DATA */
+  useEffect(() => {
+    fetchDiscounts({
+      q: "",
+      limit: itemsPerPage,
+      offset: 0,
+    });
+  }, []);
 
-  // Pagination
-  const totalPages = Math.ceil(filtered.length / itemsPerPage);
-  const start = (currentPage - 1) * itemsPerPage;
-  const currentItems = filtered.slice(start, start + itemsPerPage);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchDiscounts({
+        q: searchQuery,
+        limit: itemsPerPage,
+        offset: (currentPage - 1) * itemsPerPage,
+      });
+    }, 500); // Debounce 500ms
 
-  // Toolbar actions
-  const handleAdd = () => {
-    alert("Thêm mã giảm giá (chưa implement)");
+    return () => clearTimeout(timer);
+  }, [searchQuery, currentPage]);
+
+  const totalPages = Math.ceil(total / itemsPerPage);
+
+  /* HANDLERS */
+  const handleAddDiscount = () => {
+    clearError();
+    setSuccessMessage("");
+    setSelectedDiscount(null);
+    setIsModalOpen(true);
   };
 
-  const handleEdit = (item) => {
-    alert("Sửa mã: " + item.code);
+  const handleEditDiscount = (discount) => {
+    clearError();
+    setSuccessMessage("");
+    setSelectedDiscount(discount);
+    setIsModalOpen(true);
   };
 
-  const handleDelete = (item) => {
-    if (window.confirm(`Xóa mã ${item.code}?`)) {
-      setDiscounts(discounts.filter((d) => d.code !== item.code));
+  const handleFormSubmit = async (formData) => {
+    try {
+      if (selectedDiscount) {
+        await updateDiscount(selectedDiscount.discount_id, formData);
+        setSuccessMessage("Cập nhật mã giảm giá thành công");
+      } else {
+        await createDiscount(formData);
+        setSuccessMessage("Thêm mã giảm giá thành công");
+      }
+
+      setIsModalOpen(false);
+      setSelectedDiscount(null);
+
+      setTimeout(() => setSuccessMessage(""), 3000);
+
+      fetchDiscounts({
+        q: searchQuery,
+        limit: itemsPerPage,
+        offset: (currentPage - 1) * itemsPerPage,
+      });
+    } catch (err) {
+      console.error("Error submit form:", err);
+      throw err;
     }
   };
 
+  const handleToggleStatus = async (discount) => {
+    try {
+      await setStatus(discount.discount_id, !discount.is_active);
+      setSuccessMessage(
+        `${discount.is_active ? "Tắt" : "Bật"} mã giảm giá thành công`
+      );
+
+      setTimeout(() => setSuccessMessage(""), 3000);
+
+      fetchDiscounts({
+        q: searchQuery,
+        limit: itemsPerPage,
+        offset: (currentPage - 1) * itemsPerPage,
+      });
+    } catch (err) {
+      console.error("Error toggle status:", err);
+    }
+  };
+
+  const handleDeleteDiscount = async (discountId) => {
+    setDiscountToDelete(discountId);
+    setIsConfirmModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!discountToDelete) return;
+
+    try {
+      await deleteDiscount(discountToDelete);
+      setSuccessMessage("Xóa mã giảm giá thành công");
+
+      setTimeout(() => setSuccessMessage(""), 3000);
+
+      fetchDiscounts({
+        q: searchQuery,
+        limit: itemsPerPage,
+        offset: (currentPage - 1) * itemsPerPage,
+      });
+    } catch (err) {
+      console.error("Error delete discount:", err);
+    } finally {
+      setIsConfirmModalOpen(false);
+      setDiscountToDelete(null);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setIsConfirmModalOpen(false);
+    setDiscountToDelete(null);
+  };
+
+  /* TABLE */
   const columns = [
-    { key: "code", label: "Mã giảm giá" },
     {
-      key: "rate",
+      key: "code",
+      label: "Mã giảm giá",
+      render: (value) => <strong>{value}</strong>,
+    },
+    {
+      key: "discount_percent",
       label: "Tỉ lệ giảm giá",
-      render: (v) => v + "%",
+      render: (value) => `${value}%`,
     },
     {
-      key: "minOrder",
+      key: "min_order_value",
       label: "Đơn hàng tối thiểu",
-      render: (v) => v.toLocaleString("vi-VN") + "đ",
-      hideMobile: true,
+      className: "table__cell--price",
+      render: (value) =>
+        value ? `${Number(value).toLocaleString("vi-VN")} ₫` : "0 ₫",
     },
     {
-      key: "maxDiscount",
+      key: "max_discount",
       label: "Max Discount",
-      render: (v) => v.toLocaleString("vi-VN") + "đ",
-      hideMobile: true,
+      className: "table__cell--price",
+      render: (value) =>
+        value ? `${Number(value).toLocaleString("vi-VN")} ₫` : "Không giới hạn",
     },
-    { key: "startDate", label: "Bắt đầu" },
-    { key: "endDate", label: "Kết thúc" },
+    {
+      key: "start_date",
+      label: "Bắt đầu",
+      render: (value) =>
+        value ? new Date(value).toLocaleDateString("vi-VN") : "-",
+    },
+    {
+      key: "end_date",
+      label: "Kết thúc",
+      render: (value) =>
+        value ? new Date(value).toLocaleDateString("vi-VN") : "-",
+    },
   ];
 
   const actions = [
     {
-      label: "Xem",
-      icon: "bx bx-show",
-      onClick: (i) => alert("Xem " + i.code),
-      className: "action-btn action-btn--view",
+      label: "Sửa",
+      icon: "bx bx-edit-alt",
+      onClick: handleEditDiscount,
+      className: "action-btn action-btn--edit",
     },
     {
-      label: "Sửa",
-      icon: "bx bx-edit",
-      onClick: handleEdit,
-      className: "action-btn action-btn--edit",
+      label: "Bật/Tắt",
+      icon: "bx bx-toggle-left",
+      onClick: handleToggleStatus,
+      className: "action-btn action-btn--toggle",
     },
     {
       label: "Xóa",
       icon: "bx bx-trash",
-      onClick: handleDelete,
+      onClick: (d) => handleDeleteDiscount(d.discount_id),
       className: "action-btn action-btn--delete",
     },
   ];
 
+  /* RENDER  */
   return (
     <main className="main">
       <PageHeader
-        title="Giảm giá"
+        title="Mã giảm giá"
         breadcrumbs={[
           { label: "Trang chủ", path: "/dashboard" },
-          { label: "Giảm giá", path: "/discount" },
+          { label: "Mã giảm giá", path: "/discounts" },
         ]}
       />
 
-      {/* Toolbar */}
       <div className="toolbar">
         <div className="toolbar__header">
           <div className="toolbar__title">
             <h3 className="toolbar__title-text">Danh sách mã giảm giá</h3>
             <p className="toolbar__title-desc">
-              Quản lý và theo dõi các mã giảm giá của cửa hàng
+              Quản lý và theo dõi các mã giảm giá
             </p>
           </div>
-
           <Button
-            text="Thêm mã"
+            text="Thêm mã giảm giá"
             icon="bx bx-plus"
             variant="primary"
-            onClick={handleAdd}
+            onClick={handleAddDiscount}
           />
         </div>
 
-        {/* Search + Filter */}
         <div className="toolbar__actions">
           <div className="toolbar__search">
             <SearchBox
-              placeholder="Tìm kiếm mã..."
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
+              placeholder="Tìm kiếm mã giảm giá..."
+              onSearch={(value) => {
+                setSearchQuery(value);
                 setCurrentPage(1);
               }}
             />
@@ -148,12 +256,28 @@ export default function DiscountContent() {
           </button>
         </div>
 
-        {/* Table */}
+        {error && (
+          <div className="toolbar__alert alert alert-error">
+            <span>{error}</span>
+            <button onClick={clearError} className="alert-close">
+              <X size={18} />
+            </button>
+          </div>
+        )}
+
+        {successMessage && (
+          <div className="toolbar__alert alert alert-success">
+            <Check size={18} />
+            <span>{successMessage}</span>
+          </div>
+        )}
+
+        {loading && <div className="toolbar__loading">Đang tải...</div>}
+
         <div className="toolbar__table">
-          <Table columns={columns} data={currentItems} actions={actions} />
+          <Table columns={columns} data={discounts} actions={actions} />
         </div>
 
-        {/* Pagination */}
         {totalPages > 1 && (
           <div className="toolbar__pagination">
             <Pagination
@@ -164,6 +288,26 @@ export default function DiscountContent() {
           </div>
         )}
       </div>
+
+      {/*  MODALS  */}
+      <DiscountModal
+        key={selectedDiscount?.discount_id || "new"}
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedDiscount(null);
+        }}
+        onSubmit={handleFormSubmit}
+        discount={selectedDiscount}
+      />
+
+      <ConfirmModal
+        isOpen={isConfirmModalOpen}
+        title="Thông báo"
+        message="Bạn chắc chắn muốn xóa mã giảm giá này?"
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
+      />
     </main>
   );
 }

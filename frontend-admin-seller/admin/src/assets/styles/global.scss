@@ -25,6 +25,7 @@ li {
   --bg-primary: #f8fafc; /*màu nền chính*/
   --bg-white: #ffffff;
   --bg-hover: #f1f5f9; /*màu khi hover*/
+  --overlay-modal: rgba(15, 23, 42, 0.6);
 
   /*tông màu chủ đạo*/
   --blue: #3b82f6;
@@ -63,3 +64,6 @@ body {
   color: var(--text-primary);
   line-height: 1.6;
 }
+
+/* style chung cho các AddModal */
+@import "./modal.scss";
