@@ -1,61 +1,12 @@
-from datetime import datetime, timezone
-from typing import Dict, Any, Optional
-
-from fastapi import Depends
-from sqlalchemy.ext.asyncio import AsyncSession
+from typing import Optional, Dict, Any
 from beanie import PydanticObjectId
-
-from ...config.db import get_db
 from ...models.notification import Notification
 
-from ...utils.socket_manager import socket_manager
 
-
-class BaseNotificationService:
-    def __init__(self, db: AsyncSession):
-        self.db = db
-
-
-    @staticmethod
-    async def send_unicast(
-            user_id: int,
-            role: str,
-            title: str,
-            message: str,
-            event: str,
-            data: Dict[str, Any] = None
-    ):
-        """
-        Lưu thông báo vào MongoDB và gửi Realtime qua WebSocket (Redis Pub/Sub) cho 1 người cụ thể.
-        """
-        # 1. Lưu vào Database (Beanie Async)
-        notif = Notification(
-            recipient_id=user_id,
-            recipient_role=role,
-            title=title,
-            message=message,
-            event_type=event,
-            data=data or {},
-            is_read=False,
-            created_at=datetime.now(timezone.utc)
-        )
-        await notif.insert()
-
-        # 2. Tạo Payload gửi qua Socket
-        ws_payload = {
-            "type": "NOTIFICATION",
-            "id": str(notif.id),
-            "title": title,
-            "message": message,
-            "event": event,
-            "data": data or {},
-            "created_at": str(notif.created_at),
-            "is_read": False
-        }
-
-        await socket_manager.send_to_user(ws_payload, user_id, role)
-
-        return notif
+class NotificationService:
+    """
+    Service chung cho toàn bộ hệ thống (Admin, Buyer, Seller).
+    """
 
     @staticmethod
     async def get_notifications(
@@ -64,10 +15,8 @@ class BaseNotificationService:
             limit: int = 20,
             cursor: Optional[str] = None,
             unread_only: bool = False
-    ):
-        """
-        Lấy danh sách thông báo
-        """
+    ) -> Dict[str, Any]:
+
         query = Notification.find(
             Notification.recipient_id == user_id,
             Notification.recipient_role == role
@@ -78,8 +27,8 @@ class BaseNotificationService:
 
         if cursor:
             try:
-                obj_id = PydanticObjectId(cursor)
-                query = query.find(Notification.id < obj_id)
+                oid = PydanticObjectId(cursor)
+                query = query.find(Notification.id < oid)
             except Exception:
                 pass
 
@@ -110,16 +59,20 @@ class BaseNotificationService:
     @staticmethod
     async def mark_as_read(notif_id: str, user_id: int) -> bool:
         """
-        Đánh dấu 1 thông báo đã đọc.
+        Đánh dấu 1 thông báo là đã đọc.
+        Chỉ thành công nếu thông báo đó thuộc về user_id gửi request.
         """
         try:
             oid = PydanticObjectId(notif_id)
             notif = await Notification.get(oid)
         except Exception:
-            # Lỗi format ID
             return False
 
-        if not notif or notif.recipient_id != user_id:
+        if not notif:
+            return False
+
+        # Security check: Đảm bảo không đọc trộm thông báo người khác
+        if notif.recipient_id != user_id:
             return False
 
         if not notif.is_read:
@@ -128,6 +81,19 @@ class BaseNotificationService:
 
         return True
 
+    @staticmethod
+    async def mark_all_as_read(user_id: int, role: str) -> int:
+        """
+        Đánh dấu tất cả là đã đọc (Optional feature)
+        """
+        result = await Notification.find(
+            Notification.recipient_id == user_id,
+            Notification.recipient_role == role,
+            Notification.is_read == False
+        ).update({"$set": {"is_read": True}})
 
-def get_notification_service(db: AsyncSession = Depends(get_db)):
-    return BaseNotificationService(db)
+        return result.modified_count
+
+
+# Instance dùng chung (Singleton)
+notification_service = NotificationService()

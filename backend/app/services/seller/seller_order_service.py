@@ -16,16 +16,16 @@ from ...schemas.seller_order import (
 from ...schemas.address import AddressResponse
 from ...schemas.order import OrderItemResponse
 
-from ..buyer.buyer_notification_service import BuyerNotificationService, get_buyer_notif_service
+from ...tasks.notification_task import task_send_notification
 
 from ..common.inventory_service import inventory_service
 from ...tasks.inventory import update_stock_db
-
+from ...tasks.dashboard_task import task_admin_revert_order
 
 class SellerOrderService:
-    def __init__(self, db: AsyncSession, notif_service: BuyerNotificationService):
+    def __init__(self, db: AsyncSession):
         self.db = db
-        self.notif_service = notif_service
+
 
     async def _get_order_lightweight(self, seller_id: int, order_id: int):
         """
@@ -70,7 +70,6 @@ class SellerOrderService:
         """
         Lấy danh sách đơn hàng có phân trang
         """
-
         stmt = (
             select(Order)
             .join(Order.items)
@@ -113,7 +112,6 @@ class SellerOrderService:
 
         data = []
         for o in orders:
-            # Map sang DTO item hiển thị
             item = SellerOrderListItem(
                 order_id=o.order_id,
                 order_date=o.order_date,
@@ -121,7 +119,6 @@ class SellerOrderService:
                 payment_status=o.payment_status,
                 payment_method=o.payment_method,
                 total_price=o.total_price,
-
                 buyer_name=f"{o.buyer.fname} {o.buyer.lname or ''}".strip(),
                 item_count=len(o.items)
             )
@@ -137,14 +134,14 @@ class SellerOrderService:
         )
 
 
-    async def get_order_detail(self, seller_id: int, order_id: int) -> SellerOrderDetailResponse:
+    async def get_order_detail(self, seller_id: int, order_id: int):
         stmt = (
             select(Order)
             .join(Order.items)
             .join(OrderItem.product)
             .where(
                 Order.order_id == order_id,
-                   Product.seller_id == seller_id
+                Product.seller_id == seller_id
             )
             .options(
                 selectinload(Order.items),
@@ -182,7 +179,6 @@ class SellerOrderService:
             discount_amount=order.discount_amount,
             total_price=order.total_price,
             notes=order.notes,
-
             carrier_name=order.carrier.carrier_name if order.carrier else "N/A",
             buyer_info=buyer_resp,
             shipping_address_detail=addr_resp,
@@ -203,7 +199,14 @@ class SellerOrderService:
         order.order_status = OrderStatus.processing
         await self.db.commit()
 
-        await self.notif_service.notify_order_confirmed(order)
+        task_send_notification.delay(
+            user_id=order.buyer_id,
+            role="buyer",
+            title="Đơn hàng đã được xác nhận",
+            message=f"Shop đã xác nhận đơn hàng #{order.order_id} và đang chuẩn bị hàng.",
+            event_type="order_update",
+            data={"order_id": order.order_id, "status": "processing"}
+        )
 
         return {"message": "Đã xác nhận đơn hàng", "status": OrderStatus.processing}
 
@@ -222,21 +225,39 @@ class SellerOrderService:
         order.delivery_date = datetime.now()
         await self.db.commit()
 
-        await self.notif_service.notify_order_shipped(order)
+        task_send_notification.delay(
+            user_id=order.buyer_id,
+            role="buyer",
+            title="Đơn hàng đang được giao",
+            message=f"Đơn hàng #{order.order_id} đã được giao cho đơn vị vận chuyển.",
+            event_type="order_update",
+            data={"order_id": order.order_id, "status": "shipped"}
+        )
 
         return {"message": "Đã cập nhật trạng thái giao hàng", "status": OrderStatus.shipped}
 
 
     async def cancel_order(self, seller_id: int, order_id: int, reason: str):
-        """Hủy đơn hàng và Hoàn kho"""
-        order = await self._get_order_lightweight(seller_id, order_id)
+        """Hủy đơn hàng và Hoàn kho + Trừ thống kê Dashboard"""
+
+        order_check = await self._get_order_lightweight(seller_id, order_id)
 
         allowed = [OrderStatus.pending, OrderStatus.processing]
-        if order.order_status not in allowed:
+        if order_check.order_status not in allowed:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Không thể huỷ đơn hàng đã giao"
             )
+
+        stmt_full = (
+            select(Order)
+            .options(
+                selectinload(Order.items).selectinload(OrderItem.product)
+            )
+            .where(Order.order_id == order_id)
+        )
+        result_full = await self.db.execute(stmt_full)
+        order = result_full.scalar_one()
 
         order.order_status = OrderStatus.cancelled
         order.notes = f"{order.notes or ''} | [Shop Cancel]: {reason}"
@@ -246,6 +267,35 @@ class SellerOrderService:
             update_stock_db.delay(item.size_id, item.quantity)
 
         await self.db.commit()
+
+        task_send_notification.delay(
+            user_id=order.buyer_id,
+            role="buyer",
+            title="Đơn hàng đã bị hủy",
+            message=f"Đơn hàng #{order.order_id} đã bị hủy bởi Shop. Lý do: {reason}",
+            event_type="order_cancelled",
+            data={"order_id": order.order_id, "reason": reason}
+        )
+
+        revert_payload = {
+            "order_id": order.order_id,
+            "buyer_id": order.buyer_id,
+            "seller_id": seller_id,
+            "carrier_id": order.carrier_id,
+            "total_price": float(order.total_price),
+            "created_at": order.order_date.isoformat(),
+            "items": [
+                {
+                    "category_id": item.product.category_id,
+                    "subtotal": float(item.total_price),
+                    "quantity": item.quantity
+                }
+                for item in order.items
+            ]
+        }
+
+        task_admin_revert_order.delay(revert_payload)
+
         return {"message": "Đã huỷ đơn hàng và hoàn kho", "status": OrderStatus.cancelled}
 
 
@@ -264,7 +314,6 @@ class SellerOrderService:
 
 
 def get_seller_order_service(
-        db: AsyncSession = Depends(get_db),
-        notif_service: BuyerNotificationService = Depends(get_buyer_notif_service)
+        db: AsyncSession = Depends(get_db)
 ):
-    return SellerOrderService(db, notif_service)
+    return SellerOrderService(db)

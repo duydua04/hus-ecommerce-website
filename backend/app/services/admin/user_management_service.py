@@ -60,7 +60,7 @@ class AdminUserManagementService(UserQueryBase):
 
     async def list_sellers(
             self, search_query: Optional[str] = None,
-            active_only: bool = False, limit: int = 10,
+            active_only: bool = True, limit: int = 10,
             offset: int = 0
     ):
         """Lấy danh sách Seller"""

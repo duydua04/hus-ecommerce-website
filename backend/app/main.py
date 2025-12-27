@@ -14,7 +14,7 @@ from .controller.admin.user_management_controller import router as admin_manage_
 from .controller.admin.admin_discount_controller import router as admin_manage_discount_router
 from .controller.admin.admin_carrier_controller import router as admin_manage_carrier_router
 from .controller.admin.admin_notification_controller import router as admin_notify_router
-
+from .controller.admin.admin_dashboard_controller import router as admin_dashboard_router
 
 
 # IMPORT SELLER CONTROLLER
@@ -80,7 +80,7 @@ app.include_router(admin_manage_user_router)
 app.include_router(admin_manage_discount_router)
 app.include_router(admin_manage_carrier_router)
 app.include_router(admin_notify_router)
-
+app.include_router(admin_dashboard_router)
 
 
 
