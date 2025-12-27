@@ -6,7 +6,7 @@ from ...services.common.notification_service import notification_service
 
 router = APIRouter(
     prefix="/buyer/notifications",
-    tags=["buyer-notifications"]
+    tags=["buyer-notifications"],
 )
 
 
