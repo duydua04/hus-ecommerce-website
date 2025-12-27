@@ -1,22 +1,35 @@
 import asyncio
 from ..services.admin.admin_dashboard_service import admin_dashboard_service
-#from ..services.seller.seller_dashboard_service import seller_dashboard_service
 from ..utils.celery_client import celery_app
 from ..utils.socket_manager import socket_manager
+
 
 def run_async(coro):
     return asyncio.get_event_loop().run_until_complete(coro)
 
-# ============================================================
-# GROUP 1: ADMIN TASKS (TÍNH TOÁN)
-# ============================================================
+
 @celery_app.task(name="task_admin_sync_order")
 def task_admin_sync_order(order_data: dict):
+    """
+    order_data cần có:
+    {
+        'total_price': 100000,
+        'buyer_id': 1,
+        'seller_id': 2,
+        'carrier_id': 3,
+        'items': [{'category_id': 5, 'quantity': 2, 'subtotal': 50000}, ...]
+    }
+    """
+
     async def _process():
-        # Cộng dồn Counters, Rankings (Buyer/Seller)
+        # Cộng dồn Counters, Rankings (Buyer/Seller/Category/Carrier)
         await admin_dashboard_service.handle_new_order_stats(order_data)
+
+        # Bắn socket để FE admin tự reload số (nếu đang mở)
         await socket_manager.broadcast_admin("DATA_UPDATED")
+
     run_async(_process())
+
 
 @celery_app.task(name="task_admin_revert_order")
 def task_admin_revert_order(order_data: dict):
@@ -24,14 +37,16 @@ def task_admin_revert_order(order_data: dict):
         # Trừ ngược lại khi hủy
         await admin_dashboard_service.handle_revert_order_stats(order_data)
         await socket_manager.broadcast_admin("DATA_UPDATED")
+
     run_async(_process())
+
 
 @celery_app.task(name="task_admin_sync_user")
 def task_admin_sync_user(role: str, action: str):
-    """role: 'buyer'/'seller', action: 'add'/'delete'"""
     async def _process():
-        await admin_dashboard_service.handle_user_event(role, action)
+        await admin_dashboard_service.handle_user_count(role, action)
         await socket_manager.broadcast_admin("DATA_UPDATED")
+
     run_async(_process())
 
 # ============================================================

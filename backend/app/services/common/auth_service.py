@@ -46,7 +46,7 @@ class AuthService:
         await self.db.commit()
         await self.db.refresh(buyer)
 
-        task_admin_sync_user.delay("buyer")
+        task_admin_sync_user.delay("buyer", "add")
         task_broadcast_admin_notification.delay(
             title="Khách hàng mới",
             message=f"Khách hàng {buyer.fname} {buyer.lname} vừa đăng ký.",
@@ -78,7 +78,7 @@ class AuthService:
         await self.db.commit()
         await self.db.refresh(seller)
 
-        task_admin_sync_user.delay("seller")
+        task_admin_sync_user.delay("seller", "add")
         task_broadcast_admin_notification.delay(
             title="Đối tác bán hàng mới",
             message=f"Gian hàng {seller.shop_name} vừa đăng ký gia nhập sàn.",

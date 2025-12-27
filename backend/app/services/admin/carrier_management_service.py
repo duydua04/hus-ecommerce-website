@@ -58,7 +58,7 @@ class AdminCarrierService(BaseCarrierService):
         result = await self.db.execute(stmt)
         carriers = result.scalars().all()
 
-        return [CarrierOut.model_validate(c) for c in carriers]
+        return [self._to_response(c) for c in carriers]
 
 
     async def create_carrier(self, payload: CarrierCreate):
