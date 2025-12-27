@@ -14,7 +14,7 @@ from ...config.db import get_db
 from ...models.users import Buyer, Seller
 from ...utils.security import hash_password, issue_token, set_auth_cookies
 
-from ...tasks.dashboard_task import task_admin_sync_user
+from ...tasks.admin_dashboard_task import task_admin_update_user_count
 from ...tasks.notification_task import task_broadcast_admin_notification
 
 ALLOWED_ROLES = {"buyer", "seller"}
@@ -171,7 +171,7 @@ class GoogleAuthService:
         )
 
 
-    async def login_callback(self, request: Request): # Removed background_tasks
+    async def login_callback(self, request: Request):
         userinfo = await self._fetch_google_user_info(request)
 
         state_str = request.query_params.get("state")
@@ -179,11 +179,6 @@ class GoogleAuthService:
 
         role = state_data.get("role", "buyer")
         next_path = state_data.get("next")
-
-        target_user = None
-        is_new = False
-        base_frontend_url = ""
-        default_home = ""
 
         if role == "seller":
             target_user, is_new = await self._get_or_create_seller(userinfo)
@@ -195,7 +190,7 @@ class GoogleAuthService:
             default_home = settings.DEFAULT_BUYER_HOME
 
         if is_new:
-            task_admin_sync_user.delay(role)
+            task_admin_update_user_count.delay(role, "add")
             if role == "seller":
                 task_broadcast_admin_notification.delay(
                     title="Đối tác bán hàng mới",

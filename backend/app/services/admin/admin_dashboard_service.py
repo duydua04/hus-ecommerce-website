@@ -2,24 +2,21 @@ from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 import redis.asyncio as redis
 
-# Import Config & Models
 from ...config.redis import redis_pool
 from ...config.s3 import public_url
 from ...models import Order, OrderItem, Product, Carrier, Category
 from ...models.users import Buyer, Seller
+from ...schemas.common import OrderStatus
 
 
 class AdminDashboardService:
     PREFIX = "admin"
 
-    # --- ĐỊNH NGHĨA KEY REDIS (CỐ ĐỊNH, KHÔNG CÓ NGÀY THÁNG) ---
-    # 1. Tổng quan
     KEY_TOTAL_REVENUE = f"{PREFIX}:revenue:total"
     KEY_TOTAL_ORDERS = f"{PREFIX}:count:orders:total"
     KEY_COUNT_BUYER = f"{PREFIX}:count:buyer"
     KEY_COUNT_SELLER = f"{PREFIX}:count:seller"
 
-    # 2. Rankings (All-Time)
     KEY_RANK_BUYER_ORDERS = f"{PREFIX}:rank:buyer:orders"
     KEY_RANK_BUYER_REVENUE = f"{PREFIX}:rank:buyer:revenue"
 
@@ -29,11 +26,13 @@ class AdminDashboardService:
     KEY_RANK_CATEGORY_SOLD = f"{PREFIX}:rank:category:sold"
     KEY_RANK_CATEGORY_REVENUE = f"{PREFIX}:rank:category:revenue"
 
-    # 3. Stats
     KEY_STATS_CARRIERS = f"{PREFIX}:stats:carriers"
 
     def __init__(self):
-        self.redis = redis.Redis(connection_pool=redis_pool, decode_responses=True)
+        self.redis = redis.Redis(
+            connection_pool=redis_pool,
+            decode_responses=True
+        )
 
 
     async def handle_new_order_stats(self, order_data: dict):
@@ -44,29 +43,24 @@ class AdminDashboardService:
         buyer_id = order_data.get('buyer_id')
         seller_id = order_data.get('seller_id')
         carrier_id = order_data.get('carrier_id')
-        items = order_data.get('items', [])  # List items để tính Category
+        items = order_data.get('items', [])
 
         pipe = self.redis.pipeline()
 
-        # 1. Tổng quan
         pipe.incrbyfloat(self.KEY_TOTAL_REVENUE, total)
         pipe.incr(self.KEY_TOTAL_ORDERS)
 
-        # 2. Buyer Ranking
         if buyer_id:
             pipe.zincrby(self.KEY_RANK_BUYER_ORDERS, 1, str(buyer_id))
             pipe.zincrby(self.KEY_RANK_BUYER_REVENUE, total, str(buyer_id))
 
-        # 3. Seller Ranking
         if seller_id:
             pipe.zincrby(self.KEY_RANK_SELLER_ORDERS, 1, str(seller_id))
             pipe.zincrby(self.KEY_RANK_SELLER_REVENUE, total, str(seller_id))
 
-        # 4. Carrier Stats
         if carrier_id:
             pipe.hincrby(self.KEY_STATS_CARRIERS, str(carrier_id), 1)
 
-        # 5. Category Ranking
         for item in items:
             cat_id = item.get('category_id')
             qty = item.get('quantity', 0)
@@ -88,11 +82,9 @@ class AdminDashboardService:
 
         pipe = self.redis.pipeline()
 
-        # 1. Trừ Tổng quan
         pipe.incrbyfloat(self.KEY_TOTAL_REVENUE, -total)
         pipe.decr(self.KEY_TOTAL_ORDERS)
 
-        # 2. Trừ Ranking
         if buyer_id:
             pipe.zincrby(self.KEY_RANK_BUYER_ORDERS, -1, str(buyer_id))
             pipe.zincrby(self.KEY_RANK_BUYER_REVENUE, -total, str(buyer_id))
@@ -134,6 +126,7 @@ class AdminDashboardService:
             "orders": int(vals[2] or 0),
             "revenue": float(vals[3] or 0)
         }
+
 
     async def get_top_users(self, db: AsyncSession, role: str, criteria: str):
         if role == 'buyer':
@@ -192,13 +185,14 @@ class AdminDashboardService:
             res.append({
                 "id": c.category_id,
                 "name": c.category_name,
+                "image": public_url(c.image_url),
                 "value": val,
                 "display": f"{int(val)} cái" if criteria == 'sold' else f"{val:,.0f} đ"
             })
 
-        # Sort lại vì DB return ko theo thứ tự
         res.sort(key=lambda x: x['value'], reverse=True)
         return res
+
 
     async def get_carrier_stats(self, db: AsyncSession):
         raw = await self.redis.hgetall(self.KEY_STATS_CARRIERS)
@@ -216,9 +210,7 @@ class AdminDashboardService:
         res.sort(key=lambda x: x['count'], reverse=True)
         return res
 
-    # ==================================================================
-    # 2. SYNC: ĐỒNG BỘ TOÀN BỘ TỪ DB (FULL SCAN)
-    # ==================================================================
+
     async def sync_all_stats(self, db: AsyncSession):
         """
         Quét sạch DB tính toán lại từ đầu (All-Time).
@@ -227,8 +219,8 @@ class AdminDashboardService:
         print("🔄 [ADMIN SYNC] Bắt đầu đồng bộ All-Time...")
         pipe = self.redis.pipeline()
 
-        # --- A. Tổng quan ---
-        total_rev = await db.scalar(select(func.sum(Order.total_price)).where(Order.status == 'completed')) or 0
+        total_rev = await db.scalar(
+            select(func.sum(Order.total_price)).where(Order.order_status == OrderStatus.delivered)) or 0
         total_ord = await db.scalar(select(func.count(Order.order_id))) or 0
         total_buy = await db.scalar(select(func.count(Buyer.buyer_id))) or 0
         total_sel = await db.scalar(select(func.count(Seller.seller_id))) or 0
@@ -239,23 +231,23 @@ class AdminDashboardService:
         pipe.set(self.KEY_COUNT_SELLER, int(total_sel))
 
         # --- B. Sync Buyer Rankings ---
-        # 1. Orders
         pipe.delete(self.KEY_RANK_BUYER_ORDERS)
         buyer_ord = (
             await db.execute(select(Order.buyer_id, func.count(Order.order_id)).group_by(Order.buyer_id))).all()
         if buyer_ord:
             pipe.zadd(self.KEY_RANK_BUYER_ORDERS, {str(bid): count for bid, count in buyer_ord if bid})
 
-        # 2. Revenue
+        # 2. Revenue (Chỉ tính đơn delivered)
         pipe.delete(self.KEY_RANK_BUYER_REVENUE)
+        # [FIX]: Dùng OrderStatus.delivered
         buyer_rev = (await db.execute(
-            select(Order.buyer_id, func.sum(Order.total_price)).where(Order.status == 'completed').group_by(
-                Order.buyer_id))).all()
+            select(Order.buyer_id, func.sum(Order.total_price))
+            .where(Order.order_status == OrderStatus.delivered)
+            .group_by(Order.buyer_id))).all()
         if buyer_rev:
             pipe.zadd(self.KEY_RANK_BUYER_REVENUE, {str(bid): float(val) for bid, val in buyer_rev if bid})
 
         # --- C. Sync Seller Rankings ---
-        # 1. Orders
         pipe.delete(self.KEY_RANK_SELLER_ORDERS)
         stmt_sell_ord = select(Product.seller_id, func.count(func.distinct(Order.order_id))) \
             .join(Order.items).join(OrderItem.product).group_by(Product.seller_id)
@@ -265,9 +257,10 @@ class AdminDashboardService:
 
         # 2. Revenue
         pipe.delete(self.KEY_RANK_SELLER_REVENUE)
+        # [FIX]: Dùng OrderStatus.delivered và Order.order_status
         stmt_sell_rev = select(Product.seller_id, func.sum(Order.total_price)) \
             .join(Order.items).join(OrderItem.product) \
-            .where(Order.status == 'completed').group_by(Product.seller_id)
+            .where(Order.order_status == OrderStatus.delivered).group_by(Product.seller_id)
         seller_rev = (await db.execute(stmt_sell_rev)).all()
         if seller_rev:
             pipe.zadd(self.KEY_RANK_SELLER_REVENUE, {str(sid): float(val) for sid, val in seller_rev if sid})
@@ -281,30 +274,34 @@ class AdminDashboardService:
             pipe.hset(self.KEY_STATS_CARRIERS, str(cid), count)
 
         # --- E. Sync Category ---
-        # 1. Sold
         pipe.delete(self.KEY_RANK_CATEGORY_SOLD)
+        # [FIX]: Dùng Order.order_status == OrderStatus.delivered
         stmt_cat_sold = select(Category.category_id, func.sum(OrderItem.quantity)) \
             .join(Product, Product.category_id == Category.category_id) \
             .join(OrderItem, OrderItem.product_id == Product.product_id) \
             .join(Order, Order.order_id == OrderItem.order_id) \
-            .where(Order.status == 'completed').group_by(Category.category_id)
+            .where(Order.order_status == OrderStatus.delivered).group_by(Category.category_id)
         cat_sold = (await db.execute(stmt_cat_sold)).all()
         if cat_sold:
             pipe.zadd(self.KEY_RANK_CATEGORY_SOLD, {str(cid): int(qty) for cid, qty in cat_sold if cid})
 
         # 2. Revenue
         pipe.delete(self.KEY_RANK_CATEGORY_REVENUE)
-        stmt_cat_rev = select(Category.category_id, func.sum(OrderItem.quantity * OrderItem.price)) \
+        stmt_cat_rev = select(
+            Category.category_id,
+            func.sum(OrderItem.total_price)
+        ) \
             .join(Product, Product.category_id == Category.category_id) \
             .join(OrderItem, OrderItem.product_id == Product.product_id) \
             .join(Order, Order.order_id == OrderItem.order_id) \
-            .where(Order.status == 'completed').group_by(Category.category_id)
+            .where(Order.order_status == OrderStatus.delivered).group_by(Category.category_id)
+
         cat_rev = (await db.execute(stmt_cat_rev)).all()
         if cat_rev:
             pipe.zadd(self.KEY_RANK_CATEGORY_REVENUE, {str(cid): float(val) for cid, val in cat_rev if cid})
 
         await pipe.execute()
-        print("✅ [ADMIN SYNC] Hoàn tất đồng bộ All-Time!")
+        print("[ADMIN SYNC] Hoàn tất đồng bộ All-Time!")
         return {"status": "success", "message": "Synced all data"}
 
 

@@ -15,7 +15,7 @@ from ...utils.security import (
 from ...utils.otp import create_otp
 from ...tasks.email_task import send_otp_email_task
 
-from ...tasks.dashboard_task import task_admin_sync_user
+from ...tasks.admin_dashboard_task import task_admin_update_user_count
 from ...tasks.notification_task import task_broadcast_admin_notification
 
 
@@ -46,7 +46,7 @@ class AuthService:
         await self.db.commit()
         await self.db.refresh(buyer)
 
-        task_admin_sync_user.delay("buyer", "add")
+        task_admin_update_user_count.delay("buyer", "add")
         task_broadcast_admin_notification.delay(
             title="Khách hàng mới",
             message=f"Khách hàng {buyer.fname} {buyer.lname} vừa đăng ký.",
@@ -78,7 +78,7 @@ class AuthService:
         await self.db.commit()
         await self.db.refresh(seller)
 
-        task_admin_sync_user.delay("seller", "add")
+        task_admin_update_user_count.delay("seller", "add")
         task_broadcast_admin_notification.delay(
             title="Đối tác bán hàng mới",
             message=f"Gian hàng {seller.shop_name} vừa đăng ký gia nhập sàn.",

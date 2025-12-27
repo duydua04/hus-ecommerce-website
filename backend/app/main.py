@@ -24,7 +24,7 @@ from .controller.seller.seller_review_controller import router as seller_review_
 #from .controller.seller.seller_order_controller import router as seller_order_router
 from .controller.seller.seller_profile_controller import router as seller_profile_router
 from .controller.seller.seller_order_controller import router as seller_order_router
-
+from .controller.seller.seller_dashboard_controller import router as seller_dashboard_router
 
 
 # IMPORT COMMON CONTROLLER
@@ -92,7 +92,7 @@ app.include_router(seller_product_router)
 app.include_router(seller_review_router)
 app.include_router(seller_order_router)
 app.include_router(seller_profile_router)
-
+app.include_router(seller_dashboard_router)
 
 
 

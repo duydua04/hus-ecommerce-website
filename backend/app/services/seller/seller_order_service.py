@@ -6,6 +6,7 @@ from sqlalchemy.orm import selectinload, joinedload, load_only
 
 from ...config.db import get_db
 from ...models import Order, OrderItem, Product, BuyerAddress, Buyer
+from ...schemas import PaymentStatus, PaymentMethod
 from ...schemas.common import OrderStatus, PageMeta, Page
 from ...schemas.seller_order import (
     SellerOrderFilter,
@@ -20,7 +21,9 @@ from ...tasks.notification_task import task_send_notification
 
 from ..common.inventory_service import inventory_service
 from ...tasks.inventory import update_stock_db
-from ...tasks.dashboard_task import task_admin_revert_order
+from ...tasks.admin_dashboard_task import task_admin_revert_order_stats
+from ...tasks.seller_dashboard_task import task_seller_recalc_dashboard
+
 
 class SellerOrderService:
     def __init__(self, db: AsyncSession):
@@ -197,18 +200,34 @@ class SellerOrderService:
             )
 
         order.order_status = OrderStatus.processing
+
+        # Xử lý trạng thái thanh toán
+        if order.payment_method == PaymentMethod.bank_transfer:
+            order.payment_status = PaymentStatus.paid
+
         await self.db.commit()
+
+        # 3. Gọi Task Dashboard (Cập nhật số Pending giảm, Processing tăng)
+        task_seller_recalc_dashboard.delay(seller_id)
+
+        msg = f"Shop đã xác nhận đơn hàng #{order.order_id}."
+        if order.payment_method == PaymentMethod.bank_transfer:
+            msg += " Đã nhận được thanh toán chuyển khoản."
 
         task_send_notification.delay(
             user_id=order.buyer_id,
             role="buyer",
             title="Đơn hàng đã được xác nhận",
-            message=f"Shop đã xác nhận đơn hàng #{order.order_id} và đang chuẩn bị hàng.",
+            message=msg,
             event_type="order_update",
             data={"order_id": order.order_id, "status": "processing"}
         )
 
-        return {"message": "Đã xác nhận đơn hàng", "status": OrderStatus.processing}
+        return {
+            "message": "Đã xác nhận đơn hàng",
+            "status": OrderStatus.processing,
+            "payment_status": order.payment_status
+        }
 
 
     async def mark_as_shipped(self, seller_id: int, order_id: int):
@@ -277,40 +296,9 @@ class SellerOrderService:
             data={"order_id": order.order_id, "reason": reason}
         )
 
-        revert_payload = {
-            "order_id": order.order_id,
-            "buyer_id": order.buyer_id,
-            "seller_id": seller_id,
-            "carrier_id": order.carrier_id,
-            "total_price": float(order.total_price),
-            "created_at": order.order_date.isoformat(),
-            "items": [
-                {
-                    "category_id": item.product.category_id,
-                    "subtotal": float(item.total_price),
-                    "quantity": item.quantity
-                }
-                for item in order.items
-            ]
-        }
-
-        task_admin_revert_order.delay(revert_payload)
+        task_seller_recalc_dashboard.delay(seller_id)
 
         return {"message": "Đã huỷ đơn hàng và hoàn kho", "status": OrderStatus.cancelled}
-
-
-    async def get_stats(self, seller_id: int):
-        stmt = (
-            select(Order.order_status, func.count(Order.order_id))
-            .join(Order.items).join(OrderItem.product)
-            .where(Product.seller_id == seller_id)
-            .group_by(Order.order_status)
-        )
-        result = await self.db.execute(stmt)
-        stats = {s.value: 0 for s in OrderStatus}
-        for status_enum, count in result.all():
-            if status_enum: stats[status_enum.value] = count
-        return stats
 
 
 def get_seller_order_service(
