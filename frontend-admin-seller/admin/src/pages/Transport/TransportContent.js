@@ -9,7 +9,7 @@ import CarrierModal from "./AddCarrier/AddCarrier";
 import AvatarUploadModal from "../../components/common/AvatarUpload/AvatarUpload";
 import ConfirmModal from "../../components/common/ConfirmModal/ConfirmModal";
 import useCarrier from "../../hooks/useCarrier";
-import "./Transport.scss";
+import "../../assets/styles/page.scss";
 
 // Avatar mặc định
 import defaultAvatar from "../../assets/images/default-avatar.png";

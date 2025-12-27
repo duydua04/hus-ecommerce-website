@@ -8,7 +8,7 @@ import SearchBox from "../../components/common/SearchBox/SearchBox";
 import DiscountModal from "./AddDiscount/AddDiscount";
 import ConfirmModal from "../../components/common/ConfirmModal/ConfirmModal";
 import useDiscount from "../../hooks/useDiscount";
-import "./Discount.scss";
+import "../../assets/styles/page.scss";
 
 export default function DiscountContent() {
   const {
