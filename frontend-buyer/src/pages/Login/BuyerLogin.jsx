@@ -33,7 +33,7 @@ function BuyerLogin() {
     const checkAuth = async () => {
       try {
         const user = await api.auth.getMe();
-        if (user && user.role === 'buyer') {
+        if (user && user.role === 'buyer' && window.location.pathname !== '/home') {
           navigate('/home', { replace: true });
         }
       } catch (err) {
@@ -94,7 +94,7 @@ function BuyerLogin() {
       navigate('/', { replace: true });
     } catch (err) {
       console.error('Login error:', err);
-      
+
       const status = err.response?.status;
       const detail = err.response?.data?.detail;
 

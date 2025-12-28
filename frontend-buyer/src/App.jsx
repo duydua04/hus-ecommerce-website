@@ -7,7 +7,7 @@ import Header from './components/header.jsx';
 import Footer from './components/footer.jsx';
 
 // Import Pages
-import BuyerLogin from './pages/Login/Buyerlogin.jsx';
+import BuyerLogin from './pages/Login/BuyerLogin.jsx';
 import BuyerRegister from './pages/Login/Register/Register.jsx';
 import ForgotPassword from './pages/Login/ForgotPassword/ForgotPassword.jsx';
 import Home from './pages/Home/home.jsx';

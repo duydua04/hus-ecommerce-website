@@ -11,14 +11,16 @@ const handleResponse = async (response) => {
 };
 
 const apiCall = async (endpoint, options = {}) => {
-  const config = {
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
-    credentials: 'include', // Include cookies for authentication
-    ...options,
-  };
+  const token = localStorage.getItem('access_token');
+    const config = {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+        ...options.headers,
+      },
+      ...options,
+    };
+
 
   try {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
@@ -259,7 +261,7 @@ export const profileAPI = {
   // Update buyer profile
   updateProfile: (profileData) =>
     apiCall('/buyer/profile', {
-      method: 'PATCH',
+      method: 'PUT',
       body: JSON.stringify(profileData),
     }),
 
@@ -280,7 +282,7 @@ export const profileAPI = {
     return apiCall('/avatar/upload', {
       method: 'POST',
       body: formData,
-      headers: {}, // Let browser set Content-Type for FormData
+      headers: {},
     });
   },
 };
