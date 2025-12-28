@@ -1,35 +1,25 @@
-from typing import List, Optional
+from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
-
 from ...middleware.auth import require_admin
-from ...schemas.notification import NotificationResponse
-
-from ...services.admin.admin_notification_service import (
-    AdminNotificationService, get_admin_notif_service
-)
+from ...services.common.notification_service import notification_service
 
 router = APIRouter(
     prefix="/admin/notifications",
-    tags=["admin-notifications"]
+    tags=["Admin Notifications"]
 )
 
 
 @router.get("/")
 async def get_my_notifications(
-        limit: int = Query(default=20),
-        cursor: Optional[str] = Query(...),
-        unread_only: bool = Query(False),
-        buyer_info: dict = Depends(require_admin),
-        service: AdminNotificationService = Depends(get_admin_notif_service)
+    limit: int = Query(20, ge=1, le=100),
+    cursor: Optional[str] = Query(None),
+    unread_only: bool = Query(False),
+    admin_info: dict = Depends(require_admin)
 ):
-    """
-    API lấy thông báo
-    """
-    user = buyer_info['user']
-
-    return await service.get_notifications(
-        user_id=user.buyer_id,
-        role="buyer",
+    """Xem lịch sử thông báo của Admin"""
+    return await notification_service.get_notifications(
+        user_id=admin_info['user'].admin_id,
+        role="admin",
         limit=limit,
         cursor=cursor,
         unread_only=unread_only
@@ -38,18 +28,14 @@ async def get_my_notifications(
 
 @router.put("/{notif_id}/read")
 async def mark_read(
-        notif_id: str,
-        admin_info=Depends(require_admin),
-        service: AdminNotificationService = Depends(get_admin_notif_service)
+    notif_id: str,
+    admin_info: dict = Depends(require_admin)
 ):
-    user = admin_info['user']
-    user_id = getattr(user, 'admin_id', None)
-
-    success = await service.mark_as_read(notif_id, user_id)
+    """Đánh dấu đã đọc"""
+    success = await notification_service.mark_as_read(
+        notif_id,
+        admin_info['user'].admin_id
+    )
     if not success:
-        raise HTTPException(
-            status_code=404,
-            detail="Not found"
-        )
+        raise HTTPException(status_code=404, detail="Notification not found")
     return {"status": "ok"}
-

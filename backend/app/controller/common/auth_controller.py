@@ -137,10 +137,9 @@ async def google_login_seller(
 @router.get("/google/callback")
 async def google_callback(
         request: Request,
-        background_tasks: BackgroundTasks,
         service: GoogleAuthService = Depends(get_google_auth_service)
 ):
-    return await service.login_callback(request, background_tasks)
+    return await service.login_callback(request)
 
 
 @router.post("/forgot-password")

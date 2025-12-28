@@ -1,6 +1,6 @@
 from fastapi import HTTPException, status, Response, Depends
-from sqlalchemy.ext.asyncio import AsyncSession  # Đổi import này
-from sqlalchemy import select, or_  # Import cú pháp query mới
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, or_
 
 from ...config.db import get_db
 from ...config.settings import settings
@@ -14,26 +14,24 @@ from ...utils.security import (
 )
 from ...utils.otp import create_otp
 from ...tasks.email_task import send_otp_email_task
-from ..admin.admin_notification_service import AdminNotificationService, get_admin_notif_service
+
+from ...tasks.admin_dashboard_task import task_admin_update_user_count
+from ...tasks.notification_task import task_broadcast_admin_notification
 
 
 class AuthService:
-    def __init__(self, db: AsyncSession, notif_service: AdminNotificationService):
+    def __init__(self, db: AsyncSession):
         self.db = db
-        self.notif_service = notif_service
-
 
     async def _email_or_phone_taken(self, model, email: str, phone: str):
         stmt = select(model).where(
             or_(model.email == email, model.phone == phone)
         )
         result = await self.db.execute(stmt)
-
         return result.scalar_one_or_none() is not None
 
 
     async def register_buyer(self, payload: RegisterBuyer):
-        # Phải await hàm kiểm tra
         if await self._email_or_phone_taken(Buyer, payload.email, payload.phone):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -45,12 +43,24 @@ class AuthService:
             password=hash_password(payload.password)
         )
         self.db.add(buyer)
-        await self.db.commit()  # Async commit
-        await self.db.refresh(buyer)  # Async refresh
+        await self.db.commit()
+        await self.db.refresh(buyer)
 
-        await self.notif_service.notify_new_buyer_registration(buyer)
+        task_admin_update_user_count.delay("buyer", "add")
+        task_broadcast_admin_notification.delay(
+            title="Khách hàng mới",
+            message=f"Khách hàng {buyer.fname} {buyer.lname} vừa đăng ký.",
+            event_type="new_user_registered",
+            data={
+                "user_id": buyer.buyer_id,
+                "role": "buyer",
+                "email": buyer.email,
+                "action": "view_detail"
+            }
+        )
 
         return BuyerResponse.model_validate(buyer)
+
 
     async def register_seller(self, payload: RegisterSeller):
         if await self._email_or_phone_taken(Seller, payload.email, payload.phone):
@@ -68,13 +78,23 @@ class AuthService:
         await self.db.commit()
         await self.db.refresh(seller)
 
-
-        await self.notif_service.notify_new_seller_registration(seller)
+        task_admin_update_user_count.delay("seller", "add")
+        task_broadcast_admin_notification.delay(
+            title="Đối tác bán hàng mới",
+            message=f"Gian hàng {seller.shop_name} vừa đăng ký gia nhập sàn.",
+            event_type="new_user_registered",
+            data={
+                "user_id": seller.seller_id,
+                "role": "seller",
+                "email": seller.email,
+                "shop_name": seller.shop_name,
+            }
+        )
 
         return SellerResponse.model_validate(seller)
 
+
     async def login_admin(self, payload: Login):
-        # Chuyển sang async def vì phải await DB
         stmt = select(Admin).where(Admin.email == payload.email)
         result = await self.db.execute(stmt)
         admin = result.scalar_one_or_none()
@@ -161,6 +181,7 @@ class AuthService:
             )
 
         return issue_token(email, role)
+
 
     @staticmethod
     def logout(response: Response):
@@ -268,7 +289,6 @@ class AuthService:
 
 
 def get_auth_service(
-        db: AsyncSession = Depends(get_db),  # Inject AsyncSession
-        notif_service: AdminNotificationService = Depends(get_admin_notif_service)
+        db: AsyncSession = Depends(get_db)
 ):
-    return AuthService(db, notif_service)
+    return AuthService(db)

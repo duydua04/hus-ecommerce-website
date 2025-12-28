@@ -35,21 +35,6 @@ async def list_orders(
 
 
 @router.get(
-    "/stats",
-    status_code=status.HTTP_200_OK
-)
-async def get_order_stats(
-        seller_info: dict = Depends(require_seller),
-        service: SellerOrderService = Depends(get_seller_order_service)
-):
-    """
-    Trả về số lượng đơn hàng tương ứng với từng trạng thái (Pending, Processing, Shipped...)
-    """
-    seller_id = seller_info["user"].seller_id
-    return await service.get_stats(seller_id)
-
-
-@router.get(
     "/{order_id}",
     response_model=SellerOrderDetailResponse,
     status_code=status.HTTP_200_OK

@@ -14,7 +14,7 @@ from .controller.admin.user_management_controller import router as admin_manage_
 from .controller.admin.admin_discount_controller import router as admin_manage_discount_router
 from .controller.admin.admin_carrier_controller import router as admin_manage_carrier_router
 from .controller.admin.admin_notification_controller import router as admin_notify_router
-
+from .controller.admin.admin_dashboard_controller import router as admin_dashboard_router
 
 
 # IMPORT SELLER CONTROLLER
@@ -24,7 +24,7 @@ from .controller.seller.seller_review_controller import router as seller_review_
 #from .controller.seller.seller_order_controller import router as seller_order_router
 from .controller.seller.seller_profile_controller import router as seller_profile_router
 from .controller.seller.seller_order_controller import router as seller_order_router
-
+from .controller.seller.seller_dashboard_controller import router as seller_dashboard_router
 
 
 # IMPORT COMMON CONTROLLER
@@ -80,7 +80,7 @@ app.include_router(admin_manage_user_router)
 app.include_router(admin_manage_discount_router)
 app.include_router(admin_manage_carrier_router)
 app.include_router(admin_notify_router)
-
+app.include_router(admin_dashboard_router)
 
 
 
@@ -92,7 +92,7 @@ app.include_router(seller_product_router)
 app.include_router(seller_review_router)
 app.include_router(seller_order_router)
 app.include_router(seller_profile_router)
-
+app.include_router(seller_dashboard_router)
 
 
 
