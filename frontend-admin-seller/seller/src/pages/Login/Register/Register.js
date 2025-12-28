@@ -141,7 +141,7 @@ function SellerRegister() {
 
   const handleGoogleRegister = () => {
     const nextUrl = "/dashboard";
-    window.location.href = `${API_URL}/auth/google/login?role=seller&next=${encodeURIComponent(
+    window.location.href = `${API_URL}/auth/google/login/seller?next=${encodeURIComponent(
       nextUrl
     )}`;
   };
