@@ -1,7 +1,7 @@
 import asyncio
 import logging
 from ..utils.celery_client import celery_app
-from ..config.db import async_sessionmaker
+from ..config.db import AsyncSessionLocal
 from ..config.redis import get_redis_client
 
 from ..services.seller.seller_dashboard_service import SellerDashboardService
@@ -23,7 +23,7 @@ def task_seller_recalc_dashboard(seller_id: int):
 
         try:
             # Khởi tạo Session DB và Redis Client mới cho Worker này
-            async with async_sessionmaker() as db:
+            async with AsyncSessionLocal as db:
                 redis = await get_redis_client()
                 service = SellerDashboardService(db, redis)
                 await service.sync_realtime_data(seller_id)
