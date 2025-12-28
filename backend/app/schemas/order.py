@@ -72,3 +72,58 @@ class OrderCreateNew(BaseModel):
     discount_id: Optional[int] = None
     notes: Optional[str] = None
     cart_item_ids: List[int]  # danh sách sản phẩm muốn mua
+
+from .carrier import CarrierResponse
+class OrderDetailResponse(BaseModel):
+    order: OrderResponse               # dữ liệu order
+    shipping_address: AddressResponse
+    items: List[OrderItemResponseNew]
+    carrier: CarrierResponse
+    # discount_id: Optional[int] = None
+    # discount_amount: Optional[Decimal] = None
+    # subtotal: Decimal
+    # total_price: Decimal
+
+class OrderTrackingFirstItem(BaseModel):
+    product_id: int
+    product_name: str
+    public_url: str | None
+
+    variant_name: str | None
+    size_name: str | None
+
+    quantity: int
+    unit_price: Decimal
+
+class BuyerOrderTrackingItem(BaseModel):
+    order_id: int
+    order_status: str
+
+    shop_name: str
+
+    first_item: OrderTrackingFirstItem
+    total_items: int
+
+    subtotal: Decimal
+    total_price: Decimal
+
+    order_date: datetime
+
+class OrderItemResponseNew(BaseModel):
+    order_item_id: int
+    order_id: int
+    product_id: int
+    product_id_name: str
+    variant_id: int | None = None
+    variant_name: str 
+    size_id: int | None = None
+    size_name: str 
+    quantity: int
+    unit_price: Decimal             # giá sale lúc đặt
+    # total_price: Decimal            # unit_price * quantity
+    base_price_plus_adjustment: Decimal
+    # price_after_discount: Decimal
+    # weight: Decimal
+    # total_weight: Decimal
+    public_image_url: str | None = None
+    seller: str

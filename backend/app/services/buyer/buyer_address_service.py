@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..common.address_service import BaseAddressService
 from ...models.address import Address, BuyerAddress
-from ...schemas.address import AddressCreate, AddressUpdate, AddressResponse, BuyerAddressResponse
+from ...schemas.address import AddressCreate, AddressUpdate, AddressResponse, BuyerAddressResponse, BuyerAddressResponseOrder
 from ...config.db import get_db
 from fastapi import Depends
 
@@ -22,12 +22,20 @@ class BuyerAddressService(BaseAddressService):
         result = []
         for buyer_address, address in res.all():
             result.append(
-                BuyerAddressResponse(
+                BuyerAddressResponseOrder(
                     buyer_address_id=buyer_address.buyer_address_id,
                     buyer_id=buyer_address.buyer_id,
-                    address_id=buyer_address.address_id,
                     is_default=buyer_address.is_default,
-                    label=buyer_address.label
+                    label=buyer_address.label,
+                    address=AddressResponse(
+                        address_id=buyer_address.address_id,
+                        fullname=address.fullname,
+                        phone=address.phone,
+                        street=address.street,
+                        ward=address.ward,
+                        district=address.district,
+                        province=address.province,
+                    ),
                 )
             )
 

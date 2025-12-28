@@ -2,11 +2,14 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from typing import List, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel
+
+
 from ...middleware.auth import require_buyer
 from ...services.buyer.buyer_cart_service import CartServiceAsync,  get_cart_service
 from ...schemas.product import AddToCartRequest, UpdateCartItemRequest, UpdateVariantSizeRequest
 from ...schemas.cart import SellerCart, CartSummaryRequest
 from ...models.users import Buyer
+from ...schemas.common import Page
 
 router = APIRouter(
     prefix="/buyer/cart",
@@ -44,19 +47,36 @@ async def add_to_cart(
     }
 
 # ===================== HIỂN THỊ GIỎ HÀNG =====================
-@router.get("/show", response_model=List[SellerCart])
+@router.get("/show")
 async def get_buyer_cart(
     service: CartServiceAsync = Depends(get_cart_service),
     buyer: dict = Depends(require_buyer)
 ):
     """
-    Lấy toàn bộ giỏ hàng của người dùng.
-    - Trả về danh sách sản phẩm, variant, size, số lượng, giá, hình ảnh.
-    - Nhóm theo seller/shop.
+    Lấy giỏ hàng của buyer (phân trang theo cart item)
     """
-    return await service.get_buyer_cart(buyer["user"].buyer_id)
 
-# ===================== XÓA SẢN PHẨM KHỎI GIỎ HÀNG =====================
+    return await service.get_buyer_cart(
+        buyer_id=buyer["user"].buyer_id
+    )
+# ===================== TÌM KIẾM SẢN PHẨM TRONG GIỎ HÀNG =====================
+@router.get("/cart/search")
+async def search_cart_items(
+    q: str = Query(..., min_length=1),
+    limit: int = Query(10, ge=1, le=20),
+    service: CartServiceAsync = Depends(get_cart_service),
+    buyer: dict = Depends(require_buyer)
+):
+    """
+    Search sản phẩm trong giỏ hàng (phục vụ scroll + tick chọn).
+    """
+    data = await service.search_buyer_cart_items(
+        buyer_id=buyer["user"].buyer_id,
+        q=q,
+        limit=limit,
+    )
+
+    return {"data": data}
 # ===================== XÓA SẢN PHẨM KHỎI GIỎ HÀNG =====================
 @router.delete("/product/{item_id}", response_model=dict)
 async def delete_item(
