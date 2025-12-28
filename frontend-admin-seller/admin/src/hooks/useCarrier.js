@@ -39,6 +39,24 @@ const useCarrier = () => {
     []
   );
 
+  // Lấy chi tiết carrier
+  const getCarrierById = useCallback(async (carrierId) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const carrier = await carrierService.getCarrierDetail(carrierId);
+      return carrier;
+    } catch (err) {
+      const errorMsg =
+        err.detail || "Không thể tải thông tin đơn vị vận chuyển";
+      setError(errorMsg);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   // Tạo carrier mới
   const createCarrier = useCallback(async (carrierData) => {
     setLoading(true);
@@ -97,6 +115,7 @@ const useCarrier = () => {
     loading,
     error,
     fetchCarriers,
+    getCarrierById,
     createCarrier,
     updateCarrier,
     deleteCarrier,
