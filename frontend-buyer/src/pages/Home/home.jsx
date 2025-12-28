@@ -1,6 +1,7 @@
 // src/pages/Home/Home.jsx
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import api from '../../services/api';
 import './home.css';
 
 const API_BASE = 'http://localhost:8000';
