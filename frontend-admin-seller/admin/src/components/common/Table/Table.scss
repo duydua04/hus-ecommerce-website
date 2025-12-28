@@ -107,12 +107,14 @@
 
 /* CELL: Actions */
 .table__cell--actions {
-  display: flex;
-  gap: 8px;
-  justify-content: center;
-  align-items: center;
   width: 120px;
-  padding: 12px 16px;
+  text-align: center;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
 }
 
 /* CELL: Empty */
@@ -182,6 +184,15 @@
 
 .action-btn--delete:hover .action-btn__icon {
   color: var(--red);
+}
+
+.action-btn--toggle:hover {
+  background: var(--bg-primary);
+  border-color: var(--orange);
+}
+
+.action-btn--toggle:hover .action-btn__icon {
+  color: var(--orange);
 }
 
 /* RESPONSIVE */

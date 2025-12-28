@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { X } from "lucide-react";
-import "./AddCategory.scss";
 
 export default function CategoryModal({ isOpen, onClose, onSubmit, category }) {
   const [formData, setFormData] = useState({
@@ -72,61 +71,84 @@ export default function CategoryModal({ isOpen, onClose, onSubmit, category }) {
       await onSubmit({
         category_name: formData.category_name.trim(),
       });
+      onClose();
     } catch (err) {
       console.error("Error submitting category:", err);
+      setErrors({
+        submit: err?.detail || "Có lỗi xảy ra. Vui lòng thử lại.",
+      });
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  // Đóng modal khi click overlay
+  const handleOverlayClick = (e) => {
+    if (e.target.className === "modal-overlay" && !isSubmitting) {
+      onClose();
     }
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
-          <h2 className="modal-title">
+    <div className="modal-overlay" onClick={handleOverlayClick}>
+      <div className="modal">
+        <div className="modal__header">
+          <h2 className="modal__title">
             {category ? "Chỉnh sửa danh mục" : "Thêm danh mục mới"}
           </h2>
-          <button className="modal-close" onClick={onClose}>
+          <button
+            className="modal__close"
+            onClick={onClose}
+            disabled={isSubmitting}
+            type="button"
+          >
             <X size={24} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="modal-form">
+        <form onSubmit={handleSubmit} className="modal__body">
           <div className="form-group">
-            <label htmlFor="category_name" className="form-label">
+            <label htmlFor="category_name" className="form-group__label">
               Tên danh mục <span className="required">*</span>
             </label>
             <input
               type="text"
               id="category_name"
               name="category_name"
-              className={`form-input ${
-                errors.category_name ? "form-input--error" : ""
+              className={`form-group__input ${
+                errors.category_name ? "form-group__input--error" : ""
               }`}
               placeholder="Nhập tên danh mục..."
               value={formData.category_name}
               onChange={handleChange}
               disabled={isSubmitting}
+              maxLength={100}
             />
             {errors.category_name && (
-              <span className="form-error">{errors.category_name}</span>
+              <span className="form-group__error">{errors.category_name}</span>
             )}
           </div>
 
-          <div className="modal-footer">
+          {errors.submit && (
+            <div className="form-group__error form-group__error--submit">
+              {errors.submit}
+            </div>
+          )}
+
+          <div className="modal__footer">
             <button
               type="button"
               onClick={onClose}
-              className="btn-secondary"
+              className="btn btn--secondary"
               disabled={isSubmitting}
             >
               Hủy
             </button>
             <button
               type="submit"
-              className="btn-primary"
+              className="btn btn--primary"
               disabled={isSubmitting}
             >
               {isSubmitting

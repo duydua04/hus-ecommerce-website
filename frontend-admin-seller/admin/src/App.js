@@ -7,8 +7,8 @@ import {
 } from "react-router-dom";
 import DashboardPage from "./pages/Dashboard/DashboardPage";
 import CategoryPage from "./pages/Category/CategoryPage";
-import BuyerPage from "./pages/User/BuyerPage";
-import SellerPage from "./pages/User/SellerPage";
+import BuyerPage from "./pages/User/Buyer/BuyerPage";
+import SellerPage from "./pages/User/Seller/SellerPage";
 import DiscountPage from "./pages/Discount/DiscountPage";
 import TransportPage from "./pages/Transport/TransportPage";
 import LoginPage from "./pages/Login/LoginPage";

@@ -6,50 +6,62 @@ const SidebarMenuItem = ({
   icon,
   text,
   href,
-  isActive,
-  isDropdown,
+  isActive = false,
+  isDropdown = false,
+  isSubmenu = false,
   children,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  // Mở dropdown nếu active
+  // Tự mở dropdown khi route con active
   useEffect(() => {
-    if (isActive && isDropdown) setIsOpen(true);
-  }, [isActive, isDropdown]);
+    if (isDropdown && isActive) {
+      setIsOpen(true);
+    }
+  }, [isDropdown, isActive]);
 
-  const toggleDropdown = (e) => {
+  const handleToggle = (e) => {
+    if (!isDropdown) return;
     e.preventDefault();
-    setIsOpen(!isOpen);
+    setIsOpen((prev) => !prev);
   };
 
   return (
     <li
-      className={`sidebar__menu-item ${
-        isActive ? "sidebar__menu-item--active" : ""
-      }`}
+      className={[
+        "sidebar__menu-item",
+        isActive && "sidebar__menu-item--active",
+        isSubmenu && "sidebar__menu-item--sub",
+      ]
+        .filter(Boolean)
+        .join(" ")}
     >
       {isDropdown ? (
         <a
           href="#"
           className="sidebar__menu-link sidebar__menu-link--dropdown"
-          onClick={toggleDropdown}
+          onClick={handleToggle}
         >
-          {icon && <i className={`${icon} sidebar__menu-icon`}></i>}
+          {icon && <i className={`${icon} sidebar__menu-icon`} />}
           <span className="sidebar__menu-text">{text}</span>
-          <i className="bx bx-chevron-down sidebar__menu-arrow"></i>
+          <i
+            className={`bx bx-chevron-down sidebar__menu-arrow ${
+              isOpen ? "sidebar__menu-arrow--open" : ""
+            }`}
+          />
         </a>
       ) : (
         <Link to={href} className="sidebar__menu-link">
-          {icon && <i className={`${icon} sidebar__menu-icon`}></i>}
+          {icon && <i className={`${icon} sidebar__menu-icon`} />}
           <span className="sidebar__menu-text">{text}</span>
         </Link>
       )}
 
-      {isDropdown && children && (
+      {isDropdown && (
         <ul
-          className={`sidebar__submenu ${
-            isOpen ? "sidebar__submenu--open" : ""
-          }`}
+          className={["sidebar__submenu", isOpen && "sidebar__submenu--open"]
+            .filter(Boolean)
+            .join(" ")}
         >
           {children}
         </ul>

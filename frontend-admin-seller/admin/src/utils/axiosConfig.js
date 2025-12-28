@@ -8,7 +8,7 @@ console.log("Axios Config - API URL:", API_URL);
 // Tạo axios instance
 const axiosInstance = axios.create({
   baseURL: API_URL,
-  withCredentials: true, //
+  withCredentials: true,
   headers: {
     "Content-Type": "application/json",
   },

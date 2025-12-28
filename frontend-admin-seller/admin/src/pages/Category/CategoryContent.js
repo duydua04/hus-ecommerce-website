@@ -8,7 +8,7 @@ import SearchBox from "../../components/common/SearchBox/SearchBox";
 import CategoryModal from "./AddCategory/AddCategory";
 import ConfirmModal from "../../components/common/ConfirmModal/ConfirmModal";
 import useCategory from "../../hooks/useCategory";
-import "./Category.scss";
+import "../../assets/styles/page.scss";
 
 export default function CategoryContent() {
   const {
