@@ -54,13 +54,6 @@ async def create_order(
         payload=payload
     )
 
-# ===== LIST =====
-@router.get("", response_model=list[OrderResponse])
-async def list_my_orders(
-    buyer = Depends(require_buyer),
-    service: BuyerOrderService = Depends(get_buyer_order_service),
-):
-    return await service.list_my_orders(buyer["user"].buyer_id)
 
 # ===================== DANH SÁCH ĐƠN HÀNG CỦA BUYER THEO TRẠNG THÁI =====================
 @router.get("/tracking", response_model=List[BuyerOrderTrackingItem])

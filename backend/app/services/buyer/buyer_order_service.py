@@ -280,16 +280,6 @@ class BuyerOrderService:
 
         return order
 
-    # ===================== LIST ĐƠN HÀNG CỦA BUYER =====================
-    async def list_my_orders(self, buyer_id: int):
-        stmt = (
-            select(Order)
-            .where(Order.buyer_id == buyer_id)
-            .order_by(Order.order_date.desc())
-        )
-        result = await self.db.execute(stmt)
-        return result.scalars().all()
-
    # ===================== CHI TIẾT ĐƠN HÀNG =====================
     async def get_order_detail(self, buyer_id: int, order_id: int):
         # Lấy order với các relation cần thiết
