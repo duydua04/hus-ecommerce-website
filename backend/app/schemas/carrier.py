@@ -36,7 +36,7 @@ class CarrierCalculateResponse(BaseModel):
     carrier_id: int
     shipping_fee: int
 
-class CarrierResponse(BaseModel):
+class CarrierResponse(ORMBase):
     carrier_id: int
     carrier_name: str
     carrier_avt_url: str | None = None

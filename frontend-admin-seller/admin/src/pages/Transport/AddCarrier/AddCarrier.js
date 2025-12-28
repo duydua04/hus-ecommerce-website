@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { X, Package } from "lucide-react";
-import "./AddCarrier.scss";
+import { X } from "lucide-react";
 
 export default function CarrierModal({
   isOpen,
@@ -163,14 +162,14 @@ export default function CarrierModal({
 
   return (
     <div className="modal-overlay" onClick={handleOverlayClick}>
-      <div className="modal-content">
-        <div className="modal-header">
-          <h2 className="modal-title">
+      <div className="modal">
+        <div className="modal__header">
+          <h2 className="modal__title">
             {carrier ? "Cập nhật đơn vị vận chuyển" : "Thêm đơn vị vận chuyển"}
           </h2>
           <button
             onClick={onClose}
-            className="modal-close"
+            className="modal__close"
             disabled={isSubmitting}
             type="button"
           >
@@ -178,9 +177,9 @@ export default function CarrierModal({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="modal-form">
+        <form onSubmit={handleSubmit} className="modal__body">
           <div className="form-group">
-            <label className="form-label">
+            <label className="form-group__label">
               Tên đơn vị vận chuyển <span className="required">*</span>
             </label>
             <input
@@ -188,87 +187,101 @@ export default function CarrierModal({
               name="carrier_name"
               value={formData.carrier_name}
               onChange={handleChange}
-              className={`form-input ${errors.carrier_name ? "error" : ""}`}
+              className={`form-group__input ${
+                errors.carrier_name ? "form-group__input--error" : ""
+              }`}
               placeholder="Nhập tên đơn vị vận chuyển..."
               disabled={isSubmitting}
               maxLength={255}
               autoComplete="off"
             />
             {errors.carrier_name && (
-              <span className="error-message">{errors.carrier_name}</span>
+              <span className="form-group__error">{errors.carrier_name}</span>
             )}
           </div>
 
-          <div className="form-group">
-            <label className="form-label">
-              Giá cơ bản (đ) <span className="required">*</span>
-            </label>
-            <input
-              type="number"
-              name="base_price"
-              value={formData.base_price}
-              onChange={handleChange}
-              className={`form-input ${errors.base_price ? "error" : ""}`}
-              placeholder="VD: 20000"
-              disabled={isSubmitting}
-              min="0"
-              step="1000"
-              autoComplete="off"
-            />
-            {errors.base_price && (
-              <span className="error-message">{errors.base_price}</span>
-            )}
+          <div className="form-row">
+            <div className="form-group">
+              <label className="form-group__label">
+                Giá cơ bản (đ) <span className="required">*</span>
+              </label>
+              <input
+                type="number"
+                name="base_price"
+                value={formData.base_price}
+                onChange={handleChange}
+                className={`form-group__input ${
+                  errors.base_price ? "form-group__input--error" : ""
+                }`}
+                placeholder="VD: 20000"
+                disabled={isSubmitting}
+                min="0"
+                step="1000"
+                autoComplete="off"
+              />
+              {errors.base_price && (
+                <span className="form-group__error">{errors.base_price}</span>
+              )}
+            </div>
+
+            <div className="form-group">
+              <label className="form-group__label">
+                Giá theo kg (đ) <span className="required">*</span>
+              </label>
+              <input
+                type="number"
+                name="price_per_kg"
+                value={formData.price_per_kg}
+                onChange={handleChange}
+                className={`form-group__input ${
+                  errors.price_per_kg ? "form-group__input--error" : ""
+                }`}
+                placeholder="VD: 5000"
+                disabled={isSubmitting}
+                min="0"
+                step="1000"
+                autoComplete="off"
+              />
+              {errors.price_per_kg && (
+                <span className="form-group__error">{errors.price_per_kg}</span>
+              )}
+            </div>
           </div>
 
-          <div className="form-group">
-            <label className="form-label">
-              Giá theo kg (đ) <span className="required">*</span>
-            </label>
-            <input
-              type="number"
-              name="price_per_kg"
-              value={formData.price_per_kg}
-              onChange={handleChange}
-              className={`form-input ${errors.price_per_kg ? "error" : ""}`}
-              placeholder="VD: 5000"
-              disabled={isSubmitting}
-              min="0"
-              step="1000"
-              autoComplete="off"
-            />
-            {errors.price_per_kg && (
-              <span className="error-message">{errors.price_per_kg}</span>
-            )}
-          </div>
-
-          <div className="form-group checkbox">
-            <input
-              type="checkbox"
-              name="is_active"
-              id="is_active"
-              checked={formData.is_active}
-              onChange={handleChange}
-              disabled={isSubmitting}
-            />
-            <label htmlFor="is_active">Hoạt động</label>
+          <div className="form-group form-group--checkbox">
+            <div className="form-group__checkbox">
+              <input
+                type="checkbox"
+                name="is_active"
+                id="is_active"
+                checked={formData.is_active}
+                onChange={handleChange}
+                disabled={isSubmitting}
+              />
+              <label htmlFor="is_active" className="form-group__checkbox-text">
+                Hoạt động
+              </label>
+            </div>
           </div>
 
           {errors.submit && (
-            <div className="error-message submit-error">{errors.submit}</div>
+            <div className="form-group__error form-group__error--submit">
+              {errors.submit}
+            </div>
           )}
 
-          <div className="modal-footer">
+          <div className="modal__footer">
             <button
               type="button"
               onClick={onClose}
-              className="btn-secondary"
+              className="btn btn--secondary"
               disabled={isSubmitting}
             >
               Hủy
             </button>
             <button
               type="submit"
-              className="btn-primary"
+              className="btn btn--primary"
               disabled={isSubmitting}
             >
               {isSubmitting ? "Đang lưu..." : carrier ? "Cập nhật" : "Thêm mới"}

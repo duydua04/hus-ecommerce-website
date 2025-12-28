@@ -4,8 +4,7 @@ import SidebarMenuItem from "./SidebarMenuItem";
 import "./SidebarMenu.scss";
 
 const SidebarMenu = () => {
-  const location = useLocation();
-  const currentPath = location.pathname;
+  const { pathname } = useLocation();
 
   const menuItems = [
     {
@@ -47,9 +46,9 @@ const SidebarMenu = () => {
   return (
     <ul className="sidebar__menu">
       {menuItems.map((item) => {
-        const isActive = item.href
-          ? currentPath === item.href
-          : item.submenu?.some((s) => s.href === currentPath);
+        const isParentActive = item.isDropdown
+          ? item.submenu?.some((s) => s.href === pathname)
+          : pathname === item.href;
 
         return (
           <SidebarMenuItem
@@ -58,18 +57,17 @@ const SidebarMenu = () => {
             text={item.text}
             href={item.href}
             isDropdown={item.isDropdown}
-            isActive={isActive}
+            isActive={isParentActive}
           >
-            {item.submenu &&
-              item.submenu.map((subitem) => (
-                <li key={subitem.id} className="sidebar__submenu-item">
-                  <SidebarMenuItem
-                    text={subitem.text}
-                    href={subitem.href}
-                    isActive={currentPath === subitem.href}
-                  />
-                </li>
-              ))}
+            {item.submenu?.map((sub) => (
+              <SidebarMenuItem
+                key={sub.id}
+                text={sub.text}
+                href={sub.href}
+                isActive={pathname === sub.href}
+                isSubmenu
+              />
+            ))}
           </SidebarMenuItem>
         );
       })}

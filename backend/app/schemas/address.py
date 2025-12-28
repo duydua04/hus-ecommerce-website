@@ -67,3 +67,11 @@ class SellerAddressResponse(ORMBase):
     address_id: int
     is_default: bool
     label: SellerAddressLabel | None = None
+
+class BuyerAddressResponseOrder(BaseModel):
+    buyer_address_id: int
+    buyer_id: int
+    is_default: bool
+    label: BuyerAddressLabel
+
+    address: AddressResponse

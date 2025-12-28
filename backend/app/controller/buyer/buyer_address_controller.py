@@ -7,7 +7,7 @@ from ...schemas.address import (
     AddressCreate,
     AddressUpdate,
     BuyerAddressUpdate,
-    BuyerAddressResponse
+    BuyerAddressResponseOrder
 )
 from ...services.buyer.buyer_address_service import BuyerAddressService, get_buyer_address_service
 
@@ -21,7 +21,7 @@ router = APIRouter(
 
 @router.get(
     "",
-    response_model=List[BuyerAddressResponse]
+    response_model=List[BuyerAddressResponseOrder]
 )
 async def list_addresses(
     buyer: dict = Depends(require_buyer),
