@@ -47,7 +47,9 @@ class SellerOrderService:
                     Order.order_id,
                     Order.order_status,
                     Order.notes,
-                    Order.buyer_id
+                    Order.buyer_id,
+                    Order.payment_method,
+                    Order.payment_status
                 ),
                 selectinload(Order.items).load_only(
                     OrderItem.size_id,
@@ -166,7 +168,7 @@ class SellerOrderService:
         addr_resp = AddressResponse.model_validate(real_addr)
 
         buyer_resp = BuyerInfoShort.model_validate(order.buyer)
-        buyer_resp.full_name = f"{order.buyer.fname} {order.buyer.lname or ''}".strip()
+        buyer_resp.full_name = f"{order.buyer.lname} {order.buyer.fname or ''}".strip()
 
         items_resp = [OrderItemResponse.model_validate(i) for i in order.items]
 
