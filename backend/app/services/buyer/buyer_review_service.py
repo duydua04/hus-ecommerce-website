@@ -1,18 +1,23 @@
 from __future__ import annotations
+from typing import List, Optional
 from fastapi import HTTPException, status, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from datetime import datetime
+
+from ...schemas.common import Page
 from ...models.order import Order
 from ...config.s3 import public_url
-
+from ...utils.storage import storage  # import S3Storage instance
 from ..common.review_common_service import BaseReviewService
 from ...config.db import get_db
 from ...models.review import Review, ReviewerSnapshot
 from ...models.catalog import Product
 from ...schemas.review import (
     ReviewCreate,
-    ReviewUpdate
+    ReviewReplyResponse,
+    ReviewUpdate,
+    ReviewerResponse
 )
 
 class BuyerReviewService(BaseReviewService):
@@ -21,52 +26,90 @@ class BuyerReviewService(BaseReviewService):
         super().__init__(db)
 
     # # ===================== DANH SÁCH REVIEW CỦA 1 SẢN PHẨM =====================
-    # async def list_product_reviews(
-    #     self,
-    #     product_id: int,
-    #     rating: int | None = None,
-    #     page: int = 1,
-    #     limit: int = 10,
-    # ):
-    #     query = Review.find(Review.product_id == product_id)
+    async def list_product_reviews(
+        self,
+        product_id: int,
+        rating: int | None = None,
+        page: int = 1,
+        limit: int = 10,
+    ):
+        query = Review.find(Review.product_id == product_id)
 
-    #     if rating:
-    #         query = query.find(Review.rating == rating)
+        if rating:
+            query = query.find(Review.rating == rating)
 
-    #     offset = (page - 1) * limit
-    #     total = await query.count()
+        # Phân trang
+        offset = (page - 1) * limit
+        total = await query.count()
+        items = await query.sort("-created_at").skip(offset).limit(limit).to_list()
 
-    #     items = (
-    #         await query
-    #         .sort("-created_at")
-    #         .skip(offset)
-    #         .limit(limit)
-    #         .to_list()
-    #     )
+        for item in items:
+            # convert reviewer
+            if isinstance(item.reviewer, ReviewerSnapshot):
+                item.reviewer = ReviewerResponse(
+                    id=item.reviewer.id,
+                    name=item.reviewer.name,
+                    avatar=item.reviewer.avatar
+                )
 
-    #     return self._paginate(items, total, limit, offset)
+            # convert replies
+            if hasattr(item, "replies") and item.replies:
+                converted_replies = []
+                for reply in item.replies:
+                    converted_replies.append(
+                        ReviewReplyResponse(
+                            seller_id=reply.seller_id,
+                            reply_text=reply.reply_text,    # đúng tên field
+                            reply_date=reply.reply_date     # đúng tên field
+                        )
+                    )
+                item.replies = converted_replies
+
+        return self._paginate(items, total, limit, offset)
 
     # # ===================== REVIEW CỦA CHÍNH BUYER =====================
-    # async def list_my_reviews(
-    #     self,
-    #     buyer_id: int,
-    #     page: int = 1,
-    #     limit: int = 10,
-    # ):
-    #     query = Review.find(Review.buyer_id == buyer_id)
+    async def list_my_reviews(
+        self,
+        buyer_id: int,
+        page: int = 1,
+        limit: int = 10,
+    ) -> Page:
+        """
+        Lấy danh sách review của chính buyer
+        """
 
-    #     offset = (page - 1) * limit
-    #     total = await query.count()
+        # Build query cơ bản
+        query = Review.find(Review.buyer_id == buyer_id)
 
-    #     items = (
-    #         await query
-    #         .sort("-created_at")
-    #         .skip(offset)
-    #         .limit(limit)
-    #         .to_list()
-    #     )
 
-    #     return self._paginate(items, total, limit, offset)
+        # Phân trang
+        offset = (page - 1) * limit
+        total = await query.count()
+        items = await query.sort("-created_at").skip(offset).limit(limit).to_list()
+
+        for item in items:
+            # convert reviewer
+            if isinstance(item.reviewer, ReviewerSnapshot):
+                item.reviewer = ReviewerResponse(
+                    id=item.reviewer.id,
+                    name=item.reviewer.name,
+                    avatar=item.reviewer.avatar
+                )
+
+            # convert replies
+            if hasattr(item, "replies") and item.replies:
+                converted_replies = []
+                for reply in item.replies:
+                    converted_replies.append(
+                        ReviewReplyResponse(
+                            seller_id=reply.seller_id,
+                            reply_text=reply.reply_text,    # đúng tên field
+                            reply_date=reply.reply_date     # đúng tên field
+                        )
+                    )
+                item.replies = converted_replies
+
+        return self._paginate(items, total, limit, offset)
 
     # ===================== TẠO REVIEW =====================
     async def create_review(self, buyer_id: int, info, payload: ReviewCreate):
@@ -116,41 +159,64 @@ class BuyerReviewService(BaseReviewService):
         await review.insert()
         return review
     # # ===================== CẬP NHẬT REVIEW =====================
-    # async def update_review(
-    #     self,
-    #     buyer_id: int,
-    #     review_id: str,
-    #     payload: ReviewUpdate,
-    # ):
-    #     review = await self._get_review_or_404(review_id)
+    async def update_review(
+        self,
+        buyer_id: int,
+        product_id: int,
+        order_id: int,
+        payload: ReviewUpdate
+    ):
+        # 1. Lấy review
+        review = await Review.find_one(
+            Review.buyer_id == buyer_id,
+            Review.product_id == product_id,
+            Review.order_id == order_id
+        )
+        if not review:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Review not found"
+            )
 
-    #     if review.buyer_id != buyer_id:
-    #         raise HTTPException(
-    #             status_code=status.HTTP_403_FORBIDDEN,
-    #             detail="You do not own this review"
-    #         )
+        # 2. Update các trường nếu FE gửi
+        if payload.rating is not None:
+            review.rating = payload.rating
+        if payload.comment is not None:
+            review.review_text = payload.comment
 
-    #     review.rating = payload.rating
-    #     review.comment = payload.comment
-
-    #     await review.save()
-    #     return review
+        # 3. Lưu thay đổi vào MongoDB
+        await review.save()
+        return review
 
     # # ===================== XOÁ REVIEW =====================
-    # async def delete_review(
-    #     self,
-    #     buyer_id: int,
-    #     review_id: str,
-    # ):
-    #     review = await self._get_review_or_404(review_id)
+    async def delete_review(
+        self,
+        buyer_id: int,
+        product_id: int,
+        order_id: int,
+        delete_files: bool = False
+    ):
+        # 1. Lấy review
+        review = await Review.find_one(
+            Review.buyer_id == buyer_id,
+            Review.product_id == product_id,
+            Review.order_id == order_id
+        )
+        if not review:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Review not found"
+            )
 
-    #     if review.buyer_id != buyer_id:
-    #         raise HTTPException(
-    #             status_code=status.HTTP_403_FORBIDDEN,
-    #             detail="You do not own this review"
-    #         )
+        # 2. Xóa file trên S3 nếu cần
+        if delete_files:
+            files_to_delete: List[str] = review.images + review.videos
+            for key in files_to_delete:
+                storage.delete_file(key)
 
-    #     await review.delete()
+        # 3. Xóa review MongoDB
+        await review.delete()
+        return {"deleted": True, "review_id": str(review.id)}
 
 def get_buyer_review_service(
     db: AsyncSession = Depends(get_db),

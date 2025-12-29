@@ -40,6 +40,7 @@ class ReviewResponse(BaseModel):
     rating: int
     review_text: Optional[str] = None
     images: List[str] = []
+    videos: List[str] = []
     replies: List[ReviewReplyResponse] = []
     created_at: datetime
 
