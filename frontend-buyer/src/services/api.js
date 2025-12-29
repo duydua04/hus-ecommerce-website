@@ -5,6 +5,17 @@ const API_BASE_URL = 'http://localhost:8000';
 const handleResponse = async (response) => {
   if (!response.ok) {
     const error = await response.json().catch(() => ({ detail: 'Network error' }));
+
+    if (response.status === 401) {
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('userRole');
+      localStorage.removeItem('savedBuyerEmail');
+
+      if (!window.location.pathname.startsWith('/login')) {
+        window.location.href = '/login';
+      }
+    }
+
     throw new Error(error.detail || `HTTP error! status: ${response.status}`);
   }
   return response.json();
@@ -142,6 +153,38 @@ export const productAPI = {
       ...params,
     });
   },
+};
+
+// ============================================
+// NOTIFICATION APIs
+// ============================================
+export const notificationAPI = {
+  // Get buyer notifications (cursor pagination)
+  getAll: (params = {}) => {
+    const queryParams = {
+      limit: params.limit || 20,
+      ...(params.cursor && { cursor: params.cursor }),
+      ...(params.unread_only !== undefined && {
+        unread_only: params.unread_only,
+      }),
+    };
+
+    const query = new URLSearchParams(queryParams);
+    return apiCall(`/buyer/notifications?${query}`);
+  },
+
+  // Mark single notification as read
+  markAsRead: (notificationId) =>
+    apiCall(`/buyer/notifications/${notificationId}/read`, {
+      method: 'PUT',
+    }),
+
+  // (OPTIONAL) Mark all notifications as read
+  markAllAsRead: () =>
+    apiCall('/buyer/notifications/read-all', {
+      method: 'PUT',
+    }),
+
 };
 
 // ============================================
@@ -387,6 +430,7 @@ export default {
   auth: authAPI,
   category: categoryAPI,
   product: productAPI,
+  notification: notificationAPI,
   cart: cartAPI,
   order: orderAPI,
   address: addressAPI,

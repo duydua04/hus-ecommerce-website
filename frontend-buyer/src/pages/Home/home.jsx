@@ -137,11 +137,12 @@ const Home = () => {
                 style={{ cursor: 'pointer' }}
               >
                 <img
-                  src={category.thumbnail_url || category.image_url || "/assets/categories/default.png"}
+                  src={category.image_url || '/assets/placeholder-category.png'}
                   alt={category.category_name}
                   className="popular__image"
                   onError={(e) => {
-                    e.target.src = "/assets/categories/default.png";
+                    e.target.onerror = null;
+                    e.target.src = '/assets/placeholder-category.png';
                   }}
                 />
                 <p className="popular__label">{category.category_name}</p>
@@ -171,29 +172,44 @@ const Home = () => {
                 style={{ cursor: 'pointer' }}
               >
                 <img
-                  src={product.thumbnail_url || product.image_url || "/assets/products/default.png"}
-                  alt={product.product_name}
+                  src={product.public_primary_image_url || '/assets/placeholder-product.png'}
+                  alt={product.name}
                   className="product-card__image"
                   onError={(e) => {
-                    e.target.src = "/assets/products/default.png";
+                    e.target.onerror = null;
+                    e.target.src = '/assets/placeholder-product.png';
                   }}
                 />
 
                 <div className="product-card__info">
                   <p className="product-card__name">
-                    {product.product_name}
+                    {product.name}
                   </p>
+                  {/* PRICE ROW */}
+                <div className="product-card__price-row">
                   <p className="product-card__price">
                     {new Intl.NumberFormat('vi-VN', {
                       style: 'currency',
-                      currency: 'VND'
-                    }).format(product.base_price || 0)}
+                      currency: 'VND',
+                    }).format(Number(product.sale_price))}
                   </p>
-                  {product.discount_percent > 0 && (
-                    <p className="product-card__badge">
-                      -{product.discount_percent}%
+
+                  {Number(product.discount_percent) > 0 && (
+                    <p className="product-card__originalprice">
+                      {new Intl.NumberFormat('vi-VN', {
+                        style: 'currency',
+                        currency: 'VND',
+                      }).format(product.min_price)}
                     </p>
                   )}
+                </div>
+
+                {/* DISCOUNT BADGE */}
+                {Number(product.discount_percent) > 0 && (
+                  <p className="product-card__badge">
+                    -{Number(product.discount_percent)}%
+                  </p>
+                )}
                 </div>
               </div>
             ))
