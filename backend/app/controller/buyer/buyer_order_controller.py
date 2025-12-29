@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Body, Depends, HTTPException, Query
 from typing import List
 from ...schemas.address import AddressUpdate
+from ...schemas.common import OrderStatus
 from ...middleware.auth import require_buyer
 from ...schemas.order import OrderCreate, OrderDetailResponse, OrderResponse, SellerOrderDetail, OrderCreateNew, BuyerOrderTrackingItem
 from ...services.buyer.buyer_order_service import (
@@ -56,20 +57,28 @@ async def create_order(
 
 
 # ===================== DANH SÁCH ĐƠN HÀNG CỦA BUYER THEO TRẠNG THÁI =====================
-@router.get("/tracking", response_model=List[BuyerOrderTrackingItem])
+@router.get(
+    "/tracking",
+    response_model=List[BuyerOrderTrackingItem],
+    description=(
+        "API dùng để **theo dõi các đơn hàng của người mua**.\n\n"
+        "Người dùng có thể **lọc theo trạng thái đơn hàng** bằng tham số `tab`.\n\n"
+        "Nếu **không truyền `tab`**, hệ thống sẽ trả về **tất cả đơn hàng**."
+    ),
+)
 async def list_buyer_orders(
-    tab: str = Query(
-        "all",
-        description="all | pending | processing | shipping | completed | cancelled | refund"
+    tab: OrderStatus | None = Query(
+        None,
+        title="Trạng thái đơn hàng",
     ),
     buyer=Depends(require_buyer),
     service: BuyerOrderService = Depends(get_buyer_order_service),
 ):
+   
     return await service.list_orders_tracking(
         buyer_id=buyer["user"].buyer_id,
         tab=tab
     )
-
 
 # ===== DETAIL =====
 @router.get("/{order_id}", response_model=OrderDetailResponse)

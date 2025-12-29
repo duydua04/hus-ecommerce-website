@@ -32,37 +32,28 @@ from ...schemas.common import OrderStatus, PaymentStatus
 
 # ===================== TAB MAPPING =====================
 TAB_MAPPING = {
-    # Tất cả
     "all": {},
 
-    # Chờ xác nhận
     "pending": {
         "order_status": ["pending"]
     },
-
-    # Đang xử lý
     "processing": {
         "order_status": ["processing"]
     },
-
-    # Vận chuyển / Chờ giao hàng
-    "shipping": {
+    "shipped": {
         "order_status": ["shipped"]
     },
 
-    # Hoàn thành
-    "completed": {
+    "delivered": {
         "order_status": ["delivered"],
         "payment_status": ["paid"]
     },
 
-    # Đã hủy
     "cancelled": {
         "order_status": ["cancelled"]
     },
 
-    # Trả hàng / Hoàn tiền
-    "refund": {
+    "returned": {
         "order_status": ["returned"],
         "payment_status": ["refunded"]
     },
@@ -304,6 +295,7 @@ class BuyerOrderService:
             .selectinload(Product.seller)     # Product -> Seller
         )
         .where(Order.buyer_id == buyer_id)
+        .where(Order.order_id == order_id)
     )
 
         order: Order = (await self.db.execute(stmt)).scalars().unique().first()
@@ -445,8 +437,8 @@ class BuyerOrderService:
     
     # ===================== LIST ORDER (TRACKING VIEW) =====================
     async def list_orders_tracking(self, buyer_id: int, tab: str):
-        tab = tab.strip().lower()
-
+        if tab is None:
+            tab = "all"
         if tab not in TAB_MAPPING:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,

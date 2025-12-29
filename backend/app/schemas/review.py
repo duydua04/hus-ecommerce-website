@@ -12,6 +12,7 @@ class ReviewCreate(BaseModel):
     rating: int = Field(..., ge=1, le=5)
     content: Optional[str] = None
     images: List[str] = []
+    videos: list[str] = []   # object_key
 
 
 class ReviewReplyCreate(BaseModel):
@@ -39,9 +40,18 @@ class ReviewResponse(BaseModel):
     rating: int
     review_text: Optional[str] = None
     images: List[str] = []
+    videos: List[str] = []
     replies: List[ReviewReplyResponse] = []
     created_at: datetime
 
     class Config:
         populate_by_name = True
         from_attributes = True
+
+class ReviewUpdate(BaseModel):
+    """
+    Schema cập nhật review (buyer)
+    """
+    rating: Optional[int] = Field(None, ge=1, le=5)
+    comment: Optional[str] = Field(None, min_length=1)
+
