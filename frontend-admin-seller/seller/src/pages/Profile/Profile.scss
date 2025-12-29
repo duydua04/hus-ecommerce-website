@@ -1,3 +1,12 @@
+.toolbar__header-profile {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
 .profile {
   padding: 2rem;
   max-width: 1200px;
@@ -21,6 +30,7 @@
   border-radius: 12px;
   padding: 2rem;
   margin-bottom: 2rem;
+  border: 1px solid var(--border-color);
   box-shadow: var(--shadow-sm);
   transition: var(--transition);
 
@@ -60,10 +70,12 @@
     display: flex;
     gap: 2rem;
     align-items: center;
+    justify-content: space-between;
   }
 
   &__avatar-wrapper {
     position: relative;
+    flex-shrink: 0;
   }
 
   &__avatar {
@@ -89,16 +101,17 @@
   &__subtitle {
     font-size: 1rem;
     color: var(--text-secondary);
-    margin: 0 0 1rem 0;
+    margin: 0;
   }
 
   &__badges {
     display: flex;
+    flex-direction: row;
     gap: 0.75rem;
-    flex-wrap: wrap;
+    align-items: flex-end;
+    flex-shrink: 0;
   }
 }
-
 // Tier Badges
 .tier-badge {
   display: inline-flex;
@@ -160,10 +173,6 @@
 
 // Profile Fields
 .profile-field {
-  &--full {
-    grid-column: 1 / -1;
-  }
-
   &__label {
     display: block;
     font-size: 0.875rem;
@@ -269,6 +278,10 @@
     &__content {
       flex-direction: column;
       text-align: center;
+    }
+
+    &__badges {
+      align-items: center;
     }
   }
 }

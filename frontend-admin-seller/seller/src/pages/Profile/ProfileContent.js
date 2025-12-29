@@ -82,7 +82,9 @@ export default function ProfileContent() {
             { label: "Hồ sơ", path: "/profile" },
           ]}
         />
-        <div className="profile__loading">Đang tải...</div>
+        <div className="toolbar">
+          <div className="toolbar__loading">Đang tải...</div>
+        </div>
       </main>
     );
   }
@@ -97,10 +99,20 @@ export default function ProfileContent() {
         ]}
       />
 
-      <div className="profile">
+      <div className="toolbar">
+        {/* Toolbar Header */}
+        <div className="toolbar__header-profile">
+          <div className="toolbar__title">
+            <h3 className="toolbar__title-text">Quản lý hồ sơ</h3>
+            <p className="toolbar__title-desc">
+              Xem và cập nhật thông tin cá nhân của bạn
+            </p>
+          </div>
+        </div>
+
         {/* Alerts */}
         {error && (
-          <div className="profile__alert alert alert-error">
+          <div className="toolbar__alert alert alert-error">
             <span>{error}</span>
             <button onClick={clearError} className="alert-close">
               <X size={18} />
@@ -109,33 +121,37 @@ export default function ProfileContent() {
         )}
 
         {successMessage && (
-          <div className="profile__alert alert alert-success">
+          <div className="toolbar__alert alert alert-success">
             <Check size={18} />
             <span>{successMessage}</span>
           </div>
         )}
 
-        {/* Profile Header Card */}
-        <div className="profile-card profile-header">
-          <div className="profile-header__content">
-            <div className="profile-header__avatar-wrapper">
-              <img
-                src={profile?.avt_url || DEFAULT_AVATAR}
-                alt="Avatar"
-                className="profile-header__avatar"
-                onError={(e) => {
-                  e.target.src = DEFAULT_AVATAR;
-                }}
-              />
-            </div>
+        {/* Profile Content */}
+        <div className="profile">
+          {/* Profile Header Card */}
+          <div className="profile-card profile-header">
+            <div className="profile-header__content">
+              <div className="profile-header__avatar-wrapper">
+                <img
+                  src={profile?.avt_url || DEFAULT_AVATAR}
+                  alt="Avatar"
+                  className="profile-header__avatar"
+                  onError={(e) => {
+                    e.target.src = DEFAULT_AVATAR;
+                  }}
+                />
+              </div>
 
-            <div className="profile-header__info">
-              <h2 className="profile-header__name">
-                {profile?.fname} {profile?.lname}
-              </h2>
-              <p className="profile-header__subtitle">
-                {profile?.shop_name || "Chưa có tên cửa hàng"}
-              </p>
+              <div className="profile-header__info">
+                <h2 className="profile-header__name">
+                  {profile?.fname} {profile?.lname}
+                </h2>
+                <p className="profile-header__subtitle">
+                  {profile?.shop_name || "Chưa có tên cửa hàng"}
+                </p>
+              </div>
+
               <div className="profile-header__badges">
                 <span
                   className={`tier-badge ${
@@ -152,106 +168,108 @@ export default function ProfileContent() {
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Personal Information Card */}
-        <div className="profile-card">
-          <div className="profile-card__header">
-            <h3 className="profile-card__title">Thông tin cá nhân</h3>
-            <Button
-              text="Chỉnh sửa"
-              icon="bx bx-edit-alt"
-              variant="outline"
-              size="small"
-              onClick={handleEditPersonal}
-            />
-          </div>
+          {/* Personal Information Card */}
+          <div className="profile-card">
+            <div className="profile-card__header">
+              <h3 className="profile-card__title">Thông tin cá nhân</h3>
+              <Button
+                text="Chỉnh sửa"
+                icon="bx bx-edit-alt"
+                variant="outline"
+                size="small"
+                onClick={handleEditPersonal}
+              />
+            </div>
 
-          <div className="profile-card__body">
-            <div className="profile-grid">
-              <div className="profile-field">
-                <label className="profile-field__label">Họ</label>
-                <p className="profile-field__value">
-                  {profile?.fname || "Chưa cập nhật"}
-                </p>
-              </div>
+            <div className="profile-card__body">
+              <div className="profile-grid">
+                <div className="profile-field">
+                  <label className="profile-field__label">Họ</label>
+                  <p className="profile-field__value">
+                    {profile?.fname || "Chưa cập nhật"}
+                  </p>
+                </div>
 
-              <div className="profile-field">
-                <label className="profile-field__label">Tên</label>
-                <p className="profile-field__value">
-                  {profile?.lname || "Chưa cập nhật"}
-                </p>
-              </div>
+                <div className="profile-field">
+                  <label className="profile-field__label">Tên</label>
+                  <p className="profile-field__value">
+                    {profile?.lname || "Chưa cập nhật"}
+                  </p>
+                </div>
 
-              <div className="profile-field">
-                <label className="profile-field__label">Email</label>
-                <p className="profile-field__value profile-field__value--disabled">
-                  {profile?.email || "Chưa cập nhật"}
-                </p>
-                <small className="profile-field__note">
-                  Email không thể thay đổi
-                </small>
-              </div>
+                <div className="profile-field">
+                  <label className="profile-field__label">Email</label>
+                  <p className="profile-field__value profile-field__value--disabled">
+                    {profile?.email || "Chưa cập nhật"}
+                  </p>
+                  <small className="profile-field__note">
+                    Email không thể thay đổi
+                  </small>
+                </div>
 
-              <div className="profile-field">
-                <label className="profile-field__label">Số điện thoại</label>
-                <p className="profile-field__value">
-                  {profile?.phone || "Chưa cập nhật"}
-                </p>
+                <div className="profile-field">
+                  <label className="profile-field__label">Số điện thoại</label>
+                  <p className="profile-field__value">
+                    {profile?.phone || "Chưa cập nhật"}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Shop Information Card */}
-        <div className="profile-card">
-          <div className="profile-card__header">
-            <h3 className="profile-card__title">Thông tin cửa hàng</h3>
-            <Button
-              text="Chỉnh sửa"
-              icon="bx bx-edit-alt"
-              variant="outline"
-              size="small"
-              onClick={handleEditShop}
-            />
-          </div>
+          {/* Shop Information Card */}
+          <div className="profile-card">
+            <div className="profile-card__header">
+              <h3 className="profile-card__title">Thông tin cửa hàng</h3>
+              <Button
+                text="Chỉnh sửa"
+                icon="bx bx-edit-alt"
+                variant="outline"
+                size="small"
+                onClick={handleEditShop}
+              />
+            </div>
 
-          <div className="profile-card__body">
-            <div className="profile-grid">
-              <div className="profile-field profile-field--full">
-                <label className="profile-field__label">Tên cửa hàng</label>
-                <p className="profile-field__value">
-                  {profile?.shop_name || "Chưa cập nhật"}
-                </p>
-              </div>
+            <div className="profile-card__body">
+              <div className="profile-grid">
+                <div className="profile-field">
+                  <label className="profile-field__label">Tên cửa hàng</label>
+                  <p className="profile-field__value">
+                    {profile?.shop_name || "Chưa cập nhật"}
+                  </p>
+                </div>
 
-              <div className="profile-field">
-                <label className="profile-field__label">Hạng thành viên</label>
-                <p className="profile-field__value">
-                  {getTierBadge(profile?.seller_tier).label}
-                </p>
-              </div>
+                <div className="profile-field">
+                  <label className="profile-field__label">
+                    Hạng thành viên
+                  </label>
+                  <p className="profile-field__value">
+                    {getTierBadge(profile?.seller_tier).label}
+                  </p>
+                </div>
 
-              <div className="profile-field">
-                <label className="profile-field__label">Trạng thái</label>
-                <span
-                  className={`status-badge ${
-                    profile?.is_active
-                      ? "status-badge--active"
-                      : "status-badge--inactive"
-                  }`}
-                >
-                  {profile?.is_active ? "Hoạt động" : "Tạm khóa"}
-                </span>
-              </div>
+                <div className="profile-field">
+                  <label className="profile-field__label">Trạng thái</label>
+                  <span
+                    className={`status-badge ${
+                      profile?.is_active
+                        ? "status-badge--active"
+                        : "status-badge--inactive"
+                    }`}
+                  >
+                    {profile?.is_active ? "Hoạt động" : "Tạm khóa"}
+                  </span>
+                </div>
 
-              <div className="profile-field">
-                <label className="profile-field__label">Ngày tham gia</label>
-                <p className="profile-field__value">
-                  {profile?.created_at
-                    ? new Date(profile.created_at).toLocaleDateString("vi-VN")
-                    : "Chưa rõ"}
-                </p>
+                <div className="profile-field">
+                  <label className="profile-field__label">Ngày tham gia</label>
+                  <p className="profile-field__value">
+                    {profile?.created_at
+                      ? new Date(profile.created_at).toLocaleDateString("vi-VN")
+                      : "Chưa rõ"}
+                  </p>
+                </div>
               </div>
             </div>
           </div>

@@ -54,8 +54,8 @@ export default function EditProfileModal({
 
   const getModalTitle = () => {
     return mode === "personal"
-      ? "Edit Personal Information"
-      : "Edit Shop Information";
+      ? "Chỉnh sửa thông tin cá nhân"
+      : "Chỉnh sửa thông tin cửa hàng";
   };
 
   return (
@@ -63,13 +63,13 @@ export default function EditProfileModal({
       isOpen={isOpen}
       onClose={onClose}
       title={getModalTitle()}
-      subtitle="Update your details to keep your profile up-to-date."
+      subtitle="Hãy cập để thông tin của bạn luôn chính xác"
     >
       <div className="edit-profile-modal">
         {mode === "personal" && (
           <>
             <div className="edit-profile-modal__field">
-              <label className="edit-profile-modal__label">First Name</label>
+              <label className="edit-profile-modal__label">Tên</label>
               <input
                 type="text"
                 name="fname"
@@ -81,7 +81,7 @@ export default function EditProfileModal({
             </div>
 
             <div className="edit-profile-modal__field">
-              <label className="edit-profile-modal__label">Last Name</label>
+              <label className="edit-profile-modal__label">Họ đệm</label>
               <input
                 type="text"
                 name="lname"
@@ -93,7 +93,7 @@ export default function EditProfileModal({
             </div>
 
             <div className="edit-profile-modal__field">
-              <label className="edit-profile-modal__label">Email Address</label>
+              <label className="edit-profile-modal__label">Địa chỉ email</label>
               <input
                 type="email"
                 value={profile?.email || ""}
@@ -103,7 +103,7 @@ export default function EditProfileModal({
             </div>
 
             <div className="edit-profile-modal__field">
-              <label className="edit-profile-modal__label">Phone</label>
+              <label className="edit-profile-modal__label">Số điện thoại</label>
               <input
                 type="tel"
                 name="phone"
@@ -118,7 +118,7 @@ export default function EditProfileModal({
 
         {mode === "shop" && (
           <div className="edit-profile-modal__field">
-            <label className="edit-profile-modal__label">Shop Name</label>
+            <label className="edit-profile-modal__label">Tên shop</label>
             <input
               type="text"
               name="shop_name"
@@ -131,9 +131,9 @@ export default function EditProfileModal({
         )}
 
         <div className="edit-profile-modal__actions">
-          <Button text="Close" variant="outline" onClick={onClose} />
+          <Button text="Đóng" variant="outline" onClick={onClose} />
           <Button
-            text="Save Changes"
+            text="Lưu thay đổi"
             variant="primary"
             onClick={handleSubmit}
             disabled={loading}
