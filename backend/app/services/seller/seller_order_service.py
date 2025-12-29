@@ -47,7 +47,9 @@ class SellerOrderService:
                     Order.order_id,
                     Order.order_status,
                     Order.notes,
-                    Order.buyer_id
+                    Order.buyer_id,
+                    Order.payment_method,
+                    Order.payment_status
                 ),
                 selectinload(Order.items).load_only(
                     OrderItem.size_id,
