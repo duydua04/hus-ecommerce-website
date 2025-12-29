@@ -31,6 +31,9 @@ class ReviewerResponse(BaseModel):
     name: str
     avatar: Optional[str] = None
 
+    class Config:
+        from_attributes = True
+
 
 class ReviewResponse(BaseModel):
     id: PyObjectId = Field(alias="_id")
