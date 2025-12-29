@@ -93,6 +93,30 @@ const useCategory = () => {
     }
   }, []);
 
+  // Upload image cho category
+  const uploadCategoryImage = useCallback(async (categoryId, file) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const updated = await categoryService.uploadCategoryImage(
+        categoryId,
+        file
+      );
+      // Tự động update state với category mới có image_url
+      setCategories((prev) =>
+        prev.map((c) => (c.category_id === categoryId ? updated : c))
+      );
+      return updated;
+    } catch (err) {
+      const errorMsg = err.detail || "Không thể upload ảnh";
+      setError(errorMsg);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   return {
     categories,
     total,
@@ -103,6 +127,7 @@ const useCategory = () => {
     createCategory,
     updateCategory,
     deleteCategory,
+    uploadCategoryImage, // Export thêm function mới
     clearError: () => setError(null),
   };
 };

@@ -82,6 +82,27 @@ const categoryService = {
       throw error.response?.data || { detail: error.message };
     }
   },
+
+  // CHỨC NĂNG MỚI: Upload image cho category
+  uploadCategoryImage: async (categoryId, file) => {
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await axios.post(
+        `${CATEGORIES_ENDPOINT}/upload-image`,
+        formData,
+        {
+          params: { category_id: categoryId },
+          withCredentials: true,
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { detail: error.message };
+    }
+  },
 };
 
 export default categoryService;

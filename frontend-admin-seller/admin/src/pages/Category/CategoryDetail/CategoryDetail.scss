@@ -1,0 +1,129 @@
+// CategoryDetail.scss
+
+.modal--detail {
+  max-width: 600px;
+  width: 90%;
+
+  .modal__body {
+    max-height: calc(90vh - 160px);
+    overflow-y: auto;
+  }
+}
+
+.detail {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+
+  &__image-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1.5rem;
+    background: var(--bg-secondary, #f8f9fa);
+    border-radius: 12px;
+  }
+
+  &__image {
+    width: 200px;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 12px;
+    border: 3px solid var(--border-color, #e0e0e0);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  &__info-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  &__group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color, #e0e0e0);
+
+    &:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+  }
+
+  &__label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-secondary, #6c757d);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  &__value {
+    font-size: 1rem;
+    color: var(--text-primary, #212529);
+    line-height: 1.5;
+    word-break: break-word;
+
+    &--highlight {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--primary-color, #2563eb);
+    }
+
+    &--link {
+      color: var(--text-muted, #6c757d);
+      font-size: 0.875rem;
+      font-style: italic;
+    }
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .modal--detail {
+    max-width: 95%;
+  }
+
+  .detail {
+    gap: 1.5rem;
+
+    &__image {
+      width: 150px;
+      height: 150px;
+    }
+
+    &__value {
+      &--highlight {
+        font-size: 1.125rem;
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .detail {
+    &__image {
+      width: 120px;
+      height: 120px;
+    }
+
+    &__group {
+      gap: 0.375rem;
+      padding-bottom: 0.75rem;
+    }
+
+    &__label {
+      font-size: 0.8125rem;
+    }
+
+    &__value {
+      font-size: 0.9375rem;
+
+      &--highlight {
+        font-size: 1rem;
+      }
+    }
+  }
+}

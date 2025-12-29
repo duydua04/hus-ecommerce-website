@@ -6,9 +6,15 @@ import Pagination from "../../components/common/Pagination/Pagination";
 import Button from "../../components/common/Button/Button";
 import SearchBox from "../../components/common/SearchBox/SearchBox";
 import CategoryModal from "./AddCategory/AddCategory";
+import CategoryDetailModal from "./CategoryDetail/CategoryDetail";
+import AvatarUploadModal from "../../components/common/AvatarUpload/AvatarUpload";
 import ConfirmModal from "../../components/common/ConfirmModal/ConfirmModal";
 import useCategory from "../../hooks/useCategory";
 import "../../assets/styles/page.scss";
+
+// Avatar mặc định
+import defaultAvatar from "../../assets/images/default-avatar-category.png";
+const DEFAULT_AVATAR = defaultAvatar;
 
 export default function CategoryContent() {
   const {
@@ -17,9 +23,11 @@ export default function CategoryContent() {
     loading,
     error,
     fetchCategories,
+    getCategoryById,
     createCategory,
     updateCategory,
     deleteCategory,
+    uploadCategoryImage,
     clearError,
   } = useCategory();
 
@@ -29,6 +37,12 @@ export default function CategoryContent() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
 
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [categoryDetail, setCategoryDetail] = useState(null);
+
+  const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
+  const [selectedCategoryId, setSelectedCategoryId] = useState(null);
+
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [categoryToDelete, setCategoryToDelete] = useState(null);
 
@@ -36,7 +50,7 @@ export default function CategoryContent() {
 
   const itemsPerPage = 10;
 
-  /* FETCH DATA */
+  /* ================= FETCH DATA ================= */
   useEffect(() => {
     fetchCategories({
       q: "",
@@ -59,7 +73,7 @@ export default function CategoryContent() {
 
   const totalPages = Math.ceil(total / itemsPerPage);
 
-  /* HANDLERS */
+  /* ================= HANDLERS ================= */
   const handleAddCategory = () => {
     clearError();
     setSuccessMessage("");
@@ -72,6 +86,16 @@ export default function CategoryContent() {
     setSuccessMessage("");
     setSelectedCategory(category);
     setIsModalOpen(true);
+  };
+
+  const handleViewDetail = async (category) => {
+    try {
+      const detail = await getCategoryById(category.category_id);
+      setCategoryDetail(detail);
+      setIsDetailModalOpen(true);
+    } catch (err) {
+      console.error("Lỗi tải chi tiết category:", err);
+    }
   };
 
   const handleFormSubmit = async (formData) => {
@@ -131,8 +155,48 @@ export default function CategoryContent() {
     setCategoryToDelete(null);
   };
 
-  /* TABLE */
+  const handleAvatarUpload = async (categoryId, file) => {
+    try {
+      await uploadCategoryImage(categoryId, file);
+
+      setIsAvatarModalOpen(false);
+      setSelectedCategoryId(null);
+
+      setSuccessMessage("Tải lên hình ảnh thành công");
+      setTimeout(() => setSuccessMessage(""), 3000);
+
+      fetchCategories({
+        q: searchQuery,
+        limit: itemsPerPage,
+        offset: (currentPage - 1) * itemsPerPage,
+      });
+    } catch (err) {
+      console.error("Error upload image:", err);
+    }
+  };
+
+  /* ================= TABLE ================= */
   const columns = [
+    {
+      key: "image_url",
+      label: "Hình ảnh",
+      className: "table__cell--avatar",
+      render: (value, row) => (
+        <img
+          src={value || DEFAULT_AVATAR}
+          alt="Category image"
+          className="table__img table__img--clickable"
+          title="Click để cập nhật hình ảnh"
+          onClick={() => {
+            setSelectedCategoryId(row.category_id);
+            setIsAvatarModalOpen(true);
+          }}
+          onError={(e) => {
+            e.target.src = DEFAULT_AVATAR;
+          }}
+        />
+      ),
+    },
     {
       key: "category_id",
       label: "ID",
@@ -160,6 +224,12 @@ export default function CategoryContent() {
 
   const actions = [
     {
+      label: "Xem chi tiết",
+      icon: "bx bx-show",
+      onClick: handleViewDetail,
+      className: "action-btn action-btn--view",
+    },
+    {
       label: "Sửa",
       icon: "bx bx-edit-alt",
       onClick: handleEditCategory,
@@ -173,7 +243,7 @@ export default function CategoryContent() {
     },
   ];
 
-  /* RENDER */
+  /* ================= RENDER ================= */
   return (
     <main className="main">
       <PageHeader
@@ -249,7 +319,7 @@ export default function CategoryContent() {
         )}
       </div>
 
-      {/* MODALS */}
+      {/* ===== MODALS ===== */}
       <CategoryModal
         isOpen={isModalOpen}
         onClose={() => {
@@ -258,6 +328,25 @@ export default function CategoryContent() {
         }}
         onSubmit={handleFormSubmit}
         category={selectedCategory}
+      />
+
+      <CategoryDetailModal
+        isOpen={isDetailModalOpen}
+        category={categoryDetail}
+        onClose={() => {
+          setIsDetailModalOpen(false);
+          setCategoryDetail(null);
+        }}
+      />
+
+      <AvatarUploadModal
+        isOpen={isAvatarModalOpen}
+        categoryId={selectedCategoryId}
+        onUpload={handleAvatarUpload}
+        onClose={() => {
+          setIsAvatarModalOpen(false);
+          setSelectedCategoryId(null);
+        }}
       />
 
       <ConfirmModal
