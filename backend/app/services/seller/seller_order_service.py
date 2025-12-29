@@ -166,7 +166,7 @@ class SellerOrderService:
         addr_resp = AddressResponse.model_validate(real_addr)
 
         buyer_resp = BuyerInfoShort.model_validate(order.buyer)
-        buyer_resp.full_name = f"{order.buyer.fname} {order.buyer.lname or ''}".strip()
+        buyer_resp.full_name = f"{order.buyer.lname} {order.buyer.fname or ''}".strip()
 
         items_resp = [OrderItemResponse.model_validate(i) for i in order.items]
 
