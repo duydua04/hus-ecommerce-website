@@ -28,7 +28,7 @@ class Review(Document):
     rating: int = Field(..., ge=1, le=5)
     review_text: Optional[str] = None
     images: List[str] = []  # Mảng URL ảnh
-
+    videos: List[str] = []  # object_key của video
     replies: List[ReviewReply] = []
 
     created_at: datetime = Field(default_factory=datetime.utcnow)
