@@ -69,59 +69,76 @@ export const authAPI = {
 // CATEGORY APIs
 // ============================================
 export const categoryAPI = {
-  getAll: (params = {}) => {
-    const query = new URLSearchParams({
-      limit: params.limit || 20,
-      offset: params.offset || 0,
-      ...(params.q && { q: params.q }),
-    });
-    return apiCall(`/buyer/categories?${query}`);
-  },
+  // Get all categories (from common endpoint)
+  getAll: () => apiCall('/common/categories/'),
 
   // Get category by ID
-  getById: (categoryId) => apiCall(`/buyer/categories/${categoryId}`),
+  getById: (categoryId) => apiCall(`/common/categories/${categoryId}`),
 };
 
 // ============================================
 // PRODUCT APIs
 // ============================================
 export const productAPI = {
-  // Get products list (using seller endpoint temporarily)
-  // TODO: Replace with public buyer endpoint when available
+  // Get products list with filters
   getAll: (params = {}) => {
-    const query = new URLSearchParams({
-      limit: params.limit || 10,
+    const queryParams = {
+      limit: params.limit || 12,
       offset: params.offset || 0,
-      active_only: params.active_only !== false, // Default true
-      ...(params.q && { q: params.q }),
-    });
-    return apiCall(`/buyer/products?${query}`);
+    };
+
+    // Add optional parameters
+    if (params.q) queryParams.q = params.q;
+    if (params.min_price !== undefined) queryParams.min_price = params.min_price;
+    if (params.max_price !== undefined) queryParams.max_price = params.max_price;
+    if (params.rating_filter) queryParams.rating_filter = params.rating_filter;
+    if (params.sort) queryParams.sort = params.sort;
+
+    const query = new URLSearchParams(queryParams);
+    return apiCall(`/buyer/products/products?${query}`);
   },
 
   // Get product details
   getById: (productId) => apiCall(`/buyer/products/${productId}`),
 
-  // Search products (same as getAll but with search query)
-  search: (searchQuery, params = {}) => {
-    return productAPI.getAll({
-      q: searchQuery,
-      ...params,
-    });
-  },
+  // Get shop info for a product
+  getShopInfo: (productId) => apiCall(`/buyer/products/products/${productId}/shop`),
+
+  // Get product price details
+  getPrice: (productId, variantId, sizeId) =>
+    apiCall('/buyer/products/product/price', {
+      method: 'POST',
+      body: JSON.stringify({
+        product_id: productId,
+        variant_id: variantId,
+        size_id: sizeId,
+      }),
+    }),
 
   // Get products by category
   getByCategory: (categoryId, params = {}) => {
-    return productAPI.getAll({
-      category_id: categoryId,
-      ...params,
-    });
+    const queryParams = {
+      limit: params.limit || 10,
+      offset: params.offset || 0,
+    };
+
+    if (params.q) queryParams.q = params.q;
+
+    const query = new URLSearchParams(queryParams);
+    return apiCall(`/buyer/products/categories/${categoryId}?${query}`);
   },
 
-  // Get featured/hot deals products
-  getHotDeals: (params = {}) => {
+  // Get product variants
+  getVariants: (productId) => apiCall(`/buyer/products/${productId}/variants`),
+
+  // Get variant sizes
+  getSizes: (productId, variantId) =>
+    apiCall(`/buyer/products/${productId}/variants/${variantId}/sizes`),
+
+  // Search products (alias for getAll with search query)
+  search: (searchQuery, params = {}) => {
     return productAPI.getAll({
-      limit: params.limit || 10,
-      offset: 0,
+      q: searchQuery,
       ...params,
     });
   },

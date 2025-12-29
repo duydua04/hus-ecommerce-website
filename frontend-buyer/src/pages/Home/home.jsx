@@ -1,163 +1,303 @@
-// src/pages/Home/Home.jsx
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import api from '../../services/api';
-import './home.css';
-
-const API_BASE = 'http://localhost:8000';
-
-const DEFAULT_CATEGORY_IMAGE =
-  'https://via.placeholder.com/200x150?text=Category';
-const DEFAULT_PRODUCT_IMAGE =
-  'https://via.placeholder.com/300x200?text=Product';
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import api from "../../services/api";
+import "./home.css";
 
 const Home = () => {
   const navigate = useNavigate();
-
   const [categories, setCategories] = useState([]);
-  const [products, setProducts] = useState([]);
+  const [newestProducts, setNewestProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // ===== helper =====
-  const getCategoryImage = (cat) =>
-    cat?.image_url || DEFAULT_CATEGORY_IMAGE;
-
-  const getPrimaryImage = (product) =>
-    product?.images?.[0]?.image_url || DEFAULT_PRODUCT_IMAGE;
-
-  const getDiscountedPrice = (price, discount = 0) =>
-    Math.round(price * (1 - discount / 100));
-
-  // ===== load data =====
+  // ================= Fetch 10 Random Categories =================
   useEffect(() => {
-    const loadHomeData = async () => {
+    const fetchCategories = async () => {
       try {
-        setLoading(true);
+        const allCategories = await api.category.getAll();
 
-        const [catRes, productRes] = await Promise.all([
-          fetch(`${API_BASE}/buyer/products/categories?limit=6`),
-          fetch(`${API_BASE}/buyer/products/latest_products?limit=10`)
-        ]);
+        console.log('All categories:', allCategories);
 
-        if (!catRes.ok) {
-          throw new Error('Không tải được danh mục');
-        }
-        if (!productRes.ok) {
-          throw new Error('Không tải được sản phẩm');
-        }
+        // Lấy ngẫu nhiên 10 categories
+        const shuffled = [...allCategories].sort(() => 0.5 - Math.random());
+        const selected = shuffled.slice(0, 10);
 
-        const catData = await catRes.json();
-        const productData = await productRes.json();
-
-        setCategories(catData.items || []);
-        setProducts(productData.items || []);
+        setCategories(selected);
       } catch (err) {
-        console.error(err);
-        setError(err.message || 'Có lỗi xảy ra');
+        console.error("Categories fetch error:", err);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  // ================= Fetch Top 10 Newest Products =================
+  useEffect(() => {
+    const fetchNewestProducts = async () => {
+      try {
+        const res = await api.product.getAll({
+          sort: "newest",
+          limit: 10,
+          offset: 0,
+        });
+
+        console.log('Products response:', res);
+
+        setNewestProducts(res.data || []);
+      } catch (err) {
+        console.error("Newest products fetch error:", err);
       } finally {
         setLoading(false);
       }
     };
 
-    loadHomeData();
+    fetchNewestProducts();
   }, []);
 
-  if (loading) {
-    return <p style={{ textAlign: 'center' }}>Đang tải...</p>;
-  }
+  // ================= Handle Product Click =================
+  const handleProductClick = (productId) => {
+    navigate(`/product/${productId}`);
+  };
 
-  if (error) {
+  // ================= Handle Category Click =================
+  const handleCategoryClick = (categoryId) => {
+    navigate(`/search?category=${categoryId}`);
+  };
+
+  if (loading) {
     return (
-      <p style={{ color: 'red', textAlign: 'center' }}>
-        {error}
-      </p>
+      <div style={{ padding: 40, textAlign: 'center' }}>
+        <div className="loading-spinner"></div>
+        <p>Đang tải...</p>
+      </div>
     );
   }
 
   return (
-    <div className="home">
-      {/* ===== CATEGORIES ===== */}
-      <section className="product-catalog">
-        <h2>Danh mục sản phẩm</h2>
+    <>
+      {/* ================= BANNER (Static) ================= */}
+      <section className="banner">
+        <div className="banner__container">
+          <div className="banner__row">
+            <main className="banner__main">
+              <article className="banner__large relative rounded overflow-hidden">
+                <div className="banner__content">
+                  <h2 className="banner__title">
+                    New trending <br /> Interior decorations
+                  </h2>
+                  <p className="banner__subtitle">
+                    Hot summer discounts ending soon
+                  </p>
+                  <a href="#deals" className="banner__button">
+                    Get Deals Now &gt;
+                  </a>
+                </div>
+                <img
+                  src="/assets/banners/main-interior.png"
+                  alt="Main banner"
+                  className="banner__image"
+                />
+              </article>
+            </main>
 
-        <div className="product-catalog__row">
-          {categories.map((cat) => (
-            <button
-              key={cat.category_id}
-              className="product-catalog__item"
-              onClick={() =>
-                navigate(`/search?category=${cat.category_id}`)
-              }
-            >
-              <div
-                className="product-catalog__image"
-                style={{
-                  backgroundImage: `url(${getCategoryImage(cat)})`
-                }}
-              />
-              <p>{cat.category_name}</p>
-            </button>
-          ))}
+            <aside className="banner__small">
+              <article className="banner__small-inner">
+                <img
+                  src="/assets/banners/small-interior.png"
+                  alt="Small banner"
+                  className="banner__bg-image"
+                />
+                <div className="banner__caption">
+                  <h5 className="banner__caption-title">
+                    Custom interiors
+                  </h5>
+                  <a href="#deals" className="banner__outline-button">
+                    Order Now
+                  </a>
+                </div>
+              </article>
+            </aside>
+          </div>
         </div>
       </section>
 
-      {/* ===== PRODUCTS ===== */}
-      <section className="deals">
-        <h2>Sản phẩm mới nhất</h2>
+      {/* ================= PRODUCT CATEGORIES ================= */}
+      <section className="popular">
+        <div className="popular__grid">
+          <header className="popular__header">
+            <h2 className="popular__title">Danh mục sản phẩm</h2>
+          </header>
 
-        <div className="deals__grid">
-          {products.map((product) => {
-            const finalPrice = getDiscountedPrice(
-              product.base_price,
-              product.discount_percent
-            );
-
-            return (
+          {categories.length > 0 ? (
+            categories.map((category) => (
               <article
-                key={product.product_id}
-                className="product-card"
-                onClick={() =>
-                  navigate(`/product/${product.product_id}`)
-                }
+                className="popular__card"
+                key={category.category_id}
+                onClick={() => handleCategoryClick(category.category_id)}
+                style={{ cursor: 'pointer' }}
               >
-                <div
+                <img
+                  src={category.thumbnail_url || category.image_url || "/assets/categories/default.png"}
+                  alt={category.category_name}
+                  className="popular__image"
+                  onError={(e) => {
+                    e.target.src = "/assets/categories/default.png";
+                  }}
+                />
+                <p className="popular__label">{category.category_name}</p>
+              </article>
+            ))
+          ) : (
+            <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '40px', color: '#888' }}>
+              Không có danh mục nào
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* ================= TOP 10 NEWEST PRODUCTS ================= */}
+      <section className="deals" id="deals">
+        <div className="deals__grid">
+          <header className="deals__header">
+            <h2 className="deals__title">Sản phẩm mới nhất</h2>
+          </header>
+
+          {newestProducts.length > 0 ? (
+            newestProducts.map((product) => (
+              <div
+                className="product-card"
+                key={product.product_id}
+                onClick={() => handleProductClick(product.product_id)}
+                style={{ cursor: 'pointer' }}
+              >
+                <img
+                  src={product.thumbnail_url || product.image_url || "/assets/products/default.png"}
+                  alt={product.product_name}
                   className="product-card__image"
-                  style={{
-                    backgroundImage: `url(${getPrimaryImage(product)})`
+                  onError={(e) => {
+                    e.target.src = "/assets/products/default.png";
                   }}
                 />
 
                 <div className="product-card__info">
-                  <h3>{product.name}</h3>
-
-                  <div className="product-card__price">
-                    <span>
-                      {finalPrice.toLocaleString('vi-VN')}₫
-                    </span>
-
-                    {product.discount_percent > 0 && (
-                      <span className="discount">
-                        -{product.discount_percent}%
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="product-card__meta">
-                    ⭐ {product.rating || 0} (
-                    {product.review_count || 0})
-                  </div>
+                  <p className="product-card__name">
+                    {product.product_name}
+                  </p>
+                  <p className="product-card__price">
+                    {new Intl.NumberFormat('vi-VN', {
+                      style: 'currency',
+                      currency: 'VND'
+                    }).format(product.base_price || 0)}
+                  </p>
+                  {product.discount_percent > 0 && (
+                    <p className="product-card__badge">
+                      -{product.discount_percent}%
+                    </p>
+                  )}
                 </div>
-              </article>
-            );
-          })}
+              </div>
+            ))
+          ) : (
+            <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '40px', color: '#888' }}>
+              Không có sản phẩm nào
+            </div>
+          )}
         </div>
 
-        <button onClick={() => navigate('/search')}>
-          Xem thêm sản phẩm
-        </button>
+        {newestProducts.length > 0 && (
+          <div
+            className="show-more"
+            onClick={() => navigate('/search?sort=newest')}
+            style={{ cursor: 'pointer' }}
+          >
+            Xem thêm sản phẩm
+          </div>
+        )}
       </section>
-    </div>
+
+      {/* ================= VIDEO REVIEWS (Static) ================= */}
+      <section className="video-reviews">
+        <div className="video-reviews__container">
+          <div className="video-reviews__grid">
+            {/* Editors' Picks */}
+            <div className="video-reviews__editors-pick">
+              <article className="card card--editors-pick">
+                <div className="card__body">
+                  <p className="card__text-primary">Editors' Picks</p>
+                  <h3 className="card__title">Video Reviews</h3>
+                  <p className="card__description">
+                    Want to add that personal touch? These sellers specialize in embroidery, engraving, illustrating, and more.
+                  </p>
+                  <a href="#" className="card__button">Shop these findings</a>
+                </div>
+              </article>
+            </div>
+
+            {/* Video Cards */}
+            <div>
+              <article className="video-thumbnail">
+                <a href="#" className="video-thumbnail__link">
+                  <img src="../../assets/product-interior/review-1.png" className="video-thumbnail__image" alt="" />
+                  <button className="video-thumbnail__play-button">
+                    ▶
+                  </button>
+                </a>
+              </article>
+            </div>
+            <div>
+              <article className="video-thumbnail">
+                <a href="#" className="video-thumbnail__link">
+                  <img src="../../assets/product-interior/review-2.png" className="video-thumbnail__image" alt="" />
+                  <button className="video-thumbnail__play-button">
+                    ▶
+                  </button>
+                </a>
+              </article>
+            </div>
+            <div>
+              <article className="video-thumbnail">
+                <a href="#" className="video-thumbnail__link">
+                  <img src="../../assets/product-interior/review-3.png" className="video-thumbnail__image" alt="" />
+                  <button className="video-thumbnail__play-button">
+                    ▶
+                  </button>
+                </a>
+              </article>
+            </div>
+            <div>
+              <article className="video-thumbnail">
+                <a href="#" className="video-thumbnail__link">
+                  <img src="../../assets/product-interior/review-4.png" className="video-thumbnail__image" alt="" />
+                  <button className="video-thumbnail__play-button">
+                    ▶
+                  </button>
+                </a>
+              </article>
+            </div>
+            <div>
+              <article className="video-thumbnail">
+                <a href="#" className="video-thumbnail__link">
+                  <img src="../../assets/product-interior/review-5.png" className="video-thumbnail__image" alt="" />
+                  <button className="video-thumbnail__play-button">
+                    ▶
+                  </button>
+                </a>
+              </article>
+            </div>
+            <div>
+              <article className="video-thumbnail">
+                <a href="#" className="video-thumbnail__link">
+                  <img src="../../assets/product-interior/review-6.png" className="video-thumbnail__image" alt="" />
+                  <button className="video-thumbnail__play-button">
+                    ▶
+                  </button>
+                </a>
+              </article>
+            </div>
+          </div>
+        </div>
+      </section>
+    </>
   );
 };
 
