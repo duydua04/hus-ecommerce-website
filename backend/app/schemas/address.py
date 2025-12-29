@@ -1,4 +1,7 @@
 from __future__ import  annotations
+
+from typing import Optional
+
 from pydantic import BaseModel, Field
 from .common import ORMBase, BuyerAddressLabel, SellerAddressLabel
 
@@ -29,6 +32,9 @@ class AddressResponse(ORMBase):
     district: str
     province: str
     phone: str
+
+    class Config:
+        from_attributes = True
 
 # Request toi server gan dia chi cho buyer
 class BuyerAddressCreate(BaseModel):
@@ -67,6 +73,11 @@ class SellerAddressResponse(ORMBase):
     address_id: int
     is_default: bool
     label: SellerAddressLabel | None = None
+
+    address: Optional[AddressResponse] = None
+
+    class Config:
+        from_attributes = True
 
 class BuyerAddressResponseOrder(BaseModel):
     buyer_address_id: int

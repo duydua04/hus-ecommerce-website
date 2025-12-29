@@ -9,7 +9,7 @@ from redis.asyncio import Redis
 
 from ...config.db import get_db
 from ...config.redis import get_redis_client
-from ...models.address import Address, SellerAddress
+from ...models.address import SellerAddress
 from ...schemas.address import AddressCreate, AddressUpdate, SellerAddressUpdate, SellerAddressResponse
 from ..common.address_service import BaseAddressService
 
@@ -21,11 +21,9 @@ class SellerAddressService(BaseAddressService):
         self.redis = redis
         self.TTL = 86400
 
-
     async def _clear_user_cache(self, user_id: int):
         key = f"address:seller:{user_id}:list"
         await self.redis.delete(key)
-
 
     async def list(self, user_id: int):
         """
@@ -46,7 +44,7 @@ class SellerAddressService(BaseAddressService):
             .where(SellerAddress.seller_id == user_id)
             .order_by(SellerAddress.is_default.desc(),
                       SellerAddress.seller_address_id.desc()
-            )
+                      )
         )
         result = await self.db.execute(stmt)
         items = result.scalars().all()
@@ -57,7 +55,6 @@ class SellerAddressService(BaseAddressService):
         await self.redis.set(cache_key, json_str, ex=self.TTL)
 
         return response_data
-
 
     async def create_and_link(
             self, user_id: int,
@@ -75,11 +72,12 @@ class SellerAddressService(BaseAddressService):
         )
         self.db.add(link)
         await self.db.commit()
-        await self.db.refresh(link)
+
+        await self.db.refresh(link, attribute_names=["address"])
 
         if is_default:
             await self.set_default(user_id, link.seller_address_id)
-            await self.db.refresh(link)
+
 
         await self._clear_user_cache(user_id)
 
@@ -89,8 +87,11 @@ class SellerAddressService(BaseAddressService):
             self, user_id: int,
             link_id: int, payload: SellerAddressUpdate
     ):
-
-        stmt = select(SellerAddress).where(SellerAddress.seller_address_id == link_id)
+        stmt = (
+            select(SellerAddress)
+            .options(selectinload(SellerAddress.address))
+            .where(SellerAddress.seller_address_id == link_id)
+        )
         result = await self.db.execute(stmt)
         link = result.scalar_one_or_none()
 
@@ -106,19 +107,23 @@ class SellerAddressService(BaseAddressService):
 
         if data.get("is_default"):
             await self.set_default(user_id, link_id)
-            await self.db.refresh(link)
+            link.is_default = True
 
-            return link
+        elif "is_default" in data and not data["is_default"]:
+            link.is_default = False
 
         await self.db.commit()
-        await self.db.refresh(link)
-
+        await self.db.refresh(link, attribute_names=["address"])
         await self._clear_user_cache(user_id)
 
         return link
 
     async def update_content(self, user_id: int, link_id: int, payload: AddressUpdate):
-        stmt = select(SellerAddress).where(SellerAddress.seller_address_id == link_id)
+        stmt = (
+            select(SellerAddress)
+            .options(selectinload(SellerAddress.address))
+            .where(SellerAddress.seller_address_id == link_id)
+        )
         result = await self.db.execute(stmt)
         link = result.scalar_one_or_none()
 
@@ -128,7 +133,7 @@ class SellerAddressService(BaseAddressService):
                 detail="Address not found"
             )
 
-        address = await self.db.get(Address, link.address_id)
+        address = link.address
 
         for k, v in payload.model_dump(exclude_unset=True).items():
             if isinstance(v, str) and (not v.strip() or v == "string"):
@@ -136,9 +141,7 @@ class SellerAddressService(BaseAddressService):
             setattr(address, k, v)
 
         await self.db.commit()
-        await self.db.refresh(address)
-        await self.db.refresh(link)
-
+        await self.db.refresh(link, attribute_names=["address"])
         await self._clear_user_cache(user_id)
 
         return link
@@ -155,7 +158,7 @@ class SellerAddressService(BaseAddressService):
             )
 
         addr_id = link.address_id
-        await self.db.delete(link)  # [ASYNC] Delete
+        await self.db.delete(link)
         await self.db.commit()
 
         await self._cleanup_orphan_address(addr_id)
@@ -168,6 +171,7 @@ class SellerAddressService(BaseAddressService):
         """
         Logic: Set toàn bộ địa chỉ của user này về False -> Set cái được chọn về True.
         """
+        # Set tất cả về False
         stmt1 = (
             update(SellerAddress)
             .where(SellerAddress.seller_id == user_id)
@@ -175,6 +179,7 @@ class SellerAddressService(BaseAddressService):
         )
         await self.db.execute(stmt1)
 
+        # Set cái được chọn về True
         stmt2 = (
             update(SellerAddress)
             .where(SellerAddress.seller_address_id == link_id)
@@ -183,7 +188,6 @@ class SellerAddressService(BaseAddressService):
         await self.db.execute(stmt2)
 
         await self.db.commit()
-
         await self._clear_user_cache(user_id)
 
 

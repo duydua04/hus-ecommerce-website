@@ -10,22 +10,29 @@ const extractErrorMessage = (err) => {
   return err?.detail || err?.message || "Đã xảy ra lỗi";
 };
 
-const normalizeAddress = (data = {}, fallback = {}) => ({
-  seller_address_id: data.seller_address_id ?? fallback.seller_address_id,
-  label: data.label ?? fallback.label ?? "other",
-  is_default:
-    typeof data.is_default === "boolean"
-      ? data.is_default
-      : fallback.is_default ?? false,
-  address: {
-    fullname: data.fullname ?? fallback.address?.fullname ?? "",
-    phone: data.phone ?? fallback.address?.phone ?? "",
-    street: data.street ?? fallback.address?.street ?? "",
-    ward: data.ward ?? fallback.address?.ward ?? "",
-    district: data.district ?? fallback.address?.district ?? "",
-    province: data.province ?? fallback.address?.province ?? "",
-  },
-});
+const normalizeAddress = (data = {}, fallback = {}) => {
+  // Lấy dữ liệu từ object con 'address' do API trả về cấu trúc lồng nhau
+  const sourceAddress = data.address || {};
+
+  return {
+    seller_address_id: data.seller_address_id ?? fallback.seller_address_id,
+    label: data.label ?? fallback.label ?? "other",
+    is_default:
+      typeof data.is_default === "boolean"
+        ? data.is_default
+        : fallback.is_default ?? false,
+    address: {
+      // Ưu tiên lấy từ sourceAddress (data.address)
+      // Nếu không có thì fallback về data gốc hoặc fallback object
+      fullname: sourceAddress.fullname ?? data.fullname ?? fallback.address?.fullname ?? "",
+      phone: sourceAddress.phone ?? data.phone ?? fallback.address?.phone ?? "",
+      street: sourceAddress.street ?? data.street ?? fallback.address?.street ?? "",
+      ward: sourceAddress.ward ?? data.ward ?? fallback.address?.ward ?? "",
+      district: sourceAddress.district ?? data.district ?? fallback.address?.district ?? "",
+      province: sourceAddress.province ?? data.province ?? fallback.address?.province ?? "",
+    },
+  };
+};
 
 /* Hook */
 
@@ -70,8 +77,16 @@ const useLocation = () => {
           isDefault,
           label
         );
-        const normalized = normalizeAddress({ ...res, ...addressData });
-        setAddresses((prev) => [normalized, ...prev]);
+        // Normalize dữ liệu trả về kết hợp với dữ liệu gửi đi
+        const normalized = normalizeAddress({ ...res, ...addressData, address: addressData });
+
+        setAddresses((prev) => {
+          // FIX LOGIC: Nếu tạo địa chỉ mới là Default, phải tắt Default của các địa chỉ cũ
+          if (isDefault) {
+            return [normalized, ...prev.map((a) => ({ ...a, is_default: false }))];
+          }
+          return [normalized, ...prev];
+        });
         return normalized;
       }),
     []
@@ -82,10 +97,12 @@ const useLocation = () => {
     (id, addressData) =>
       run(async () => {
         const res = await locationService.updateAddressContent(id, addressData);
+
         setAddresses((prev) =>
           prev.map((a) =>
             a.seller_address_id === id
-              ? normalizeAddress({ ...res, ...addressData }, a)
+              // Khi update content, giữ nguyên các thông tin meta (label, is_default) của a
+              ? normalizeAddress({ ...res, address: addressData }, a)
               : a
           )
         );
@@ -94,15 +111,24 @@ const useLocation = () => {
     []
   );
 
-  /* ===== Update link ===== */
+  /* ===== Update link (Label / Default) ===== */
   const updateAddressLink = useCallback(
     (id, linkData) =>
       run(async () => {
         const res = await locationService.updateAddressLink(id, linkData);
+
         setAddresses((prev) =>
-          prev.map((a) =>
-            a.seller_address_id === id ? normalizeAddress(res, a) : a
-          )
+          prev.map((a) => {
+            // Cập nhật địa chỉ hiện tại
+            if (a.seller_address_id === id) {
+              return normalizeAddress(res, a);
+            }
+            // FIX LOGIC: Nếu địa chỉ được update trở thành Default, tắt Default của các địa chỉ khác
+            if (linkData.is_default === true) {
+              return { ...a, is_default: false };
+            }
+            return a;
+          })
         );
         return res;
       }),
@@ -114,6 +140,7 @@ const useLocation = () => {
     (id) =>
       run(async () => {
         await locationService.setDefaultAddress(id);
+        // Logic này đã đúng: set true cho id được chọn, set false cho tất cả id khác
         setAddresses((prev) =>
           prev.map((a) => ({
             ...a,
