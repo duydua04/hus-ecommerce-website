@@ -50,6 +50,15 @@ class OrderItemResponse(ORMBase):
     unit_price: Decimal
     total_price: Decimal
 
+    product_name: Optional[str] = None
+    product_image: Optional[str] = None
+    size_name: Optional[str] = None
+
+    # -------------------------
+
+    class Config:
+        from_attributes = True
+
 
 from .address import AddressResponse
 from typing import List, Optional

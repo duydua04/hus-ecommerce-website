@@ -4,6 +4,7 @@ from sqlalchemy import select, desc, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload, joinedload, load_only
 
+from ...config import public_url
 from ...config.db import get_db
 from ...models import Order, OrderItem, Product, BuyerAddress, Buyer
 from ...schemas import PaymentStatus, PaymentMethod
@@ -29,10 +30,10 @@ class SellerOrderService:
     def __init__(self, db: AsyncSession):
         self.db = db
 
-
     async def _get_order_lightweight(self, seller_id: int, order_id: int):
         """
         Lấy các trường cần thiết để kiểm tra logic (Status, ID, BuyerID).
+        Dùng cho các hành động: Confirm, Ship, Cancel.
         """
         stmt = (
             select(Order)
@@ -70,10 +71,9 @@ class SellerOrderService:
             )
         return order
 
-
     async def list_orders(self, seller_id: int, filters: SellerOrderFilter) -> Page:
         """
-        Lấy danh sách đơn hàng có phân trang
+        Lấy danh sách đơn hàng có phân trang (chỉ lấy thông tin tóm tắt)
         """
         stmt = (
             select(Order)
@@ -138,8 +138,13 @@ class SellerOrderService:
             data=data
         )
 
-
     async def get_order_detail(self, seller_id: int, order_id: int):
+        """
+        Lấy chi tiết đơn hàng:
+        - Thông tin Buyer
+        - Địa chỉ giao hàng
+        - Danh sách sản phẩm (kèm Tên, Ảnh đại diện, Size)
+        """
         stmt = (
             select(Order)
             .join(Order.items)
@@ -149,7 +154,11 @@ class SellerOrderService:
                 Product.seller_id == seller_id
             )
             .options(
-                selectinload(Order.items),
+                # 1. Load sâu vào trong: Items -> Product -> Images
+                selectinload(Order.items).options(
+                    joinedload(OrderItem.product).selectinload(Product.images),
+                    joinedload(OrderItem.size)
+                ),
                 selectinload(Order.buyer),
                 selectinload(Order.carrier),
                 selectinload(Order.shipping_address).selectinload(BuyerAddress.address)
@@ -164,13 +173,38 @@ class SellerOrderService:
                 detail="Không tìm thấy đơn hàng"
             )
 
+        # Xử lý địa chỉ
         real_addr = order.shipping_address.address
         addr_resp = AddressResponse.model_validate(real_addr)
 
+        # Xử lý thông tin người mua
         buyer_resp = BuyerInfoShort.model_validate(order.buyer)
         buyer_resp.full_name = f"{order.buyer.lname} {order.buyer.fname or ''}".strip()
 
-        items_resp = [OrderItemResponse.model_validate(i) for i in order.items]
+        # Xử lý danh sách sản phẩm
+        items_resp = []
+        for item in order.items:
+            item_data = OrderItemResponse.model_validate(item)
+
+            if item.product:
+                item_data.product_name = item.product.name
+
+                if item.product.images:
+                    # Tìm ảnh có is_primary = True
+                    primary_img = next((img for img in item.product.images if img.is_primary), None)
+
+                    if primary_img:
+                        item_data.product_image = public_url(primary_img.image_url)
+                    else:
+                        # Nếu không có ảnh primary, lấy ảnh đầu tiên làm đại diện
+                        item_data.product_image = public_url(item.product.images[0].image_url)
+                else:
+                    item_data.product_image = None
+
+            if item.size:
+                item_data.size_name = item.size.size_name
+
+            items_resp.append(item_data)
 
         return SellerOrderDetailResponse(
             order_id=order.order_id,
@@ -190,7 +224,6 @@ class SellerOrderService:
             items=items_resp
         )
 
-
     async def confirm_order(self, seller_id: int, order_id: int):
         """Xác nhận đơn hàng (Pending -> Processing)"""
         order = await self._get_order_lightweight(seller_id, order_id)
@@ -209,7 +242,7 @@ class SellerOrderService:
 
         await self.db.commit()
 
-        # 3. Gọi Task Dashboard (Cập nhật số Pending giảm, Processing tăng)
+        # Cập nhật thống kê Dashboard
         task_seller_recalc_dashboard.delay(seller_id)
 
         msg = f"Shop đã xác nhận đơn hàng #{order.order_id}."
@@ -230,7 +263,6 @@ class SellerOrderService:
             "status": OrderStatus.processing,
             "payment_status": order.payment_status
         }
-
 
     async def mark_as_shipped(self, seller_id: int, order_id: int):
         """Giao hàng (Processing -> Shipped)"""
@@ -257,10 +289,8 @@ class SellerOrderService:
 
         return {"message": "Đã cập nhật trạng thái giao hàng", "status": OrderStatus.shipped}
 
-
     async def cancel_order(self, seller_id: int, order_id: int, reason: str):
         """Hủy đơn hàng và Hoàn kho + Trừ thống kê Dashboard"""
-
         order_check = await self._get_order_lightweight(seller_id, order_id)
 
         allowed = [OrderStatus.pending, OrderStatus.processing]
