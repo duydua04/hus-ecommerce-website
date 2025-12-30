@@ -1,0 +1,126 @@
+/*BLOCK: toolbar - Khung chứa bảng dữ liệu*/
+.toolbar {
+  background: var(--bg-white);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+/* ELEMENT: toolbar__header - Header của toolbar */
+.toolbar__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px;
+  border-bottom: 1px solid var(--border-color);
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+/* ELEMENT: toolbar__title - Tiêu đề toolbar */
+.toolbar__title-text {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.toolbar__title-desc {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+/* ELEMENT: toolbar__actions - Thanh tìm kiếm và lọc */
+.toolbar__actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border-color);
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+/* ELEMENT: toolbar__search - Search box trong toolbar */
+.toolbar__search {
+  flex: 1;
+  min-width: 200px;
+  max-width: 400px;
+}
+
+/* ELEMENT: toolbar__table - Container chứa bảng */
+.toolbar__table {
+  padding: 24px;
+  overflow-x: auto;
+}
+
+/* ELEMENT: toolbar__pagination - Phân trang */
+.toolbar__pagination {
+  padding: 24px;
+  border-top: 1px solid var(--border-color);
+}
+
+/* ELEMENT: toolbar__filter - Nút lọc */
+.toolbar__filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ELEMENT: toolbar__alert - Thông báo */
+
+.toolbar__alert {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+// Alert Styles
+.alert {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+
+  &-success {
+    background: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #81c784;
+  }
+
+  &-error {
+    background: #ffebee;
+    color: #c62828;
+    border: 1px solid #e57373;
+  }
+
+  &-close {
+    margin-left: auto;
+    background: transparent;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem;
+    border-radius: 4px;
+    transition: var(--transition);
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.1);
+    }
+  }
+}
+
+/* ELEMENT: toolbar__loading - Loading state */
+.toolbar__loading {
+  padding: 40px 24px;
+  text-align: center;
+  color: var(--text-secondary);
+}

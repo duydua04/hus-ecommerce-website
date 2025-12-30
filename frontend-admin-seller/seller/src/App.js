@@ -24,7 +24,6 @@ import ProtectedRoute from "./components/ProtectedRoute";
 
 // Global Styles
 import "./assets/styles/global.scss";
-import "./assets/styles/react-select.scss";
 import "boxicons/css/boxicons.min.css";
 
 function App() {

@@ -10,6 +10,7 @@ import ProductDetailModal from "./ProductDetail/ProductDetail";
 import ImageUploadModal from "../../components/common/AvatarUpload/AvatarUpload";
 import ConfirmModal from "../../components/common/ConfirmModal/ConfirmModal";
 import useProduct from "../../hooks/useProduct";
+import "../../assets/styles/page.scss";
 import "./Product.scss";
 
 // Avatar mặc định
