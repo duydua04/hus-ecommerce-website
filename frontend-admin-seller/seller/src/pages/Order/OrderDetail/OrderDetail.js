@@ -55,7 +55,7 @@ export default function OrderDetailModal({
   const formatAddress = (address) => {
     if (!address) return "N/A";
     const parts = [
-      address.address_line,
+      address.street,
       address.ward,
       address.district,
       address.province,
@@ -138,11 +138,11 @@ export default function OrderDetailModal({
             </div>
           </div>
 
-          {/* Thông tin khách hàng */}
+          {/* Thông tin người đặt hàng */}
           <div className="order-section">
             <h3 className="section-title">
               <User size={20} />
-              Thông tin khách hàng
+              Người đặt hàng
             </h3>
             <div className="info-grid">
               <div className="info-item">
@@ -176,16 +176,37 @@ export default function OrderDetailModal({
             </div>
           </div>
 
-          {/* Địa chỉ giao hàng */}
+          {/* Địa chỉ giao hàng và thông tin người nhận */}
           <div className="order-section">
             <h3 className="section-title">
               <MapPin size={20} />
               Địa chỉ giao hàng
             </h3>
-            <div className="info-item">
-              <p className="info-value">
-                {formatAddress(orderDetail.shipping_address_detail)}
-              </p>
+
+            <div className="info-grid">
+              <div className="info-item">
+                <span className="info-label">Người nhận hàng:</span>
+                <span className="info-value">
+                  {orderDetail.shipping_address_detail?.fullname || "N/A"}
+                </span>
+              </div>
+
+              <div className="info-item">
+                <span className="info-label">
+                  <Phone size={16} />
+                  Số điện thoại:
+                </span>
+                <span className="info-value">
+                  {orderDetail.shipping_address_detail?.phone || "N/A"}
+                </span>
+              </div>
+
+              <div className="info-item info-item--full">
+                <span className="info-label">Địa chỉ:</span>
+                <span className="info-value">
+                  {formatAddress(orderDetail.shipping_address_detail)}
+                </span>
+              </div>
             </div>
           </div>
 
@@ -199,7 +220,7 @@ export default function OrderDetailModal({
             </div>
           )}
 
-          {/* Danh sách sản phẩm */}
+          {/* Danh sách sản phẩm - UPDATED */}
           <div className="order-section">
             <h3 className="section-title">
               Sản phẩm ({orderDetail.items?.length || 0})
@@ -207,26 +228,47 @@ export default function OrderDetailModal({
             <div className="items-list">
               {orderDetail.items?.map((item) => (
                 <div key={item.order_item_id} className="item-card">
-                  <div className="item-info">
-                    <div className="item-name">
-                      {item.product_id_name || `Sản phẩm #${item.product_id}`}
+                  {/* Ảnh sản phẩm */}
+                  {item.product_image && (
+                    <div className="item-image">
+                      <img
+                        src={item.product_image}
+                        alt={item.product_name || "Product"}
+                        onError={(e) => {
+                          e.target.src = "/placeholder-product.png";
+                        }}
+                      />
                     </div>
-                    <div className="item-details">
-                      {item.variant_name && (
-                        <span className="item-variant">
-                          Màu: {item.variant_name}
-                        </span>
-                      )}
-                      {item.size_name && (
-                        <span className="item-size">
-                          Size: {item.size_name}
-                        </span>
-                      )}
+                  )}
+
+                  <div className="item-content">
+                    {/* Tên sản phẩm */}
+                    <div className="item-info">
+                      <div className="item-name">
+                        {item.product_name || `Sản phẩm #${item.product_id}`}
+                      </div>
+                      <div className="item-details">
+                        {/* Size */}
+                        {item.size_name && (
+                          <span className="item-size">
+                            Size: {item.size_name}
+                          </span>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                  <div className="item-quantity">x{item.quantity}</div>
-                  <div className="item-price">
-                    {formatPrice(item.unit_price)}
+
+                    {/* Số lượng và giá */}
+                    <div className="item-pricing">
+                      <div className="item-quantity">x{item.quantity}</div>
+                      <div className="item-prices">
+                        <div className="item-unit-price">
+                          {formatPrice(item.unit_price)}
+                        </div>
+                        <div className="item-subtotal">
+                          {formatPrice(item.total_price)}
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               ))}
