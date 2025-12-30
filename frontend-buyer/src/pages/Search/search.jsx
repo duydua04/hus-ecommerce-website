@@ -1,177 +1,257 @@
-// src/pages/Search/Search.jsx
-import React, { useEffect, useState } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
-import './search.css';
+import React, { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import api from "../../services/api";
+import "./search.css";
 
-const API_BASE = 'http://localhost:8000';
+// ================== Helpers ==================
+const SORT_OPTIONS = [
+  { label: "Mới nhất", value: "newest" },
+  { label: "Giá tăng dần", value: "price_asc" },
+  { label: "Giá giảm dần", value: "price_desc" },
+  { label: "Bán chạy", value: "best_seller" },
+];
 
-const SearchResult = () => {
-  const navigate = useNavigate();
+const RATING_OPTIONS = [
+  { label: "★★★★★", value: "5" },
+  { label: "★★★★✩", value: "4plus" },
+  { label: "★★★✩✩", value: "3plus" },
+  { label: "★★✩✩✩", value: "2plus" },
+  { label: "★✩✩✩✩", value: "1plus" },
+];
+
+// ================== Component ==================
+export default function SearchResult() {
   const [searchParams] = useSearchParams();
+  const q = searchParams.get("q") || "";
 
+  // ===== Filters =====
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [minPriceInput, setMinPriceInput] = useState("");
+  const [maxPriceInput, setMaxPriceInput] = useState("");
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
+  const [rating, setRating] = useState(null);
+  const [sort, setSort] = useState("newest");
+
+  // ===== Data =====
+  const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
+  const [meta, setMeta] = useState({ total: 0, limit: 12, offset: 0 });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
 
-  // filters
-  const [priceRange, setPriceRange] = useState({ min: 0, max: 100000000 });
-  const [selectedRatings, setSelectedRatings] = useState([]);
-
-  // pagination
-  const [page, setPage] = useState(1);
-  const limit = 12;
-
-  const q = searchParams.get('q') || '';
-
-  // ================= FETCH PRODUCTS =================
-  const fetchProducts = async () => {
+  // ================== API ==================
+  const fetchCategories = async () => {
     try {
-      setLoading(true);
-      setError(null);
+      const res = await api.category.getAll();
+      setCategories(res.data || []);
+    } catch (err) {
+      console.error("Fetch categories failed", err);
+    }
+  };
 
-      const params = new URLSearchParams({
-        q,
-        min_price: priceRange.min,
-        max_price: priceRange.max,
-        limit,
-        offset: (page - 1) * limit,
+  const fetchProducts = async (offset = 0) => {
+    setLoading(true);
+    try {
+      const res = await api.product.getAll({
+        q: q || undefined,
+        category_id: selectedCategory || undefined,
+        min_price: minPrice || undefined,
+        max_price: maxPrice || undefined,
+        rating_filter: rating || undefined,
+        sort,
+        limit: meta.limit,
+        offset,
       });
 
-      if (selectedRatings.length === 1) {
-        params.append('rating_filter', selectedRatings[0]);
-      }
-
-      const res = await fetch(
-        `${API_BASE}/buyer/products/products?${params.toString()}`
-      );
-
-      if (!res.ok) throw new Error('Không tải được sản phẩm');
-
-      const data = await res.json();
-      setProducts(data.items || []);
+      setProducts(res.data || []);
+      setMeta(res.meta || { total: 0, limit: 12, offset });
     } catch (err) {
-      setError(err.message);
+      console.error("Search fetch failed", err);
     } finally {
       setLoading(false);
     }
   };
 
+  // ================== Effects ==================
   useEffect(() => {
-    fetchProducts();
-  }, [q, priceRange, selectedRatings, page]);
+    fetchCategories();
+  }, []);
 
-  // ================= UI HELPERS =================
-  const renderStars = (rating = 0) => {
-    const full = '★'.repeat(Math.round(rating));
-    const empty = '☆'.repeat(5 - Math.round(rating));
-    return (
-      <>
-        <span className="product-card__stars">{full}</span>
-        {empty}
-      </>
-    );
+  useEffect(() => {
+    fetchProducts(0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [q, selectedCategory, minPrice, maxPrice, rating, sort]);
+
+  // ================== Handlers ==================
+  const changePage = (page) => {
+    const offset = (page - 1) * meta.limit;
+    fetchProducts(offset);
   };
 
-  const handleRatingChange = (rating) => {
-    setSelectedRatings((prev) =>
-      prev.includes(rating)
-        ? prev.filter((r) => r !== rating)
-        : [rating] // backend chỉ nhận 1 rating_filter
-    );
-  };
+  const totalPages = Math.ceil(meta.total / meta.limit);
+  const currentPage = Math.floor(meta.offset / meta.limit) + 1;
 
-  // ================= RENDER =================
+  // ================== Render ==================
   return (
     <div className="products-section">
-      {/* SIDEBAR */}
+      {/* ===== Sidebar ===== */}
       <aside className="sidebar">
+        {/* Category */}
         <div className="sidebar__section">
-          <h3 className="sidebar__title">Mức giá</h3>
-          <input
-            type="number"
-            className="sidebar__input"
-            placeholder="Min"
-            value={priceRange.min}
-            onChange={(e) =>
-              setPriceRange({ ...priceRange, min: Number(e.target.value) })
-            }
-          />
-          <input
-            type="number"
-            className="sidebar__input"
-            placeholder="Max"
-            value={priceRange.max}
-            onChange={(e) =>
-              setPriceRange({ ...priceRange, max: Number(e.target.value) })
-            }
-          />
+          <h3 className="sidebar__title">Danh mục</h3>
+          <ul className="sidebar__list">
+            <li className="sidebar__item">
+              <label className="sidebar__label">
+                <input
+                  type="radio"
+                  checked={selectedCategory === null}
+                  onChange={() => setSelectedCategory(null)}
+                />
+                Tất cả
+              </label>
+            </li>
+
+            {categories.map((c) => (
+              <li key={c.category_id} className="sidebar__item">
+                <label className="sidebar__label">
+                  <input
+                    type="radio"
+                    checked={selectedCategory === c.category_id}
+                    onChange={() => setSelectedCategory(c.category_id)}
+                  />
+                  {c.name}
+                </label>
+              </li>
+            ))}
+          </ul>
         </div>
 
+        {/* Price */}
+        <div className="sidebar__section">
+          <h3 className="sidebar__title">Khoảng giá</h3>
+          <div className="sidebar__price-inputs">
+            <input
+              className="sidebar__input"
+              type="number"
+              placeholder="Min"
+              value={minPriceInput}
+              onChange={(e) => setMinPriceInput(e.target.value)}
+            />
+            <input
+              className="sidebar__input"
+              type="number"
+              placeholder="Max"
+              value={maxPriceInput}
+              onChange={(e) => setMaxPriceInput(e.target.value)}
+            />
+          </div>
+
+          <button
+            className="sidebar__button"
+            onClick={() => {
+              setMinPrice(minPriceInput);
+              setMaxPrice(maxPriceInput);
+            }}
+          >
+            Áp dụng
+          </button>
+        </div>
+
+        {/* Rating */}
         <div className="sidebar__section">
           <h3 className="sidebar__title">Đánh giá</h3>
-          {[5, 4, 3, 2, 1].map((r) => (
-            <label key={r} className="sidebar__label">
-              <input
-                type="checkbox"
-                checked={selectedRatings.includes(r)}
-                onChange={() => handleRatingChange(r)}
-              />
-              {renderStars(r)}
-            </label>
-          ))}
+          <ul className="sidebar__list">
+            {RATING_OPTIONS.map((r) => (
+              <li key={r.value} className="sidebar__item">
+                <label className="sidebar__label">
+                  <input
+                    type="radio"
+                    name="rating"
+                    checked={rating === r.value}
+                    onChange={() => setRating(r.value)}
+                  />
+                  {r.label}
+                </label>
+              </li>
+            ))}
+          </ul>
         </div>
       </aside>
 
-      {/* MAIN */}
+      {/* ===== Main content ===== */}
       <main className="main-content">
-        {loading && <p>Đang tải sản phẩm...</p>}
-        {error && <p style={{ color: 'red' }}>{error}</p>}
+        {/* Sort */}
+        <div className="main-content__header">
+          <select className="main-content__sort" value={sort} onChange={(e) => setSort(e.target.value)}>
+            {SORT_OPTIONS.map((s) => (
+              <option key={s.value} value={s.value}>
+                {s.label}
+              </option>
+            ))}
+          </select>
+        </div>
 
+        {/* Loading / Empty */}
+        {loading && <p>Đang tải…</p>}
+        {!loading && products.length === 0 && (
+          <p>Không tìm thấy sản phẩm phù hợp</p>
+        )}
+
+        {/* Product grid */}
         <div className="product-grid">
           {products.map((p) => (
-            <div
-              key={p.product_id}
-              className="product-card"
-              onClick={() => navigate(`/product/${p.product_id}`)}
-            >
-              <img
-                src={
-                  p.images?.[0]?.image_url ||
-                  'https://via.placeholder.com/300x300?text=Product'
-                }
-                alt={p.name}
-                className="product-card__image"
-              />
+            <div key={p.product_id} className="product-card">
+              <div className="product-card__image-wrapper">
+                <img
+                  className="product-card__image"
+                  src={p.public_primary_image_url}
+                  alt={p.name}
+                />
+              </div>
 
               <div className="product-card__info">
                 <h3 className="product-card__name">{p.name}</h3>
 
                 <div className="product-card__rating">
-                  {renderStars(p.rating || 0)}
-                  <span>
-                    ({p.review_count || 0})
+                  <span className="product-card__stars">★ {p.rating}</span>
+                  <span className="product-card__reviews">
+                    ({p.review_count})
                   </span>
                 </div>
 
                 <div className="product-card__price">
-                  {Number(p.base_price).toLocaleString('vi-VN')}₫
+                  {Number(p.sale_price).toLocaleString()} ₫
                 </div>
+
+                <button className="product-card__button">
+                  Xem chi tiết
+                </button>
               </div>
             </div>
           ))}
         </div>
 
-        {/* PAGINATION */}
-        <div className="pagination">
-          <button disabled={page === 1} onClick={() => setPage(page - 1)}>
-            Prev
-          </button>
-          <span>Trang {page}</span>
-          <button onClick={() => setPage(page + 1)}>Next</button>
-        </div>
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="pagination">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                  (page) => (
+                    <button
+                      key={page}
+                      className={`pagination__button ${
+                        page === currentPage
+                          ? "pagination__button--active"
+                          : ""
+                      }`}
+                      onClick={() => changePage(page)}
+                    >
+                      {page}
+                    </button>
+                  )
+                )}
+          </div>
+        )}
       </main>
     </div>
   );
-};
-
-export default SearchResult;
+}

@@ -22,7 +22,6 @@ const Header = () => {
           setUser(userData);
         } catch (err) {
           console.error(err);
-          navigate("/login", { replace: true });
         }
       };
 
