@@ -23,19 +23,6 @@ const ORDER_STATUS = {
   returned: "Trả hàng",
 };
 
-const PAYMENT_STATUS = {
-  pending: "Chờ thanh toán",
-  paid: "Đã thanh toán",
-  failed: "Thanh toán thất bại",
-  refunded: "Đã hoàn tiền",
-};
-
-const PAYMENT_METHOD = {
-  cod: "Thanh toán khi nhận hàng (COD)",
-  bank_transfer: "Chuyển khoản ngân hàng",
-  mim_pay: "Ví Mim Pay",
-};
-
 export default function OrderContent() {
   const {
     orders,

@@ -74,14 +74,6 @@
 
 /* STATUS BADGES */
 .status-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 500;
-  white-space: nowrap;
-
   &--pending {
     background: #fef3c7;
     color: #92400e;
@@ -110,34 +102,39 @@
 
 /* ACTION BUTTONS */
 .action-btn {
-  i {
-    font-size: 16px;
-  }
-
   &--confirm {
-    background: #d1fae5;
-    color: #065f46;
+    background: var(--bg-white);
 
     &:hover {
-      background: #a7f3d0;
+      background: #98ffba;
+      border-color: var(--green);
+      .action-btn__icon {
+        color: var(--green);
+      }
     }
   }
 
   &--ship {
-    background: #e0e7ff;
-    color: #3730a3;
+    background: var(--bg-white);
 
     &:hover {
-      background: #c7d2fe;
+      background: #fad595;
+      border-color: var(--orange);
+      .action-btn__icon {
+        color: var(--orange);
+      }
     }
   }
 
   &--cancel {
-    background: #fee2e2;
-    color: #991b1b;
+    background: var(--bg-white);
 
     &:hover {
       background: #fecaca;
+      border-color: var(--red);
+      .action-btn__icon {
+        color: var(--red);
+      }
     }
   }
 }

@@ -1,13 +1,7 @@
 import React from "react";
-import {
-  X,
-  Package,
-  MapPin,
-  CreditCard,
-  User,
-  Phone,
-  Mail,
-} from "lucide-react";
+import { X, MapPin, CreditCard, User, Phone, Mail } from "lucide-react";
+
+import "../../../assets/styles/modal.scss";
 import "./OrderDetail.scss";
 
 // Map trạng thái
@@ -20,15 +14,16 @@ const ORDER_STATUS = {
 };
 
 const PAYMENT_STATUS = {
-  unpaid: "Chưa thanh toán",
+  pending: "Chờ thanh toán",
   paid: "Đã thanh toán",
+  failed: "Thanh toán thất bại",
   refunded: "Đã hoàn tiền",
 };
 
 const PAYMENT_METHOD = {
-  cash_on_delivery: "Thanh toán khi nhận hàng (COD)",
+  cod: "Thanh toán khi nhận hàng",
   bank_transfer: "Chuyển khoản ngân hàng",
-  e_wallet: "Ví điện tử",
+  mim_pay: "Ví Mim Pay",
 };
 
 export default function OrderDetailModal({
@@ -70,23 +65,19 @@ export default function OrderDetailModal({
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div
-        className="modal-container modal-container--large"
-        onClick={(e) => e.stopPropagation()}
-      >
+      <div className="modal modal--large" onClick={(e) => e.stopPropagation()}>
         {/* HEADER */}
-        <div className="modal-header">
-          <h2 className="modal-title">
-            <Package size={24} />
+        <div className="modal__header">
+          <h2 className="modal__title">
             Chi tiết đơn hàng #{orderDetail.order_id}
           </h2>
-          <button className="modal-close" onClick={onClose}>
+          <button className="modal__close" onClick={onClose}>
             <X size={24} />
           </button>
         </div>
 
         {/* BODY */}
-        <div className="modal-body">
+        <div className="modal__body">
           {/* Thông tin đơn hàng */}
           <div className="order-section">
             <h3 className="section-title">Thông tin đơn hàng</h3>
@@ -191,8 +182,8 @@ export default function OrderDetailModal({
               <MapPin size={20} />
               Địa chỉ giao hàng
             </h3>
-            <div className="address-box">
-              <p className="address-text">
+            <div className="info-item">
+              <p className="info-value">
                 {formatAddress(orderDetail.shipping_address_detail)}
               </p>
             </div>
@@ -286,7 +277,7 @@ export default function OrderDetailModal({
         </div>
 
         {/* FOOTER - Actions */}
-        <div className="modal-footer">
+        <div className="modal__footer">
           <button className="btn btn--secondary" onClick={onClose}>
             Đóng
           </button>

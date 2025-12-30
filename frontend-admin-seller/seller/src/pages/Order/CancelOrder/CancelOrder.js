@@ -71,20 +71,17 @@ export default function CancelOrderModal({
 
   return (
     <div className="modal-overlay" onClick={handleClose}>
-      <div className="modal-container" onClick={(e) => e.stopPropagation()}>
+      <div className="modal" onClick={(e) => e.stopPropagation()}>
         {/* HEADER */}
-        <div className="modal-header">
-          <h2 className="modal-title">
-            <AlertCircle size={24} className="text-danger" />
-            Hủy đơn hàng #{order.order_id}
-          </h2>
-          <button className="modal-close" onClick={handleClose}>
+        <div className="modal__header">
+          <h2 className="modal__title">Hủy đơn hàng #{order.order_id}</h2>
+          <button className="modal__close" onClick={handleClose}>
             <X size={24} />
           </button>
         </div>
 
         {/* BODY */}
-        <div className="modal-body">
+        <div className="modal__body">
           <div className="cancel-warning">
             <AlertCircle size={20} />
             <span>
@@ -113,7 +110,7 @@ export default function CancelOrderModal({
 
           {/* Chọn lý do */}
           <div className="form-group">
-            <label className="form-label">
+            <label className="form-group__label">
               Lý do hủy đơn <span className="required">*</span>
             </label>
             <div className="reason-list">
@@ -135,7 +132,7 @@ export default function CancelOrderModal({
           {/* Nhập lý do tùy chỉnh */}
           {selectedReason === "Khác" && (
             <div className="form-group">
-              <label className="form-label">
+              <label className="form-group__label">
                 Nhập lý do cụ thể <span className="required">*</span>
               </label>
               <textarea
@@ -160,7 +157,7 @@ export default function CancelOrderModal({
         </div>
 
         {/* FOOTER */}
-        <div className="modal-footer">
+        <div className="modal__footer">
           <button className="btn btn--secondary" onClick={handleClose}>
             Quay lại
           </button>

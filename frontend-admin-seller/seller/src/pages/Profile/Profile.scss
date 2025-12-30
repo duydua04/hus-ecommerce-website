@@ -203,26 +203,6 @@
   }
 }
 
-// Status Badge
-.status-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.375rem 0.875rem;
-  border-radius: 20px;
-  font-size: 0.875rem;
-  font-weight: 600;
-
-  &--active {
-    background: #e8f5e9;
-    color: #2e7d32;
-  }
-
-  &--inactive {
-    background: #ffebee;
-    color: #c62828;
-  }
-}
-
 // Responsive
 @media (max-width: 768px) {
   .profile {
