@@ -3,6 +3,7 @@ from typing import List, Any, Optional
 from ...models.review import Review
 from ...schemas.common import Page
 from ...schemas.review import (
+    ReviewMediaItem,
     ReviewResponse,
     ReviewCreate,
     ReviewUpdate,
@@ -20,6 +21,18 @@ router = APIRouter(
     prefix="/buyer/reviews",
     tags=["Buyer-Reviews"]
 )
+
+@router.get(
+    "/media",
+    response_model=list[ReviewMediaItem]
+)
+async def list_review_media(
+    service: BuyerReviewService = Depends(get_buyer_review_service),
+):
+    """
+    Danh sách ảnh + video review của tất cả sản phẩm
+    """
+    return await service.list_all_review_media()
 
 @router.get(
     "/product/{product_id}",
@@ -124,18 +137,6 @@ async def delete_review(
         order_id=order_id,
         delete_files=True  # nếu muốn xóa ảnh/video trên S3
     )
-
-# @router.get(
-#     "/{review_id}/replies",
-#     response_model=List[ReviewReplyResponse],
-#     summary="Xem phản hồi của shop",
-#     description="Buyer xem phản hồi từ seller cho review."
-# )
-# async def get_review_replies(
-#     review_id: str,
-#     service: BuyerReviewService = Depends(get_buyer_review_service),
-# ):
-#     return await service.get_replies(review_id)
 
 
 

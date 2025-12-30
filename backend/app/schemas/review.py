@@ -58,3 +58,13 @@ class ReviewUpdate(BaseModel):
     rating: Optional[int] = Field(None, ge=1, le=5)
     comment: Optional[str] = Field(None, min_length=1)
 
+class ReviewMediaItem(BaseModel):
+    review_id: str
+    product_id: int
+    buyer_id: int
+    rating: int
+    created_at: datetime
+    images: List[str] = []
+    videos: List[str] = []
+
+    

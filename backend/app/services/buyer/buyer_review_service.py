@@ -15,6 +15,7 @@ from ...models.review import Review, ReviewerSnapshot
 from ...models.catalog import Product
 from ...schemas.review import (
     ReviewCreate,
+    ReviewMediaItem,
     ReviewReplyResponse,
     ReviewUpdate,
     ReviewerResponse
@@ -217,6 +218,40 @@ class BuyerReviewService(BaseReviewService):
         # 3. Xóa review MongoDB
         await review.delete()
         return {"deleted": True, "review_id": str(review.id)}
+
+    # ===================== MEDIA REVIEW (ẢNH + VIDEO) =====================
+    async def list_all_review_media(self):
+        """
+        Lấy toàn bộ ảnh + video review của tất cả sản phẩm
+        FE tự random kết quả
+        """
+
+        query = Review.find(
+            {
+                "$or": [
+                    {"images": {"$exists": True, "$ne": []}},
+                    {"videos": {"$exists": True, "$ne": []}},
+                ]
+            }
+        )
+
+        items = await query.sort("-created_at").limit(50).to_list()
+
+        results = []
+        for r in items:
+            results.append(
+                ReviewMediaItem(
+                    review_id=str(r.id),
+                    product_id=r.product_id,
+                    buyer_id=r.buyer_id,
+                    rating=r.rating,
+                    created_at=r.created_at,
+                    images=[public_url(i) for i in (r.images or [])],
+                    videos=[public_url(v) for v in (r.videos or [])],
+                )
+            )
+
+        return results
 
 def get_buyer_review_service(
     db: AsyncSession = Depends(get_db),
