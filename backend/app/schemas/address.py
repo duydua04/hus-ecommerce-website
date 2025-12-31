@@ -55,6 +55,11 @@ class BuyerAddressResponse(ORMBase):
     is_default:bool
     label: BuyerAddressLabel | None = None
 
+    address: Optional[AddressResponse] = None
+
+    class Config:
+        from_attributes = True
+
 # Request tao dia chi seller
 class SellerAddressCreate(BaseModel):
     address_id: int
