@@ -3,7 +3,9 @@ import { X, Check } from "lucide-react";
 import PageHeader from "../../components/common/PageHeader/PageHeader";
 import Button from "../../components/common/Button/Button";
 import EditProfileModal from "./EditProfile/EditProfileModal";
+import ImageUploadModal from "../../components/common/ImageUpload/ImageUpload";
 import useProfile from "../../hooks/useProfile";
+import useAvatar from "../../hooks/useAvatar";
 import "./Profile.scss";
 
 // Avatar mặc định
@@ -14,8 +16,16 @@ export default function ProfileContent() {
   const { profile, loading, error, fetchProfile, updateProfile, clearError } =
     useProfile();
 
+  const {
+    uploadAvatar,
+    loading: avatarLoading,
+    error: avatarError,
+    clearError: clearAvatarError,
+  } = useAvatar();
+
   const [successMessage, setSuccessMessage] = useState("");
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
   const [editMode, setEditMode] = useState(""); // "personal" or "shop"
 
   // Fetch profile on mount
@@ -58,6 +68,34 @@ export default function ProfileContent() {
       setTimeout(() => setSuccessMessage(""), 3000);
     } catch (err) {
       console.error("Error updating profile:", err);
+    }
+  };
+
+  // Handler upload avatar
+  const handleAvatarClick = () => {
+    clearError();
+    clearAvatarError();
+    setSuccessMessage("");
+    setIsAvatarModalOpen(true);
+  };
+
+  const handleAvatarUpload = async (file) => {
+    try {
+      const result = await uploadAvatar(file);
+
+      if (result.success) {
+        setIsAvatarModalOpen(false);
+        setSuccessMessage("Cập nhật avatar thành công");
+        setTimeout(() => setSuccessMessage(""), 3000);
+
+        // Refresh profile để lấy avatar mới
+        await fetchProfile();
+      } else {
+        throw new Error(result.error);
+      }
+    } catch (err) {
+      console.error("Error upload avatar:", err);
+      throw err; // Để modal hiển thị lỗi
     }
   };
 
@@ -111,10 +149,16 @@ export default function ProfileContent() {
         </div>
 
         {/* Alerts */}
-        {error && (
+        {(error || avatarError) && (
           <div className="toolbar__alert alert alert-error">
-            <span>{error}</span>
-            <button onClick={clearError} className="alert-close">
+            <span>{error || avatarError}</span>
+            <button
+              onClick={() => {
+                clearError();
+                clearAvatarError();
+              }}
+              className="alert-close"
+            >
               <X size={18} />
             </button>
           </div>
@@ -132,15 +176,25 @@ export default function ProfileContent() {
           {/* Profile Header Card */}
           <div className="profile-card profile-header">
             <div className="profile-header__content">
+              {/* Avatar có thể click để upload */}
               <div className="profile-header__avatar-wrapper">
                 <img
                   src={profile?.avt_url || DEFAULT_AVATAR}
                   alt="Avatar"
-                  className="profile-header__avatar"
+                  className="profile-header__avatar profile-header__avatar--clickable"
+                  onClick={handleAvatarClick}
+                  title="Click để cập nhật avatar"
                   onError={(e) => {
                     e.target.src = DEFAULT_AVATAR;
                   }}
                 />
+                <div
+                  className="profile-header__avatar-overlay"
+                  onClick={handleAvatarClick}
+                >
+                  <i className="bx bx-camera"></i>
+                  <span>Đổi ảnh</span>
+                </div>
               </div>
 
               <div className="profile-header__info">
@@ -284,6 +338,19 @@ export default function ProfileContent() {
         mode={editMode}
         profile={profile}
         loading={loading}
+      />
+
+      {/* Avatar Upload Modal */}
+      <ImageUploadModal
+        isOpen={isAvatarModalOpen}
+        onClose={() => setIsAvatarModalOpen(false)}
+        onUpload={handleAvatarUpload}
+        title="Cập nhật avatar"
+        maxSizeMB={10}
+        multiple={false}
+        dragDropText="Kéo thả ảnh đại diện"
+        selectFileText="Chọn ảnh"
+        maxSizeText="Tối đa 10MB: JPG, PNG, GIF, WEBP"
       />
     </main>
   );
