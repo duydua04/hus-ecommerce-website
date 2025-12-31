@@ -90,6 +90,7 @@ async def update_cart_quantity_item(
     Cập nhật số lượng sản phẩm trong giỏ hàng.
     - Có thể tăng 1 đơn vị (`action="increase"` ,`action="decrease"` ) hoặc set quantity cụ thể.
     - Đồng bộ Redis sau khi update SQL.
+    - Nếu quantity = 0 thì sản phẩm sẽ bị xóa khỏi giỏ hàng.
     """
     return await service.update_quantity(
         buyer_id=buyer["user"].buyer_id,
