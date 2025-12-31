@@ -120,13 +120,19 @@ class ProductVariantWithSizesResponse(ProductVariantResponse):
 
 from typing import Optional
 class UpdateCartItemRequest(BaseModel):
-    quantity: int | None = None
-    action: str | None = None  # "increase"
+    product_id: int
+    variant_id: Optional[int] = None
+    size_id: Optional[int] = None
+    action: Optional[str] = None  # "increase" hoặc "decrease"
+    quantity: Optional[int] = None  # số lượng mới nếu muốn set trực tiếp
 
 class UpdateVariantSizeRequest(BaseModel):
-    new_variant_id: Optional[int] = None
-    new_size_id: Optional[int] = None
-
+    product_id: int                  # ID của sản phẩm cần update
+    old_variant_id: Optional[int]    # variant hiện tại của item (cũ)
+    old_size_id: Optional[int]       # size hiện tại của item (cũ)
+    new_variant_id: Optional[int]    # variant muốn update (nếu muốn đổi)
+    new_size_id: Optional[int]       # size muốn update (nếu muốn đổi)
+    
 class AddToCartRequest(BaseModel):
     product_id: int
     variant_id: Optional[int] = None

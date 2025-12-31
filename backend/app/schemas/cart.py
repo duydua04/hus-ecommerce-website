@@ -46,5 +46,10 @@ class SellerCart(BaseModel):
     seller: str
     products: List[CartProduct]
 
+class CartItemKey(BaseModel):
+    product_id: int
+    variant_id: Optional[int] = None
+    size_id: Optional[int] = None
+
 class CartSummaryRequest(BaseModel):
-    selected_item_ids: List[int]  # danh sách shopping_cart_item_id
+    selected_items: List[CartItemKey]  # danh sách sản phẩm trong cart

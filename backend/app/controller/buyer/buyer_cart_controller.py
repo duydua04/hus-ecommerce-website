@@ -17,7 +17,7 @@ router = APIRouter(
 )
 
 
-# ===================== THÊM SẢN PHẨM VÀO GIỎ HÀNG =====================
+# ===================== THÊM SẢN PHẨM VÀO GIỎ HÀNG (REDIS) =====================
 @router.post("/add", response_model=dict)
 async def add_to_cart(
     payload: AddToCartRequest,
@@ -25,10 +25,10 @@ async def add_to_cart(
     buyer: dict = Depends(require_buyer)
 ):
     """
-    Thêm sản phẩm vào giỏ hàng
+    Thêm sản phẩm vào giỏ hàng (Redis)
     """
-    # Thêm sản phẩm
-    cart = await service.add_to_cart(
+
+    item = await service.add_to_cart(
         buyer_id=buyer["user"].buyer_id,
         product_id=payload.product_id,
         variant_id=payload.variant_id,
@@ -36,16 +36,13 @@ async def add_to_cart(
         quantity=payload.quantity
     )
 
-    # Preload items để tính tổng
-    await service.db.refresh(cart, attribute_names=["items"])
-    total_items = sum(item.quantity for item in cart.items)
+    total_items = await service.count_items(buyer["user"].buyer_id)
 
     return {
         "message": f"✅ Thêm {payload.quantity} sản phẩm vào giỏ hàng thành công",
-        "cart_id": cart.shopping_cart_id,
+        "item": item,
         "total_items": total_items
     }
-
 # ===================== HIỂN THỊ GIỎ HÀNG =====================
 @router.get("/show")
 async def get_buyer_cart(
@@ -53,42 +50,43 @@ async def get_buyer_cart(
     buyer: dict = Depends(require_buyer)
 ):
     """
-    Lấy giỏ hàng của buyer (phân trang theo cart item)
+    Lấy giỏ hàng của buyer từ Redis
     """
-
     return await service.get_buyer_cart(
         buyer_id=buyer["user"].buyer_id
     )
-# ===================== TÌM KIẾM SẢN PHẨM TRONG GIỎ HÀNG =====================
-@router.get("/cart/search")
-async def search_cart_items(
-    q: str = Query(..., min_length=1),
-    limit: int = Query(10, ge=1, le=20),
-    service: CartServiceAsync = Depends(get_cart_service),
-    buyer: dict = Depends(require_buyer)
-):
-    """
-    Search sản phẩm trong giỏ hàng (phục vụ scroll + tick chọn).
-    """
-    data = await service.search_buyer_cart_items(
-        buyer_id=buyer["user"].buyer_id,
-        q=q,
-        limit=limit,
-    )
-
-    return {"data": data}
+# # ===================== ROUTER =======================
+# @router.get("/cart/search")
+# async def search_cart_items(
+#     q: str = Query(..., min_length=1),
+#     limit: int = Query(10, ge=1, le=20),
+#     service: CartServiceAsync = Depends(get_cart_service),
+#     buyer: dict = Depends(require_buyer)
+# ):
+#     """
+#     Search sản phẩm trong giỏ hàng (Redis + DB lookup)
+#     """
+#     data = await service.search_buyer_cart_items(
+#         buyer_id=buyer["user"].buyer_id,
+#         q=q,
+#         limit=limit,
+#     )
+#     return {"data": data}
 # ===================== XÓA SẢN PHẨM KHỎI GIỎ HÀNG =====================
-@router.delete("/product/{item_id}", response_model=dict)
+@router.delete("/product", response_model=dict)
 async def delete_item(
-    item_id: int,
+    product_id: int = Query(...),
+    variant_id: int | None = Query(None),
+    size_id: int | None = Query(None),
     service: CartServiceAsync = Depends(get_cart_service),
     buyer: dict = Depends(require_buyer)
 ):
-    """
-    Xóa 1 item khỏi giỏ hàng của người dùng.
-    - item_id là `shopping_cart_item_id` trong DB.
-    """
-    return await service.delete_item(buyer["user"].buyer_id, item_id)
+    return await service.delete_item(
+        buyer["user"].buyer_id,
+        product_id,
+        variant_id,
+        size_id
+    )
 
 
 # ===================== TÍNH TỔNG TIỀN GIỎ HÀNG =====================
@@ -100,38 +98,41 @@ async def cart_summary(
     buyer: dict = Depends(require_buyer)
 ):
     """
-    Tính tổng tiền các sản phẩm trong giỏ hàng dựa trên danh sách item_id.
-    - Trả về subtotal và tổng số lượng item.
+    Tính tổng tiền các sản phẩm trong giỏ hàng dựa trên danh sách selected_items (product_id, variant_id, size_id)
     """
-    return await service.cart_total(buyer["user"].buyer_id, request.selected_item_ids)
-
-
+    return await service.cart_total(
+        buyer_id=buyer["user"].buyer_id,
+        selected_items=request.selected_items
+    )
 # ===================== CẬP NHẬT SỐ LƯỢNG SẢN PHẨM =====================
-@router.patch("/item/quantity/{item_id}")
+@router.patch("/item/quantity")
 async def update_cart_quantity_item(
-    item_id: int,
     request: UpdateCartItemRequest,
     service: CartServiceAsync = Depends(get_cart_service),
     buyer: dict = Depends(require_buyer)
 ):
     """
-    Cập nhật số lượng sản phẩm trong giỏ hàng.
+    Cập nhật số lượng sản phẩm trong giỏ hàng (Redis).
+
+    FE cần gửi JSON body gồm:
+    - product_id: int                -> ID sản phẩm
+    - variant_id: int (optional)    -> ID biến thể, nếu sản phẩm có variant
+    - size_id: int (optional)       -> ID size, nếu sản phẩm có size
+    - action: str (optional)        -> "increase" hoặc "decrease" để tăng/giảm số lượng
+    - quantity: int (optional)      -> set số lượng trực tiếp (nếu muốn set cụ thể)
     """
-    return await service.update_quantity(buyer["user"].buyer_id, item_id, request)
+    return await service.update_quantity(buyer["user"].buyer_id, request)
 
 
 # ===================== CẬP NHẬT VARIANT + SIZE =====================
-@router.patch("/item/variant-size/{item_id}")
+@router.patch("/item/variant-size", response_model=dict)
 async def update_cart_item_variant_size(
-    item_id: int,
     request: UpdateVariantSizeRequest,
     service: CartServiceAsync = Depends(get_cart_service),
     buyer: dict = Depends(require_buyer)
 ):
     """
-    Cập nhật variant và size của sản phẩm trong giỏ hàng.
-    - Kiểm tra tồn kho, hợp lệ với product.
-    - Nếu trùng item, merge số lượng.
+    Cập nhật variant và size của sản phẩm trong giỏ hàng (Redis).
     """
-    return await service.update_variant_size(buyer["user"].buyer_id, item_id, request)
+    return await service.update_variant_size(buyer["user"].buyer_id, request)
 
