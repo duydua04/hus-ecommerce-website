@@ -55,7 +55,22 @@ class SellerReviewService(BaseReviewService):
         # Lấy danh sách (Sort mới nhất trước)
         items = await query.sort("-created_at").skip(offset).limit(limit).to_list()
 
-        return self._paginate(items, total, limit, offset)
+        page_result = self._paginate(items, total, limit, offset)
+
+        if items:
+            current_p_ids = list({item.product_id for item in items})
+
+            if current_p_ids:
+                stmt_name = select(Product.product_id, Product.name).where(
+                    Product.product_id.in_(current_p_ids)
+                )
+                res_name = await self.db.execute(stmt_name)
+                product_map = {pid: name for pid, name in res_name.all()}
+
+                for review_resp in page_result.data:
+                    review_resp.product_name = product_map.get(review_resp.product_id)
+
+        return page_result
 
 
     async def reply_review(self, seller_id: int, payload: ReviewReplyCreate):

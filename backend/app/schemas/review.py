@@ -47,6 +47,7 @@ class ReviewerResponse(BaseModel):
 class ReviewResponse(BaseModel):
     id: PyObjectId = Field(alias="_id")
     product_id: int
+    product_name: Optional[str] = None
     order_id: int
     reviewer: ReviewerResponse
     rating: int
