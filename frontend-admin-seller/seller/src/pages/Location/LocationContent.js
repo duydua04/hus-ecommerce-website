@@ -172,7 +172,7 @@ export default function LocationContent() {
           title="Địa chỉ"
           breadcrumbs={[
             { label: "Trang chủ", path: "/dashboard" },
-            { label: "Địa chỉ", path: "/location" },
+            { label: "Địa chỉ", path: "/locations" },
           ]}
         />
         <div className="toolbar">
@@ -188,7 +188,7 @@ export default function LocationContent() {
         title="Địa chỉ"
         breadcrumbs={[
           { label: "Trang chủ", path: "/dashboard" },
-          { label: "Địa chỉ", path: "/location" },
+          { label: "Địa chỉ", path: "/locations" },
         ]}
       />
 

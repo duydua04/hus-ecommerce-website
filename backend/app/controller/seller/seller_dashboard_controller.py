@@ -67,8 +67,8 @@ async def get_top_selling_products(
     products = await service.get_top_products(current_seller["user"].seller_id)
     return products
 
-#
-# # 4. API FORCE SYNC (ĐỒNG BỘ THỦ CÔNG)
+
+# 4. API FORCE SYNC (ĐỒNG BỘ THỦ CÔNG)
 # @router.post("/sync")
 # async def force_sync_dashboard(
 #         current_seller=Depends(require_seller)
