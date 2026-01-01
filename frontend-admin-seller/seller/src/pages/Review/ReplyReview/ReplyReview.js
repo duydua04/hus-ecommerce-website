@@ -23,7 +23,6 @@ export default function ReplyReviewModal({
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Validation
     if (!replyText.trim()) {
       setError("Vui lòng nhập nội dung phản hồi");
       return;
@@ -48,16 +47,29 @@ export default function ReplyReviewModal({
         {[1, 2, 3, 4, 5].map((star) => (
           <Star
             key={star}
-            size={16}
-            fill={star <= rating ? "#fbbf24" : "none"}
-            stroke={star <= rating ? "#fbbf24" : "#d1d5db"}
+            size={18}
+            fill={star <= rating ? "#ef4444" : "none"}
+            stroke={star <= rating ? "#ef4444" : "#d1d5db"}
           />
         ))}
       </div>
     );
   };
 
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    return date.toLocaleString("vi-VN", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
   const remainingChars = 500 - replyText.length;
+  const existingRepliesCount = review.replies?.length || 0;
 
   return (
     <div className="modal-overlay" onClick={onCancel}>
@@ -74,38 +86,70 @@ export default function ReplyReviewModal({
         <div className="modal__body">
           {/* Review Info */}
           <div className="review-info">
-            <div className="review-info__header">
-              <h4 className="review-info__product">{review.product_name}</h4>
-              <div className="review-info__rating">
-                {renderStars(review.rating)}
-                <span className="rating-number">{review.rating}/5</span>
+            {/* Customer Info */}
+            <div className="review-info__customer">
+              <div className="customer-info">
+                {review.reviewer?.avatar && (
+                  <img
+                    src={review.reviewer.avatar}
+                    alt={review.reviewer.name}
+                    className="customer-avatar"
+                  />
+                )}
+                <div className="customer-details">
+                  <span className="customer-name">
+                    {review.reviewer?.name || "Ẩn danh"}
+                  </span>
+                </div>
               </div>
             </div>
 
-            {review.comment && (
-              <div className="review-info__comment">
-                <p className="review-info__label">Nhận xét của khách hàng:</p>
-                <p className="review-info__text">{review.comment}</p>
+            {/* Rating and Date */}
+            <div className="review-info__meta">
+              <div className="review-rating">{renderStars(review.rating)}</div>
+              <div className="review-date">
+                <span>{formatDate(review.created_at)}</span>
+              </div>
+            </div>
+
+            {/* Review Text */}
+            {review.review_text && (
+              <div className="review-info__content">
+                <p className="review-text">{review.review_text}</p>
               </div>
             )}
 
-            <div className="review-info__customer">
-              <span className="customer-name">
-                {review.buyer_name || "Ẩn danh"}
-              </span>
-              <span className="customer-date">
-                {review.created_at
-                  ? new Date(review.created_at).toLocaleDateString("vi-VN")
-                  : ""}
-              </span>
-            </div>
+            {/* Existing Replies */}
+            {existingRepliesCount > 0 && (
+              <div className="existing-replies">
+                <p className="existing-replies__title">
+                  Phản hồi hiện có ({existingRepliesCount}):
+                </p>
+                <div className="existing-replies__list">
+                  {review.replies.map((reply, idx) => (
+                    <div key={idx} className="existing-reply">
+                      <div className="existing-reply__header">
+                        <span className="reply-author">Shop</span>
+                        <span className="reply-date">
+                          {formatDate(reply.reply_date)}
+                        </span>
+                      </div>
+                      <p className="existing-reply__text">{reply.reply_text}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Reply Form */}
           <form onSubmit={handleSubmit} className="reply-form">
             <div className="form-group">
               <label className="form-group__label">
-                Nội dung phản hồi <span className="required">*</span>
+                {existingRepliesCount > 0
+                  ? "Thêm phản hồi mới"
+                  : "Nội dung phản hồi"}{" "}
+                <span className="required">*</span>
               </label>
               <textarea
                 className={`form-textarea ${
@@ -140,11 +184,11 @@ export default function ReplyReviewModal({
             </div>
 
             <div className="reply-tips">
-              <p className="reply-tips__title">💡 Gợi ý phản hồi:</p>
+              <p className="reply-tips__title">Gợi ý phản hồi:</p>
               <ul className="reply-tips__list">
-                <li>Cảm ơn khách hàng đã đánh giá và tin tưởng sản phẩm</li>
-                <li>Giải đáp thắc mắc hoặc khắc phục vấn đề (nếu có)</li>
-                <li>Mời khách hàng tiếp tục ủng hộ trong tương lai</li>
+                <li>Cảm ơn bạn đã đánh giá sản phẩm cho shop!</li>
+                <li>Bạn có thắc mắc gì về sản phẩm không?</li>
+                <li>Ủng hộ cho shop tiếp bạn nhé!</li>
               </ul>
             </div>
           </form>

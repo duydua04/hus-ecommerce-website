@@ -6,7 +6,7 @@ const REVIEW_ENDPOINT = `${API_URL}/seller/reviews`;
 const handleAxiosError = (error) => {
   if (error.response) {
     throw {
-      detail: error.response.data?.detail,
+      detail: error.response.data?.detail || error.response.data?.message,
       status: error.response.status,
     };
   }
@@ -24,14 +24,19 @@ const reviewService = {
     try {
       const queryParams = new URLSearchParams();
 
+      // API sử dụng offset thay vì page
+      const page = params.page || 1;
+      const limit = params.limit || 10;
+      const offset = (page - 1) * limit;
+
       if (params.product_name) {
         queryParams.append("product_name", params.product_name);
       }
       if (params.rating) {
         queryParams.append("rating", params.rating);
       }
-      queryParams.append("page", params.page || 1);
-      queryParams.append("limit", params.limit || 10);
+      queryParams.append("offset", offset);
+      queryParams.append("limit", limit);
 
       const res = await axios.get(
         `${REVIEW_ENDPOINT}?${queryParams.toString()}`,

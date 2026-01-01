@@ -12,31 +12,32 @@ const extractErrorMessage = (err) => {
 
 const normalizeReview = (data = {}) => {
   return {
-    id: data.id || data._id,
+    _id: data._id,
+    id: data._id, // Thêm id để tương thích với code cũ
     product_id: data.product_id,
     product_name: data.product_name,
-    buyer_id: data.buyer_id,
-    buyer_name: data.buyer_name,
-    seller_id: data.seller_id,
     order_id: data.order_id,
+    reviewer: data.reviewer || {},
     rating: data.rating || 0,
-    comment: data.comment || "",
+    review_text: data.review_text || "",
     images: Array.isArray(data.images) ? data.images : [],
+    videos: Array.isArray(data.videos) ? data.videos : [],
     replies: Array.isArray(data.replies) ? data.replies : [],
     created_at: data.created_at,
-    updated_at: data.updated_at,
   };
 };
 
-const normalizePaginationData = (data = {}) => {
+const normalizePaginationData = (apiResponse = {}) => {
+  // API trả về { meta: {...}, data: [...] }
+  const meta = apiResponse.meta || {};
+  const data = apiResponse.data || [];
+
   return {
-    items: Array.isArray(data.items)
-      ? data.items.map((i) => normalizeReview(i))
-      : [],
-    total: data.total || 0,
-    page: data.page || 1,
-    limit: data.limit || 10,
-    pages: data.pages || 0,
+    items: Array.isArray(data) ? data.map((i) => normalizeReview(i)) : [],
+    total: meta.total || 0,
+    page: Math.floor((meta.offset || 0) / (meta.limit || 10)) + 1,
+    limit: meta.limit || 10,
+    pages: Math.ceil((meta.total || 0) / (meta.limit || 10)),
   };
 };
 
@@ -95,7 +96,7 @@ const useReview = () => {
         // Cập nhật review trong state với reply mới
         setReviews((prev) =>
           prev.map((review) =>
-            review.id === reviewId
+            review._id === reviewId
               ? {
                   ...review,
                   replies: [...(review.replies || []), reply],
@@ -113,14 +114,19 @@ const useReview = () => {
   const getReplies = useCallback(
     (reviewId) =>
       run(async () => {
-        const replies = await reviewService.getReplies(reviewId);
+        const repliesData = await reviewService.getReplies(reviewId);
+
+        // API có thể trả về { data: [...] } hoặc trực tiếp [...]
+        const replies = Array.isArray(repliesData)
+          ? repliesData
+          : Array.isArray(repliesData?.data)
+          ? repliesData.data
+          : [];
 
         // Cập nhật replies cho review cụ thể
         setReviews((prev) =>
           prev.map((review) =>
-            review.id === reviewId
-              ? { ...review, replies: Array.isArray(replies) ? replies : [] }
-              : review
+            review._id === reviewId ? { ...review, replies } : review
           )
         );
 

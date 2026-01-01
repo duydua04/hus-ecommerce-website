@@ -1,5 +1,14 @@
 import React from "react";
-import { X, Star, User, Package, Calendar, MessageSquare } from "lucide-react";
+import {
+  X,
+  Star,
+  User,
+  Package,
+  Calendar,
+  MessageSquare,
+  Image as ImageIcon,
+  Video,
+} from "lucide-react";
 import "./ReviewDetail.scss";
 
 export default function ReviewDetailModal({
@@ -60,13 +69,7 @@ export default function ReviewDetailModal({
               <div className="info-row">
                 <span className="info-label">Sản phẩm:</span>
                 <span className="info-value">
-                  {review.product_name || "N/A"}
-                </span>
-              </div>
-              <div className="info-row">
-                <span className="info-label">Mã sản phẩm:</span>
-                <span className="info-value">
-                  #{review.product_id || "N/A"}
+                  #{review.product_name || "N/A"}
                 </span>
               </div>
             </div>
@@ -79,15 +82,28 @@ export default function ReviewDetailModal({
               <h3 className="review-section__title">Thông tin khách hàng</h3>
             </div>
             <div className="review-section__content">
-              <div className="info-row">
-                <span className="info-label">Tên khách hàng:</span>
-                <span className="info-value">
-                  {review.buyer_name || "Ẩn danh"}
-                </span>
-              </div>
-              <div className="info-row">
-                <span className="info-label">Mã đơn hàng:</span>
-                <span className="info-value">#{review.order_id || "N/A"}</span>
+              <div className="customer-info">
+                {review.reviewer?.avatar && (
+                  <img
+                    src={review.reviewer.avatar}
+                    alt={review.reviewer.name}
+                    className="customer-avatar"
+                  />
+                )}
+                <div className="customer-details">
+                  <div className="info-row">
+                    <span className="info-label">Tên khách hàng:</span>
+                    <span className="info-value">
+                      {review.reviewer?.name || "Ẩn danh"}
+                    </span>
+                  </div>
+                  <div className="info-row">
+                    <span className="info-label">Mã đơn hàng:</span>
+                    <span className="info-value">
+                      #{review.order_id || "N/A"}
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -109,19 +125,45 @@ export default function ReviewDetailModal({
                 <span>{formatDate(review.created_at)}</span>
               </div>
 
-              {review.comment && (
+              {review.review_text && (
                 <div className="review-comment">
-                  <p className="review-comment__text">{review.comment}</p>
+                  <p className="review-comment__text">{review.review_text}</p>
                 </div>
               )}
 
+              {/* Images */}
               {review.images && review.images.length > 0 && (
-                <div className="review-images">
-                  <p className="review-images__label">Hình ảnh đính kèm:</p>
-                  <div className="review-images__grid">
+                <div className="review-media">
+                  <p className="review-media__label">
+                    <ImageIcon size={16} />
+                    Hình ảnh đính kèm ({review.images.length})
+                  </p>
+                  <div className="review-media__grid">
                     {review.images.map((img, idx) => (
-                      <div key={idx} className="review-image">
+                      <div key={idx} className="review-media__item">
                         <img src={img} alt={`Review ${idx + 1}`} />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Videos */}
+              {review.videos && review.videos.length > 0 && (
+                <div className="review-media">
+                  <p className="review-media__label">
+                    <Video size={16} />
+                    Video đính kèm ({review.videos.length})
+                  </p>
+                  <div className="review-media__grid">
+                    {review.videos.map((videoKey, idx) => (
+                      <div
+                        key={idx}
+                        className="review-media__item review-media__item--video"
+                      >
+                        <Video size={32} />
+                        <span className="video-label">Video {idx + 1}</span>
+                        <span className="video-key">{videoKey}</span>
                       </div>
                     ))}
                   </div>
@@ -149,9 +191,12 @@ export default function ReviewDetailModal({
                   {review.replies.map((reply, idx) => (
                     <div key={idx} className="reply-item">
                       <div className="reply-header">
-                        <span className="reply-author">Shop</span>
+                        <span className="reply-author">
+                          <User size={14} />
+                          Shop
+                        </span>
                         <span className="reply-date">
-                          {formatDate(reply.created_at)}
+                          {formatDate(reply.reply_date)}
                         </span>
                       </div>
                       <p className="reply-text">{reply.reply_text}</p>

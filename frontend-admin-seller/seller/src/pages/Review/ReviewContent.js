@@ -68,7 +68,7 @@ export default function ReviewContent() {
     try {
       setSelectedReview(review);
       setIsDetailModalOpen(true);
-      
+
       // Gọi API lấy danh sách replies riêng biệt
       setLoadingReplies(true);
       await getReplies(review.id);
@@ -81,7 +81,7 @@ export default function ReviewContent() {
 
   const handleReplyClick = (review) => {
     // Lấy review đã có replies từ state (đã được update bởi getReplies)
-    const reviewWithReplies = reviews.find(r => r.id === review.id) || review;
+    const reviewWithReplies = reviews.find((r) => r.id === review.id) || review;
     setReviewToReply(reviewWithReplies);
     setIsReplyModalOpen(true);
   };
@@ -133,16 +133,16 @@ export default function ReviewContent() {
   /* TABLE  */
   const columns = [
     {
-      key: "product_name",
+      key: "product_id",
       label: "Sản phẩm",
       className: "table__cell--product",
-      render: (v) => v || "N/A",
+      render: (v) => `Sản phẩm #${v}` || "N/A",
     },
     {
-      key: "buyer_name",
+      key: "reviewer",
       label: "Khách hàng",
       className: "table__cell--buyer",
-      render: (v) => v || "Ẩn danh",
+      render: (v) => v?.name || "Ẩn danh",
     },
     {
       key: "rating",
@@ -156,28 +156,13 @@ export default function ReviewContent() {
       ),
     },
     {
-      key: "comment",
+      key: "review_text",
       label: "Nội dung",
       className: "table__cell--comment",
       render: (v) => {
         if (!v) return <span className="text-muted">Không có bình luận</span>;
         return v.length > 50 ? `${v.substring(0, 50)}...` : v;
       },
-    },
-    {
-      key: "created_at",
-      label: "Ngày đánh giá",
-      className: "table__cell--date",
-      render: (v) =>
-        v
-          ? new Date(v).toLocaleDateString("vi-VN", {
-              day: "2-digit",
-              month: "2-digit",
-              year: "numeric",
-              hour: "2-digit",
-              minute: "2-digit",
-            })
-          : "N/A",
     },
     {
       key: "replies",
@@ -214,8 +199,8 @@ export default function ReviewContent() {
   ];
 
   // Lấy review đã update từ state để truyền vào modal
-  const currentSelectedReview = selectedReview 
-    ? reviews.find(r => r.id === selectedReview.id) || selectedReview
+  const currentSelectedReview = selectedReview
+    ? reviews.find((r) => r.id === selectedReview.id) || selectedReview
     : null;
 
   /* RENDER */
