@@ -1,7 +1,7 @@
-from pydantic import BaseModel, Field, BeforeValidator
+from pydantic import BaseModel, Field, BeforeValidator, field_validator
 from typing import List, Optional, Annotated
 from datetime import datetime
-
+from ..config.s3 import public_url
 
 PyObjectId = Annotated[str, BeforeValidator(str)]
 
@@ -25,6 +25,8 @@ class ReviewReplyResponse(BaseModel):
     reply_text: str
     reply_date: datetime
 
+    class Config:
+        from_attributes = True
 
 class ReviewerResponse(BaseModel):
     id: int
@@ -33,6 +35,13 @@ class ReviewerResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+    @field_validator("avatar")
+    @classmethod
+    def transform_avatar_url(cls, v: str | None) -> str | None:
+        if v:
+            return public_url(v)
+        return v
 
 
 class ReviewResponse(BaseModel):
