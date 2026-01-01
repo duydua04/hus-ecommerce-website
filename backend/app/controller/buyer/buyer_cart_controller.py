@@ -17,7 +17,7 @@ router = APIRouter(
 )
 
 
-# ===================== THÊM SẢN PHẨM VÀO GIỎ HÀNG =====================
+# ===================== THÊM SẢN PHẨM VÀO GIỎ HÀNG (REDIS) =====================
 @router.post("/add", response_model=dict)
 async def add_to_cart(
     payload: AddToCartRequest,
@@ -27,25 +27,14 @@ async def add_to_cart(
     """
     Thêm sản phẩm vào giỏ hàng
     """
-    # Thêm sản phẩm
-    cart = await service.add_to_cart(
+    result = await service.add_to_cart(
         buyer_id=buyer["user"].buyer_id,
         product_id=payload.product_id,
         variant_id=payload.variant_id,
         size_id=payload.size_id,
         quantity=payload.quantity
     )
-
-    # Preload items để tính tổng
-    await service.db.refresh(cart, attribute_names=["items"])
-    total_items = sum(item.quantity for item in cart.items)
-
-    return {
-        "message": f"✅ Thêm {payload.quantity} sản phẩm vào giỏ hàng thành công",
-        "cart_id": cart.shopping_cart_id,
-        "total_items": total_items
-    }
-
+    return result
 # ===================== HIỂN THỊ GIỎ HÀNG =====================
 @router.get("/show")
 async def get_buyer_cart(
@@ -53,30 +42,12 @@ async def get_buyer_cart(
     buyer: dict = Depends(require_buyer)
 ):
     """
-    Lấy giỏ hàng của buyer (phân trang theo cart item)
+    Lấy giỏ hàng của buyer, trả về phân nhóm theo seller
     """
-
     return await service.get_buyer_cart(
         buyer_id=buyer["user"].buyer_id
     )
-# ===================== TÌM KIẾM SẢN PHẨM TRONG GIỎ HÀNG =====================
-@router.get("/cart/search")
-async def search_cart_items(
-    q: str = Query(..., min_length=1),
-    limit: int = Query(10, ge=1, le=20),
-    service: CartServiceAsync = Depends(get_cart_service),
-    buyer: dict = Depends(require_buyer)
-):
-    """
-    Search sản phẩm trong giỏ hàng (phục vụ scroll + tick chọn).
-    """
-    data = await service.search_buyer_cart_items(
-        buyer_id=buyer["user"].buyer_id,
-        q=q,
-        limit=limit,
-    )
 
-    return {"data": data}
 # ===================== XÓA SẢN PHẨM KHỎI GIỎ HÀNG =====================
 @router.delete("/product/{item_id}", response_model=dict)
 async def delete_item(
@@ -87,9 +58,9 @@ async def delete_item(
     """
     Xóa 1 item khỏi giỏ hàng của người dùng.
     - item_id là `shopping_cart_item_id` trong DB.
+    - Trả về giỏ hàng mới sau khi xóa.
     """
     return await service.delete_item(buyer["user"].buyer_id, item_id)
-
 
 # ===================== TÍNH TỔNG TIỀN GIỎ HÀNG =====================
 
@@ -103,11 +74,12 @@ async def cart_summary(
     Tính tổng tiền các sản phẩm trong giỏ hàng dựa trên danh sách item_id.
     - Trả về subtotal và tổng số lượng item.
     """
-    return await service.cart_total(buyer["user"].buyer_id, request.selected_item_ids)
-
-
+    return await service.cart_total(
+        buyer_id=buyer["user"].buyer_id,
+        selected_item_ids=request.selected_item_ids
+    )
 # ===================== CẬP NHẬT SỐ LƯỢNG SẢN PHẨM =====================
-@router.patch("/item/quantity/{item_id}")
+@router.patch("/item/quantity/{item_id}", response_model=dict)
 async def update_cart_quantity_item(
     item_id: int,
     request: UpdateCartItemRequest,
@@ -116,12 +88,19 @@ async def update_cart_quantity_item(
 ):
     """
     Cập nhật số lượng sản phẩm trong giỏ hàng.
+    - Có thể tăng 1 đơn vị (`action="increase"` ,`action="decrease"` ) hoặc set quantity cụ thể.
+    - Đồng bộ Redis sau khi update SQL.
+    - Nếu quantity = 0 thì sản phẩm sẽ bị xóa khỏi giỏ hàng.
     """
-    return await service.update_quantity(buyer["user"].buyer_id, item_id, request)
+    return await service.update_quantity(
+        buyer_id=buyer["user"].buyer_id,
+        item_id=item_id,
+        data=request
+    )
 
 
 # ===================== CẬP NHẬT VARIANT + SIZE =====================
-@router.patch("/item/variant-size/{item_id}")
+@router.patch("/item/variant-size/{item_id}", response_model=dict)
 async def update_cart_item_variant_size(
     item_id: int,
     request: UpdateVariantSizeRequest,
@@ -132,6 +111,10 @@ async def update_cart_item_variant_size(
     Cập nhật variant và size của sản phẩm trong giỏ hàng.
     - Kiểm tra tồn kho, hợp lệ với product.
     - Nếu trùng item, merge số lượng.
+    - Đồng bộ Redis theo double-delete.
     """
-    return await service.update_variant_size(buyer["user"].buyer_id, item_id, request)
-
+    return await service.update_variant_size(
+        buyer_id=buyer["user"].buyer_id,
+        item_id=item_id,
+        req=request
+    )

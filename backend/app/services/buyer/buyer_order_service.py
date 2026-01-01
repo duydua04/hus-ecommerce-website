@@ -1,11 +1,15 @@
+import asyncio
 from decimal import Decimal
 from datetime import datetime
 from fastapi import HTTPException, status
-from sqlalchemy import select, and_, desc
+from sqlalchemy import select, and_, desc, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import joinedload
+
+
 from ...config.db import get_db
 from datetime import datetime, date
 from ...config.s3 import public_url
@@ -29,40 +33,35 @@ from ...schemas.order import OrderCreate, OrderDetailResponse, OrderDetailRespon
 from ...schemas.address import AddressResponse, AddressUpdate
 from ...schemas.carrier import CarrierCalculateResponse, CarrierResponse
 from ...schemas.common import OrderStatus, PaymentStatus
+from app.tasks.admin_dashboard_task import task_admin_add_order_stats
+from app.tasks.seller_dashboard_task import task_seller_recalc_dashboard
+from app.tasks.notification_task import task_send_notification
+from app.tasks.inventory import update_stock_db
 
 # ===================== TAB MAPPING =====================
 TAB_MAPPING = {
-    # Tất cả
     "all": {},
 
-    # Chờ xác nhận
     "pending": {
         "order_status": ["pending"]
     },
-
-    # Đang xử lý
     "processing": {
         "order_status": ["processing"]
     },
-
-    # Vận chuyển / Chờ giao hàng
-    "shipping": {
+    "shipped": {
         "order_status": ["shipped"]
     },
 
-    # Hoàn thành
-    "completed": {
+    "delivered": {
         "order_status": ["delivered"],
         "payment_status": ["paid"]
     },
 
-    # Đã hủy
     "cancelled": {
         "order_status": ["cancelled"]
     },
 
-    # Trả hàng / Hoàn tiền
-    "refund": {
+    "returned": {
         "order_status": ["returned"],
         "payment_status": ["refunded"]
     },
@@ -71,7 +70,23 @@ TAB_MAPPING = {
 class BuyerOrderService:
     def __init__(self, db: AsyncSession):
         self.db = db
-
+    async def _get_order_with_items(self, buyer_id: int, order_id: int) -> Order:
+        """Lấy thông tin đơn hàng kèm danh sách items"""
+        from sqlalchemy.orm import selectinload
+        
+        stmt = (
+            select(Order)
+            .options(selectinload(Order.items)) # Chỉ load items
+            .where(Order.order_id == order_id, Order.buyer_id == buyer_id)
+        )
+        result = await self.db.execute(stmt)
+        order = result.scalar_one_or_none()
+        
+        if not order:
+            raise HTTPException(status_code=404, detail="Không tìm thấy đơn hàng hoặc bạn không có quyền")
+            
+        return order
+    
     # ===================== LẤY CHI TIẾT CÁC SẢN PHẨM ĐÃ CHỌN ĐỂ THANH TOÁN =====
     async def get_selected_cart_items(self, shopping_cart_item_ids: list[int]):
         if not shopping_cart_item_ids:
@@ -178,6 +193,19 @@ class BuyerOrderService:
         if not selected_items:
             raise HTTPException(400, "Sản phẩm chọn không hợp lệ")
 
+        # 2. VALIDATE TỒN KHO TRƯỚC KHI LÀM BẤT CỨ VIỆC GÌ (Reserve Stock Logic)
+        #Việc này đảm bảo 100% không bao giờ bán lố
+        # for item in selected_items:
+        #     stock_stmt = select(ProductSize).where(ProductSize.size_id == item.size_id).with_for_update()
+        #     stock_res = await self.db.execute(stock_stmt)
+        #     size_obj = stock_res.scalar_one_or_none()
+
+        #     if not size_obj or size_obj.available_units < item.quantity:
+        #         raise HTTPException(400, f"Hết hàng: {item.product.name}")
+            
+        #     # TRỪ LUÔN TẠI ĐÂY
+        #     size_obj.available_units -= item.quantity
+
         # Validate buyer_address_id
         address = await self.db.get(BuyerAddress, payload.buyer_address_id)
         if not address or address.buyer_id != buyer_id:
@@ -271,12 +299,37 @@ class BuyerOrderService:
             )
             self.db.add(order_item)
 
-        #Clear các item đã mua khỏi cart
+        # 5. CLEAR CÁC ITEM ĐÃ MUA KHỎI GIỎ HÀNG TRONG DATABASE
         for item in selected_items:
             await self.db.delete(item)
 
+        # 6. COMMIT DATABASE
+        # Bước này chốt hạ dữ liệu trong MySQL
         await self.db.commit()
         await self.db.refresh(order)
+
+        # 7. GỌI CÁC TASK CHẠY NGẦM (CELERY) SAU KHI COMMIT THÀNH CÔNG
+        # Chỉ trừ kho thực tế sau khi đơn hàng đã chắc chắn được tạo thành công
+        for item in selected_items:
+            # update_stock_db.delay thực hiện trừ (-) số lượng trong bảng ProductSize
+            update_stock_db.delay(item.size_id, -item.quantity)
+
+        # Lấy seller_id (giả sử đơn hàng thuộc về 1 seller hoặc lấy seller của item đầu tiên)
+        seller_id = selected_items[0].product.seller_id
+
+        # Cập nhật thông số Dashboard cho người bán (nặng nề nên chạy ngầm)
+        task_seller_recalc_dashboard.delay(seller_id) 
+        
+        # Gửi thông báo Notification cho người bán (phụ thuộc bên thứ 3 nên chạy ngầm)
+        task_send_notification.delay(
+            user_id=seller_id,
+            role="seller",          # Sửa từ user_type thành role
+            title="Đơn hàng mới",    # Thêm title (hàm yêu cầu)
+            message=f"Đơn hàng mới #{order.order_id}",
+            event_type="NEW_ORDER", # Thêm event_type (hàm yêu cầu)
+            data={"order_id": order.order_id}
+        )
+
 
         return order
 
@@ -304,6 +357,7 @@ class BuyerOrderService:
             .selectinload(Product.seller)     # Product -> Seller
         )
         .where(Order.buyer_id == buyer_id)
+        .where(Order.order_id == order_id)
     )
 
         order: Order = (await self.db.execute(stmt)).scalars().unique().first()
@@ -445,8 +499,8 @@ class BuyerOrderService:
     
     # ===================== LIST ORDER (TRACKING VIEW) =====================
     async def list_orders_tracking(self, buyer_id: int, tab: str):
-        tab = tab.strip().lower()
-
+        if tab is None:
+            tab = "all"
         if tab not in TAB_MAPPING:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -543,42 +597,133 @@ class BuyerOrderService:
         ]
     
     # ===================== BUYER HỦY ĐƠN =====================
+    # ===================== BUYER HỦY ĐƠN (FULL HOÀN THIỆN) =====================
     async def cancel_order(self, buyer_id: int, order_id: int):
-        order = await self._get_order(buyer_id, order_id)
+        # 1. Lấy thông tin đơn hàng
+        order = await self._get_order_with_items(buyer_id, order_id)
 
+        # Kiểm tra trạng thái: Chỉ cho hủy nếu đang pending
         if order.order_status != "pending":
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Chỉ được huỷ đơn khi đang ở trạng thái pending"
+                status_code=400,
+                detail=f"Không thể hủy đơn hàng ở trạng thái {order.order_status}"
             )
 
-        order.order_status = "cancelled"
+        # 2. PHỤC HỒI KHO (Thực hiện đồng bộ trong Transaction)
+        for item in order.items:
+            stmt_stock = (
+                update(ProductSize)
+                .where(ProductSize.size_id == item.size_id)
+                .values(available_units=ProductSize.available_units + item.quantity)
+            )
+            await self.db.execute(stmt_stock)
 
-        # Nếu muốn: cập nhật payment_status
+        # 3. Cập nhật trạng thái đơn hàng và thanh toán
+        order.order_status = "cancelled"
         if order.payment_status == "pending":
             order.payment_status = "failed"
 
+        # 4. CHỐT GIAO DỊCH (COMMIT)
+        # Tại đây MySQL sẽ thực hiện cộng kho và đổi status đơn hàng cùng lúc
         await self.db.commit()
         await self.db.refresh(order)
 
-        return order
+        # 5. XỬ LÝ HẬU CẦN QUA CELERY (Bất đồng bộ)
+        if order.items:
+            # Lấy seller_id bằng truy vấn riêng để tránh lỗi MissingGreenlet (Lazy Load)
+            first_item = order.items[0]
+            seller_stmt = select(Product.seller_id).where(Product.product_id == first_item.product_id)
+            seller_res = await self.db.execute(seller_stmt)
+            seller_id = seller_res.scalar()
 
+            if seller_id:
+                # Task 1: Cập nhật lại số liệu Dashboard cho Seller
+                task_seller_recalc_dashboard.delay(seller_id)
+
+                # Task 2: Gửi thông báo cho Seller
+                task_send_notification.delay(
+                    user_id=seller_id,
+                    role="seller",
+                    title="Đơn hàng đã bị hủy",
+                    message=f"Đơn hàng #{order.order_id} đã bị khách hàng hủy. Kho đã được hoàn trả.",
+                    event_type="ORDER_CANCELLED",
+                    data={
+                        "order_id": order.order_id,
+                        "buyer_id": buyer_id,
+                        "time": str(datetime.now())
+                    }
+                )
+
+        return order
     # ===================== BUYER XÁC NHẬN ĐÃ NHẬN HÀNG =====================
     async def confirm_received(self, buyer_id: int, order_id: int):
-        order = await self._get_order(buyer_id, order_id)
+        # 1. Lấy đơn hàng kèm đầy đủ thông tin để làm payload
+        # Cần joinedload product và category để lấy category_id cho thống kê
+        stmt = (
+            select(Order)
+            .options(
+                joinedload(Order.items).joinedload(OrderItem.product)
+            )
+            .where(Order.order_id == order_id, Order.buyer_id == buyer_id)
+        )
+        result = await self.db.execute(stmt)
+        order = result.unique().scalar_one_or_none()
+
+        if not order:
+            raise HTTPException(404, "Không tìm thấy đơn hàng")
 
         if order.order_status != "shipped":
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Chỉ xác nhận khi đơn hàng đang được giao"
+                status_code=400,
+                detail="Chỉ xác nhận khi đơn hàng đang được giao (shipped)"
             )
 
+        # 2. Cập nhật trạng thái thành công
         order.order_status = "delivered"
         order.delivery_date = datetime.now()
         order.payment_status = "paid"
 
+        # 3. Commit vào Database để chốt dữ liệu thực
         await self.db.commit()
         await self.db.refresh(order)
+
+        # 4. CHUẨN BỊ PAYLOAD CHO HỆ THỐNG THỐNG KÊ (ANALYTICS)
+        # Giả định đơn hàng thuộc về một seller
+        seller_id = order.items[0].product.seller_id
+
+        admin_payload = {
+            "order_id": order.order_id,
+            "total_price": float(order.total_price), # Tổng doanh thu sàn (Redis: revenue:total)
+            "buyer_id": order.buyer_id,              # Xếp hạng Người mua (Redis: rank:buyer)
+            "seller_id": seller_id,                  # Xếp hạng Người bán (Redis: rank:seller)
+            "carrier_id": order.carrier_id,          # Thống kê Vận chuyển (Redis: stats:carriers)
+            "items": [
+                {
+                    "category_id": item.product.category_id, # Xếp hạng Danh mục (Redis: rank:category)
+                    "quantity": item.quantity,               # Số lượng đã bán của danh mục
+                    "subtotal": float(item.total_price)      # Doanh thu của danh mục
+                }
+                for item in order.items
+            ]
+        }
+
+        # 5. GỌI CÁC TASK CHẠY NGẦM (CELERY) ĐỂ CẬP NHẬT REDIS/DASHBOARD
+        
+        # A. Cập nhật thống kê tổng cho Admin (Real-time Stats bằng Redis Sorted Sets)
+        task_admin_add_order_stats.delay(admin_payload)
+
+        # B. Tính toán lại doanh thu/dashboard cho Người bán
+        task_seller_recalc_dashboard.delay(seller_id)
+        
+        # C. Gửi thông báo cho Seller biết tiền đã về ví
+        task_send_notification.delay(
+            user_id=seller_id,
+            role="seller",
+            title="Đơn hàng hoàn tất",      # Bạn đang thiếu tham số này
+            message=f"Đơn hàng #{order.order_id} đã hoàn tất. Doanh thu đã được ghi nhận.",
+            event_type="ORDER_COMPLETED",   # Bạn đang thiếu tham số này
+            data={"order_id": order.order_id} # Bạn đang thiếu tham số này
+        )
 
         return order
     

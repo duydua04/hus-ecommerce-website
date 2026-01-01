@@ -121,7 +121,7 @@ class ProductVariantWithSizesResponse(ProductVariantResponse):
 from typing import Optional
 class UpdateCartItemRequest(BaseModel):
     quantity: int | None = None
-    action: str | None = None  # "increase"
+    action: str | None = None  # "increase" hoặc "decrease"
 
 class UpdateVariantSizeRequest(BaseModel):
     new_variant_id: Optional[int] = None

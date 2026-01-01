@@ -1,219 +1,206 @@
+from redis import Redis
 from sqlalchemy import select, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
+import json
 
+from ...config.redis import get_redis_client
 from ..common.address_service import BaseAddressService
 from ...models.address import Address, BuyerAddress
-from ...schemas.address import AddressCreate, AddressUpdate, AddressResponse, BuyerAddressResponse, BuyerAddressResponseOrder
+from ...schemas.address import AddressCreate, AddressUpdate, AddressResponse, BuyerAddressResponse, BuyerAddressResponseOrder, BuyerAddressUpdate
 from ...config.db import get_db
-from fastapi import Depends
+from fastapi import HTTPException, status, Depends
 
 class BuyerAddressService(BaseAddressService):
+    def __init__(self, db: AsyncSession, redis: Redis):
+        super().__init__(db)
+        self.redis = redis
+        self.TTL = 86400
+    async def _clear_user_cache(self, user_id: int):
+        key = f"address:buyer:{user_id}:list"
+        await self.redis.delete(key)
+    
     # ============== DANH SÁCH ĐỊA CHỈ CỦA BUYER =======================
     async def list(self, user_id: int):
+        cache_key = f"address:buyer:{user_id}:list"
+
+        if cached := await self.redis.get(cache_key):
+            try:
+                data_list = json.loads(cached)
+                return [BuyerAddressResponse(**item) for item in data_list]
+            except Exception:
+                pass
+
         stmt = (
-            select(BuyerAddress, Address)
-            .join(Address, BuyerAddress.address_id == Address.address_id)
+            select(BuyerAddress)
+            .options(selectinload(BuyerAddress.address))
             .where(BuyerAddress.buyer_id == user_id)
-            .order_by(BuyerAddress.is_default.desc())
+            .order_by(
+                BuyerAddress.is_default.desc(),
+                BuyerAddress.buyer_address_id.desc()
+            )
         )
 
-        res = await self.db.execute(stmt)
+        result = await self.db.execute(stmt)
+        items = result.scalars().all()
 
-        result = []
-        for buyer_address, address in res.all():
-            result.append(
-                BuyerAddressResponseOrder(
-                    buyer_address_id=buyer_address.buyer_address_id,
-                    buyer_id=buyer_address.buyer_id,
-                    is_default=buyer_address.is_default,
-                    label=buyer_address.label,
-                    address=AddressResponse(
-                        address_id=buyer_address.address_id,
-                        fullname=address.fullname,
-                        phone=address.phone,
-                        street=address.street,
-                        ward=address.ward,
-                        district=address.district,
-                        province=address.province,
-                    ),
-                )
-            )
+        response_data = [
+            BuyerAddressResponse.model_validate(item)
+            for item in items
+        ]
 
-        return result
+        await self.redis.set(
+            cache_key,
+            json.dumps([item.model_dump() for item in response_data]),
+            ex=self.TTL
+        )
+
+        return response_data
 
     # ================ TẠO ADRESS MẶC ĐỊNH LIÊN KẾT VỚI BUYER ========================
     async def create_and_link(
         self,
         user_id: int,
         payload: AddressCreate,
-        is_default: bool,
-        label: str
+        is_default: bool = False,
+        label: str = None,
     ):
-        """
-        Tạo Address gốc và liên kết với Buyer
-        - Nếu là address đầu tiên → auto default
-        - Nếu is_default=True → bỏ default cũ
-        """
+        core_addr = await self._create_core_address(payload)
 
-        # Kiểm tra buyer đã có address chưa
-        result = await self.db.execute(
-            select(BuyerAddress)
-            .where(BuyerAddress.buyer_id == user_id)
-            .limit(1)
-        )
-        has_address = result.scalar_one_or_none() is not None
-
-        # Nếu chưa có address nào → auto default
-        if not has_address:
-            is_default = True
-
-        # Nếu set default → bỏ default cũ
-        if is_default:
-            await self.db.execute(
-                update(BuyerAddress)
-                .where(BuyerAddress.buyer_id == user_id)
-                .values(is_default=False)
-            )
-
-        # Tạo address gốc
-        address = await self._create_core_address(payload)
-
-        # Tạo bảng liên kết
-        buyer_address = BuyerAddress(
+        link = BuyerAddress(
             buyer_id=user_id,
-            address_id=address.address_id,
+            address_id=core_addr.address_id,
             is_default=is_default,
             label=label
         )
 
-        self.db.add(buyer_address)
+        self.db.add(link)
         await self.db.commit()
-        await self.db.refresh(buyer_address)
+        await self.db.refresh(link, attribute_names=["address"])
 
-        return buyer_address
+        if is_default:
+            await self.set_default(user_id, link.buyer_address_id)
+
+        await self._clear_user_cache(user_id)
+        return link
 
     # ============= CẬP NHẬT THÔNG TIN LIÊN KẾT VỚI ĐỊA CHỈ (LABEL, IS_DEFAULT)==============
     async def update_link(
         self,
         user_id: int,
-        buyer_address_id: int,
-        payload
+        link_id: int,
+        payload: BuyerAddressUpdate
     ):
-        """
-        Cập nhật thông tin liên kết (label, is_default)
-        """
-        stmt = select(BuyerAddress).where(
-            BuyerAddress.buyer_address_id == buyer_address_id,
-            BuyerAddress.buyer_id == user_id
+        stmt = (
+            select(BuyerAddress)
+            .options(selectinload(BuyerAddress.address))
+            .where(BuyerAddress.buyer_address_id == link_id)
         )
-        res = await self.db.execute(stmt)
-        buyer_address = res.scalar_one_or_none()
+        result = await self.db.execute(stmt)
+        link = result.scalar_one_or_none()
 
-        if not buyer_address:
-            return None
-
-        # Nếu set default
-        if payload.is_default:
-            await self.db.execute(
-                update(BuyerAddress)
-                .where(BuyerAddress.buyer_id == user_id)
-                .values(is_default=False)
+        if not link or link.buyer_id != user_id:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Address not found"
             )
 
-        buyer_address.is_default = payload.is_default
-        buyer_address.label = payload.label
+        data = payload.model_dump(exclude_unset=True)
+
+        if "label" in data:
+            link.label = data["label"]
+
+        if data.get("is_default"):
+            await self.set_default(user_id, link_id)
+            link.is_default = True
+        elif "is_default" in data and not data["is_default"]:
+            link.is_default = False
 
         await self.db.commit()
-        await self.db.refresh(buyer_address)
+        await self.db.refresh(link, attribute_names=["address"])
+        await self._clear_user_cache(user_id)
 
-        return buyer_address
+        return link
 
     # ============= CẬP NHẬT NỘI DUNG ĐỊA CHỉ ==============
     async def update_content(
         self,
         user_id: int,
-        buyer_address_id: int,
+        link_id: int,
         payload: AddressUpdate
     ):
-        """
-        Cập nhật nội dung Address gốc
-        """
         stmt = (
-            select(Address)
-            .join(BuyerAddress, BuyerAddress.address_id == Address.address_id)
-            .where(
-                BuyerAddress.buyer_address_id == buyer_address_id,
-                BuyerAddress.buyer_id == user_id
-            )
+            select(BuyerAddress)
+            .options(selectinload(BuyerAddress.address))
+            .where(BuyerAddress.buyer_address_id == link_id)
         )
-        res = await self.db.execute(stmt)
-        address = res.scalar_one_or_none()
+        result = await self.db.execute(stmt)
+        link = result.scalar_one_or_none()
 
-        if not address:
-            return None
+        if not link or link.buyer_id != user_id:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Address not found"
+            )
 
-        for key, value in payload.model_dump(exclude_unset=True).items():
-            setattr(address, key, value)
+        address = link.address
+
+        for k, v in payload.model_dump(exclude_unset=True).items():
+            if isinstance(v, str) and (not v.strip() or v == "string"):
+                continue
+            setattr(address, k, v)
 
         await self.db.commit()
-        await self.db.refresh(address)
+        await self.db.refresh(link, attribute_names=["address"])
+        await self._clear_user_cache(user_id)
 
-        return address
+        return link
 
     # ==================== XÓA LIÊN KẾT ĐỊA CHỈ =================
-    async def delete(self, user_id: int, buyer_address_id: int):
-        """
-        Xóa liên kết BuyerAddress và dọn Address nếu bị orphan
-        """
+    async def delete(self, user_id: int, link_id: int):
         stmt = select(BuyerAddress).where(
-            BuyerAddress.buyer_address_id == buyer_address_id,
-            BuyerAddress.buyer_id == user_id
+            BuyerAddress.buyer_address_id == link_id
         )
-        res = await self.db.execute(stmt)
-        buyer_address = res.scalar_one_or_none()
+        result = await self.db.execute(stmt)
+        link = result.scalar_one_or_none()
 
-        if not buyer_address:
-            return False
+        if not link or link.buyer_id != user_id:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Address not found"
+            )
 
-        address_id = buyer_address.address_id
+        addr_id = link.address_id
 
-        await self.db.delete(buyer_address)
+        await self.db.delete(link)
         await self.db.commit()
 
-        # Dọn Address nếu không còn liên kết
-        await self._cleanup_orphan_address(address_id)
+        await self._cleanup_orphan_address(addr_id)
+        await self._clear_user_cache(user_id)
 
-        return True
+        return {"deleted": True}
 
     # =============== SET ĐỊA CHỈ MẶC ĐỊNH =============
-    async def set_default(self, user_id: int, buyer_address_id: int):
-        """
-        Set một địa chỉ làm mặc định
-        """
-        stmt = select(BuyerAddress).where(
-            BuyerAddress.buyer_address_id == buyer_address_id,
-            BuyerAddress.buyer_id == user_id
-        )
-        res = await self.db.execute(stmt)
-        buyer_address = res.scalar_one_or_none()
-
-        if not buyer_address:
-            return None
-
-        # Bỏ default cũ
-        await self.db.execute(
+    async def set_default(self, user_id: int, link_id: int):
+        stmt1 = (
             update(BuyerAddress)
             .where(BuyerAddress.buyer_id == user_id)
             .values(is_default=False)
         )
+        await self.db.execute(stmt1)
 
-        buyer_address.is_default = True
+        stmt2 = (
+            update(BuyerAddress)
+            .where(BuyerAddress.buyer_address_id == link_id)
+            .values(is_default=True)
+        )
+        await self.db.execute(stmt2)
+
         await self.db.commit()
-        await self.db.refresh(buyer_address)
-
-        return buyer_address
+        await self._clear_user_cache(user_id)
 
 def get_buyer_address_service(
     db: AsyncSession = Depends(get_db),
+    redis: Redis = Depends(get_redis_client),
 ):
-    return BuyerAddressService(db)
+    return BuyerAddressService(db, redis)

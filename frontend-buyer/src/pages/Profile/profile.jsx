@@ -1,5 +1,6 @@
 // src/pages/Profile/profile.jsx
 import React, { useEffect, useState } from "react";
+import {Link} from 'react-router-dom';
 import api from "../../services/api";
 import { useUser } from "../../context/UserContext";
 import "./profile.css";
@@ -219,10 +220,10 @@ export default function Profile() {
           </li>
 
           <li className="sidebar-menu__item">
-            <a className="sidebar-menu__link">
+            <Link to="/notifications" className="sidebar-menu__link">
               <span>🔔</span>
               <span>Thông Báo</span>
-            </a>
+            </Link>
           </li>
 
           <li className="sidebar-menu__item">

@@ -30,6 +30,6 @@ async def get_category_detail(
     service: PublicCategoryService = Depends(get_public_category_service)
 ):
     """
-    Lấy chi tiết 1 danh mục.
+    Lấy chi tiết 1 danh mục.:
     """
     return await service.get(category_id)
