@@ -1,6 +1,8 @@
 import asyncio
 from decimal import Decimal
 from datetime import datetime
+from http.client import RemoteDisconnected
+
 from fastapi import HTTPException, status
 from sqlalchemy import select, and_, desc, update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -8,10 +10,12 @@ from sqlalchemy.orm import selectinload
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
-
+from redis.asyncio import Redis
 
 from ...config.db import get_db
 from datetime import datetime, date
+
+from ...config.redis import get_redis_client
 from ...config.s3 import public_url
 from ...models import (
     Order,
@@ -33,10 +37,11 @@ from ...schemas.order import OrderCreate, OrderDetailResponse, OrderDetailRespon
 from ...schemas.address import AddressResponse, AddressUpdate
 from ...schemas.carrier import CarrierCalculateResponse, CarrierResponse
 from ...schemas.common import OrderStatus, PaymentStatus
-from app.tasks.admin_dashboard_task import task_admin_add_order_stats
-from app.tasks.seller_dashboard_task import task_seller_recalc_dashboard
-from app.tasks.notification_task import task_send_notification
-from app.tasks.inventory import update_stock_db
+from ...tasks.admin_dashboard_task import task_admin_add_order_stats
+from ...tasks.seller_dashboard_task import task_seller_recalc_dashboard
+from ...tasks.notification_task import task_send_notification
+from ...tasks.inventory import update_stock_db
+from ...services.buyer.buyer_cart_service import CartServiceAsync
 
 # ===================== TAB MAPPING =====================
 TAB_MAPPING = {
@@ -68,8 +73,10 @@ TAB_MAPPING = {
 }
 
 class BuyerOrderService:
-    def __init__(self, db: AsyncSession):
+    def __init__(self, db: AsyncSession, cart_service: CartServiceAsync):
         self.db = db
+        self.cart_service = cart_service
+
     async def _get_order_with_items(self, buyer_id: int, order_id: int) -> Order:
         """Lấy thông tin đơn hàng kèm danh sách items"""
         from sqlalchemy.orm import selectinload
@@ -308,6 +315,7 @@ class BuyerOrderService:
         await self.db.commit()
         await self.db.refresh(order)
 
+        await self.cart_service._refresh_cart_cache(buyer_id)
         # 7. GỌI CÁC TASK CHẠY NGẦM (CELERY) SAU KHI COMMIT THÀNH CÔNG
         # Chỉ trừ kho thực tế sau khi đơn hàng đã chắc chắn được tạo thành công
         for item in selected_items:
@@ -729,5 +737,7 @@ class BuyerOrderService:
     
 def get_buyer_order_service(
     db: AsyncSession = Depends(get_db),
+    redis: Redis = Depends(get_redis_client)
 ):
-    return BuyerOrderService(db)
+    cart_service = CartServiceAsync(db, redis)
+    return BuyerOrderService(db,cart_service)
