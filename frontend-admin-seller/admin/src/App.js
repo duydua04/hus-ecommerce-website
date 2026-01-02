@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   BrowserRouter as Router,
   Routes,
   Route,
   Navigate,
 } from "react-router-dom";
+
 import DashboardPage from "./pages/Dashboard/DashboardPage";
 import CategoryPage from "./pages/Category/CategoryPage";
 import BuyerPage from "./pages/User/Buyer/BuyerPage";
@@ -14,20 +15,30 @@ import TransportPage from "./pages/Transport/TransportPage";
 import LoginPage from "./pages/Login/LoginPage";
 
 import ProtectedRoute from "./components/ProtectedRoute";
+import { WebSocketClient } from "./hooks/websocket";
 
 import "./assets/styles/global.scss";
 import "boxicons/css/boxicons.min.css";
 
 function App() {
+  /* INIT WEBSOCKET */
+  useEffect(() => {
+    WebSocketClient.connect();
+
+    return () => {
+      WebSocketClient.disconnect();
+    };
+  }, []);
+
   return (
     <Router>
       <Routes>
         {/* ===== PUBLIC ROUTE ===== */}
         <Route path="/login" element={<LoginPage />} />
 
-        {/* ===== PROTECTED ROUTES - CHỈ ADMIN ===== */}
+        {/* ===== PROTECTED ROUTES - ADMIN ===== */}
 
-        {/* Dashboard - Trang chủ */}
+        {/* Dashboard */}
         <Route
           path="/dashboard"
           element={
@@ -37,7 +48,7 @@ function App() {
           }
         />
 
-        {/* Quản lý danh mục */}
+        {/* Category */}
         <Route
           path="/category"
           element={
@@ -47,7 +58,7 @@ function App() {
           }
         />
 
-        {/* Quản lý người mua */}
+        {/* Buyer */}
         <Route
           path="/buyer"
           element={
@@ -57,7 +68,7 @@ function App() {
           }
         />
 
-        {/* Quản lý người bán */}
+        {/* Seller */}
         <Route
           path="/seller"
           element={
@@ -67,7 +78,7 @@ function App() {
           }
         />
 
-        {/* Quản lý khuyến mãi */}
+        {/* Discount */}
         <Route
           path="/discount"
           element={
@@ -77,7 +88,7 @@ function App() {
           }
         />
 
-        {/* Quản lý vận chuyển */}
+        {/* Transport */}
         <Route
           path="/transport"
           element={
@@ -87,7 +98,7 @@ function App() {
           }
         />
 
-        {/* Root path "/" redirect về dashboard */}
+        {/* Root → Dashboard */}
         <Route
           path="/"
           element={
@@ -97,14 +108,17 @@ function App() {
           }
         />
 
-        {/*404 NOT FOUND*/}
+        {/* 404 */}
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Router>
   );
 }
 
-// Component 404
+/* ======================
+   404 PAGE
+====================== */
+
 function NotFoundPage() {
   return (
     <div
