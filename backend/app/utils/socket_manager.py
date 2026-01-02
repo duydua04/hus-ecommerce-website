@@ -72,14 +72,14 @@ class SocketConnectionManager:
         return f"{role}_{user_id}"
 
 
-    async def send_to_user(self, message: dict, user_id: int, role: str):
+    async def send_to_user(self, message: dict, user_id: int, role: str, external_redis: redis.Redis = None):
         """
         Hàm gửi tin. Publish lên Redis channel 'global_socket_channel'.
         """
-        redis_client = self.redis_pub or self.redis
+        redis_client = external_redis or self.redis_pub
 
         if not redis_client:
-            print("[SOCKET ERROR] Redis Pub not connected! (Make sure to init redis in Worker)")
+            print("[SOCKET ERROR] Redis Pub not connected! (Checking external_redis or self.redis_pub)")
             return
 
         target_key = self.get_connection_key(user_id, role)
@@ -90,6 +90,7 @@ class SocketConnectionManager:
         }
 
         try:
+            # Publish tin nhắn lên Redis
             await redis_client.publish("global_socket_channel", json.dumps(payload))
         except Exception as e:
             print(f"[SOCKET ERROR] Failed to publish: {e}")

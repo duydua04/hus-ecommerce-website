@@ -156,12 +156,20 @@ class SellerDashboardService:
         top_products = await self._query_top_products(seller_id)
         await self.redis.set(f"seller:{seller_id}:top_products", json.dumps(top_products), ex=self.CACHE_TTL)
 
-        await socket_manager.send_to_user(seller_id, "DASHBOARD_UPDATED", {
-            "stats": stats,
-            "charts": {"monthly": chart_monthly, "daily": chart_daily},
-            "top_products": top_products,
-            "timestamp": str(now)
-        })
+        await socket_manager.send_to_user(
+            message={
+                "type": "DASHBOARD_UPDATED",
+                "data": {
+                    "stats": stats,
+                    "charts": {"monthly": chart_monthly, "daily": chart_daily},
+                    "top_products": top_products,
+                    "timestamp": str(now)
+                }
+            },
+            user_id=seller_id,
+            role="seller",
+            external_redis=self.redis
+        )
 
 
     async def get_stats(self, seller_id: int):
