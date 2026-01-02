@@ -23,14 +23,40 @@ const Detail = () => {
   const [filterMediaOnly, setFilterMediaOnly] = useState(false);
   const [addingToCart, setAddingToCart] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  // Thêm state cho replies
+  const [replies, setReplies] = useState({}); // { reviewId: [replies] }
+  const [loadingReplies, setLoadingReplies] = useState({});
 
-  // Auto-select first primary image or first image
-  useEffect(() => {
-    if (product?.images && product.images.length > 0) {
-      const primaryIndex = product.images.findIndex(img => img.is_primary);
-      setSelectedImageIndex(primaryIndex >= 0 ? primaryIndex : 0);
-    }
-  }, [product]);
+// Hàm fetch replies
+  const fetchReplies = async (reviewId) => {
+      try {
+        setLoadingReplies(prev => ({ ...prev, [reviewId]: true }));
+        const response = await api.review.getReplies(reviewId);
+        setReplies(prev => ({ ...prev, [reviewId]: response }));
+      } catch (error) {
+        console.error('Error fetching replies:', error);
+      } finally {
+        setLoadingReplies(prev => ({ ...prev, [reviewId]: false }));
+      }
+    };
+
+    // Tự động fetch replies khi có reviews
+    useEffect(() => {
+      if (reviews.length > 0) {
+        reviews.forEach(review => {
+          if (review.replies && review.replies.length > 0) {
+            setReplies(prev => ({ ...prev, [review.id]: review.replies }));
+          }
+        });
+      }
+    }, [reviews]);
+      // Auto-select first primary image or first image
+      useEffect(() => {
+        if (product?.images && product.images.length > 0) {
+          const primaryIndex = product.images.findIndex(img => img.is_primary);
+          setSelectedImageIndex(primaryIndex >= 0 ? primaryIndex : 0);
+        }
+      }, [product]);
 
   /* ================= FETCH DATA ================= */
   useEffect(() => {
@@ -79,7 +105,7 @@ const Detail = () => {
     };
 
     fetchAll();
-  }, [productId]);
+    }, [productId]);
 
   /* ================= FETCH SIZE ================= */
   useEffect(() => {
@@ -168,9 +194,6 @@ const Detail = () => {
         quantity
       );
 
-      if (window.confirm("Đã thêm vào giỏ hàng! Bạn có muốn xem giỏ hàng không?")) {
-        navigate("/cart");
-      }
     } catch (e) {
       alert(e.message || "Không thể thêm vào giỏ");
     } finally {
@@ -404,7 +427,7 @@ const Detail = () => {
                 <div style={{ fontSize: '16px', color: '#999', fontWeight: 'normal', marginBottom: '8px' }}>
                   Đơn giá: {price.toLocaleString()}₫
                 </div>
-                <div style={{ color: '#ff4d4f' }}>
+                <div>
                   Tổng: {(price * quantity).toLocaleString()}₫
                 </div>
               </>
@@ -508,6 +531,24 @@ const Detail = () => {
                   <div className="review__media">
                     {r.videos.map((vid, i) => (
                       <video key={i} src={vid} controls />
+                    ))}
+                  </div>
+                )}
+
+                {/* Hiển thị replies của người bán */}
+                {replies[r.id] && replies[r.id].length > 0 && (
+                  <div className="seller-replies">
+                    <div className="seller-replies__header">
+                      <span className="seller-replies__icon">💬</span>
+                      <span className="seller-replies__title">Phản hồi từ người bán:</span>
+                    </div>
+                    {replies[r.id].map((reply, idx) => (
+                      <div key={idx} className="seller-reply">
+                        <div className="seller-reply__text">{reply.reply_text}</div>
+                        <div className="seller-reply__date">
+                          {new Date(reply.reply_date).toLocaleDateString("vi-VN")}
+                        </div>
+                      </div>
                     ))}
                   </div>
                 )}

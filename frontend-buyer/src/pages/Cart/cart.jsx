@@ -7,6 +7,7 @@ const Cart = () => {
   const navigate = useNavigate();
   const [cartData, setCartData] = useState([]);
   const [selectedItems, setSelectedItems] = useState(new Set());
+  const [selectedSellerId, setSelectedSellerId] = useState(null); // Theo dõi shop đang được chọn
   const [summary, setSummary] = useState({ subtotal: 0, total_items: 0 });
   const [loading, setLoading] = useState(true);
 
@@ -49,11 +50,29 @@ const Cart = () => {
   }, [selectedItems]);
 
   // ================= Toggle Item Selection =================
-  const toggleItemSelection = (itemId) => {
+  const toggleItemSelection = (itemId, sellerId, product) => {
+    // Nếu chưa có shop nào được chọn, cho phép chọn sản phẩm đầu tiên
+    if (selectedSellerId === null) {
+      setSelectedSellerId(sellerId);
+      setSelectedItems(new Set([itemId]));
+      return;
+    }
+
+    // Nếu shop khác với shop đang được chọn, không cho phép chọn
+    if (selectedSellerId !== sellerId) {
+      alert("Bạn chỉ có thể chọn sản phẩm từ một shop trong một đơn hàng. Vui lòng bỏ chọn sản phẩm hiện tại trước khi chọn từ shop khác.");
+      return;
+    }
+
+    // Nếu cùng shop, cho phép chọn/bỏ chọn
     setSelectedItems((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(itemId)) {
         newSet.delete(itemId);
+        // Nếu đã bỏ chọn tất cả sản phẩm, reset selectedSellerId
+        if (newSet.size === 0) {
+          setSelectedSellerId(null);
+        }
       } else {
         newSet.add(itemId);
       }
@@ -62,16 +81,28 @@ const Cart = () => {
   };
 
   // ================= Toggle All Seller Items =================
-  const toggleSellerItems = (sellerProducts) => {
+  const toggleSellerItems = (sellerProducts, sellerId) => {
     const sellerItemIds = sellerProducts.map((p) => p.shopping_cart_item_id);
     const allSelected = sellerItemIds.every((id) => selectedItems.has(id));
+
+    // Nếu đang chọn shop khác và muốn chọn shop này
+    if (selectedSellerId !== null && selectedSellerId !== sellerId && !allSelected) {
+      alert("Bạn chỉ có thể chọn sản phẩm từ một shop trong một đơn hàng. Vui lòng bỏ chọn sản phẩm hiện tại trước khi chọn từ shop khác.");
+      return;
+    }
 
     setSelectedItems((prev) => {
       const newSet = new Set(prev);
       if (allSelected) {
+        // Bỏ chọn tất cả sản phẩm của seller này
         sellerItemIds.forEach((id) => newSet.delete(id));
+        if (newSet.size === 0) {
+          setSelectedSellerId(null);
+        }
       } else {
+        // Chọn tất cả sản phẩm của seller này
         sellerItemIds.forEach((id) => newSet.add(id));
+        setSelectedSellerId(sellerId);
       }
       return newSet;
     });
@@ -92,7 +123,7 @@ const Cart = () => {
   };
 
   // ================= Delete Item =================
-  const deleteItem = async (itemId) => {
+  const deleteItem = async (itemId, sellerId) => {
     if (!confirm("Bạn có chắc muốn xóa sản phẩm này?")) return;
 
     try {
@@ -100,6 +131,10 @@ const Cart = () => {
       setSelectedItems((prev) => {
         const newSet = new Set(prev);
         newSet.delete(itemId);
+        // Nếu đã xóa hết sản phẩm của shop này, reset selectedSellerId
+        if (newSet.size === 0) {
+          setSelectedSellerId(null);
+        }
         return newSet;
       });
       await fetchCart();
@@ -110,14 +145,21 @@ const Cart = () => {
   };
 
   // ================= Delete All Seller Items =================
-  const deleteSellerItems = async (sellerProducts) => {
-    if (!confirm(`Bạn có chắc muốn xóa tất cả sản phẩm của seller này?`))
+  const deleteSellerItems = async (sellerProducts, sellerId) => {
+    if (!confirm(`Bạn có chắc muốn xóa tất cả sản phẩm của shop này?`))
       return;
 
     try {
       await Promise.all(
         sellerProducts.map((p) => api.cart.removeItem(p.shopping_cart_item_id))
       );
+
+      // Nếu đang chọn shop này, reset selectedSellerId
+      if (selectedSellerId === sellerId) {
+        setSelectedSellerId(null);
+        setSelectedItems(new Set());
+      }
+
       await fetchCart();
     } catch (err) {
       console.error("Delete seller items error:", err);
@@ -145,6 +187,22 @@ const Cart = () => {
       alert("Vui lòng chọn sản phẩm để thanh toán");
       return;
     }
+
+    // Kiểm tra xem tất cả sản phẩm đã chọn có cùng seller không
+    const selectedSellerIds = new Set();
+    cartData.forEach(sellerGroup => {
+      sellerGroup.products.forEach(product => {
+        if (selectedItems.has(product.shopping_cart_item_id)) {
+          selectedSellerIds.add(sellerGroup.seller.seller_id);
+        }
+      });
+    });
+
+    if (selectedSellerIds.size > 1) {
+      alert("Vui lòng chỉ chọn sản phẩm từ một shop trong một đơn hàng");
+      return;
+    }
+
     navigate("/payment", {
       state: { selectedItems: Array.from(selectedItems) },
     });
@@ -153,6 +211,23 @@ const Cart = () => {
   // ================= Get Total Products Count =================
   const getTotalProducts = () => {
     return cartData.reduce((sum, seller) => sum + seller.products.length, 0);
+  };
+
+  // ================= Check if item is selectable =================
+  const isItemSelectable = (sellerId) => {
+    // Có thể chọn nếu: chưa có shop nào được chọn HOẶC cùng shop với shop đang được chọn
+    return selectedSellerId === null || selectedSellerId === sellerId;
+  };
+
+  // ================= Check if seller checkbox is enabled =================
+  const isSellerCheckboxEnabled = (sellerId) => {
+    // Có thể chọn nếu: chưa có shop nào được chọn HOẶC cùng shop với shop đang được chọn
+    // HOẶC đã chọn ít nhất 1 sản phẩm từ shop này
+    const hasSelectedItemsFromThisSeller = cartData
+      .find(sg => sg.seller.seller_id === sellerId)
+      ?.products.some(p => selectedItems.has(p.shopping_cart_item_id));
+
+    return selectedSellerId === null || selectedSellerId === sellerId || hasSelectedItemsFromThisSeller;
   };
 
   if (loading) {
@@ -205,6 +280,12 @@ const Cart = () => {
                   </span>{" "}
                   sản phẩm
                 </p>
+                {selectedSellerId && (
+                  <div className="selected-shop-notice">
+                    <span className="notice-icon">ℹ️</span>
+                    <span>Đang chọn sản phẩm từ <strong>{cartData.find(sg => sg.seller.seller_id === selectedSellerId)?.seller.shop_name || "một shop"}</strong>. Chỉ có thể chọn sản phẩm từ shop này.</span>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -229,15 +310,17 @@ const Cart = () => {
             {/* Seller Groups */}
             {cartData.length > 0 ? (
               cartData.map((sellerGroup, idx) => {
+                const sellerId = sellerGroup.seller.seller_id;
                 const allSelected = sellerGroup.products.every((p) =>
                   selectedItems.has(p.shopping_cart_item_id)
                 );
+                const isSelectable = isSellerCheckboxEnabled(sellerId);
 
                 return (
                   <div
                     className="seller-group"
                     key={idx}
-                    data-seller-id={sellerGroup.seller.seller_id}
+                    data-seller-id={sellerId}
                   >
                     {/* Seller Header */}
                     <div className="seller-group__header">
@@ -255,6 +338,9 @@ const Cart = () => {
                         <div className="seller-group__name-wrapper">
                           <div className="seller-group__name">
                             {sellerGroup.seller.shop_name}
+                            {selectedSellerId === sellerId && (
+                              <span className="selected-shop-badge">(Đang chọn)</span>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -265,11 +351,10 @@ const Cart = () => {
                         <button
                           className={`seller-group__checkbox ${
                             allSelected ? "selected" : ""
-                          }`}
-                          title="Chọn tất cả"
-                          onClick={() =>
-                            toggleSellerItems(sellerGroup.products)
-                          }
+                          } ${!isSelectable ? "disabled" : ""}`}
+                          title={isSelectable ? "Chọn tất cả" : "Chỉ có thể chọn sản phẩm từ một shop"}
+                          onClick={() => isSelectable && toggleSellerItems(sellerGroup.products, sellerId)}
+                          disabled={!isSelectable}
                         >
                           <svg
                             className="seller-group__checkbox-icon"
@@ -285,8 +370,8 @@ const Cart = () => {
                         </button>
                         <button
                           className="seller-group__remove"
-                          title="Xóa seller"
-                          onClick={() => deleteSellerItems(sellerGroup.products)}
+                          title="Xóa shop"
+                          onClick={() => deleteSellerItems(sellerGroup.products, sellerId)}
                         >
                           <svg
                             width="14"
@@ -309,6 +394,7 @@ const Cart = () => {
                       const isSelected = selectedItems.has(
                         product.shopping_cart_item_id
                       );
+                      const isSelectable = isItemSelectable(sellerId);
 
                       return (
                         <div
@@ -385,13 +471,14 @@ const Cart = () => {
                             <button
                               className={`action-btn action-btn--checkbox ${
                                 isSelected ? "selected" : ""
-                              }`}
-                              title="Chọn"
-                              onClick={() =>
-                                toggleItemSelection(
-                                  product.shopping_cart_item_id
-                                )
-                              }
+                              } ${!isSelectable ? "disabled" : ""}`}
+                              title={isSelectable ? "Chọn" : "Chỉ có thể chọn sản phẩm từ một shop"}
+                              onClick={() => isSelectable && toggleItemSelection(
+                                product.shopping_cart_item_id,
+                                sellerId,
+                                product
+                              )}
+                              disabled={!isSelectable}
                             >
                               <svg
                                 className="action-btn__icon"
@@ -409,7 +496,7 @@ const Cart = () => {
                               className="action-btn action-btn--remove"
                               title="Xóa"
                               onClick={() =>
-                                deleteItem(product.shopping_cart_item_id)
+                                deleteItem(product.shopping_cart_item_id, sellerId)
                               }
                             >
                               <svg
@@ -462,9 +549,9 @@ const Cart = () => {
           </div>
         </div>
 
-        {/* Cart Summary - Đã xóa Voucher và Delivery */}
+        {/* Cart Summary */}
         <aside className="cart-summary">
-          {/* Phần Input Voucher đã bị xóa ở đây */}
+
 
           <div className="cart-summary__row">
             <span className="cart-summary__label">
@@ -500,8 +587,6 @@ const Cart = () => {
           >
             Mua Ngay
           </button>
-
-          {/* Phần Đơn vị vận chuyển đã bị xóa ở đây */}
         </aside>
       </div>
     </main>

@@ -1,9 +1,11 @@
 from __future__ import annotations
 from typing import List, Optional
-from fastapi import HTTPException, status, Depends
+from fastapi import HTTPException, status, Depends, BackgroundTasks
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import func, select, update
 from datetime import datetime
+import asyncio
+from sqlalchemy.ext.asyncio import async_sessionmaker
 
 from ...schemas.common import Page
 from ...models.order import Order
@@ -20,6 +22,8 @@ from ...schemas.review import (
     ReviewUpdate,
     ReviewerResponse
 )
+from ...models.users import Seller  # Điều chỉnh đường dẫn import cho đúng
+
 
 class BuyerReviewService(BaseReviewService):
 
@@ -45,23 +49,29 @@ class BuyerReviewService(BaseReviewService):
         items = await query.sort("-created_at").skip(offset).limit(limit).to_list()
 
         for item in items:
-            # convert reviewer
+            # 1. CONVERT MEDIA (ẢNH + VIDEO) -> THÊM ĐOẠN NÀY
+            if item.images:
+                item.images = [public_url(img) for img in item.images]
+            if item.videos:
+                item.videos = [public_url(vid) for vid in item.videos]
+
+            # 2. convert reviewer
             if isinstance(item.reviewer, ReviewerSnapshot):
                 item.reviewer = ReviewerResponse(
                     id=item.reviewer.id,
                     name=item.reviewer.name,
-                    avatar=item.reviewer.avatar
+                    avatar=public_url(item.reviewer.avatar) if item.reviewer.avatar else None
                 )
 
-            # convert replies
+            # 3. convert replies
             if hasattr(item, "replies") and item.replies:
                 converted_replies = []
                 for reply in item.replies:
                     converted_replies.append(
                         ReviewReplyResponse(
                             seller_id=reply.seller_id,
-                            reply_text=reply.reply_text,    # đúng tên field
-                            reply_date=reply.reply_date     # đúng tên field
+                            reply_text=reply.reply_text,
+                            reply_date=reply.reply_date
                         )
                     )
                 item.replies = converted_replies
@@ -112,9 +122,9 @@ class BuyerReviewService(BaseReviewService):
 
         return self._paginate(items, total, limit, offset)
 
-    # ===================== TẠO REVIEW =====================
-    async def create_review(self, buyer_id: int, info, payload: ReviewCreate):
-        # Check đã review chưa
+ # ===================== TẠO REVIEW =====================
+    async def create_review(self, buyer_id: int, info, payload: ReviewCreate, bg_tasks: BackgroundTasks):
+        # 1. Check đã review chưa
         existed = await Review.find_one(
             Review.buyer_id == buyer_id,
             Review.order_id == payload.order_id,
@@ -126,25 +136,24 @@ class BuyerReviewService(BaseReviewService):
                 detail="You already reviewed this product"
             )
 
-        # Lấy seller_id từ Product (SQL)
+        # 2. Lấy seller_id từ Product (SQL)
         stmt = select(Product.seller_id).where(Product.product_id == payload.product_id)
         result = await self.db.execute(stmt)
         seller_id = result.scalar_one_or_none()
 
         if not seller_id:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Product not found"
+                status_code=status.HTTP_404_NOT_FOUND, detail="Product not found"
             )
 
-        # Tạo reviewer snapshot
+        # 3. Tạo reviewer snapshot
         reviewer_snapshot = ReviewerSnapshot(
             id=info["user"].buyer_id,
             name=info["user"].lname + " " + info["user"].fname,
-            avatar=getattr(info["user"], "avt_url", None)  # nếu có avatar
+            avatar=getattr(info["user"], "avt_url", None)
         )
 
-        # Tạo Review
+        # 4. Tạo Review Object
         review = Review(
             product_id=payload.product_id,
             order_id=payload.order_id,
@@ -157,7 +166,13 @@ class BuyerReviewService(BaseReviewService):
             videos=payload.videos
         )
 
+        # 5. LƯU VÀO MONGODB
         await review.insert()
+
+        # 6. GỌI BACKGROUND TASK
+        # Task này sẽ thực thi sau khi return review về cho khách
+        bg_tasks.add_task(self.trigger_sync_ratings, payload.product_id, seller_id)
+
         return review
     # # ===================== CẬP NHẬT REVIEW =====================
     async def update_review(
@@ -252,6 +267,93 @@ class BuyerReviewService(BaseReviewService):
             )
 
         return results
+    
+    # ===================== SYNC RATINGS (PRIVATE) =====================
+    
+    async def _sync_product_rating(self, db_session: AsyncSession, product_id: int):
+        from motor.motor_asyncio import AsyncIOMotorClient
+        from ...config.settings import settings
+        import asyncio
+
+        # 1. Kết nối trực tiếp driver Motor
+        client = AsyncIOMotorClient(settings.MONGO_URL)
+        db = client[settings.MONGO_DB_NAME]
+        
+        # SỬA TẠI ĐÂY: Tên bảng phải là 'reviews' như bạn đặt trong Settings
+        collection = db['reviews'] 
+        
+        # Đợi một chút để đảm bảo lệnh insert trước đó đã hoàn tất ghi vào đĩa
+        await asyncio.sleep(0.2)
+
+        pipeline = [
+            {"$match": {"product_id": int(product_id)}}, # product_id của bạn là int
+            {"$group": {
+                "_id": "$product_id", 
+                "avg": {"$avg": "$rating"}, 
+                "count": {"$sum": 1}
+            }}
+        ]
+        
+        cursor = collection.aggregate(pipeline)
+        res = await cursor.to_list(length=1)
+        
+        avg, count = (round(res[0]["avg"], 1), res[0]["count"]) if res else (0.0, 0)
+
+        # 2. Cập nhật SQL
+        await db_session.execute(
+            update(Product)
+            .where(Product.product_id == product_id)
+            .values(rating=avg, review_count=count)
+        )
+        print(f"📊 [reviews table] Updated Product {product_id}: {avg}*")
+
+    async def _sync_seller_rating(self, db_session: AsyncSession, seller_id: int):
+        # Công thức chuẩn: Tổng (Rating * Review_Count) / Tổng Review_Count
+        # Nhưng để đơn giản và chính xác theo Dashboard, ta dùng trọng số:
+        stmt = select(
+            # Tính tổng điểm: mỗi sản phẩm (rating * số lượt review)
+            func.sum(Product.rating * Product.review_count),
+            # Tính tổng lượt review
+            func.sum(Product.review_count)
+        ).where(Product.seller_id == seller_id)
+        
+        res = await db_session.execute(stmt)
+        total_score, total_reviews = res.one()
+
+        # Tính toán giá trị cuối cùng
+        if total_reviews and total_reviews > 0:
+            final_avg = round(float(total_score) / total_reviews, 1)
+        else:
+            final_avg = 0.0
+
+        await db_session.execute(
+            update(Seller)
+            .where(Seller.seller_id == seller_id)
+            .values(
+                average_rating=final_avg,
+                rating_count=total_reviews or 0
+            )
+        )
+        print(f"🏢 Updated Seller {seller_id}: {final_avg}* stars from {total_reviews} reviews")
+
+    async def trigger_sync_ratings(self, product_id: int, seller_id: int):
+        """Hàm này sẽ chạy ngầm sau khi API trả về 200"""
+        from ...config.db import engine # Import engine để tạo session mới
+        from sqlalchemy.ext.asyncio import async_sessionmaker
+        
+        new_session_factory = async_sessionmaker(engine, expire_on_commit=False)
+        
+        async with new_session_factory() as new_db:
+            try:
+                # Gọi các hàm sync và truyền session mới vào
+                await self._sync_product_rating(new_db, product_id)
+                await self._sync_seller_rating(new_db, seller_id)
+                
+                await new_db.commit()
+                print("✅ Sync Rating Complete!")
+            except Exception as e:
+                await new_db.rollback()
+                print(f"❌ Sync Rating Error: {e}")
 
 def get_buyer_review_service(
     db: AsyncSession = Depends(get_db),

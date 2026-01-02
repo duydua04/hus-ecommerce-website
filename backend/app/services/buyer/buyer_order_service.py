@@ -691,7 +691,14 @@ class BuyerOrderService:
         order.delivery_date = datetime.now()
         order.payment_status = "paid"
 
-        # 3. Commit vào Database để chốt dữ liệu thực
+        for item in order.items:
+            stmt_update_sold = (
+                update(Product)
+                .where(Product.product_id == item.product_id)
+                .values(sold_quantity=Product.sold_quantity + item.quantity)
+            )
+            await self.db.execute(stmt_update_sold)
+
         await self.db.commit()
         await self.db.refresh(order)
 

@@ -80,7 +80,8 @@ class BuyerProfileService:
             buyer.fname = payload.fname
         if payload.lname is not None:
             buyer.lname = payload.lname
-
+        if payload.avt_url is not None:
+            buyer.avt_url = public_url(payload.avt_url) # Lưu object key           
         await self.db.commit()
         await self.db.refresh(buyer)
 

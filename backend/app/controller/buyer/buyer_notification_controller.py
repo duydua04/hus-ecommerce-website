@@ -50,3 +50,14 @@ async def mark_notification_read(
         )
 
     return {"message": "Đã đánh dấu đã đọc"}
+
+@router.put("/read-all")
+async def mark_all_buyer_notifications_read(
+    buyer_info: dict = Depends(require_buyer)
+):
+    """
+    API bổ sung: Đánh dấu đã đọc tất cả thông báo của Buyer
+    """
+    user = buyer_info['user']
+    await notification_service.mark_all_as_read(user.buyer_id, role="buyer")
+    return {"message": "Đã đánh dấu đã đọc tất cả thông báo"}
