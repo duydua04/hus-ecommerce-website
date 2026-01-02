@@ -1,7 +1,7 @@
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
+from redis.asyncio import Redis
 import redis.asyncio as redis
-
 from ...config.redis import redis_pool
 from ...config.s3 import public_url
 from ...models import Order, OrderItem, Product, Carrier, Category
@@ -28,11 +28,16 @@ class AdminDashboardService:
 
     KEY_STATS_CARRIERS = f"{PREFIX}:stats:carriers"
 
-    def __init__(self):
-        self.redis = redis.Redis(
-            connection_pool=redis_pool,
-            decode_responses=True
-        )
+    def __init__(self, db: AsyncSession = None, redis_client: Redis = None):
+        self.db = db
+
+        if redis_client:
+            self.redis = redis_client
+        else:
+            self.redis = redis.Redis(
+                connection_pool=redis_pool,
+                decode_responses=True
+            )
 
 
     async def handle_new_order_stats(self, order_data: dict):

@@ -1,9 +1,10 @@
 import asyncio
+import logging
 from datetime import datetime, timezone
 from sqlalchemy import select
 from motor.motor_asyncio import AsyncIOMotorClient
 from beanie import init_beanie
-
+import redis.asyncio as redis
 from ..config.settings import settings
 from ..models.notification import Notification
 from ..models.users import Admin
@@ -11,6 +12,7 @@ from ..config.db import AsyncSessionLocal
 from ..utils.celery_client import celery_app
 from ..utils.socket_manager import socket_manager
 
+logger = logging.getLogger(__name__)
 
 async def init_worker_mongo():
     client = AsyncIOMotorClient(settings.MONGO_URL)
@@ -19,6 +21,24 @@ async def init_worker_mongo():
         database=client[settings.MONGO_DB_NAME],
         document_models=[Notification]
     )
+
+async def init_socket_redis():
+    """Chỉ khởi tạo Redis cho Socket vì task này không cần DB SQL hay Cache"""
+    if socket_manager.redis_pub is None or socket_manager.redis is None:
+        try:
+            redis_conn = redis.from_url(
+                settings.redis_url_broker,
+                encoding="utf-8",
+                decode_responses=True
+            )
+
+            # 👇 GÁN CHO CẢ 2 BIẾN (Đây là chỗ bạn đang thiếu)
+            socket_manager.redis = redis_conn
+            socket_manager.redis_pub = redis_conn
+
+            logger.info("[NOTIFICATION TASK] Socket Redis (Pub & Sub) connected successfully")
+        except Exception as e:
+            logger.error(f"[NOTIFICATION TASK] Failed to connect Redis: {e}")
 
 
 @celery_app.task(name="task_send_notification")
@@ -31,6 +51,7 @@ def task_send_notification(
 
     async def _process():
         try:
+            await init_socket_redis()
             await init_worker_mongo()
 
             # Tạo object Notification
