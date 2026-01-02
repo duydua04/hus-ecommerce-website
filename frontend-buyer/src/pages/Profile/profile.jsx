@@ -1,13 +1,19 @@
 // src/pages/Profile/profile.jsx
 import React, { useEffect, useState } from "react";
-import {Link} from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import api from "../../services/api";
 import { useUser } from "../../context/UserContext";
 import "./profile.css";
 import Addresses from "../Addresses/addresses";
 
 export default function Profile() {
-  const [profile, setProfile] = useState(null);
+  const [profile, setProfile] = useState({
+    fname: "",
+    lname: "",
+    phone: "",
+    email: "",
+    avt_url: ""
+  });
   const [activeSection, setActiveSection] = useState("profile");
   const { user, setUser } = useUser();
   const [avatarPreview, setAvatarPreview] = useState(null);
@@ -20,7 +26,7 @@ export default function Profile() {
       try {
         const data = await api.profile.getProfile();
         setProfile(data);
-        setUser(data);
+        setUser(prev => ({ ...prev, ...data }));
       } catch (err) {
         console.error("Load profile error:", err);
       }
@@ -29,34 +35,23 @@ export default function Profile() {
     loadProfile();
   }, [setUser]);
 
-  if (!profile) {
-    return (
-      <div style={{ padding: 40, textAlign: 'center' }}>
-        <div className="loading-spinner"></div>
-        <p>Đang tải hồ sơ...</p>
-      </div>
-    );
-  }
-
   /* ================= HANDLERS ================= */
   const handleChange = (e) => {
-    // Chỉ cập nhật local state, KHÔNG cập nhật UserContext
     setProfile({ ...profile, [e.target.name]: e.target.value });
   };
 
   const handleSaveProfile = async () => {
     try {
       setLoading(true);
-      await api.profile.updateProfile({
-        fullname: profile.fullname,
-        birthday: profile.birthday,
+
+      const updatedData = await api.profile.updateProfile({
+        fname: profile.fname,
+        lname: profile.lname,
+        phone: profile.phone,
       });
 
-      setUser(prev => ({
-        ...prev,
-        fullname: profile.fullname,
-        birthday: profile.birthday,
-      }));
+      setProfile(prev => ({ ...prev, ...updatedData }));
+      setUser(prev => ({ ...prev, ...updatedData }));
 
       alert("✅ Lưu hồ sơ thành công");
     } catch (err) {
@@ -85,45 +80,37 @@ export default function Profile() {
   };
 
   const handleUploadAvatar = async () => {
-  if (!avatarFile) return alert("Vui lòng chọn ảnh");
+    if (!avatarFile) return alert("Vui lòng chọn ảnh");
 
-  try {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    const uploadRes = await api.avatar.upload(avatarFile);
+      const uploadRes = await api.avatar.upload(avatarFile);
+      const newAvatarUrl = uploadRes.avatar_url;
 
-    const updatedProfile = await api.profile.updateProfile({
-      avatar_url: uploadRes.avatar_url,
-    });
+      setProfile(prev => ({ ...prev, avt_url: newAvatarUrl }));
+      setUser(prev => ({
+        ...prev,
+        avt_url: newAvatarUrl,
+        avatar_url: newAvatarUrl
+      }));
 
-    setProfile(prev => ({
-      ...prev,
-      avatar_url: uploadRes.avatar_url,
-    }));
+      if (avatarPreview) URL.revokeObjectURL(avatarPreview);
+      setAvatarPreview(null);
+      setAvatarFile(null);
 
-    setUser(prev => ({
-      ...prev,
-      avatar_url: uploadRes.avatar_url,
-    }));
+      alert("✅ Avatar đã được lưu");
 
-    if (avatarPreview) URL.revokeObjectURL(avatarPreview);
-    setAvatarPreview(null);
-    setAvatarFile(null);
-
-    alert("✅ Avatar đã được lưu");
-
-  } catch (err) {
-    console.error(err);
-    alert(err.message || "Upload avatar thất bại");
-  } finally {
-    setLoading(false);
-  }
-};
+    } catch (err) {
+      console.error(err);
+      alert(err.message || "Upload avatar thất bại");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleCancelAvatarPreview = () => {
-    if (avatarPreview) {
-      URL.revokeObjectURL(avatarPreview);
-    }
+    if (avatarPreview) URL.revokeObjectURL(avatarPreview);
     setAvatarPreview(null);
     setAvatarFile(null);
   };
@@ -135,11 +122,8 @@ export default function Profile() {
       setLoading(true);
       await api.avatar.delete();
 
-      console.log('✅ Avatar deleted');
-
-      // Cập nhật cả Profile và UserContext
-      setProfile(prev => ({ ...prev, avatar_url: null }));
-      setUser(prev => ({ ...prev, avatar_url: null }));
+      setProfile(prev => ({ ...prev, avt_url: null }));
+      setUser(prev => ({ ...prev, avt_url: null, avatar_url: null }));
 
       alert('✅ Xóa avatar thành công');
     } catch (err) {
@@ -149,10 +133,19 @@ export default function Profile() {
     }
   };
 
-  // Lấy avatar URL hiện tại
+  // Helper hiển thị avatar
   const getCurrentAvatarUrl = () => {
-    return avatarPreview || profile.avatar_url;
+    return avatarPreview || profile.avt_url || user?.avt_url || user?.avatar_url;
   };
+
+  // Helper hiển thị tên (Ưu tiên Họ + Tên cho người Việt)
+  const getDisplayName = () => {
+    if (user.lname || user.fname) {
+      // SỬA: lname (Họ) đứng trước, fname (Tên) đứng sau
+      return `${user.lname || ''} ${user.fname || ''}`.trim();
+    }
+    return user.email;
+  }
 
   /* ================= UI ================= */
   return (
@@ -162,34 +155,17 @@ export default function Profile() {
         <div className="user-info">
           <div className="user-avatar">
             {getCurrentAvatarUrl() ? (
-              <div className="user-avatar">
-                  {user?.avatar_url ? (
-                    <img
-                      src={user.avatar_url}
-                      alt="avatar"
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover"
-                      }}
-                    />
-                  ) : (
-                    <div className="avatar-fallback">👤</div>
-                  )}
-                </div>
+              <img
+                src={getCurrentAvatarUrl()}
+                alt="avatar"
+                style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }}
+              />
             ) : (
-              <div style={{
-                fontSize: '24px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: '100%',
-                height: '100%'
-              }}>👤</div>
+              <div className="avatar-fallback">👤</div>
             )}
           </div>
           <div>
-            <div className="user-name">{user.fullname || user.fname || user.email}</div>
+            <div className="user-name">{getDisplayName()}</div>
             <a
               href="#"
               className="user-edit"
@@ -214,11 +190,7 @@ export default function Profile() {
           <li className="sidebar-menu__item">
             <a
               className={`sidebar-menu__link ${
-                activeSection === "profile" ||
-                activeSection === "address" ||
-                activeSection === "password"
-                  ? "active"
-                  : ""
+                ["profile", "address"].includes(activeSection) ? "active" : ""
               }`}
             >
               <span>👤</span>
@@ -228,9 +200,7 @@ export default function Profile() {
             <ul className="submenu show">
               <li>
                 <a
-                  className={`submenu__link ${
-                    activeSection === "profile" ? "active" : ""
-                  }`}
+                  className={`submenu__link ${activeSection === "profile" ? "active" : ""}`}
                   onClick={() => setActiveSection("profile")}
                 >
                   Hồ Sơ
@@ -238,9 +208,7 @@ export default function Profile() {
               </li>
               <li>
                 <a
-                  className={`submenu__link ${
-                    activeSection === "address" ? "active" : ""
-                  }`}
+                  className={`submenu__link ${activeSection === "address" ? "active" : ""}`}
                   onClick={() => setActiveSection("address")}
                 >
                   Địa Chỉ
@@ -260,7 +228,6 @@ export default function Profile() {
 
       {/* ================= CONTENT ================= */}
       <main className="content">
-        {/* ===== PROFILE ===== */}
         {activeSection === "profile" && (
           <div className="content-section active">
             <h2 className="section-title">Hồ Sơ Của Tôi</h2>
@@ -270,28 +237,41 @@ export default function Profile() {
 
             <div className="form-group">
               <label className="form-label">Email</label>
-              <input className="form-input" value={profile.email} disabled />
+              <input className="form-input" value={profile.email || ""} disabled />
             </div>
 
+            {/* SỬA: Đổi Label Họ -> lname */}
             <div className="form-group">
-              <label className="form-label">Tên đầy đủ</label>
+              <label className="form-label">Họ</label>
               <input
                 className="form-input"
-                name="fullname"
-                value={profile.fullname || ""}
+                name="lname"
+                value={profile.lname || ""}
                 onChange={handleChange}
-                placeholder="Nhập tên của bạn"
+                placeholder="Nhập họ"
+              />
+            </div>
+
+            {/* SỬA: Đổi Label Tên -> fname */}
+            <div className="form-group">
+              <label className="form-label">Tên</label>
+              <input
+                className="form-input"
+                name="fname"
+                value={profile.fname || ""}
+                onChange={handleChange}
+                placeholder="Nhập tên"
               />
             </div>
 
             <div className="form-group">
-              <label className="form-label">Ngày sinh</label>
+              <label className="form-label">Số điện thoại</label>
               <input
-                type="date"
                 className="form-input"
-                name="birthday"
-                value={profile.birthday || ""}
+                name="phone"
+                value={profile.phone || ""}
                 onChange={handleChange}
+                placeholder="Nhập số điện thoại"
               />
             </div>
 
@@ -308,23 +288,15 @@ export default function Profile() {
                         height: '100%',
                         objectFit: 'cover',
                         objectPosition: 'center',
-                        borderRadius: '8px'
+                        borderRadius: '50%'
                       }}
                       onError={(e) => {
-                        console.error('Avatar preview load error');
                         e.target.style.display = 'none';
-                        e.target.parentElement.innerHTML = '<div style="font-size: 48px; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;">👤</div>';
+                        e.target.parentElement.innerHTML = '<div style="font-size: 48px;">👤</div>';
                       }}
                     />
                   ) : (
-                    <div style={{
-                      fontSize: '48px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      width: '100%',
-                      height: '100%'
-                    }}>👤</div>
+                    <div style={{ fontSize: '48px' }}>👤</div>
                   )}
                 </div>
 
@@ -353,8 +325,9 @@ export default function Profile() {
                           className="avatar-button"
                           onClick={handleUploadAvatar}
                           disabled={loading}
+                          style={{ borderColor: 'var(--blue-600)', color: 'var(--blue-600)' }}
                         >
-                          {loading ? 'Đang tải...' : 'Tải Lên'}
+                          {loading ? 'Đang tải...' : 'Lưu Ảnh'}
                         </button>
 
                         <button
@@ -367,17 +340,17 @@ export default function Profile() {
                       </>
                     )}
 
-                    {profile.avatar_url && !avatarFile && (
+                    {profile.avt_url && !avatarFile && (
                       <button
                         className="avatar-button avatar-button--danger"
                         onClick={handleDeleteAvatar}
                         disabled={loading}
+                        style={{ color: 'red', borderColor: 'red' }}
                       >
                         Xóa Avatar
                       </button>
                     )}
                   </div>
-
                   <p style={{ fontSize: '12px', color: '#666', marginTop: '8px' }}>
                     Định dạng: JPG, PNG. Tối đa 5MB
                   </p>
@@ -391,13 +364,12 @@ export default function Profile() {
                 onClick={handleSaveProfile}
                 disabled={loading}
               >
-                {loading ? 'Đang lưu...' : 'Lưu'}
+                {loading ? 'Đang lưu...' : 'Lưu Thay Đổi'}
               </button>
             </div>
           </div>
         )}
 
-        {/* ===== ADDRESS ===== */}
         {activeSection === "address" && (
           <Addresses />
         )}
