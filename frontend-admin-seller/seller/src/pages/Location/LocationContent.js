@@ -5,7 +5,17 @@ import Button from "../../components/common/Button/Button";
 import AddEditAddressModal from "./AddLocation/AddLocation";
 import ConfirmModal from "../../components/common/ConfirmModal/ConfirmModal";
 import useLocation from "../../hooks/useLocation";
+
 import "./Location.scss";
+import "../../assets/styles/page.scss";
+
+const ADDRESS_LABEL_MAP = {
+  headquarters: "Trụ sở chính",
+  warehouse: "Kho hàng",
+  other: "Khác",
+};
+
+const getAddressLabelText = (label) => ADDRESS_LABEL_MAP[label] || "Khác";
 
 export default function LocationContent() {
   const {
@@ -162,7 +172,7 @@ export default function LocationContent() {
           title="Địa chỉ"
           breadcrumbs={[
             { label: "Trang chủ", path: "/dashboard" },
-            { label: "Địa chỉ", path: "/location" },
+            { label: "Địa chỉ", path: "/locations" },
           ]}
         />
         <div className="toolbar">
@@ -178,7 +188,7 @@ export default function LocationContent() {
         title="Địa chỉ"
         breadcrumbs={[
           { label: "Trang chủ", path: "/dashboard" },
-          { label: "Địa chỉ", path: "/location" },
+          { label: "Địa chỉ", path: "/locations" },
         ]}
       />
 
@@ -286,7 +296,7 @@ export default function LocationContent() {
                     {address.label && (
                       <div className="location-card__label">
                         <Tag size={14} />
-                        <span>{address.label}</span>
+                        <span>{getAddressLabelText(address.label)}</span>
                       </div>
                     )}
                   </div>

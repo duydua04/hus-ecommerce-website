@@ -1,151 +1,82 @@
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: var(--overlay-modal);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  padding: 1rem;
-}
+.react-select {
+  font-size: 0.875rem;
 
-.modal {
-  background-color: var(--bg-white);
-  border-radius: 8px;
-  box-shadow: var(--shadow-sm);
-  max-width: 600px;
-  width: 100%;
-  max-height: 90vh;
-  overflow-y: auto;
-
-  &--large {
-    max-width: 900px;
-  }
-
-  &--small {
-    max-width: 400px;
-  }
-
-  &__header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1.5rem;
-    border-bottom: 1px solid var(--border-color);
-  }
-
-  &__title {
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin: 0;
-  }
-
-  &__close {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 2rem;
-    height: 2rem;
-    background-color: transparent;
-    border: none;
-    color: #9ca3af;
+  /* Control (input box) */
+  &__control {
+    min-height: 40px;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    box-shadow: none;
     cursor: pointer;
-    transition: var(--transition);
-    border-radius: 8px;
+    background-color: var(--bg-white);
 
     &:hover {
-      color: var(--blue-dark);
-      background-color: var(--blue-light);
+      border-color: var(--bg-hover);
     }
-  }
 
-  &__body {
-    padding: 1.5rem;
-  }
-
-  &__footer {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 0.75rem;
-    padding: 1.5rem;
-    border-top: 1px solid var(--border-color);
-  }
-}
-
-.form-group {
-  margin-bottom: 1.25rem;
-
-  &__label {
-    display: block;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: var(--bg-primary);
-    margin-bottom: 0.5rem;
-
-    .required {
-      color: var(--red);
-    }
-  }
-
-  &__input,
-  &__textarea {
-    width: 100%;
-    padding: 0.625rem 0.875rem;
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    font-size: 0.875rem;
-    transition: all 0.2s;
-
-    &:focus {
-      outline: none;
+    &--is-focused {
       border-color: var(--blue);
-      box-shadow: 0 0 0 3px var(--shadow-md);
+      box-shadow: var(--shadow-md);
     }
 
-    &::placeholder {
-      color: var(--bg-hover);
+    &--is-disabled {
+      background-color: var(--bg-hover);
+      cursor: not-allowed;
     }
   }
 
-  &__textarea {
-    resize: vertical;
-    min-height: 80px;
+  /* Value container */
+  &__value-container {
+    padding: 0 0.75rem;
   }
 
-  &--checkbox {
-    margin-bottom: 0;
+  &__placeholder {
+    color: var(--bg-hover);
   }
 
-  &__checkbox {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+  &__single-value {
+    color: var(--text-primary);
+  }
+
+  /* Menu dropdown */
+  &__menu {
+    margin-top: 4px;
+    border-radius: 10px;
+    box-shadow: var(--shadow-sm);
+    z-index: 9999;
+  }
+
+  /* Option */
+  &__option {
+    padding: 0.5rem 0.75rem;
     cursor: pointer;
 
-    input[type="checkbox"] {
-      width: 18px;
-      height: 18px;
-      cursor: pointer;
+    &--is-focused {
+      background-color: var(--bg-hover);
     }
 
-    &-text {
-      font-size: 0.875rem;
-      color: var(--blue-dark);
+    &--is-selected {
+      background-color: var(--blue);
+      color: white;
     }
   }
-}
 
-.form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
+  /* Icons */
+  &__indicator {
+    color: var(--bg-hover);
 
-  @media (max-width: 640px) {
-    grid-template-columns: 1fr;
+    &:hover {
+      color: var(--blue);
+    }
+  }
+
+  &__indicator-separator {
+    display: none;
+  }
+
+  /* Messages */
+  &__menu-notice {
+    font-size: 0.875rem;
+    color: var(--bg-hover);
   }
 }

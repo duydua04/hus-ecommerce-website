@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { X } from "lucide-react";
-import "./AddLocation.scss";
+import "../../../assets/styles/modal.scss";
 
 /* ===== CONSTANTS ===== */
 const LABEL_OPTIONS = [

@@ -1,0 +1,257 @@
+/* ===== REVIEW INFO CARD ===== */
+.review-info {
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+
+  /* Customer Info Section */
+  &__customer {
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  /* Meta Info (Rating + Date) */
+  &__meta {
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 1rem;
+    padding: 0.75rem 0;
+  }
+
+  /* Review Content */
+  &__content {
+    background: #f9fafb;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+}
+
+/* ===== CUSTOMER INFO ===== */
+.customer-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.customer-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 2px solid var(--border-color);
+}
+
+.customer-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+}
+
+.customer-name {
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 1rem;
+}
+
+/* ===== REVIEW TEXT ===== */
+.review-text {
+  margin: 0;
+  font-size: 0.9375rem;
+  word-break: break-word;
+}
+
+/* ===== EXISTING REPLIES ===== */
+.existing-replies {
+  margin-top: 1.25rem;
+  padding: 1.25rem;
+  background: #fef3c7;
+  border-radius: 12px;
+  border: 2px solid #fbbf24;
+}
+
+.existing-replies__title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #78350f;
+  margin: 0 0 0.875rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.existing-replies__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.existing-reply {
+  background: var(--bg-white);
+  border-radius: 10px;
+  padding: 1rem;
+  border: 2px solid #fde68a;
+}
+
+.existing-reply__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.625rem;
+}
+
+.reply-author {
+  font-weight: 700;
+  color: var(--green);
+  font-size: 0.813rem;
+  background: #d1fae5;
+  padding: 0.25rem 0.625rem;
+  border-radius: 12px;
+}
+
+.reply-date {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.existing-reply__text {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* ===== REPLY FORM ===== */
+.reply-form {
+  margin-top: 1.5rem;
+}
+
+.form-group {
+  margin-bottom: 1.25rem;
+
+  &__label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 0.625rem;
+  }
+}
+
+.required {
+  color: #ef4444;
+  margin-left: 2px;
+}
+
+.form-textarea {
+  width: 100%;
+  min-height: 140px;
+  padding: 1rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  background: #ffffff;
+
+  &:hover {
+    border-color: #cbd5e1;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: #3b82f6;
+  }
+
+  &::placeholder {
+    color: #94a3b8;
+  }
+
+  &--error {
+    border-color: #ef4444;
+    background: #fef2f2;
+  }
+}
+
+.form-error {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #ef4444;
+  font-size: 0.875rem;
+  font-weight: 500;
+  background: #fef2f2;
+  padding: 0.5rem 0.875rem;
+  border-radius: 8px;
+  border: 1px solid #fecaca;
+}
+
+.char-counter {
+  font-size: 0.813rem;
+  color: #64748b;
+  font-weight: 500;
+
+  &--warning {
+    color: #f59e0b;
+    font-weight: 600;
+  }
+}
+
+/* ===== REPLY TIPS ===== */
+.reply-tips {
+  background: #d1fae5;
+  border: 2px solid #6ee7b7;
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin-top: 1.25rem;
+
+  &__title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #065f46;
+    margin: 0 0 0.875rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  &__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    li {
+      position: relative;
+      color: #047857;
+      font-size: 0.875rem;
+      line-height: 1.7;
+      margin-bottom: 0.625rem;
+      padding-left: 1.75rem;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      &::before {
+        content: "✓";
+        position: absolute;
+        left: 0;
+        color: #10b981;
+        font-weight: bold;
+        font-size: 1rem;
+        width: 20px;
+        height: 20px;
+        background: #d1fae5;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
+      }
+    }
+  }
+}

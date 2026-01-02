@@ -21,18 +21,20 @@ class SocketConnectionManager:
     def __init__(self):
         # Lưu các socket đang kết nối trực tiếp tới Server này
         self.active_connections: Dict[str, List[WebSocketConnection]] = {}
-
+        self.redis: redis.Redis | None = None
         self.redis_pub: redis.Redis | None = None
         self.redis_sub: redis.Redis | None = None
         self.pubsub = None
 
 
     async def connect_redis(self):
-        """Khởi tạo kết nối Redis khi ứng dụng khởi động"""
+        """Khởi tạo kết nối Redis khi ứng dụng khởi động (Dùng cho Main API)"""
+
         self.redis_pub = redis.from_url(settings.redis_url_cache, decode_responses=True)
         self.redis_sub = redis.from_url(settings.redis_url_cache, decode_responses=True)
         self.pubsub = self.redis_sub.pubsub()
 
+        self.redis = self.redis_pub
 
     async def close_redis(self):
         """Dọn dẹp kết nối khi ứng dụng tắt"""
@@ -70,12 +72,14 @@ class SocketConnectionManager:
         return f"{role}_{user_id}"
 
 
-    async def send_to_user(self, message: dict, user_id: int, role: str):
+    async def send_to_user(self, message: dict, user_id: int, role: str, external_redis: redis.Redis = None):
         """
         Hàm gửi tin. Publish lên Redis channel 'global_socket_channel'.
         """
-        if not self.redis_pub:
-            print("[SOCKET ERROR] Redis Pub not connected!")
+        redis_client = external_redis or self.redis_pub
+
+        if not redis_client:
+            print("[SOCKET ERROR] Redis Pub not connected! (Checking external_redis or self.redis_pub)")
             return
 
         target_key = self.get_connection_key(user_id, role)
@@ -85,14 +89,15 @@ class SocketConnectionManager:
             "message": message
         }
 
-        # Publish tin nhắn lên Redis
-        await self.redis_pub.publish("global_socket_channel", json.dumps(payload))
-
+        try:
+            # Publish tin nhắn lên Redis
+            await redis_client.publish("global_socket_channel", json.dumps(payload))
+        except Exception as e:
+            print(f"[SOCKET ERROR] Failed to publish: {e}")
 
     async def run_redis_listener(self):
         """
         Hàm lắng nghe tin nhắn từ Redis.
-        Nhận tin từ Redis  kiểm tra user có ở server này không -> Gửi xuống socket.
         """
         if not self.pubsub:
             print("[SOCKET ERROR] Redis Sub not ready!")
@@ -108,9 +113,7 @@ class SocketConnectionManager:
                     target_key = data["target_key"]
                     msg_content = data["message"]
 
-                    # Kiểm tra xem User này có đang kết nối vào Server này khong
                     if target_key in self.active_connections:
-                        # Nếu có, gửi tin qua WebSocket
                         for connection in self.active_connections[target_key]:
                             try:
                                 await connection.websocket.send_json(msg_content)

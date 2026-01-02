@@ -45,10 +45,20 @@ class OrderItemResponse(ORMBase):
     order_id: int
     product_id: int
     variant_id: int | None = None
+    variant_name: str | None = None
     size_id: int | None = None
     quantity: int
     unit_price: Decimal
     total_price: Decimal
+
+    product_name: Optional[str] = None
+    product_image: Optional[str] = None
+    size_name: Optional[str] = None
+
+    # -------------------------
+
+    class Config:
+        from_attributes = True
 
 
 from .address import AddressResponse

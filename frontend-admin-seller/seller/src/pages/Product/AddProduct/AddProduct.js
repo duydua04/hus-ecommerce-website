@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import Select from "react-select";
 import categoryService from "../../../api/CategoryService";
+import "../../../assets/styles/modal.scss";
 import "./AddProduct.scss";
 
 export default function ProductModal({ isOpen, onClose, onSubmit, product }) {
