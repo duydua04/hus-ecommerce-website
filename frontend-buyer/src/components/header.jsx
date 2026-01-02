@@ -11,22 +11,22 @@ const Header = () => {
   const { user, setUser } = useUser();
   const [showUserMenu, setShowUserMenu] = useState(false);
 
-  // Fetch user info on mount
+  // Fetch user info on mount nếu chưa có user trong context
   useEffect(() => {
-      const token = localStorage.getItem("access_token");
-      if (!token) return;
+    const token = localStorage.getItem("access_token");
+    if (!token || user) return; // Nếu đã có user thì không load lại
 
-      const loadUser = async () => {
-        try {
-          const userData = await api.profile.getProfile();
-          setUser(userData);
-        } catch (err) {
-          console.error(err);
-        }
-      };
+    const loadUser = async () => {
+      try {
+        const userData = await api.profile.getProfile();
+        setUser(userData);
+      } catch (err) {
+        console.error("Load user error:", err);
+      }
+    };
 
-      loadUser();
-    }, [setUser, navigate]);
+    loadUser();
+  }, [user, setUser]);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -37,20 +37,23 @@ const Header = () => {
   };
 
   const handleLogout = async () => {
-      try {
-        await api.auth.logout();
-      } catch (err) {
-        console.warn('Logout API failed:', err);
-      }
+    try {
+      await api.auth.logout();
+    } catch (err) {
+      console.warn('Logout API failed:', err);
+    }
 
-      // Xóa token và thông tin user
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('userRole');
-      localStorage.removeItem('savedBuyerEmail');
+    // Xóa token và thông tin user
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('savedBuyerEmail');
 
-      // Quay về trang login
-      navigate('/login', { replace: true });
-    };
+    // Clear user context
+    setUser(null);
+
+    // Quay về trang login
+    navigate('/login', { replace: true });
+  };
 
   // Lấy tên hiển thị từ UserContext
   const getDisplayName = () => {
@@ -68,7 +71,7 @@ const Header = () => {
           <div className="brand">
             <Link to="/" className="brand__link">
               <div className="brand__logo">🛍️</div>
-              <span className="brand__name">BrandName</span>
+              <span className="brand__name">FastBuy</span>
             </Link>
           </div>
         </div>
@@ -130,11 +133,21 @@ const Header = () => {
                 aria-label="Tài khoản"
                 onClick={() => setShowUserMenu(!showUserMenu)}
               >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z" stroke="currentColor" strokeWidth="1.5" />
-                  <path d="M15 10C15 11.6569 13.6569 13 12 13C10.3431 13 9 11.6569 9 10C9 8.34315 10.3431 7 12 7C13.6569 7 15 8.34315 15 10Z" stroke="currentColor" strokeWidth="1.5" />
-                  <path d="M5.49994 19.0001L6.06034 18.0194C6.95055 16.4616 8.60727 15.5001 10.4016 15.5001H13.5983C15.3926 15.5001 17.0493 16.4616 17.9395 18.0194L18.4999 19.0001" stroke="currentColor" strokeWidth="1.5" strokeLinecap="square" strokeLinejoin="round" />
-                </svg>
+                 {getAvatarUrl() ? (
+                    <img
+                      src={getAvatarUrl()}
+                      alt="avatar"
+                      className="header-avatar"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.style.display = 'none';
+                      }}
+                    />
+                  ) : (
+                    <div className="header-avatar header-avatar--fallback">
+                      👤
+                    </div>
+                  )}
               </button>
 
               {showUserMenu && (

@@ -23,15 +23,14 @@ const handleResponse = async (response) => {
 
 const apiCall = async (endpoint, options = {}) => {
   const token = localStorage.getItem('access_token');
-    const config = {
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
-        ...options.headers,
-      },
-      ...options,
-    };
-
+  const config = {
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+      ...options.headers,
+    },
+    ...options,
+  };
 
   try {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
@@ -46,30 +45,21 @@ const apiCall = async (endpoint, options = {}) => {
 // AUTHENTICATION APIs
 // ============================================
 export const authAPI = {
-  // Get current user info
   getMe: () => apiCall('/auth/me'),
-
-  // Login as buyer
   loginBuyer: (email, password) =>
     apiCall('/auth/login/buyer', {
       method: 'POST',
       body: JSON.stringify({ email, password }),
     }),
-
-  // Register as buyer
   registerBuyer: (userData) =>
     apiCall('/auth/register/buyer', {
       method: 'POST',
       body: JSON.stringify(userData),
     }),
-
-  // Logout
   logout: () =>
     apiCall('/auth/logout', {
       method: 'POST',
     }),
-
-  // Refresh token
   refreshToken: () =>
     apiCall('/auth/refresh', {
       method: 'POST',
@@ -80,10 +70,7 @@ export const authAPI = {
 // CATEGORY APIs
 // ============================================
 export const categoryAPI = {
-  // Get all categories (from common endpoint)
   getAll: () => apiCall('/common/categories/'),
-
-  // Get category by ID
   getById: (categoryId) => apiCall(`/common/categories/${categoryId}`),
 };
 
@@ -91,14 +78,12 @@ export const categoryAPI = {
 // PRODUCT APIs
 // ============================================
 export const productAPI = {
-  // Get products list with filters
   getAll: (params = {}) => {
     const queryParams = {
       limit: params.limit || 12,
       offset: params.offset || 0,
     };
 
-    // Add optional parameters
     if (params.q) queryParams.q = params.q;
     if (params.min_price !== undefined) queryParams.min_price = params.min_price;
     if (params.max_price !== undefined) queryParams.max_price = params.max_price;
@@ -108,14 +93,8 @@ export const productAPI = {
     const query = new URLSearchParams(queryParams);
     return apiCall(`/buyer/products/products?${query}`);
   },
-
-  // Get product details
   getById: (productId) => apiCall(`/buyer/products/${productId}`),
-
-  // Get shop info for a product
   getShopInfo: (productId) => apiCall(`/buyer/products/products/${productId}/shop`),
-
-  // Get product price details
   getPrice: (productId, variantId, sizeId) =>
     apiCall('/buyer/products/product/price', {
       method: 'POST',
@@ -125,8 +104,6 @@ export const productAPI = {
         size_id: sizeId,
       }),
     }),
-
-  // Get products by category
   getByCategory: (categoryId, params = {}) => {
     const queryParams = {
       limit: params.limit || 10,
@@ -138,15 +115,9 @@ export const productAPI = {
     const query = new URLSearchParams(queryParams);
     return apiCall(`/buyer/products/categories/${categoryId}?${query}`);
   },
-
-  // Get product variants
   getVariants: (productId) => apiCall(`/buyer/products/${productId}/variants`),
-
-  // Get variant sizes
   getSizes: (productId, variantId) =>
     apiCall(`/buyer/products/${productId}/variants/${variantId}/sizes`),
-
-  // Search products (alias for getAll with search query)
   search: (searchQuery, params = {}) => {
     return productAPI.getAll({
       q: searchQuery,
@@ -159,7 +130,6 @@ export const productAPI = {
 // NOTIFICATION APIs
 // ============================================
 export const notificationAPI = {
-  // Get buyer notifications (cursor pagination)
   getAll: (params = {}) => {
     const queryParams = {
       limit: params.limit || 20,
@@ -172,31 +142,23 @@ export const notificationAPI = {
     const query = new URLSearchParams(queryParams);
     return apiCall(`/buyer/notifications?${query}`);
   },
-
-  // Mark single notification as read
   markAsRead: (notificationId) =>
     apiCall(`/buyer/notifications/${notificationId}/read`, {
       method: 'PUT',
     }),
-
-  // (OPTIONAL) Mark all notifications as read
   markAllAsRead: () =>
     apiCall('/buyer/notifications/read-all', {
       method: 'PUT',
     }),
-
 };
 
 // ============================================
 // CART APIs
 // ============================================
 export const cartAPI = {
-  // Get current cart
-  getCart: () => apiCall('/buyer/cart'),
-
-  // Add item to cart
+  getCart: () => apiCall('/buyer/cart/show'),
   addItem: (productId, variantId, sizeId, quantity = 1) =>
-    apiCall('/buyer/cart/items', {
+    apiCall('/buyer/cart/add', {
       method: 'POST',
       body: JSON.stringify({
         product_id: productId,
@@ -205,32 +167,42 @@ export const cartAPI = {
         quantity,
       }),
     }),
-
-  // Update cart item quantity
-  updateItem: (itemId, quantity) =>
-    apiCall(`/buyer/cart/items/${itemId}`, {
+  updateQuantity: (itemId, data) =>
+    apiCall(`/buyer/cart/item/quantity/${itemId}`, {
       method: 'PATCH',
-      body: JSON.stringify({ quantity }),
+      body: JSON.stringify(data),
     }),
-
-  // Remove item from cart
+  updateVariantSize: (itemId, data) =>
+    apiCall(`/buyer/cart/item/variant-size/${itemId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
   removeItem: (itemId) =>
-    apiCall(`/buyer/cart/items/${itemId}`, {
+    apiCall(`/buyer/cart/product/${itemId}`, {
       method: 'DELETE',
     }),
-
-  // Clear cart
-  clearCart: () =>
-    apiCall('/buyer/cart', {
-      method: 'DELETE',
+  calculateSummary: (data) =>
+    apiCall('/buyer/cart/summary', {
+      method: 'POST',
+      body: JSON.stringify(data),
     }),
+  searchItems: (query, limit = 10) => {
+    const params = new URLSearchParams({ q: query, limit });
+    return apiCall(`/buyer/cart/cart/search?${params}`);
+  },
 };
 
 // ============================================
-// ORDER APIs
+// ORDER APIs - CẬP NHẬT HOÀN CHỈNH
 // ============================================
 export const orderAPI = {
-  // Get buyer's orders
+  // GET /buyer/orders/tracking?tab=
+  getOrdersTracking: (tab = null) => {
+    const params = tab ? `?tab=${tab}` : '';
+    return apiCall(`/buyer/orders/tracking${params}`);
+  },
+
+  // GET /buyer/orders?limit=&offset=&status=
   getOrders: (params = {}) => {
     const query = new URLSearchParams({
       limit: params.limit || 10,
@@ -240,74 +212,78 @@ export const orderAPI = {
     return apiCall(`/buyer/orders?${query}`);
   },
 
-  // Get order details
+  // GET /buyer/orders/{order_id}
   getById: (orderId) => apiCall(`/buyer/orders/${orderId}`),
 
-  // Create order from cart
+  // POST /buyer/orders
   createOrder: (orderData) =>
     apiCall('/buyer/orders', {
       method: 'POST',
       body: JSON.stringify(orderData),
     }),
 
-  // Cancel order
+  // POST /buyer/orders/selected-items
+  getSelectedItems: (cartItemIds) =>
+    apiCall('/buyer/orders/selected-items', {
+      method: 'POST',
+      body: JSON.stringify({
+        shopping_cart_item_ids: cartItemIds
+      }),
+    }),
+
+  // PATCH /buyer/orders/{order_id}/cancel
   cancelOrder: (orderId) =>
     apiCall(`/buyer/orders/${orderId}/cancel`, {
-      method: 'POST',
+      method: 'PATCH',
+    }),
+
+  // PATCH /buyer/orders/{order_id}/confirm
+  confirmReceived: (orderId) =>
+    apiCall(`/buyer/orders/${orderId}/confirm`, {
+      method: 'PATCH',
+    }),
+
+  // PATCH /buyer/orders/{order_id}/shipping-address
+  updateShippingAddress: (orderId, addressData) =>
+    apiCall(`/buyer/orders/${orderId}/shipping-address`, {
+      method: 'PATCH',
+      body: JSON.stringify(addressData),
     }),
 };
 
+
 // ============================================
-// ADDRESS APIs
+// ADDRESSES APIs
 // ============================================
 export const addressAPI = {
-  // Get all buyer addresses
-  getAll: () => apiCall('/buyer/addresses'),
+  list: () => apiCall('/buyer/addresses'),
+  create: (addressData, isDefault = false, label = null) => {
+    const params = new URLSearchParams();
+    if (isDefault) params.append('is_default', true);
+    if (label) params.append('label', label);
 
-  // Create and link new address
-  createAndLink: (addressData, isDefault = false, label = null) =>
-    apiCall('/buyer/addresses/create-and-link', {
+    return apiCall(`/buyer/addresses/create-and-link?${params}`, {
       method: 'POST',
       body: JSON.stringify(addressData),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    }).then(res => res).catch(err => {
-      // Handle query params for this endpoint
-      const query = new URLSearchParams({
-        is_default: isDefault,
-        ...(label && { label }),
-      });
-      return apiCall(`/buyer/addresses/create-and-link?${query}`, {
-        method: 'POST',
-        body: JSON.stringify(addressData),
-      });
-    }),
-
-  // Update address link (is_default, label)
+    });
+  },
   updateLink: (buyerAddressId, data) =>
     apiCall(`/buyer/addresses/${buyerAddressId}`, {
       method: 'PATCH',
       body: JSON.stringify(data),
     }),
-
-  // Update address fields
-  updateAddress: (buyerAddressId, addressData) =>
+  updateContent: (buyerAddressId, data) =>
     apiCall(`/buyer/addresses/${buyerAddressId}/address`, {
       method: 'PATCH',
-      body: JSON.stringify(addressData),
+      body: JSON.stringify(data),
     }),
-
-  // Set default address
-  setDefault: (buyerAddressId) =>
-    apiCall(`/buyer/addresses/${buyerAddressId}/default`, {
-      method: 'PATCH',
-    }),
-
-  // Delete address
   delete: (buyerAddressId) =>
     apiCall(`/buyer/addresses/${buyerAddressId}`, {
       method: 'DELETE',
+    }),
+  setDefault: (buyerAddressId) =>
+    apiCall(`/buyer/addresses/${buyerAddressId}/default`, {
+      method: 'PATCH',
     }),
 };
 
@@ -315,17 +291,12 @@ export const addressAPI = {
 // PROFILE APIs
 // ============================================
 export const profileAPI = {
-  // Get buyer profile
   getProfile: () => apiCall('/buyer/profile'),
-
-  // Update buyer profile
   updateProfile: (profileData) =>
     apiCall('/buyer/profile', {
       method: 'PUT',
       body: JSON.stringify(profileData),
     }),
-
-  // Update password
   updatePassword: (currentPassword, newPassword) =>
     apiCall('/buyer/profile/password', {
       method: 'POST',
@@ -334,16 +305,59 @@ export const profileAPI = {
         new_password: newPassword,
       }),
     }),
+};
 
-  // Upload avatar
-  uploadAvatar: (file) => {
+// ============================================
+// AVATAR APIs
+// ============================================
+export const avatarAPI = {
+  // Upload avatar - trả về object chứa public_url
+  upload: async (file) => {
+    const token = localStorage.getItem('access_token');
     const formData = new FormData();
     formData.append('file', file);
-    return apiCall('/avatar/upload', {
+
+    const response = await fetch(`${API_BASE_URL}/avatars/me`, {
       method: 'POST',
+      headers: {
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+      },
       body: formData,
-      headers: {},
     });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ detail: 'Upload failed' }));
+      throw new Error(error.detail || `HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    // Backend trả về: { public_url, object_key, size, content_type, role, email }
+    // Frontend cần: { avatar_url }
+    return {
+      ...data,
+      avatar_url: data.public_url
+    };
+  },
+
+  // Delete avatar
+  delete: async () => {
+    const token = localStorage.getItem('access_token');
+
+    const response = await fetch(`${API_BASE_URL}/avatars/me`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ detail: 'Delete failed' }));
+      throw new Error(error.detail || `HTTP error! status: ${response.status}`);
+    }
+
+    return response.json();
   },
 };
 
@@ -351,42 +365,97 @@ export const profileAPI = {
 // REVIEW APIs
 // ============================================
 export const reviewAPI = {
-  // Get product reviews
+
+  // 🔹 Lấy ảnh + video review của tất cả sản phẩm
+  getAllMedia: () =>
+    apiCall('/buyer/reviews/media'),
+
+  // 🔹 Lấy review theo product
   getByProduct: (productId, params = {}) => {
     const query = new URLSearchParams({
+      page: params.page || 1,
       limit: params.limit || 10,
-      offset: params.offset || 0,
+      ...(params.rating && { rating: params.rating }),
     });
-    return apiCall(`/products/${productId}/reviews?${query}`);
+
+    return apiCall(`/buyer/reviews/product/${productId}?${query}`);
   },
 
-  // Create review
-  create: (reviewData) =>
-    apiCall('/buyer/reviews', {
+  // 🔹 Lấy tất cả review của buyer hiện tại
+  getMyReviews: (params = {}) => {
+    const query = new URLSearchParams({
+      page: params.page || 1,
+      limit: params.limit || 10,
+    });
+
+    return apiCall(`/buyer/reviews?${query}`);
+  },
+
+  // 🔹 Upload ảnh / video review (trả về array URL)
+  uploadFiles: async (files = []) => {
+    const token = localStorage.getItem('access_token');
+    const formData = new FormData();
+
+    files.forEach(file => {
+      formData.append('files', file);
+    });
+
+    const response = await fetch(
+      `${API_BASE_URL}/buyer/reviews/upload`,
+      {
+        method: 'POST',
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: formData,
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ detail: 'Upload failed' }));
+      throw new Error(error.detail || 'Upload failed');
+    }
+
+    return response.json();
+    // backend trả về: ["url1", "url2"]
+  },
+
+  // 🔹 Tạo review
+  create: (data) =>
+    apiCall('/buyer/reviews/create', {
       method: 'POST',
-      body: JSON.stringify(reviewData),
+      body: JSON.stringify({
+        product_id: data.product_id,
+        order_id: data.order_id,
+        rating: data.rating,
+        content: data.content,
+        images: data.images || [],
+        videos: data.videos || [],
+      }),
     }),
 
-  // Upload review images
-  uploadImages: (reviewId, files) => {
-    const formData = new FormData();
-    files.forEach(file => formData.append('files', file));
-    return apiCall(`/buyer/reviews/${reviewId}/images`, {
-      method: 'POST',
-      body: formData,
-      headers: {},
-    });
-  },
+  // 🔹 Update review
+  update: (productId, orderId, data) =>
+    apiCall(`/buyer/reviews/${productId}/${orderId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({
+        rating: data.rating,
+        comment: data.comment,
+      }),
+    }),
+
+  // 🔹 Delete review
+  delete: (productId, orderId) =>
+    apiCall(`/buyer/reviews/${productId}/${orderId}`, {
+      method: 'DELETE',
+    }),
 };
 
 // ============================================
 // CARRIER APIs (Shipping)
 // ============================================
 export const carrierAPI = {
-  // Get available carriers
   getAll: () => apiCall('/carriers'),
-
-  // Calculate shipping fee
   calculateFee: (carrierId, addressId, weight) =>
     apiCall('/carriers/calculate-fee', {
       method: 'POST',
@@ -402,10 +471,7 @@ export const carrierAPI = {
 // DISCOUNT APIs (Vouchers)
 // ============================================
 export const discountAPI = {
-  // Get available discounts
   getAvailable: () => apiCall('/buyer/discounts/available'),
-
-  // Apply discount code
   applyCode: (code, cartTotal) =>
     apiCall('/buyer/discounts/apply', {
       method: 'POST',
@@ -414,8 +480,6 @@ export const discountAPI = {
         cart_total: cartTotal,
       }),
     }),
-
-  // Validate discount
   validate: (discountId, cartTotal) =>
     apiCall(`/buyer/discounts/${discountId}/validate`, {
       method: 'POST',
@@ -435,6 +499,7 @@ export default {
   order: orderAPI,
   address: addressAPI,
   profile: profileAPI,
+  avatar: avatarAPI,
   review: reviewAPI,
   carrier: carrierAPI,
   discount: discountAPI,
