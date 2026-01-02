@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom"; // 1. Thêm useNavigate
 import api from "../../services/api";
 import "./search.css";
 
@@ -22,6 +22,7 @@ const RATING_OPTIONS = [
 // ================== Component ==================
 export default function SearchResult() {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate(); // 2. Khởi tạo hook điều hướng
   const q = searchParams.get("q") || "";
 
   // ===== Filters =====
@@ -200,7 +201,13 @@ export default function SearchResult() {
         {/* Product grid */}
         <div className="product-grid">
           {products.map((p) => (
-            <div key={p.product_id} className="product-card">
+            <div
+              key={p.product_id}
+              className="product-card"
+              // 3. Thêm sự kiện click để chuyển hướng
+              onClick={() => navigate(`/product/${p.product_id}`)}
+              style={{ cursor: "pointer" }}
+            >
               <div className="product-card__image-wrapper">
                 <img
                   className="product-card__image"
