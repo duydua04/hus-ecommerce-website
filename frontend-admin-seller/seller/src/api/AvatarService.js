@@ -1,8 +1,6 @@
-// api/avatarService.js
-import axios from "axios";
+import axiosInstance from "../utils/axiosConfig";
 
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
-const AVATARS_ENDPOINT = `${API_URL}/avatars`;
+const AVATARS_ENDPOINT = "/avatars";
 
 const avatarService = {
   /* Upload avatar cho user hiện tại */
@@ -11,13 +9,16 @@ const avatarService = {
       const formData = new FormData();
       formData.append("file", file);
 
-      const response = await axios.post(`${AVATARS_ENDPOINT}/me`, formData, {
-        withCredentials: true,
-        timeout: 30000, // 30s cho upload file
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const response = await axiosInstance.post(
+        `${AVATARS_ENDPOINT}/me`,
+        formData,
+        {
+          timeout: 30000, // 30s cho upload file
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
       return response.data;
     } catch (error) {
       if (error.response) {
@@ -36,10 +37,7 @@ const avatarService = {
   /* Xóa avatar của user hiện tại */
   deleteMyAvatar: async () => {
     try {
-      const response = await axios.delete(`${AVATARS_ENDPOINT}/me`, {
-        withCredentials: true,
-        timeout: 10000,
-      });
+      const response = await axiosInstance.delete(`${AVATARS_ENDPOINT}/me`);
       return response.data;
     } catch (error) {
       if (error.response) {

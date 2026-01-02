@@ -1,7 +1,6 @@
-import axios from "axios";
+import axiosInstance from "../utils/axiosConfig";
 
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
-const CATEGORIES_ENDPOINT = `${API_URL}/common/categories`;
+const CATEGORIES_ENDPOINT = "/common/categories";
 
 const categoryService = {
   /**
@@ -9,10 +8,7 @@ const categoryService = {
    */
   getAllCategories: async () => {
     try {
-      const response = await axios.get(CATEGORIES_ENDPOINT, {
-        withCredentials: true,
-        timeout: 10000,
-      });
+      const response = await axiosInstance.get(CATEGORIES_ENDPOINT);
       return response.data;
     } catch (error) {
       if (error.response) {
@@ -33,10 +29,9 @@ const categoryService = {
    */
   getCategoryDetail: async (categoryId) => {
     try {
-      const response = await axios.get(`${CATEGORIES_ENDPOINT}/${categoryId}`, {
-        withCredentials: true,
-        timeout: 10000,
-      });
+      const response = await axiosInstance.get(
+        `${CATEGORIES_ENDPOINT}/${categoryId}`
+      );
       return response.data;
     } catch (error) {
       throw error.response?.data || { detail: error.message };

@@ -297,7 +297,7 @@ export default function ReviewContent() {
             </div>
             <div className="stats-card__content">
               <h4 className="stats-card__title">Tổng đánh giá</h4>
-              <p className="stats-card__value">{pagination.total || 0}</p>
+              <p className="stats-card__value-review">{pagination.total || 0}</p>
             </div>
           </div>
 
@@ -307,7 +307,7 @@ export default function ReviewContent() {
             </div>
             <div className="stats-card__content">
               <h4 className="stats-card__title">Đã phản hồi</h4>
-              <p className="stats-card__value">
+              <p className="stats-card__value-review">
                 {reviews.filter((r) => r.replies && r.replies.length > 0)
                   .length || 0}
               </p>
@@ -320,7 +320,7 @@ export default function ReviewContent() {
             </div>
             <div className="stats-card__content">
               <h4 className="stats-card__title">Chưa phản hồi</h4>
-              <p className="stats-card__value">
+              <p className="stats-card__value-review">
                 {reviews.filter((r) => !r.replies || r.replies.length === 0)
                   .length || 0}
               </p>

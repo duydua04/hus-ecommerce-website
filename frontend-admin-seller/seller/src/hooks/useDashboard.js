@@ -43,6 +43,7 @@ const useDashboard = () => {
   const [lastUpdate, setLastUpdate] = useState(null);
 
   const [autoRefresh, setAutoRefresh] = useState(false);
+  const [syncing, setSyncing] = useState(false);
   const refreshIntervalRef = useRef(null);
 
   /* ===== Helper runner ===== */
@@ -75,7 +76,7 @@ const useDashboard = () => {
     (view = "monthly") =>
       run(async () => {
         const data = await dashboardService.getChart(view);
-        setChart(normalize.chart(data)); // Backend đã trả đúng format
+        setChart(normalize.chart(data));
         return data;
       }),
     []
@@ -107,6 +108,24 @@ const useDashboard = () => {
       return { stats: s, chart: c, products: p };
     });
   }, []);
+
+  /* ===== Force Sync ===== */
+  const syncDashboard = useCallback(async () => {
+    setSyncing(true);
+    try {
+      const result = await dashboardService.syncDashboard();
+      // Sau khi trigger sync, đợi 2-3 giây rồi fetch lại data
+      setTimeout(() => {
+        fetchDashboard("monthly");
+      }, 2500);
+      return result;
+    } catch (e) {
+      setError(errorMessage(e));
+      throw e;
+    } finally {
+      setSyncing(false);
+    }
+  }, [fetchDashboard]);
 
   /* ===== Auto-refresh (Polling) ===== */
   const startAutoRefresh = useCallback(
@@ -161,12 +180,14 @@ const useDashboard = () => {
     error,
     lastUpdate,
     autoRefresh,
+    syncing,
 
     fetchStats,
     fetchChart,
     fetchTopProducts,
     fetchDashboard,
     refreshDashboard,
+    syncDashboard,
 
     startAutoRefresh,
     stopAutoRefresh,

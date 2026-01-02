@@ -8,12 +8,9 @@ const request = async (fn) => {
   } catch (e) {
     if (e.response) {
       const { status, data } = e.response;
-
-      // Không cần xử lý 401 ở đây vì interceptor đã handle
       throw {
-        detail: data?.detail,
+        detail: data?.detail || data?.message || "Lỗi không xác định",
         status,
-        message: data?.message || "Lỗi không xác định",
       };
     }
     throw { detail: "Không thể kết nối server" };
@@ -30,6 +27,9 @@ const dashboardService = {
 
   getTopProducts: () =>
     request(() => axiosInstance.get("/seller/dashboard/top-products")),
+
+  syncDashboard: () =>
+    request(() => axiosInstance.post("/seller/dashboard/sync")),
 };
 
 export default dashboardService;
