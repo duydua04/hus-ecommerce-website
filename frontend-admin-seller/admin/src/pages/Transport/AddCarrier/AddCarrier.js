@@ -162,7 +162,7 @@ export default function CarrierModal({
 
   return (
     <div className="modal-overlay" onClick={handleOverlayClick}>
-      <div className="modal">
+      <div className="modal modal--small">
         <div className="modal__header">
           <h2 className="modal__title">
             {carrier ? "Cập nhật đơn vị vận chuyển" : "Thêm đơn vị vận chuyển"}
