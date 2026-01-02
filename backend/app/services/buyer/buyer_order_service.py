@@ -2,7 +2,7 @@ import asyncio
 from decimal import Decimal
 from datetime import datetime
 from fastapi import HTTPException, status
-from sqlalchemy import select, and_, desc, update
+from sqlalchemy import select, and_, desc, update, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from fastapi import Depends
@@ -38,6 +38,8 @@ from app.tasks.seller_dashboard_task import task_seller_recalc_dashboard
 from app.tasks.notification_task import task_send_notification
 from app.tasks.inventory import update_stock_db
 
+from ...config.db import engine
+from sqlalchemy.ext.asyncio import async_sessionmaker
 # ===================== TAB MAPPING =====================
 TAB_MAPPING = {
     "all": {},
@@ -591,7 +593,6 @@ class BuyerOrderService:
         ]
     
     # ===================== BUYER HỦY ĐƠN =====================
-    # ===================== BUYER HỦY ĐƠN (FULL HOÀN THIỆN) =====================
     async def cancel_order(self, buyer_id: int, order_id: int):
         # 1. Lấy thông tin đơn hàng
         order = await self._get_order_with_items(buyer_id, order_id)
@@ -677,10 +678,15 @@ class BuyerOrderService:
         order.delivery_date = datetime.now()
         order.payment_status = "paid"
 
-        # 3. Commit vào Database để chốt dữ liệu thực
-        await self.db.commit()
-        await self.db.refresh(order)
+        ## Lấy thông tin cần thiết trước khi commit
+        items_data = [{"product_id": item.product_id, "quantity": item.quantity} for item in order.items]
+        seller_id = order.items[0].product.seller_id
 
+        await self.db.commit()
+
+        # 2. Kích hoạt task chạy ngầm để cập nhật số lượng bán
+        # Truyền danh sách items để update từng sản phẩm
+        await self._bg_sync_sold_stats(items_data, seller_id)
         # 4. CHUẨN BỊ PAYLOAD CHO HỆ THỐNG THỐNG KÊ (ANALYTICS)
         # Giả định đơn hàng thuộc về một seller
         seller_id = order.items[0].product.seller_id
@@ -721,6 +727,27 @@ class BuyerOrderService:
 
         return order
     
+    async def _bg_sync_sold_stats(self, items_data: list, seller_id: int):
+        async_session = async_sessionmaker(engine, expire_on_commit=False)
+
+        async with async_session() as new_db:
+            try:
+                for item in items_data:
+                    await new_db.execute(
+                        update(Product)
+                        .where(Product.product_id == item["product_id"])
+                        .values(
+                            sold_quantity=Product.sold_quantity + item["quantity"]
+                        )
+                    )
+
+                # ✅ BẮT BUỘC
+                await new_db.commit()
+
+            except Exception as e:
+                await new_db.rollback()
+                print(f"❌ Failed to sync sold stats: {str(e)}")
+            
 def get_buyer_order_service(
     db: AsyncSession = Depends(get_db),
 ):

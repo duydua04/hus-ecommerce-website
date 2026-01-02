@@ -99,14 +99,6 @@ export default function Notifications() {
 
         <ul className="sidebar-menu">
           <li className="sidebar-menu__item">
-            <a className="sidebar-menu__link">
-              <span>📦</span>
-              <span>Siêu Sale 12/12</span>
-              <span className="sidebar-menu__badge">New</span>
-            </a>
-          </li>
-
-          <li className="sidebar-menu__item">
             <Link to="/notifications" className="sidebar-menu__link">
               <span>🔔</span>
               <span>Thông Báo</span>

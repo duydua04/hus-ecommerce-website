@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, File, Query, UploadFile, status
+from fastapi import APIRouter, Depends, File, Query, UploadFile, status, BackgroundTasks
 from typing import List, Any, Optional
 from ...models.review import Review
 from ...schemas.common import Page
@@ -22,6 +22,7 @@ router = APIRouter(
     tags=["Buyer-Reviews"]
 )
 
+# ===================== MEDIA =====================
 @router.get(
     "/media",
     response_model=list[ReviewMediaItem]
@@ -33,6 +34,7 @@ async def list_review_media(
     Danh sách ảnh + video review của tất cả sản phẩm
     """
     return await service.list_all_review_media()
+
 
 @router.get(
     "/product/{product_id}",
@@ -94,10 +96,18 @@ async def upload_review_files(
 @router.post("/create", response_model=Review)
 async def create_review(
     payload: ReviewCreate,
+    bg_tasks: BackgroundTasks, # Inject BackgroundTasks vào đây
     service: BuyerReviewService = Depends(get_buyer_review_service),
     info: Any = Depends(get_current_user)
 ):
-    return await service.create_review(buyer_id=info["user"].buyer_id, info=info, payload=payload)
+    # Truyền bg_tasks xuống hàm service
+    return await service.create_review(
+        buyer_id=info["user"].buyer_id, 
+        info=info, 
+        payload=payload, 
+        bg_tasks=bg_tasks
+    )
+
 @router.patch(
     "/{product_id}/{order_id}",
     response_model=ReviewResponse,

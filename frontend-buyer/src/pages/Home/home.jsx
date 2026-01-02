@@ -7,6 +7,7 @@ const Home = () => {
   const navigate = useNavigate();
   const [categories, setCategories] = useState([]);
   const [newestProducts, setNewestProducts] = useState([]);
+  const [reviewMedias, setReviewMedias] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -53,6 +54,45 @@ const Home = () => {
 
     fetchNewestProducts();
   }, []);
+
+  // ================= Fetch 6 Random Media Reviews =================
+  useEffect(() => {
+      const fetchMedia = async () => {
+        try {
+          const res = await api.review.getAllMedia();
+          // res: [{ review_id, rating, images, videos, ... }]
+
+          // 1. Chỉ lấy rating = 5
+          const rating5Reviews = res.filter(r => r.rating === 5);
+
+          // 2. Gom images + videos thành 1 mảng media
+          const medias = rating5Reviews.flatMap(r => {
+            const images = (r.images || []).map(url => ({
+              type: 'image',
+              url,
+              product_id: r.product_id,
+            }));
+
+            const videos = (r.videos || []).map(url => ({
+              type: 'video',
+              url,
+              product_id: r.product_id,
+            }));
+
+            return [...images, ...videos];
+          });
+
+          // 3. Random & lấy 6 media
+          const shuffled = medias.sort(() => 0.5 - Math.random());
+          setReviewMedias(shuffled.slice(0, 6));
+
+        } catch (err) {
+          console.error('Fetch media reviews error:', err);
+        }
+      };
+
+      fetchMedia();
+    }, []);
 
   // ================= Handle Product Click =================
   const handleProductClick = (productId) => {
@@ -239,77 +279,56 @@ const Home = () => {
             <div className="video-reviews__editors-pick">
               <article className="card card--editors-pick">
                 <div className="card__body">
-                  <p className="card__text-primary">Editors' Picks</p>
-                  <h3 className="card__title">Video Reviews</h3>
+                  <p className="card__text-primary">Ảnh và Video phản hồi</p>
+                  <h3 className="card__title">Video đánh giá sản phẩm</h3>
                   <p className="card__description">
-                    Want to add that personal touch? These sellers specialize in embroidery, engraving, illustrating, and more.
+                    Mua sắm uy tín, hàng thật, chất lượng thật!
                   </p>
-                  <a href="#" className="card__button">Shop these findings</a>
+                  <a href="#" className="card__button">Phản hồi chân thật</a>
                 </div>
               </article>
             </div>
+            {/* ----------------------Video card -----------------*/}
+            {reviewMedias.length > 0 ? (
+              reviewMedias.map((media, index) => (
+                <div key={index}>
+                  <article className="video-thumbnail">
+                    <a
+                      className="video-thumbnail__link"
+                      onClick={() => navigate(`/product/${media.product_id}`)}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      {media.type === 'video' ? (
+                        <>
+                          <video
+                            src={media.url}
+                            className="video-thumbnail__image"
+                            muted
+                            preload="metadata"
+                          />
+                          <button className="video-thumbnail__play-button">▶</button>
+                        </>
+                      ) : (
+                        <img
+                          src={media.url}
+                          className="video-thumbnail__image"
+                          alt="Review media"
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = '/assets/placeholder-product.png';
+                          }}
+                        />
+                      )}
+                    </a>
+                  </article>
+                </div>
+              ))
+            ) : (
+              <div style={{ gridColumn: '1 / -1', textAlign: 'center', color: '#888' }}>
+                Chưa có phản hồi 5 sao
+              </div>
+            )}
 
-            {/* Video Cards */}
-            <div>
-              <article className="video-thumbnail">
-                <a href="#" className="video-thumbnail__link">
-                  <img src="../../assets/product-interior/review-1.png" className="video-thumbnail__image" alt="" />
-                  <button className="video-thumbnail__play-button">
-                    ▶
-                  </button>
-                </a>
-              </article>
-            </div>
-            <div>
-              <article className="video-thumbnail">
-                <a href="#" className="video-thumbnail__link">
-                  <img src="../../assets/product-interior/review-2.png" className="video-thumbnail__image" alt="" />
-                  <button className="video-thumbnail__play-button">
-                    ▶
-                  </button>
-                </a>
-              </article>
-            </div>
-            <div>
-              <article className="video-thumbnail">
-                <a href="#" className="video-thumbnail__link">
-                  <img src="../../assets/product-interior/review-3.png" className="video-thumbnail__image" alt="" />
-                  <button className="video-thumbnail__play-button">
-                    ▶
-                  </button>
-                </a>
-              </article>
-            </div>
-            <div>
-              <article className="video-thumbnail">
-                <a href="#" className="video-thumbnail__link">
-                  <img src="../../assets/product-interior/review-4.png" className="video-thumbnail__image" alt="" />
-                  <button className="video-thumbnail__play-button">
-                    ▶
-                  </button>
-                </a>
-              </article>
-            </div>
-            <div>
-              <article className="video-thumbnail">
-                <a href="#" className="video-thumbnail__link">
-                  <img src="../../assets/product-interior/review-5.png" className="video-thumbnail__image" alt="" />
-                  <button className="video-thumbnail__play-button">
-                    ▶
-                  </button>
-                </a>
-              </article>
-            </div>
-            <div>
-              <article className="video-thumbnail">
-                <a href="#" className="video-thumbnail__link">
-                  <img src="../../assets/product-interior/review-6.png" className="video-thumbnail__image" alt="" />
-                  <button className="video-thumbnail__play-button">
-                    ▶
-                  </button>
-                </a>
-              </article>
-            </div>
           </div>
         </div>
       </section>
