@@ -417,7 +417,6 @@ export const reviewAPI = {
     }
 
     return response.json();
-    // backend trả về: ["url1", "url2"]
   },
 
   // 🔹 Tạo review
@@ -449,6 +448,10 @@ export const reviewAPI = {
     apiCall(`/buyer/reviews/${productId}/${orderId}`, {
       method: 'DELETE',
     }),
+
+  getReplies: (reviewId) => {
+    return request.get(`/reviews/${reviewId}/replies`);
+  },
 };
 
 // ============================================

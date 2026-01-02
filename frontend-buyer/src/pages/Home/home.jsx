@@ -178,12 +178,11 @@ const Home = () => {
                 style={{ cursor: 'pointer' }}
               >
                 <img
-                  src={category.image_url || '/assets/placeholder-category.png'}
+                  src={category.image_url || 'src/assets/confligloading/null.png'}
                   alt={category.category_name}
                   className="popular__image"
                   onError={(e) => {
                     e.target.onerror = null;
-                    e.target.src = '/assets/placeholder-category.png';
                   }}
                 />
                 <p className="popular__label">{category.category_name}</p>
@@ -213,12 +212,11 @@ const Home = () => {
                 style={{ cursor: 'pointer' }}
               >
                 <img
-                  src={product.public_primary_image_url || '/assets/placeholder-product.png'}
+                  src={product.public_primary_image_url || '/assets/confligloading/null.png'}
                   alt={product.name}
                   className="product-card__image"
                   onError={(e) => {
                     e.target.onerror = null;
-                    e.target.src = '/assets/placeholder-product.png';
                   }}
                 />
 

@@ -5,7 +5,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 // Import Components
 import Header from './components/header.jsx';
 import Footer from './components/footer.jsx';
-
+import Modal from './components/modal.jsx';
 // Import Pages
 import BuyerLogin from './pages/Login/BuyerLogin.jsx';
 import BuyerRegister from './pages/Login/Register/Register.jsx';

@@ -208,7 +208,7 @@
 .product-card__name {
     font-size: 0.95rem;
     font-weight: 400;
-    color: #111827;
+    color: black;
     margin-bottom: 8px;
     line-height: 1.4;
     display: -webkit-box;
@@ -235,7 +235,7 @@
 }
 
 .product-card__price {
-    color: #111827;
+    color: var(--blue-600);
     font-size: 1.125rem;
     font-weight: 600;
     margin-bottom: 12px;
