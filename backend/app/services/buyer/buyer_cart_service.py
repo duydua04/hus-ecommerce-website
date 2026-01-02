@@ -50,11 +50,10 @@ class CartServiceAsync:
         cart_stmt = select(ShoppingCart).where(ShoppingCart.buyer_id == buyer_id)
         cart_res = await self.db.execute(cart_stmt)
         cart = cart_res.scalar_one_or_none()
-        
-        # --- Tối ưu Lỗi 5: Chống Cache Penetration ---
+
+        # --- Xử lý khi không có giỏ hàng ---
         if not cart:
-            # Lưu giá trị rỗng vào Redis với TTL ngắn thay vì chỉ xóa cache
-            await self.redis.set(self._cart_key(buyer_id), json.dumps([]), ex=self.EMPTY_CART_TTL)
+            await self.redis.set(self._cart_key(buyer_id), json.dumps([]), ex=self.CART_TTL)
             return []
 
         stmt = (
@@ -71,25 +70,40 @@ class CartServiceAsync:
         items = res.unique().scalars().all()
 
         if not items:
-            await self.redis.set(self._cart_key(buyer_id), json.dumps([]), ex=self.EMPTY_CART_TTL)
+            await self.redis.set(self._cart_key(buyer_id), json.dumps([]), ex=self.CART_TTL)
             return []
 
+        # Key của dict sẽ là tuple chứa thông tin seller: (id, name, avt)
         grouped = defaultdict(list)
+
         for item in items:
             product = item.product
-            seller_name = product.seller.shop_name if product.seller else "Unknown Seller"
+
+            # 1. Lấy thông tin Seller
+            seller_obj = product.seller
+            seller_id = seller_obj.seller_id if seller_obj else 0
+            seller_name = seller_obj.shop_name if seller_obj else "Unknown Seller"
+
+            # 2. Lấy avt_url (đã xác nhận trường DB là avt_url)
+            raw_avt = seller_obj.avt_url if seller_obj else None
+            seller_avt = public_url(raw_avt) if raw_avt else None
+
+            # 3. Tạo key gom nhóm
+            seller_key = (seller_id, seller_name, seller_avt)
+
+            # Logic tính toán giá và variant
             variant = next((v for v in product.variants if v.variant_id == item.variant_id), None)
             size = next((s for s in variant.sizes if s.size_id == item.size_id), None) if variant else None
 
-            # Tính toán bằng Decimal để tránh sai số (Lỗi 6)
             base_price = Decimal(str(product.base_price)) + Decimal(str(variant.price_adjustment if variant else 0))
             discount = Decimal(str(product.discount_percent))
             sale_price = base_price * (Decimal('100') - discount) / Decimal('100')
-            
+
             unit_weight = float(product.weight or 0)
             total_weight = unit_weight * item.quantity
             image_url = public_url(product.images[0].image_url) if product.images else None
-            grouped[seller_name].append({
+
+            grouped[seller_key].append({
                 "shopping_cart_item_id": item.shopping_cart_item_id,
                 "product_id": product.product_id,
                 "name": product.name,
@@ -104,7 +118,18 @@ class CartServiceAsync:
                 "public_image_url": image_url
             })
 
-        final_response = [{"seller": seller, "products": products} for seller, products in grouped.items()]
+        final_response = [
+            {
+                "seller": {
+                    "seller_id": s_id,
+                    "shop_name": s_name,
+                    "avt_url": s_avt  # Trường mới đã được thêm
+                },
+                "products": products
+            }
+            for (s_id, s_name, s_avt), products in grouped.items()
+        ]
+
         await self.redis.set(self._cart_key(buyer_id), json.dumps(final_response), ex=self.CART_TTL)
         return final_response
 
@@ -112,25 +137,18 @@ class CartServiceAsync:
     async def get_buyer_cart(self, buyer_id: int):
         key = self._cart_key(buyer_id)
         cached = await self.redis.get(key)
-        
+
         if cached:
             items = json.loads(cached)
-        else:
-            items = await self._update_cart_cache(buyer_id)
 
-        # Logic hiển thị phân nhóm theo seller (nếu dữ liệu cache chưa đúng format)
-        if items and "seller" in items[0]:
-            return items
+            # --- KIỂM TRA TÍNH HỢP LỆ CỦA CACHE ---
+            if items and isinstance(items[0].get("seller"), dict):
+                return items
 
-        grouped = defaultdict(list)
-        for item in items:
-            seller = item.get("seller_name", "Unknown Seller")
-            grouped[seller].append(item)
+            if isinstance(items, list) and not items:
+                return items
 
-        return [
-            {"seller": seller, "products": products}
-            for seller, products in grouped.items()
-        ]
+        return await self._update_cart_cache(buyer_id)
 
     # =================== THÊM SẢN PHẨM VÀO GIỎ HÀNG ===================
     async def add_to_cart(self, buyer_id: int, product_id: int, variant_id: Optional[int] = None, size_id: Optional[int] = None, quantity: int = 1):

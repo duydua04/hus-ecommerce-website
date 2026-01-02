@@ -237,23 +237,24 @@ const Cart = () => {
                   <div
                     className="seller-group"
                     key={idx}
-                    data-seller={sellerGroup.seller}
+                    data-seller-id={sellerGroup.seller.seller_id}
                   >
                     {/* Seller Header */}
                     <div className="seller-group__header">
                       <div className="seller-group__avatar">
                         <img
-                          src="/assets/categories/default.png"
-                          alt={sellerGroup.seller}
+                          src={sellerGroup.seller.avt_url || "/assets/categories/default.png"}
+                          alt={sellerGroup.seller.shop_name}
                           onError={(e) => {
-                            e.target.style.display = "none";
+                            e.target.onerror = null;
+                            e.target.src = "/assets/categories/default.png";
                           }}
                         />
                       </div>
                       <div className="seller-group__info">
                         <div className="seller-group__name-wrapper">
                           <div className="seller-group__name">
-                            {sellerGroup.seller}
+                            {sellerGroup.seller.shop_name}
                           </div>
                         </div>
                       </div>
@@ -461,18 +462,9 @@ const Cart = () => {
           </div>
         </div>
 
-        {/* Cart Summary */}
+        {/* Cart Summary - Đã xóa Voucher và Delivery */}
         <aside className="cart-summary">
-          <div className="cart-summary__promo">
-            <div className="cart-summary__promo-input">
-              <input
-                type="text"
-                className="cart-summary__promo-field"
-                placeholder="Nhập Voucher"
-              />
-              <button className="cart-summary__promo-btn">Áp dụng</button>
-            </div>
-          </div>
+          {/* Phần Input Voucher đã bị xóa ở đây */}
 
           <div className="cart-summary__row">
             <span className="cart-summary__label">
@@ -509,17 +501,7 @@ const Cart = () => {
             Mua Ngay
           </button>
 
-          <div className="cart-summary__delivery">
-            <div className="cart-summary__delivery-icon">📦</div>
-            <div className="cart-summary__delivery-info">
-              <div className="cart-summary__delivery-label">
-                Đơn vị vận chuyển: Ba con heo
-              </div>
-              <div className="cart-summary__delivery-location">
-                Địa chỉ: Tây sơn, Hà Nội
-              </div>
-            </div>
-          </div>
+          {/* Phần Đơn vị vận chuyển đã bị xóa ở đây */}
         </aside>
       </div>
     </main>
