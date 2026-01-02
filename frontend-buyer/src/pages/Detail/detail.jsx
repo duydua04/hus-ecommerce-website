@@ -168,9 +168,6 @@ const Detail = () => {
         quantity
       );
 
-      if (window.confirm("Đã thêm vào giỏ hàng! Bạn có muốn xem giỏ hàng không?")) {
-        navigate("/cart");
-      }
     } catch (e) {
       alert(e.message || "Không thể thêm vào giỏ");
     } finally {

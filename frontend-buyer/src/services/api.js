@@ -16,7 +16,7 @@ const handleResponse = async (response) => {
       }
     }
 
-    throw new Error(error.detail || `HTTP error! status: ${response.status}`);
+    throw new Error(JSON.stringify(error));
   }
   return response.json();
 };
@@ -193,7 +193,7 @@ export const cartAPI = {
 };
 
 // ============================================
-// ORDER APIs - CẬP NHẬT HOÀN CHỈNH
+// ORDER APIs
 // ============================================
 export const orderAPI = {
   // GET /buyer/orders/tracking?tab=
@@ -455,36 +455,99 @@ export const reviewAPI = {
 // CARRIER APIs (Shipping)
 // ============================================
 export const carrierAPI = {
-  getAll: () => apiCall('/carriers'),
-  calculateFee: (carrierId, addressId, weight) =>
-    apiCall('/carriers/calculate-fee', {
+  // GET /buyer/carriers/
+  getAll: () => apiCall('/buyer/carriers/'),
+
+  // POST /buyer/carriers/calculate
+  calculateFee: (carrierId, addressId, weight, cartTotal) =>
+    apiCall('/buyer/carriers/calculate', {
       method: 'POST',
       body: JSON.stringify({
         carrier_id: carrierId,
-        address_id: addressId,
-        weight,
+        address_id: addressId,  // Thêm address_id từ request schema
+        weight: weight,
+        cart_total: cartTotal
       }),
     }),
+
+  // POST /buyer/carriers/available
+  getAvailable: (addressId, weight, cartTotal) =>
+    apiCall('/buyer/carriers/available', {
+      method: 'POST',
+      body: JSON.stringify({
+        address_id: addressId,
+        weight: weight,
+        cart_total: cartTotal
+      }),
+    }),
+
+  // GET /buyer/carriers/{carrier_id}
+  getById: (carrierId) => apiCall(`/buyer/carriers/${carrierId}`),
 };
 
 // ============================================
 // DISCOUNT APIs (Vouchers)
 // ============================================
 export const discountAPI = {
-  getAvailable: () => apiCall('/buyer/discounts/available'),
-  applyCode: (code, cartTotal) =>
-    apiCall('/buyer/discounts/apply', {
+  // GET /buyer/discount/available?cart_total=&q=&limit=&offset=
+  getAvailable: (params = {}) => {
+    const queryParams = new URLSearchParams();
+
+    if (params.cart_total !== undefined) queryParams.append('cart_total', params.cart_total);
+    if (params.q) queryParams.append('q', params.q);
+    queryParams.append('limit', params.limit || 10);
+    queryParams.append('offset', params.offset || 0);
+
+    return apiCall(`/buyer/discount/available?${queryParams}`);
+  },
+
+  // POST /buyer/discount/validate (validate bằng code)
+  validateByCode: (code, cartTotal) =>
+    apiCall('/buyer/discount/validate', {
       method: 'POST',
       body: JSON.stringify({
-        code,
-        cart_total: cartTotal,
+        code: code,
+        cart_total: cartTotal
       }),
     }),
-  validate: (discountId, cartTotal) =>
-    apiCall(`/buyer/discounts/${discountId}/validate`, {
+
+  // POST /buyer/discount/validate (validate bằng discount_id)
+  validateById: (discountId, cartTotal) =>
+    apiCall('/buyer/discount/validate', {
       method: 'POST',
-      body: JSON.stringify({ cart_total: cartTotal }),
+      body: JSON.stringify({
+        discount_id: discountId,
+        cart_total: cartTotal
+      }),
     }),
+
+  // GET /buyer/discount/best?cart_total=
+  getBest: (cartTotal) => {
+    const params = new URLSearchParams({ cart_total: cartTotal });
+    return apiCall(`/buyer/discount/best?${params}`);
+  },
+
+  // POST /buyer/discount/preview
+  preview: (discountId, cartTotal) =>
+    apiCall('/buyer/discount/preview', {
+      method: 'POST',
+      body: JSON.stringify({
+        discount_id: discountId,
+        cart_total: cartTotal
+      }),
+    }),
+
+  // GET /buyer/discount/{discount_id}
+  getById: (discountId) => apiCall(`/buyer/discount/${discountId}`),
+
+  // GET /buyer/discount/?limit=&offset=
+  getAll: (params = {}) => {
+    const query = new URLSearchParams({
+      limit: params.limit || 10,
+      offset: params.offset || 0,
+    });
+    return apiCall(`/buyer/discount/?${query}`);
+  },
 };
 
 // ============================================

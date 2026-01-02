@@ -84,66 +84,6 @@ toolbar__header {
     gap: 12px;
 }
 
-/* Search and Filter Section */
-.toolbar__search-section {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px 24px;
-    border-bottom: 1px solid var(--neutral-200);
-    gap: 16px;
-    flex-wrap: wrap;
-}
-
-.toolbar__search {
-    flex: 1;
-    min-width: 200px;
-    max-width: 400px;
-    position: relative;
-}
-
-.toolbar__search-input {
-    width: 100%;
-    padding: 10px 14px 10px 40px;
-    border: 1px solid var(--neutral-200);
-    border-radius: 8px;
-    font-size: 14px;
-    outline: none;
-    transition: border-color 0.2s;
-}
-
-.toolbar__search-input:focus {
-    border-color: var(--blue-500);
-}
-
-.toolbar__search-icon {
-    position: absolute;
-    left: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--neutral-400);
-}
-
-.toolbar__filter-btn {
-    padding: 10px 16px;
-    background-color: white;
-    border: 1px solid var(--neutral-200);
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 500;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: var(--neutral-700);
-}
-
-.toolbar__filter-btn:hover {
-    background-color: var(--neutral-50);
-    border-color: var(--blue-500);
-    color: var(--blue-600);
-}
-
 /* Table Header */
 .toolbar__table-header {
     background-color: var(--neutral-50);
