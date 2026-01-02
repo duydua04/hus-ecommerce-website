@@ -113,10 +113,10 @@ export default function Notifications() {
           </li>
 
           <li className="sidebar-menu__item">
-            <a className="sidebar-menu__link">
+            <Link to="/tracking" className="sidebar-menu__link">
               <span>📄</span>
               <span>Đơn Mua</span>
-            </a>
+            </Link>
           </li>
         </ul>
       </aside>

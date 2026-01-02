@@ -355,6 +355,77 @@
   text-align: center;
 }
 
+/* Seller Group Styles - Giống như trong cart */
+.seller-group {
+  margin-bottom: 20px;
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.seller-group__header {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  background: #fafafa;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.seller-group__avatar {
+  width: 32px;
+  height: 32px;
+  margin-right: 12px;
+}
+
+.seller-group__avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.seller-group__info {
+  flex: 1;
+}
+
+.seller-group__name-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+.seller-group__name {
+  font-weight: 600;
+  font-size: 14px;
+  color: #333;
+}
+
+/* Product Item trong seller group */
+.seller-group .product-item {
+  border-bottom: 1px solid #f0f0f0;
+  margin: 0;
+}
+
+.seller-group .product-item:last-child {
+  border-bottom: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .seller-group__header {
+    padding: 10px 12px;
+  }
+
+  .seller-group__avatar {
+    width: 28px;
+    height: 28px;
+    margin-right: 8px;
+  }
+
+  .seller-group__name {
+    font-size: 13px;
+  }
+}
+
 /* Payment Section */
 .payment-header {
   margin-bottom: 16px;

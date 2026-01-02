@@ -738,3 +738,56 @@ toolbar__header {
         font-size: 1.4rem;
     }
 }
+
+
+/* Hiện chú ý chỉ chọn được sản phẩm trong cùng một shop */
+
+/* Notice khi đang chọn shop */
+.selected-shop-notice {
+  background-color: #e8f4ff;
+  border-left: 4px solid var(--blue-500);
+  padding: 8px 12px;
+  margin-top: 10px;
+  border-radius: 4px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.notice-icon {
+  font-size: 16px;
+}
+
+/* Phần hiển thị shop đang được chọn trong summary */
+.selected-shop-summary {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 16px;
+  border: 1px solid #e9ecef;
+}
+
+.selected-shop-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.clear-selection-btn {
+  width: 100%;
+  padding: 8px;
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  color: #6c757d;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+
+.clear-selection-btn:hover {
+  background-color: #e9ecef;
+  color: #495057;
+}

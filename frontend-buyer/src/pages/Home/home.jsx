@@ -99,9 +99,10 @@ const Home = () => {
     navigate(`/product/${productId}`);
   };
 
-  // ================= Handle Category Click =================
-  const handleCategoryClick = (categoryId) => {
-    navigate(`/search?category=${categoryId}`);
+  // ================= Handle Category Click - SỬA LẠI =================
+  const handleCategoryClick = (categoryId, categoryName) => {
+    // Chuyển đến trang search với điều kiện lọc: mới nhất + danh mục đã chọn
+    navigate(`/search?sort=newest&category=${categoryId}&categoryName=${encodeURIComponent(categoryName)}`);
   };
 
   if (loading) {
@@ -133,7 +134,7 @@ const Home = () => {
                   </a>
                 </div>
                 <img
-                  src="/assets/banners/main-interior.png"
+                  src="src/assets/banners/main-interior.png"
                   alt="Main banner"
                   className="banner__image"
                 />
@@ -143,7 +144,7 @@ const Home = () => {
             <aside className="banner__small">
               <article className="banner__small-inner">
                 <img
-                  src="/assets/banners/small-interior.png"
+                  src="src/assets/banners/small-interior.png"
                   alt="Small banner"
                   className="banner__bg-image"
                 />
@@ -173,7 +174,7 @@ const Home = () => {
               <article
                 className="popular__card"
                 key={category.category_id}
-                onClick={() => handleCategoryClick(category.category_id)}
+                onClick={() => handleCategoryClick(category.category_id, category.category_name)}
                 style={{ cursor: 'pointer' }}
               >
                 <img
