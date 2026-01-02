@@ -182,7 +182,7 @@
 
   &__title {
     font-size: 18px;
-    font-weight: 600;
+    font-weight: bold;
     color: var(--text-primary);
   }
 
@@ -193,7 +193,7 @@
 
   &__btn {
     padding: 8px 16px;
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--text-primary);
     background: transparent;
     border-radius: 8px;
     font-size: 14px;
@@ -201,7 +201,10 @@
     transition: all 0.3s ease;
 
     &:hover {
-      background: var(--bg-secondary);
+      background: var(--blue);
+      color: var(--bg-primary);
+      border-color: var(--primary);
+      transition: var(--transition);
     }
 
     &--active {
@@ -243,38 +246,79 @@
   &__bar {
     width: 100%;
     max-width: 40px;
-    background: linear-gradient(180deg, var(--primary) 0%, #3b82f6 100%);
-    border-radius: 4px 4px 0 0;
-    transition: all 0.3s ease;
+    background: var(--blue);
+    border-radius: 8px 8px 0 0;
     position: relative;
     cursor: pointer;
+    transition: var(--transition);
 
     &:hover {
-      opacity: 0.8;
+      background: linear-gradient(180deg, #60a5fa 0%, #3b82f6 100%);
+      box-shadow: 0 8px 20px rgba(59, 130, 246, 0.5),
+        inset 0 -2px 8px rgba(0, 0, 0, 0.15);
+      transform: translateY(-4px) scale(1.05);
+
+      &::before {
+        opacity: 1;
+      }
     }
   }
 
   &__bar-value {
     position: absolute;
-    top: -24px;
+    top: -28px;
     left: 50%;
     transform: translateX(-50%);
     font-size: 11px;
-    font-weight: 600;
-    color: var(--text-secondary);
+    font-weight: bold;
+    color: var(--text-primary);
     white-space: nowrap;
-    display: none;
+    background: white;
+    padding: 4px 8px;
+    border-radius: 6px;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s ease;
+    z-index: 10;
   }
 
   &__bar:hover &__bar-value {
-    display: block;
+    opacity: 1;
+    top: -32px;
   }
 
   &__label {
     margin-top: 8px;
     font-size: 12px;
+    font-weight: 500;
     color: var(--text-secondary);
     text-align: center;
+    transition: color 0.3s ease;
+  }
+
+  &__bar-wrapper:hover &__label {
+    color: var(--primary);
+    font-weight: 600;
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .chart {
+    &__header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    &__bar {
+      max-width: 32px;
+    }
+
+    &__bar-value {
+      font-size: 10px;
+      padding: 3px 6px;
+    }
   }
 }
 
@@ -422,17 +466,17 @@
       font-size: 18px;
 
       &--gold {
-        background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+        background: #efef03;
         color: #b8860b;
       }
 
       &--silver {
-        background: linear-gradient(135deg, #c0c0c0 0%, #e8e8e8 100%);
+        background: #e8e8e8;
         color: #808080;
       }
 
       &--bronze {
-        background: linear-gradient(135deg, #cd7f32 0%, #e5a869 100%);
+        background: #e5a869 100%;
         color: #8b4513;
       }
     }

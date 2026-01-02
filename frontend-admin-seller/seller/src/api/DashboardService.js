@@ -1,11 +1,5 @@
-import axios from "axios";
-
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
-
-const api = axios.create({
-  baseURL: `${API_URL}/seller/dashboard`,
-  withCredentials: true,
-});
+// api/DashboardService.js
+import axiosInstance from "../utils/axiosConfig";
 
 const request = async (fn) => {
   try {
@@ -15,11 +9,7 @@ const request = async (fn) => {
     if (e.response) {
       const { status, data } = e.response;
 
-      // Thêm xử lý 401/403
-      if (status === 401 || status === 403) {
-        window.location.href = "/login"; // Hoặc dùng router
-      }
-
+      // Không cần xử lý 401 ở đây vì interceptor đã handle
       throw {
         detail: data?.detail,
         status,
@@ -31,10 +21,15 @@ const request = async (fn) => {
 };
 
 const dashboardService = {
-  getStats: () => request(() => api.get("/stats")),
+  getStats: () => request(() => axiosInstance.get("/seller/dashboard/stats")),
+
   getChart: (view = "monthly") =>
-    request(() => api.get("/chart", { params: { view } })),
-  getTopProducts: () => request(() => api.get("/top-products")),
+    request(() =>
+      axiosInstance.get("/seller/dashboard/chart", { params: { view } })
+    ),
+
+  getTopProducts: () =>
+    request(() => axiosInstance.get("/seller/dashboard/top-products")),
 };
 
 export default dashboardService;
