@@ -4,6 +4,7 @@ import {Link} from 'react-router-dom';
 import api from "../../services/api";
 import { useUser } from "../../context/UserContext";
 import "./profile.css";
+import Addresses from "../Addresses/addresses";
 
 export default function Profile() {
   const [profile, setProfile] = useState(null);
@@ -19,18 +20,14 @@ export default function Profile() {
       try {
         const data = await api.profile.getProfile();
         setProfile(data);
-
-        // Đồng bộ với UserContext nếu chưa có
-        if (!user) {
-          setUser(data);
-        }
+        setUser(data);
       } catch (err) {
         console.error("Load profile error:", err);
       }
     };
 
     loadProfile();
-  }, [setUser, user]);
+  }, [setUser]);
 
   if (!profile) {
     return (
@@ -55,7 +52,6 @@ export default function Profile() {
         birthday: profile.birthday,
       });
 
-      // CHỈ KHI LƯU THÀNH CÔNG mới cập nhật UserContext
       setUser(prev => ({
         ...prev,
         fullname: profile.fullname,
@@ -89,10 +85,7 @@ export default function Profile() {
   };
 
   const handleUploadAvatar = async () => {
-  if (!avatarFile) {
-    alert("Vui lòng chọn ảnh");
-    return;
-  }
+  if (!avatarFile) return alert("Vui lòng chọn ảnh");
 
   try {
     setLoading(true);
@@ -105,12 +98,12 @@ export default function Profile() {
 
     setProfile(prev => ({
       ...prev,
-      avatar_url,
+      avatar_url: uploadRes.avatar_url,
     }));
 
     setUser(prev => ({
       ...prev,
-      avatar_url,
+      avatar_url: uploadRes.avatar_url,
     }));
 
     if (avatarPreview) URL.revokeObjectURL(avatarPreview);
@@ -212,14 +205,6 @@ export default function Profile() {
 
         <ul className="sidebar-menu">
           <li className="sidebar-menu__item">
-            <a className="sidebar-menu__link">
-              <span>📦</span>
-              <span>Siêu Sale 12/12</span>
-              <span className="sidebar-menu__badge">New</span>
-            </a>
-          </li>
-
-          <li className="sidebar-menu__item">
             <Link to="/notifications" className="sidebar-menu__link">
               <span>🔔</span>
               <span>Thông Báo</span>
@@ -261,24 +246,14 @@ export default function Profile() {
                   Địa Chỉ
                 </a>
               </li>
-              <li>
-                <a
-                  className={`submenu__link ${
-                    activeSection === "password" ? "active" : ""
-                  }`}
-                  onClick={() => setActiveSection("password")}
-                >
-                  Đổi Mật Khẩu
-                </a>
-              </li>
             </ul>
           </li>
 
           <li className="sidebar-menu__item">
-            <a className="sidebar-menu__link">
+            <Link to="/tracking" className="sidebar-menu__link">
               <span>📄</span>
               <span>Đơn Mua</span>
-            </a>
+            </Link>
           </li>
         </ul>
       </aside>
@@ -424,51 +399,7 @@ export default function Profile() {
 
         {/* ===== ADDRESS ===== */}
         {activeSection === "address" && (
-          <div className="content-section active">
-            <h2 className="section-title">Địa Chỉ Của Tôi</h2>
-            <p className="section-subtitle">Quản lý địa chỉ giao hàng</p>
-            <p style={{ padding: 40, textAlign: "center", color: "#888" }}>
-              Chưa có địa chỉ nào được lưu
-            </p>
-          </div>
-        )}
-
-        {/* ===== PASSWORD ===== */}
-        {activeSection === "password" && (
-          <div className="content-section active">
-            <h2 className="section-title">Đổi Mật Khẩu</h2>
-            <p className="section-subtitle">
-              Không chia sẻ mật khẩu cho người khác
-            </p>
-
-            <div className="form-group">
-              <input
-                className="form-input"
-                type="password"
-                placeholder="Mật khẩu hiện tại"
-              />
-            </div>
-
-            <div className="form-group">
-              <input
-                className="form-input"
-                type="password"
-                placeholder="Mật khẩu mới"
-              />
-            </div>
-
-            <div className="form-group">
-              <input
-                className="form-input"
-                type="password"
-                placeholder="Xác nhận mật khẩu"
-              />
-            </div>
-
-            <div className="button-group">
-              <button className="btn-save">Xác Nhận</button>
-            </div>
-          </div>
+          <Addresses />
         )}
       </main>
     </div>

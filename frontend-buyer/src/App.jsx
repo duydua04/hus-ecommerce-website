@@ -18,6 +18,7 @@ import Payment from './pages/Payment/payment.jsx';
 import OrderTracking from './pages/OrderTracking/order_tracking.jsx';
 import Profile from './pages/Profile/profile.jsx';
 import SearchResult from './pages/Search/search.jsx';
+import Addresses from './pages/Addresses/addresses.jsx'
 
 // Import CSS
 import './App.css';
@@ -93,12 +94,13 @@ function App() {
                   <Routes>
                     <Route path="/" element={<Home />} />
                     <Route path="/search" element={<SearchResult />} />
-                    <Route path="/product/:id" element={<Detail />} />
+                    <Route path="/product/:productId" element={<Detail />} />
                     <Route path="/cart" element={<Cart />} />
                     <Route path="/payment" element={<Payment />} />
                     <Route path="/tracking" element={<OrderTracking />} />
                     <Route path="/profile" element={<Profile />} />
                     <Route path="/notifications" element={<Notifications />} />
+                    <Route path="/addresses" element={<Addresses />} />
 
                     {/* 404 Page */}
                     <Route path="*" element={
