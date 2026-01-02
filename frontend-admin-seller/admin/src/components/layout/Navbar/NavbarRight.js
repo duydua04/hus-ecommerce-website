@@ -9,7 +9,7 @@ const NavbarRight = ({ profileImage = "" }) => {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
 
-  // 🔥 bao cả notification + profile
+  // bao cả notification + profile
   const wrapperRef = useRef(null);
 
   const { notifications, unreadCount, markAsRead, markAllAsRead } =

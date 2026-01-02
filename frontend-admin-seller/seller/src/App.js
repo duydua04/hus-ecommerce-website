@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -21,12 +21,21 @@ import ReviewPage from "./pages/Review/ReviewPage";
 
 // Protected Route Component
 import ProtectedRoute from "./components/ProtectedRoute";
+import { WebSocketClient } from "./hooks/websocket";
 
 // Global Styles
 import "./assets/styles/global.scss";
 import "boxicons/css/boxicons.min.css";
 
 function App() {
+  /* INIT WEBSOCKET */
+  useEffect(() => {
+    WebSocketClient.connect();
+
+    return () => {
+      WebSocketClient.disconnect();
+    };
+  }, []);
   return (
     <Router>
       <Routes>
