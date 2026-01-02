@@ -19,7 +19,7 @@ from ...schemas.product import UpdateCartItemRequest, UpdateVariantSizeRequest
 class CartServiceAsync:
     CART_TTL = 3600  # 1 giờ
     DELAY_DELETE = 0.5  # Khoảng trễ để xóa cache lần 2 (giây)
-
+    EMPTY_CART_TTL = 300  # 5 phút cho giỏ hàng rỗng để tránh cache penetration
     def __init__(self, db: AsyncSession, redis: Redis):
         self.db = db
         self.redis = redis
@@ -71,8 +71,9 @@ class CartServiceAsync:
         items = res.unique().scalars().all()
 
         if not items:
-            await self.redis.set(self._cart_key(buyer_id), json.dumps([]), ex=self.EMPTY_CART_TTL)
-            return []
+             # Lưu mảng rỗng vào redis để tránh query DB liên tục
+             await self.redis.set(self._cart_key(buyer_id), json.dumps([]), ex=self.EMPTY_CART_TTL)
+             return []
 
         grouped = defaultdict(list)
         for item in items:

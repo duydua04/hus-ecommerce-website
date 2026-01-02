@@ -266,7 +266,7 @@ class BuyerOrderService:
         # Tổng tiền
         total_price = subtotal + shipping_price - discount_amount
 
-        #Tạo Order
+        # 1. TẠO ĐƠN HÀNG VÀ ITEMS (Chưa commit)
         order = Order(
             buyer_id=buyer_id,
             buyer_address_id=payload.buyer_address_id,
@@ -282,13 +282,20 @@ class BuyerOrderService:
             notes=payload.notes
         )
         self.db.add(order)
-        await self.db.flush()  # để lấy order_id
+        await self.db.flush() 
 
-        #Tạo OrderItem
         for item in selected_items:
+            # Trừ kho đồng bộ ngay tại đây (An toàn nhất)
+            stock_stmt = select(ProductSize).where(ProductSize.size_id == item.size_id).with_for_update()
+            size_obj = (await self.db.execute(stock_stmt)).scalar_one_or_none()
+            if not size_obj or size_obj.available_units < item.quantity:
+                raise HTTPException(400, f"Sản phẩm {item.product.name} đã hết hàng")
+            size_obj.available_units -= item.quantity
+
+            # Tạo OrderItem
             variant_price = item.variant.price_adjustment if item.variant else 0
             unit_price = (item.product.base_price + variant_price) * (100 - item.product.discount_percent) / 100
-            order_item = OrderItem(
+            self.db.add(OrderItem(
                 order_id=order.order_id,
                 product_id=item.product_id,
                 variant_id=item.variant_id,
@@ -296,40 +303,27 @@ class BuyerOrderService:
                 quantity=item.quantity,
                 unit_price=unit_price,
                 total_price=unit_price * item.quantity
-            )
-            self.db.add(order_item)
-
-        # 5. CLEAR CÁC ITEM ĐÃ MUA KHỎI GIỎ HÀNG TRONG DATABASE
-        for item in selected_items:
+            ))
+            # Xóa khỏi giỏ hàng
             await self.db.delete(item)
 
-        # 6. COMMIT DATABASE
-        # Bước này chốt hạ dữ liệu trong MySQL
+        # 2. LẤY SELLER_ID TRƯỚC KHI COMMIT (Rất quan trọng)
+        seller_id = selected_items[0].product.seller_id
+
+        # 3. CHỐT TRANSACTION DUY NHẤT
         await self.db.commit()
         await self.db.refresh(order)
 
-        # 7. GỌI CÁC TASK CHẠY NGẦM (CELERY) SAU KHI COMMIT THÀNH CÔNG
-        # Chỉ trừ kho thực tế sau khi đơn hàng đã chắc chắn được tạo thành công
-        for item in selected_items:
-            # update_stock_db.delay thực hiện trừ (-) số lượng trong bảng ProductSize
-            update_stock_db.delay(item.size_id, -item.quantity)
-
-        # Lấy seller_id (giả sử đơn hàng thuộc về 1 seller hoặc lấy seller của item đầu tiên)
-        seller_id = selected_items[0].product.seller_id
-
-        # Cập nhật thông số Dashboard cho người bán (nặng nề nên chạy ngầm)
+        # 4. GỌI CELERY (Sau khi mọi thứ ở DB đã xong)
         task_seller_recalc_dashboard.delay(seller_id) 
-        
-        # Gửi thông báo Notification cho người bán (phụ thuộc bên thứ 3 nên chạy ngầm)
         task_send_notification.delay(
             user_id=seller_id,
-            role="seller",          # Sửa từ user_type thành role
-            title="Đơn hàng mới",    # Thêm title (hàm yêu cầu)
-            message=f"Đơn hàng mới #{order.order_id}",
-            event_type="NEW_ORDER", # Thêm event_type (hàm yêu cầu)
+            role="seller",
+            title="Đơn hàng mới",
+            message=f"Bạn có đơn hàng mới #{order.order_id}",
+            event_type="NEW_ORDER",
             data={"order_id": order.order_id}
         )
-
 
         return order
 

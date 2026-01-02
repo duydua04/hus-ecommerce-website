@@ -26,7 +26,7 @@ from .controller.seller.seller_profile_controller import router as seller_profil
 from .controller.seller.seller_order_controller import router as seller_order_router
 from .controller.seller.seller_dashboard_controller import router as seller_dashboard_router
 
-
+from .controller.seller.seller_notification_controller import router as seller_notify_router
 # IMPORT COMMON CONTROLLER
 from .controller.common.auth_controller import router as auth_router
 from .controller.common.avatar_controller import router as avatar_router
@@ -93,7 +93,7 @@ app.include_router(seller_review_router)
 app.include_router(seller_order_router)
 app.include_router(seller_profile_router)
 app.include_router(seller_dashboard_router)
-
+app.include_router(seller_notify_router)
 
 
 
