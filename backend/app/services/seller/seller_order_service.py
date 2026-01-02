@@ -139,12 +139,6 @@ class SellerOrderService:
         )
 
     async def get_order_detail(self, seller_id: int, order_id: int):
-        """
-        Lấy chi tiết đơn hàng:
-        - Thông tin Buyer
-        - Địa chỉ giao hàng
-        - Danh sách sản phẩm (kèm Tên, Ảnh đại diện, Size)
-        """
         stmt = (
             select(Order)
             .join(Order.items)
@@ -154,10 +148,11 @@ class SellerOrderService:
                 Product.seller_id == seller_id
             )
             .options(
-                # 1. Load sâu vào trong: Items -> Product -> Images
+                # 1. Load sâu vào trong: Items
                 selectinload(Order.items).options(
                     joinedload(OrderItem.product).selectinload(Product.images),
-                    joinedload(OrderItem.size)
+                    joinedload(OrderItem.size),
+                    joinedload(OrderItem.variant)
                 ),
                 selectinload(Order.buyer),
                 selectinload(Order.carrier),
@@ -186,23 +181,27 @@ class SellerOrderService:
         for item in order.items:
             item_data = OrderItemResponse.model_validate(item)
 
+            # --- Xử lý Product  ---
             if item.product:
                 item_data.product_name = item.product.name
-
                 if item.product.images:
-                    # Tìm ảnh có is_primary = True
                     primary_img = next((img for img in item.product.images if img.is_primary), None)
-
                     if primary_img:
                         item_data.product_image = public_url(primary_img.image_url)
                     else:
-                        # Nếu không có ảnh primary, lấy ảnh đầu tiên làm đại diện
                         item_data.product_image = public_url(item.product.images[0].image_url)
                 else:
                     item_data.product_image = None
 
+            # --- Xử lý Size ---
             if item.size:
                 item_data.size_name = item.size.size_name
+
+            if item.variant:
+                item_data.variant_id = item.variant.variant_id
+                item_data.variant_name = item.variant.variant_name
+            elif item.variant_id:
+                item_data.variant_id = item.variant_id
 
             items_resp.append(item_data)
 

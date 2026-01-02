@@ -45,6 +45,7 @@ class OrderItemResponse(ORMBase):
     order_id: int
     product_id: int
     variant_id: int | None = None
+    variant_name: str | None = None
     size_id: int | None = None
     quantity: int
     unit_price: Decimal
