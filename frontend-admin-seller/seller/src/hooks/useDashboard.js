@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import dashboardService from "../api/DashboardService";
 
-/* ================= Utils ================= */
+/* Utils  */
 
 const errorMessage = (err) =>
   Array.isArray(err?.detail)
@@ -32,7 +32,7 @@ const normalize = {
       : [],
 };
 
-/* ================= Hook ================= */
+/* Hook */
 
 const useDashboard = () => {
   const [stats, setStats] = useState(normalize.stats());

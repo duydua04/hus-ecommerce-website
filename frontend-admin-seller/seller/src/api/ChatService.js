@@ -1,11 +1,7 @@
 import axiosInstance from "../utils/axiosConfig";
 
 const ChatService = {
-  /**
-   * Upload ảnh cho chat
-   * @param {File[]} files - Danh sách file ảnh
-   * @returns {Promise<{urls: string[]}>}
-   */
+  /* UPLOAD IMAGE */
   async uploadImages(files) {
     const formData = new FormData();
     files.forEach((file) => {
@@ -21,36 +17,19 @@ const ChatService = {
     return res.data;
   },
 
-  /**
-   * Gửi tin nhắn
-   * @param {Object} payload
-   * @param {string} payload.conversation_id
-   * @param {string} payload.content - Nội dung text (optional)
-   * @param {string[]} payload.image_urls - Danh sách URL ảnh (optional)
-   * @returns {Promise<MessageResponse>}
-   */
+  /* SEND MESSAGE */
   async sendMessage(payload) {
     const res = await axiosInstance.post("/chat/send", payload);
     return res.data;
   },
 
-  /**
-   * Lấy danh sách cuộc trò chuyện (inbox)
-   * @returns {Promise<ConversationResponse[]>}
-   */
+  /* CONVERSATIONS */
   async getConversations() {
     const res = await axiosInstance.get("/chat/conversations");
     return res.data;
   },
 
-  /**
-   * Lấy lịch sử tin nhắn theo conversation
-   * @param {string} conversationId
-   * @param {Object} options
-   * @param {string} options.cursor - Cursor phân trang
-   * @param {number} options.limit - Số lượng tin nhắn
-   * @returns {Promise<ChatHistoryResponse>}
-   */
+  /* MESSAGES */
   async getMessages(conversationId, { cursor = null, limit = 20 } = {}) {
     const params = { limit };
     if (cursor) params.cursor = cursor;

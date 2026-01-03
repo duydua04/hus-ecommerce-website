@@ -13,7 +13,7 @@ export default function ChatContent() {
     selectConversation,
     sendTextMessage,
     sendImageMessage,
-    loadMessages,
+    loadMoreMessages,
     hasMoreMessages,
   } = useChat({ role: "seller" });
 
@@ -105,7 +105,7 @@ export default function ChatContent() {
   // Handle scroll to load more
   const handleScroll = (e) => {
     if (e.target.scrollTop === 0 && hasMoreMessages && !sending) {
-      loadMessages();
+      loadMoreMessages();
     }
   };
 
@@ -251,7 +251,7 @@ export default function ChatContent() {
                 {hasMoreMessages && (
                   <div className="chat-load-more">
                     <button
-                      onClick={() => loadMessages()}
+                      onClick={loadMoreMessages}
                       className="chat-load-more-btn"
                     >
                       Tải tin nhắn cũ hơn

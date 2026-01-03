@@ -1,19 +1,24 @@
-export function convertToVietnamTime(utcTime) {
-  if (!utcTime) return null;
+export function parseUTCTime(timestamp) {
+  if (!timestamp) return null;
 
-  const date = new Date(utcTime);
-  // Chuyển sang múi giờ Việt Nam (UTC+7)
-  return new Date(date.getTime() + 7 * 60 * 60 * 1000);
+  // Nếu timestamp không có 'Z' ở cuối, thêm vào để đảm bảo parse đúng UTC
+  const timeStr =
+    typeof timestamp === "string"
+      ? timestamp.endsWith("Z")
+        ? timestamp
+        : timestamp + "Z"
+      : timestamp;
+
+  return new Date(timeStr);
 }
 
 export function formatChatTime(timestamp) {
   if (!timestamp) return "";
 
-  const vnDate = convertToVietnamTime(timestamp);
+  const date = parseUTCTime(timestamp);
   const now = new Date();
-  const nowVN = convertToVietnamTime(now);
 
-  const diff = nowVN - vnDate;
+  const diff = now - date;
 
   const minutes = Math.floor(diff / 60000);
   const hours = Math.floor(diff / 3600000);
@@ -24,63 +29,74 @@ export function formatChatTime(timestamp) {
   if (hours < 24) return `${hours} giờ trước`;
   if (days < 7) return `${days} ngày trước`;
 
-  return vnDate.toLocaleDateString("vi-VN", {
+  return date.toLocaleDateString("vi-VN", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
+    timeZone: "Asia/Ho_Chi_Minh",
   });
 }
 
 export function formatDetailedTime(timestamp) {
   if (!timestamp) return "";
 
-  const vnDate = convertToVietnamTime(timestamp);
+  const date = parseUTCTime(timestamp);
 
-  const hours = vnDate.getHours().toString().padStart(2, "0");
-  const minutes = vnDate.getMinutes().toString().padStart(2, "0");
-  const day = vnDate.getDate().toString().padStart(2, "0");
-  const month = (vnDate.getMonth() + 1).toString().padStart(2, "0");
-  const year = vnDate.getFullYear();
-
-  return `${hours}:${minutes} ${day}/${month}/${year}`;
+  return date.toLocaleString("vi-VN", {
+    hour: "2-digit",
+    minute: "2-digit",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    timeZone: "Asia/Ho_Chi_Minh",
+    hour12: false,
+  });
 }
 
 export function formatTimeOnly(timestamp) {
   if (!timestamp) return "";
 
-  const vnDate = convertToVietnamTime(timestamp);
+  const date = parseUTCTime(timestamp);
 
-  const hours = vnDate.getHours().toString().padStart(2, "0");
-  const minutes = vnDate.getMinutes().toString().padStart(2, "0");
-
-  return `${hours}:${minutes}`;
+  return date.toLocaleTimeString("vi-VN", {
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "Asia/Ho_Chi_Minh",
+    hour12: false,
+  });
 }
 
 export function isToday(timestamp) {
   if (!timestamp) return false;
 
-  const vnDate = convertToVietnamTime(timestamp);
-  const today = convertToVietnamTime(new Date());
+  const date = parseUTCTime(timestamp);
+  const today = new Date();
 
-  return (
-    vnDate.getDate() === today.getDate() &&
-    vnDate.getMonth() === today.getMonth() &&
-    vnDate.getFullYear() === today.getFullYear()
-  );
+  const dateStr = date.toLocaleDateString("vi-VN", {
+    timeZone: "Asia/Ho_Chi_Minh",
+  });
+  const todayStr = today.toLocaleDateString("vi-VN", {
+    timeZone: "Asia/Ho_Chi_Minh",
+  });
+
+  return dateStr === todayStr;
 }
 
 export function isYesterday(timestamp) {
   if (!timestamp) return false;
 
-  const vnDate = convertToVietnamTime(timestamp);
-  const yesterday = convertToVietnamTime(new Date());
+  const date = parseUTCTime(timestamp);
+  const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
 
-  return (
-    vnDate.getDate() === yesterday.getDate() &&
-    vnDate.getMonth() === yesterday.getMonth() &&
-    vnDate.getFullYear() === yesterday.getFullYear()
-  );
+  const dateStr = date.toLocaleDateString("vi-VN", {
+    timeZone: "Asia/Ho_Chi_Minh",
+  });
+  const yesterdayStr = yesterday.toLocaleDateString("vi-VN", {
+    timeZone: "Asia/Ho_Chi_Minh",
+  });
+
+  return dateStr === yesterdayStr;
 }
 
 export function formatSmartTime(timestamp) {
@@ -94,18 +110,20 @@ export function formatSmartTime(timestamp) {
     return "Hôm qua";
   }
 
-  const vnDate = convertToVietnamTime(timestamp);
-  const now = convertToVietnamTime(new Date());
-  const daysDiff = Math.floor((now - vnDate) / (1000 * 60 * 60 * 24));
+  const date = parseUTCTime(timestamp);
+  const now = new Date();
+  const daysDiff = Math.floor((now - date) / (1000 * 60 * 60 * 24));
 
   if (daysDiff < 7) {
     const days = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
-    return days[vnDate.getDay()];
+    const dayOfWeek = date.getDay();
+    return days[dayOfWeek];
   }
 
-  return vnDate.toLocaleDateString("vi-VN", {
+  return date.toLocaleDateString("vi-VN", {
     day: "2-digit",
     month: "2-digit",
+    timeZone: "Asia/Ho_Chi_Minh",
   });
 }
 
@@ -113,8 +131,10 @@ export function groupMessagesByDate(messages) {
   const grouped = {};
 
   messages.forEach((msg) => {
-    const vnDate = convertToVietnamTime(msg.created_at);
-    const dateKey = vnDate.toLocaleDateString("vi-VN");
+    const date = parseUTCTime(msg.created_at);
+    const dateKey = date.toLocaleDateString("vi-VN", {
+      timeZone: "Asia/Ho_Chi_Minh",
+    });
 
     if (!grouped[dateKey]) {
       grouped[dateKey] = [];
@@ -136,10 +156,11 @@ export function getDateLabel(timestamp) {
     return "Hôm qua";
   }
 
-  const vnDate = convertToVietnamTime(timestamp);
-  return vnDate.toLocaleDateString("vi-VN", {
+  const date = parseUTCTime(timestamp);
+  return date.toLocaleDateString("vi-VN", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
+    timeZone: "Asia/Ho_Chi_Minh",
   });
 }

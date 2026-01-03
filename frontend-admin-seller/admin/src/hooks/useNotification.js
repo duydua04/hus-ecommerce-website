@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import NotificationService from "../api/NotificationService";
 import { WebSocketClient } from "./websocket";
 
@@ -8,7 +8,8 @@ export default function useNotification({ role = "admin" } = {}) {
   const [cursor, setCursor] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  /* LOAD HISTORY */
+  const isInitialized = useRef(false);
+
   const loadNotifications = useCallback(
     async ({ reset = false } = {}) => {
       setLoading(true);
@@ -19,11 +20,10 @@ export default function useNotification({ role = "admin" } = {}) {
 
         const items = data.items.map((n) => ({
           ...n,
-          id: n._id, 
+          id: n._id,
         }));
 
         setNotifications((prev) => (reset ? items : [...prev, ...items]));
-
         setCursor(data.next_cursor || null);
 
         const unread = items.filter((n) => !n.is_read).length;
@@ -37,7 +37,6 @@ export default function useNotification({ role = "admin" } = {}) {
     [cursor]
   );
 
-  /* MARK ONE AS READ */
   const markAsRead = useCallback(async (notifId) => {
     try {
       await NotificationService.markAsRead(notifId);
@@ -48,12 +47,15 @@ export default function useNotification({ role = "admin" } = {}) {
 
       setUnreadCount((prev) => Math.max(prev - 1, 0));
     } catch (err) {
-      console.error("Mark read failed:", err);
+      console.error("Mark as read failed:", err);
     }
   }, []);
 
-  /* WEBSOCKET REALTIME */
+  // WebSocket connection and subscription (once only)
   useEffect(() => {
+    if (isInitialized.current) return;
+
+    isInitialized.current = true;
     WebSocketClient.connect();
 
     const unsubscribe = WebSocketClient.subscribe("notification", (message) => {
@@ -71,20 +73,18 @@ export default function useNotification({ role = "admin" } = {}) {
     return () => {
       unsubscribe();
     };
-  }, [role]);
+  }, []);
 
-  /* INIT LOAD */
+  // Load initial notifications (once only)
   useEffect(() => {
     loadNotifications({ reset: true });
-  }, [loadNotifications]);
+  }, []);
 
-  /* PUBLIC API */
   return {
     notifications,
     unreadCount,
     loading,
     hasMore: !!cursor,
-
     loadNotifications,
     markAsRead,
   };
