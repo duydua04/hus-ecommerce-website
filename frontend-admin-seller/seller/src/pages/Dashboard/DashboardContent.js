@@ -1,29 +1,24 @@
 import React, { useState, useEffect } from "react";
-import { X, TrendingUp, TrendingDown, RefreshCw } from "lucide-react";
+import { X, TrendingUp, TrendingDown } from "lucide-react";
 import useDashboard from "../../hooks/useDashboard";
 
 import "../../assets/styles/page.scss";
 import "./Dashboard.scss";
 
 export default function DashboardContent() {
-  const token = localStorage.getItem("access_token");
-
   const {
     stats,
     chart,
     topProducts,
     loading,
     error,
-    lastUpdate,
-    autoRefresh,
+    syncing,
     fetchDashboard,
-    refreshDashboard,
-    toggleAutoRefresh,
+    syncDashboard,
     clearError,
-  } = useDashboard(token);
+  } = useDashboard();
 
   const [chartView, setChartView] = useState("monthly");
-  const [refreshing, setRefreshing] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
 
   /* FETCH INITIAL DATA */
@@ -37,30 +32,15 @@ export default function DashboardContent() {
     fetchDashboard(view);
   };
 
-  // THAY ĐỔI: Thay vì syncDashboard, chỉ refresh data
-  const handleRefreshClick = async () => {
+  // Đồng bộ lại toàn bộ (recalculate từ database)
+  const handleSyncClick = async () => {
     try {
-      setRefreshing(true);
-      await refreshDashboard(chartView);
-      setSuccessMessage("Đã làm mới dữ liệu thành công");
+      await syncDashboard();
+      setSuccessMessage("Đang đồng bộ dữ liệu, vui lòng đợi trong giây lát...");
       setTimeout(() => setSuccessMessage(""), 3000);
     } catch (err) {
-      console.error("Refresh failed:", err);
-      setSuccessMessage("Làm mới thất bại. Vui lòng thử lại.");
-      setTimeout(() => setSuccessMessage(""), 3000);
-    } finally {
-      setRefreshing(false);
+      console.error("Sync failed:", err);
     }
-  };
-
-  const handleAutoRefreshToggle = () => {
-    toggleAutoRefresh();
-    setSuccessMessage(
-      autoRefresh
-        ? "Đã tắt tự động làm mới"
-        : "Đã bật tự động làm mới (30 giây)"
-    );
-    setTimeout(() => setSuccessMessage(""), 3000);
   };
 
   /* FORMAT NUMBER */
@@ -159,6 +139,26 @@ export default function DashboardContent() {
   /* RENDER */
   return (
     <main className="main dashboard">
+      {/* Header với nút đồng bộ */}
+      <div className="dashboard__header">
+        <div className="dashboard__title-section">
+          <h2 className="dashboard__title">Dashboard</h2>
+        </div>
+
+        <div className="dashboard__actions">
+          {/* Nút đồng bộ lại */}
+          <button
+            className="btn btn--icon btn--primary"
+            onClick={handleSyncClick}
+            disabled={syncing || loading}
+            title="Đồng bộ lại toàn bộ dữ liệu từ database"
+          >
+            <i className={`bx bx-sync ${syncing ? "spin" : ""}`}></i>
+            <span>{syncing ? "Đang đồng bộ..." : "Đồng bộ dữ liệu"}</span>
+          </button>
+        </div>
+      </div>
+
       {/* Thông báo */}
       {error && (
         <div className="dashboard__alert alert alert-error">

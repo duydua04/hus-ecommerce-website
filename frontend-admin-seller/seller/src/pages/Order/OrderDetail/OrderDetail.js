@@ -248,6 +248,12 @@ export default function OrderDetailModal({
                         {item.product_name || `Sản phẩm #${item.product_id}`}
                       </div>
                       <div className="item-details">
+                        {/* variant */}
+                        {item.variant_name && (
+                          <span className="item-variant">
+                            {item.variant_name || `Loại #${item.variant_id}`}
+                          </span>
+                        )}
                         {/* Size */}
                         {item.size_name && (
                           <span className="item-size">

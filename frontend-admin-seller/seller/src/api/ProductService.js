@@ -1,7 +1,10 @@
-import axios from "axios";
+import axiosInstance from "../utils/axiosConfig";
 
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
-const PRODUCTS_ENDPOINT = `${API_URL}/seller/products`;
+const PRODUCTS_ENDPOINT = "/seller/products";
+
+const handleError = (error) => {
+  throw error.response?.data || { detail: error.message };
+};
 
 const productService = {
   /**
@@ -14,16 +17,9 @@ const productService = {
     offset = 0,
   } = {}) => {
     try {
-      const response = await axios.get(PRODUCTS_ENDPOINT, {
-        params: {
-          q,
-          active_only,
-          limit,
-          offset,
-        },
-        withCredentials: true,
+      const response = await axiosInstance.get(PRODUCTS_ENDPOINT, {
+        params: { q, active_only, limit, offset },
       });
-
       return response.data;
     } catch (error) {
       if (error.response) {
@@ -44,12 +40,12 @@ const productService = {
    */
   getProductDetail: async (productId) => {
     try {
-      const response = await axios.get(`${PRODUCTS_ENDPOINT}/${productId}`, {
-        withCredentials: true,
-      });
+      const response = await axiosInstance.get(
+        `${PRODUCTS_ENDPOINT}/${productId}`
+      );
       return response.data;
     } catch (error) {
-      throw error.response?.data || { detail: error.message };
+      handleError(error);
     }
   },
 
@@ -58,13 +54,10 @@ const productService = {
    */
   createProduct: async (data) => {
     try {
-      const response = await axios.post(PRODUCTS_ENDPOINT, data, {
-        withCredentials: true,
-        headers: { "Content-Type": "application/json" },
-      });
+      const response = await axiosInstance.post(PRODUCTS_ENDPOINT, data);
       return response.data;
     } catch (error) {
-      throw error.response?.data || { detail: error.message };
+      handleError(error);
     }
   },
 
@@ -73,17 +66,13 @@ const productService = {
    */
   updateProduct: async (productId, data) => {
     try {
-      const response = await axios.put(
+      const response = await axiosInstance.put(
         `${PRODUCTS_ENDPOINT}/${productId}`,
-        data,
-        {
-          withCredentials: true,
-          headers: { "Content-Type": "application/json" },
-        }
+        data
       );
       return response.data;
     } catch (error) {
-      throw error.response?.data || { detail: error.message };
+      handleError(error);
     }
   },
 
@@ -92,12 +81,12 @@ const productService = {
    */
   deleteProduct: async (productId) => {
     try {
-      const response = await axios.delete(`${PRODUCTS_ENDPOINT}/${productId}`, {
-        withCredentials: true,
-      });
+      const response = await axiosInstance.delete(
+        `${PRODUCTS_ENDPOINT}/${productId}`
+      );
       return response.data;
     } catch (error) {
-      throw error.response?.data || { detail: error.message };
+      handleError(error);
     }
   },
 
@@ -111,18 +100,17 @@ const productService = {
         formData.append("files", file);
       });
 
-      let url = `${PRODUCTS_ENDPOINT}/${productId}/images`;
-      if (primaryIndex !== null) {
-        url += `?primary_index=${primaryIndex}`;
-      }
+      const params =
+        primaryIndex !== null ? { primary_index: primaryIndex } : {};
 
-      const response = await axios.post(url, formData, {
-        withCredentials: true,
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const response = await axiosInstance.post(
+        `${PRODUCTS_ENDPOINT}/${productId}/images`,
+        formData,
+        { params }
+      );
       return response.data;
     } catch (error) {
-      throw error.response?.data || { detail: error.message };
+      handleError(error);
     }
   },
 
@@ -131,16 +119,13 @@ const productService = {
    */
   setPrimaryImage: async (productId, imageId) => {
     try {
-      const response = await axios.patch(
+      const response = await axiosInstance.patch(
         `${PRODUCTS_ENDPOINT}/${productId}/images/${imageId}/primary`,
-        {},
-        {
-          withCredentials: true,
-        }
+        {}
       );
       return response.data;
     } catch (error) {
-      throw error.response?.data || { detail: error.message };
+      handleError(error);
     }
   },
 
@@ -149,15 +134,12 @@ const productService = {
    */
   deleteImage: async (productId, imageId) => {
     try {
-      const response = await axios.delete(
-        `${PRODUCTS_ENDPOINT}/${productId}/images/${imageId}`,
-        {
-          withCredentials: true,
-        }
+      const response = await axiosInstance.delete(
+        `${PRODUCTS_ENDPOINT}/${productId}/images/${imageId}`
       );
       return response.data;
     } catch (error) {
-      throw error.response?.data || { detail: error.message };
+      handleError(error);
     }
   },
 
@@ -166,17 +148,13 @@ const productService = {
    */
   createVariant: async (productId, data) => {
     try {
-      const response = await axios.post(
+      const response = await axiosInstance.post(
         `${PRODUCTS_ENDPOINT}/${productId}/variants`,
-        data,
-        {
-          withCredentials: true,
-          headers: { "Content-Type": "application/json" },
-        }
+        data
       );
       return response.data;
     } catch (error) {
-      throw error.response?.data || { detail: error.message };
+      handleError(error);
     }
   },
 
@@ -185,17 +163,13 @@ const productService = {
    */
   updateVariant: async (productId, variantId, data) => {
     try {
-      const response = await axios.put(
+      const response = await axiosInstance.put(
         `${PRODUCTS_ENDPOINT}/${productId}/variants/${variantId}`,
-        data,
-        {
-          withCredentials: true,
-          headers: { "Content-Type": "application/json" },
-        }
+        data
       );
       return response.data;
     } catch (error) {
-      throw error.response?.data || { detail: error.message };
+      handleError(error);
     }
   },
 
@@ -204,15 +178,12 @@ const productService = {
    */
   deleteVariant: async (productId, variantId) => {
     try {
-      const response = await axios.delete(
-        `${PRODUCTS_ENDPOINT}/${productId}/variants/${variantId}`,
-        {
-          withCredentials: true,
-        }
+      const response = await axiosInstance.delete(
+        `${PRODUCTS_ENDPOINT}/${productId}/variants/${variantId}`
       );
       return response.data;
     } catch (error) {
-      throw error.response?.data || { detail: error.message };
+      handleError(error);
     }
   },
 
@@ -221,15 +192,12 @@ const productService = {
    */
   getVariantSizes: async (productId, variantId) => {
     try {
-      const response = await axios.get(
-        `${PRODUCTS_ENDPOINT}/${productId}/variants/${variantId}/sizes`,
-        {
-          withCredentials: true,
-        }
+      const response = await axiosInstance.get(
+        `${PRODUCTS_ENDPOINT}/${productId}/variants/${variantId}/sizes`
       );
       return response.data;
     } catch (error) {
-      throw error.response?.data || { detail: error.message };
+      handleError(error);
     }
   },
 
@@ -238,17 +206,13 @@ const productService = {
    */
   createSize: async (productId, variantId, data) => {
     try {
-      const response = await axios.post(
+      const response = await axiosInstance.post(
         `${PRODUCTS_ENDPOINT}/${productId}/variants/${variantId}/sizes`,
-        data,
-        {
-          withCredentials: true,
-          headers: { "Content-Type": "application/json" },
-        }
+        data
       );
       return response.data;
     } catch (error) {
-      throw error.response?.data || { detail: error.message };
+      handleError(error);
     }
   },
 
@@ -257,17 +221,13 @@ const productService = {
    */
   updateSize: async (productId, variantId, sizeId, data) => {
     try {
-      const response = await axios.put(
+      const response = await axiosInstance.put(
         `${PRODUCTS_ENDPOINT}/${productId}/variants/${variantId}/sizes/${sizeId}`,
-        data,
-        {
-          withCredentials: true,
-          headers: { "Content-Type": "application/json" },
-        }
+        data
       );
       return response.data;
     } catch (error) {
-      throw error.response?.data || { detail: error.message };
+      handleError(error);
     }
   },
 
@@ -276,15 +236,12 @@ const productService = {
    */
   deleteSize: async (productId, variantId, sizeId) => {
     try {
-      const response = await axios.delete(
-        `${PRODUCTS_ENDPOINT}/${productId}/variants/${variantId}/sizes/${sizeId}`,
-        {
-          withCredentials: true,
-        }
+      const response = await axiosInstance.delete(
+        `${PRODUCTS_ENDPOINT}/${productId}/variants/${variantId}/sizes/${sizeId}`
       );
       return response.data;
     } catch (error) {
-      throw error.response?.data || { detail: error.message };
+      handleError(error);
     }
   },
 };

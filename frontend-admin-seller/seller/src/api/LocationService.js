@@ -1,7 +1,7 @@
-import axios from "axios";
+// api/locationService.js
+import axiosInstance from "../utils/axiosConfig";
 
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
-const LOCATION_ENDPOINT = `${API_URL}/seller/addresses`;
+const LOCATION_ENDPOINT = "/seller/addresses";
 
 const handleAxiosError = (error) => {
   if (error.response) {
@@ -22,9 +22,7 @@ const locationService = {
   /* GET */
   async getAddresses() {
     try {
-      const res = await axios.get(LOCATION_ENDPOINT, {
-        withCredentials: true,
-      });
+      const res = await axiosInstance.get(LOCATION_ENDPOINT);
 
       if (Array.isArray(res.data)) return res.data;
       if (res.data?.addresses) return res.data.addresses;
@@ -39,14 +37,13 @@ const locationService = {
   /* CREATE */
   async createAddress(addressData, isDefault = false, label = null) {
     try {
-      const params = new URLSearchParams();
-      params.append("is_default", isDefault);
-      if (label) params.append("label", label);
+      const params = { is_default: isDefault };
+      if (label) params.label = label;
 
-      const res = await axios.post(
-        `${LOCATION_ENDPOINT}/create-and-link?${params.toString()}`,
+      const res = await axiosInstance.post(
+        `${LOCATION_ENDPOINT}/create-and-link`,
         addressData,
-        { withCredentials: true }
+        { params }
       );
 
       return res.data;
@@ -58,10 +55,9 @@ const locationService = {
   /* UPDATE LINK */
   async updateAddressLink(sellerAddressId, linkData) {
     try {
-      const res = await axios.patch(
+      const res = await axiosInstance.patch(
         `${LOCATION_ENDPOINT}/${sellerAddressId}`,
-        linkData,
-        { withCredentials: true }
+        linkData
       );
       return res.data;
     } catch (error) {
@@ -72,10 +68,9 @@ const locationService = {
   /* UPDATE CONTENT */
   async updateAddressContent(sellerAddressId, addressData) {
     try {
-      const res = await axios.patch(
+      const res = await axiosInstance.patch(
         `${LOCATION_ENDPOINT}/${sellerAddressId}/address`,
-        addressData,
-        { withCredentials: true }
+        addressData
       );
       return res.data;
     } catch (error) {
@@ -86,10 +81,9 @@ const locationService = {
   /* SET DEFAULT */
   async setDefaultAddress(sellerAddressId) {
     try {
-      const res = await axios.patch(
+      const res = await axiosInstance.patch(
         `${LOCATION_ENDPOINT}/${sellerAddressId}/default`,
-        {},
-        { withCredentials: true }
+        {}
       );
       return res.data;
     } catch (error) {
@@ -100,9 +94,8 @@ const locationService = {
   /* DELETE */
   async deleteAddress(sellerAddressId) {
     try {
-      const res = await axios.delete(
-        `${LOCATION_ENDPOINT}/${sellerAddressId}`,
-        { withCredentials: true }
+      const res = await axiosInstance.delete(
+        `${LOCATION_ENDPOINT}/${sellerAddressId}`
       );
       return res.data;
     } catch (error) {

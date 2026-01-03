@@ -4,7 +4,7 @@ from typing import List
 from ...middleware.auth import require_seller
 
 from ...services.seller.seller_dashboard_service import get_seller_dashboard_service, SellerDashboardService
-#from ...tasks.seller_dashboard_task import task_seller_recalc_dashboard
+from ...tasks.seller_dashboard_task import task_seller_recalc_dashboard
 
 from ...schemas.seller_dashboard import (
     DashboardStatsResponse,
@@ -69,13 +69,13 @@ async def get_top_selling_products(
 
 
 # 4. API FORCE SYNC (ĐỒNG BỘ THỦ CÔNG)
-# @router.post("/sync")
-# async def force_sync_dashboard(
-#         current_seller=Depends(require_seller)
-# ):
-#     """
-#     API này dùng để Seller tự bấm nút 'Làm mới dữ liệu' nếu thấy nghi ngờ số liệu cũ.
-#     """
-#     task_seller_recalc_dashboard.delay(current_seller["user"].seller_id)
-#
-#     return {"message": "Đang đồng bộ dữ liệu, vui lòng đợi trong giây lát..."}
+@router.post("/sync")
+async def force_sync_dashboard(
+        current_seller=Depends(require_seller)
+):
+    """
+    API này dùng để Seller tự bấm nút 'Làm mới dữ liệu' nếu thấy nghi ngờ số liệu cũ.
+    """
+    task_seller_recalc_dashboard.delay(current_seller["user"].seller_id)
+
+    return {"message": "Đang đồng bộ dữ liệu, vui lòng đợi trong giây lát..."}

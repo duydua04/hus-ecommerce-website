@@ -2,8 +2,29 @@
 .dashboard {
   padding: 24px;
 
-  &__alert {
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 24px;
+    padding: 20px 24px;
+  }
+
+  &__title-section {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  &__title {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  &__actions {
+    display: flex;
+    gap: 12px;
   }
 
   &__loading {

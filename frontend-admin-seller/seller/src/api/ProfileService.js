@@ -1,7 +1,6 @@
-import axios from "axios";
+import axiosInstance from "../utils/axiosConfig";
 
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
-const PROFILE_ENDPOINT = `${API_URL}/seller/profile`;
+const PROFILE_ENDPOINT = "/seller/profile";
 
 const profileService = {
   /**
@@ -9,9 +8,7 @@ const profileService = {
    */
   getProfile: async () => {
     try {
-      const response = await axios.get(PROFILE_ENDPOINT, {
-        withCredentials: true,
-      });
+      const response = await axiosInstance.get(PROFILE_ENDPOINT);
       return response.data;
     } catch (error) {
       if (error.response) {
@@ -32,10 +29,7 @@ const profileService = {
    */
   updateProfile: async (data) => {
     try {
-      const response = await axios.put(PROFILE_ENDPOINT, data, {
-        withCredentials: true,
-        headers: { "Content-Type": "application/json" },
-      });
+      const response = await axiosInstance.put(PROFILE_ENDPOINT, data);
       return response.data;
     } catch (error) {
       if (error.response) {

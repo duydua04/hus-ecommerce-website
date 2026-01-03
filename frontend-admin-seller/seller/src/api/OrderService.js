@@ -1,7 +1,6 @@
-import axios from "axios";
+import axiosInstance from "../utils/axiosConfig";
 
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
-const ORDERS_ENDPOINT = `${API_URL}/seller/orders`;
+const ORDERS_ENDPOINT = "/seller/orders";
 
 const orderService = {
   /* Lay danh sach don hang */
@@ -13,20 +12,13 @@ const orderService = {
     limit = 10,
   } = {}) => {
     try {
-      const params = {
-        page,
-        limit,
-      };
+      const params = { page, limit };
 
       if (status) params.status = status;
       if (date_from) params.date_from = date_from;
       if (date_to) params.date_to = date_to;
 
-      const response = await axios.get(ORDERS_ENDPOINT, {
-        params,
-        withCredentials: true,
-      });
-
+      const response = await axiosInstance.get(ORDERS_ENDPOINT, { params });
       return response.data;
     } catch (error) {
       if (error.response) {
@@ -45,9 +37,7 @@ const orderService = {
   /* lay chi tiet don hang*/
   getOrderDetail: async (orderId) => {
     try {
-      const response = await axios.get(`${ORDERS_ENDPOINT}/${orderId}`, {
-        withCredentials: true,
-      });
+      const response = await axiosInstance.get(`${ORDERS_ENDPOINT}/${orderId}`);
       return response.data;
     } catch (error) {
       throw error.response?.data || { detail: error.message };
@@ -57,12 +47,9 @@ const orderService = {
   /*Xac nhan don hang: pending => processing */
   confirmOrder: async (orderId) => {
     try {
-      const response = await axios.put(
+      const response = await axiosInstance.put(
         `${ORDERS_ENDPOINT}/${orderId}/confirm`,
-        {},
-        {
-          withCredentials: true,
-        }
+        {}
       );
       return response.data;
     } catch (error) {
@@ -73,12 +60,9 @@ const orderService = {
   /* danh dau da giao don cho Don vi can chuyen: processing => shipped */
   shipOrder: async (orderId) => {
     try {
-      const response = await axios.put(
+      const response = await axiosInstance.put(
         `${ORDERS_ENDPOINT}/${orderId}/ship`,
-        {},
-        {
-          withCredentials: true,
-        }
+        {}
       );
       return response.data;
     } catch (error) {
@@ -89,13 +73,9 @@ const orderService = {
   /* huy don hang va hoan kho */
   cancelOrder: async (orderId, reason) => {
     try {
-      const response = await axios.put(
+      const response = await axiosInstance.put(
         `${ORDERS_ENDPOINT}/${orderId}/cancel`,
-        { reason },
-        {
-          withCredentials: true,
-          headers: { "Content-Type": "application/json" },
-        }
+        { reason }
       );
       return response.data;
     } catch (error) {
