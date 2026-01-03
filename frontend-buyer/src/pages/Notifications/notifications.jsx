@@ -2,18 +2,20 @@ import React, { useEffect, useState } from "react";
 import { Link } from 'react-router-dom';
 import api from "../../services/api";
 import { useUser } from "../../context/UserContext";
+import { useNotifications } from "../../context/useNotifications";
+import NotificationSidebar from "../../components/notificationSidebar";
 import "../Profile/profile.css";
 import "./notifications.css";
 
 export default function Notifications() {
   const { user } = useUser();
+  const { unreadCount, incrementUnread, decrementUnread, resetUnread } = useNotifications();
 
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [cursor, setCursor] = useState(null);
   const [hasMore, setHasMore] = useState(false);
   const [unreadOnly, setUnreadOnly] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
   const [markingAllRead, setMarkingAllRead] = useState(false);
 
   /* ================= FETCH NOTIFICATIONS ================= */
@@ -23,7 +25,7 @@ export default function Notifications() {
 
       const res = await api.notification.getAll({
         limit: 20,
-        cursor: reset ? null : cursor, // Reset cursor khi filter thay đổi
+        cursor: reset ? null : cursor,
         unread_only: unreadOnly,
       });
 
@@ -35,11 +37,7 @@ export default function Notifications() {
       setCursor(next_cursor);
       setHasMore(has_more);
 
-      // Đếm số thông báo chưa đọc
-      if (reset) {
-        const unreadItems = items.filter(n => !n.is_read);
-        setUnreadCount(unreadItems.length);
-      }
+      // Đếm sẽ được quản lý bởi useNotifications hook
 
     } catch (err) {
       console.error("Load notifications error:", err);
@@ -53,6 +51,48 @@ export default function Notifications() {
     loadNotifications(true);
   }, [unreadOnly]);
 
+  /* ================= WEBSOCKET REALTIME ================= */
+  useEffect(() => {
+    // Lắng nghe thông báo mới qua WebSocket
+    const unsubscribe = api.websocket.onMessage('NOTIFICATION', (payload) => {
+      console.log('📨 New notification received:', payload);
+
+      // Tạo notification object từ payload
+      const newNotif = {
+        _id: payload.id,
+        title: payload.title,
+        message: payload.message,
+        event_type: payload.data?.event_type || 'general',
+        is_read: false,
+        created_at: new Date().toISOString(),
+        ...payload.data
+      };
+
+      // Thêm vào đầu danh sách
+      setNotifications(prev => [newNotif, ...prev]);
+
+      // Count sẽ tự động tăng qua hook
+
+      // Hiển thị toast hoặc notification browser (optional)
+      if (Notification.permission === 'granted') {
+        new Notification(payload.title, {
+          body: payload.message,
+          icon: '/notification-icon.png'
+        });
+      }
+    });
+
+    // Request permission cho browser notifications (optional)
+    if (Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+
+    // Cleanup khi unmount
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
   /* ================= HANDLERS ================= */
   const handleMarkRead = async (notifId) => {
     try {
@@ -65,8 +105,8 @@ export default function Notifications() {
         )
       );
 
-      // Giảm số lượng chưa đọc
-      setUnreadCount(prev => Math.max(prev - 1, 0));
+      // Giảm unread count qua hook
+      decrementUnread();
 
     } catch (err) {
       console.error("Mark read error:", err);
@@ -83,7 +123,8 @@ export default function Notifications() {
         prev.map(n => ({ ...n, is_read: true }))
       );
 
-      setUnreadCount(0);
+      // Reset unread count qua hook
+      resetUnread();
 
     } catch (err) {
       console.error("Mark all read error:", err);
@@ -96,55 +137,7 @@ export default function Notifications() {
   return (
     <div className="main-container">
       {/* ================= SIDEBAR ================= */}
-      <aside className="sidebar">
-        <div className="user-info">
-          <div className="user-avatar">
-            {user?.avatar_url ? (
-              <img
-                src={user.avatar_url}
-                alt="avatar"
-                style={{ width: "100%", height: "100%", objectFit: "cover" }}
-              />
-            ) : (
-              <div className="avatar-fallback">👤</div>
-            )}
-          </div>
-          <div>
-            <div className="user-name">
-              {user?.fullname || user?.fname || user?.email || "Người dùng"}
-            </div>
-            <Link to="/profile" className="user-edit">
-              ✏️ Sửa Hồ Sơ
-            </Link>
-          </div>
-        </div>
-
-        <ul className="sidebar-menu">
-          <li className="sidebar-menu__item">
-            <Link to="/notifications" className="sidebar-menu__link sidebar-menu__link--active">
-              <span>🔔</span>
-              <span>Thông Báo</span>
-              {unreadCount > 0 && (
-                <span className="notification-badge">{unreadCount}</span>
-              )}
-            </Link>
-          </li>
-
-          <li className="sidebar-menu__item">
-            <Link to="/profile" className="sidebar-menu__link">
-              <span>👤</span>
-              <span>Tài Khoản Của Tôi</span>
-            </Link>
-          </li>
-
-          <li className="sidebar-menu__item">
-            <Link to="/tracking" className="sidebar-menu__link">
-              <span>📄</span>
-              <span>Đơn Mua</span>
-            </Link>
-          </li>
-        </ul>
-      </aside>
+      <NotificationSidebar user={user} />
 
       {/* ============ CONTENT ============ */}
       <main className="content">

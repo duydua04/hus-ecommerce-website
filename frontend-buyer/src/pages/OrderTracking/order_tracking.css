@@ -1,119 +1,15 @@
 /* src/pages/OrderTracking/order_tracking.css */
+/* NOTE: Sidebar styles are now in src/components/sidebar.css */
 
 .order-tracking-page {
   min-height: 100vh;
-  background-color: #f5f5f5;
+  background-color: var(--neutral-50);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
-/* Main Container */
-.main-container {
-  display: flex;
-  max-width: 1200px;
-  margin: 24px auto;
-  gap: 24px;
-  padding: 0 24px;
-}
-
 /* ============================================ */
-/* SIDEBAR */
+/* TABS */
 /* ============================================ */
-.sidebar {
-  width: 250px;
-  background-color: #fff;
-  border-radius: 8px;
-  padding: 24px;
-  height: fit-content;
-  position: sticky;
-  top: 88px;
-}
-
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 24px;
-  padding-bottom: 24px;
-  border-bottom: 1px solid #e0e0e0;
-}
-
-.user-avatar {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background-color: #e0e0e0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-  overflow: hidden;
-  flex-shrink: 0;
-}
-
-.user-avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.user-name {
-  font-weight: 600;
-  font-size: 16px;
-}
-
-.user-edit {
-  font-size: 14px;
-  color: #1976d2;
-  text-decoration: none;
-}
-
-.user-edit:hover {
-  text-decoration: underline;
-}
-
-.sidebar-menu {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.sidebar-menu__item {
-  margin-bottom: 8px;
-}
-
-.sidebar-menu__link {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px;
-  border-radius: 8px;
-  text-decoration: none;
-  color: #666;
-  transition: all 0.2s;
-}
-
-.sidebar-menu__link:hover {
-  background-color: #f5f5f5;
-}
-
-.sidebar-menu__link.active {
-  background-color: #e3f2fd;
-  color: #1976d2;
-  font-weight: 500;
-}
-
-/* ============================================ */
-/* CONTENT */
-/* ============================================ */
-.content {
-  flex: 1;
-  background-color: #fff;
-  border-radius: 8px;
-  padding: 24px;
-  min-height: 600px;
-}
-
-/* Tabs */
 .tabs {
   display: flex;
   gap: 8px;
@@ -144,7 +40,9 @@
   border-bottom-color: #1976d2;
 }
 
-/* Search Bar */
+/* ============================================ */
+/* SEARCH BAR */
+/* ============================================ */
 .search-bar {
   margin-bottom: 24px;
 }
@@ -178,6 +76,7 @@
   cursor: pointer;
   transition: all 0.3s;
   animation: fadeIn 0.3s ease-out;
+  background-color: white;
 }
 
 .order-card:hover {
@@ -307,7 +206,7 @@
 .price-value {
   font-size: 18px;
   font-weight: bold;
-  color: var(--blue-600);
+  color: #1976d2;
 }
 
 /* Order Footer */
@@ -348,7 +247,8 @@
 /* ============================================ */
 /* LOADING & EMPTY STATES */
 /* ============================================ */
-.loading-container {
+.loading-container,
+.empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -368,20 +268,7 @@
 }
 
 @keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 60px 20px;
+  to { transform: rotate(360deg); }
 }
 
 .empty-state__icon {
@@ -424,12 +311,8 @@
 }
 
 @keyframes slideIn {
-  from {
-    transform: translateX(100%);
-  }
-  to {
-    transform: translateX(0);
-  }
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
 }
 
 .modal-header {
@@ -508,8 +391,6 @@
   font-size: 16px;
   font-weight: 600;
   color: #333;
-  display: flex;
-  justify-content: left;
 }
 
 /* Address Box */
@@ -523,8 +404,8 @@
 .address-box p {
   margin: 4px 0;
   display: flex;
-  justify-content: left;
   align-items: left;
+  justify-content: left;
 }
 
 /* Item Row */
@@ -609,6 +490,15 @@
 
 .btn-review:hover {
   background-color: #f57c00;
+}
+
+.reviewed-badge {
+  padding: 4px 12px;
+  background-color: #4caf50;
+  color: white;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
 }
 
 /* Carrier Box */
@@ -900,16 +790,6 @@
 /* RESPONSIVE */
 /* ============================================ */
 @media (max-width: 768px) {
-  .main-container {
-    flex-direction: column;
-    padding: 16px;
-  }
-
-  .sidebar {
-    width: 100%;
-    position: static;
-  }
-
   .tabs {
     overflow-x: auto;
     flex-wrap: nowrap;

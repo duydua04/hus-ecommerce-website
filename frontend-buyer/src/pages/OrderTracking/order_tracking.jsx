@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../../context/UserContext';
 import api from '../../services/api';
+import NotificationSidebar from "../../components/notificationSidebar";
 import './order_tracking.css';
 
 export default function OrderTracking() {
@@ -335,29 +336,6 @@ export default function OrderTracking() {
     });
   };
 
-  const getUserDisplayName = () => {
-    if (!user) return 'User';
-    return user.fullname || user.fname || user.email?.split('@')[0] || 'User';
-  };
-
-  const getUserAvatar = () => {
-    if (user?.avatar_url) {
-      return (
-        <img
-          src={user.avatar_url}
-          alt="avatar"
-          style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            borderRadius: '50%'
-          }}
-        />
-      );
-    }
-    return '👤';
-  };
-
   // Check if product has been reviewed
   const hasReviewed = (productId) => {
     if (!orderDetail?.items) return false;
@@ -370,46 +348,7 @@ export default function OrderTracking() {
       {/* Main Container */}
       <div className="main-container">
         {/* Sidebar */}
-        <aside className="sidebar">
-          <div className="user-info">
-            <div className="user-avatar">
-              {getUserAvatar()}
-            </div>
-            <div>
-              <div className="user-name">{getUserDisplayName()}</div>
-              <a href="#" className="user-edit" onClick={(e) => {
-                e.preventDefault();
-                navigate('/profile');
-              }}>✏️ Sửa Hồ Sơ</a>
-            </div>
-          </div>
-          <ul className="sidebar-menu">
-            <li className="sidebar-menu__item">
-              <a href="#" className="sidebar-menu__link" onClick={(e) => {
-                e.preventDefault();
-                navigate('/notifications');
-              }}>
-                <span>🔔</span>
-                <span>Thông Báo</span>
-              </a>
-            </li>
-            <li className="sidebar-menu__item">
-              <a href="#" className="sidebar-menu__link" onClick={(e) => {
-                e.preventDefault();
-                navigate('/profile');
-              }}>
-                <span>👤</span>
-                <span>Hồ sơ của tôi</span>
-              </a>
-            </li>
-            <li className="sidebar-menu__item">
-              <a href="#" className="sidebar-menu__link active">
-                <span>📄</span>
-                <span>Đơn Mua</span>
-              </a>
-            </li>
-          </ul>
-        </aside>
+        <NotificationSidebar user={user} />
 
         {/* Content */}
         <main className="content">

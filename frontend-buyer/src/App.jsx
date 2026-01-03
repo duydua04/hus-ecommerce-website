@@ -5,7 +5,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 // Import Components
 import Header from './components/header.jsx';
 import Footer from './components/footer.jsx';
-import Modal from './components/modal.jsx';
+import NotFound from './components/NotFound/notFound.jsx';
+
 // Import Pages
 import BuyerLogin from './pages/Login/BuyerLogin.jsx';
 import BuyerRegister from './pages/Login/Register/Register.jsx';
@@ -18,9 +19,8 @@ import Payment from './pages/Payment/payment.jsx';
 import OrderTracking from './pages/OrderTracking/order_tracking.jsx';
 import Profile from './pages/Profile/profile.jsx';
 import SearchResult from './pages/Search/search.jsx';
-import Addresses from './pages/Addresses/addresses.jsx'
+import Addresses from './pages/Addresses/addresses.jsx';
 
-// Import CSS
 import './App.css';
 
 // Protected Route Component
@@ -53,11 +53,24 @@ function PublicRoute({ children }) {
   return children;
 }
 
+// Layout cho các trang có Header/Footer
+function MainLayout({ children }) {
+  return (
+    <div className="app-container">
+      <Header />
+      <main className="main-content" style={{ marginTop: '100px', minHeight: '80vh' }}>
+        {children}
+      </main>
+      <Footer />
+    </div>
+  );
+}
+
 function App() {
   return (
     <Router>
       <Routes>
-        {/* Public Route - Login */}
+        {/* Public Route - Login (không có Header/Footer) */}
         <Route
           path="/login"
           element={
@@ -83,35 +96,97 @@ function App() {
           }
         />
 
-        {/* Protected Routes - Require Authentication */}
+        {/* 404 Route */}
+        <Route path="*" element={<NotFound />} />
+
+        {/* Protected Routes với Header/Footer*/}
         <Route
-          path="/*"
+          path="/"
           element={
             <ProtectedRoute>
-              <div className="app-container">
-                <Header />
-                <main className="main-content" style={{ marginTop: '100px', minHeight: '80vh' }}>
-                  <Routes>
-                    <Route path="/" element={<Home />} />
-                    <Route path="/search" element={<SearchResult />} />
-                    <Route path="/product/:productId" element={<Detail />} />
-                    <Route path="/cart" element={<Cart />} />
-                    <Route path="/payment" element={<Payment />} />
-                    <Route path="/tracking" element={<OrderTracking />} />
-                    <Route path="/profile" element={<Profile />} />
-                    <Route path="/notifications" element={<Notifications />} />
-                    <Route path="/addresses" element={<Addresses />} />
-
-                    {/* 404 Page */}
-                    <Route path="*" element={
-                      <div style={{ textAlign: 'center', padding: '50px' }}>
-                        404 - Không tìm thấy trang 🤨
-                      </div>
-                    } />
-                  </Routes>
-                </main>
-                <Footer />
-              </div>
+              <MainLayout>
+                <Home />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/search"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <SearchResult />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/product/:productId"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <Detail />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/cart"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <Cart />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/payment"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <Payment />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/tracking"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <OrderTracking />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <Profile />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/notifications"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <Notifications />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/addresses"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <Addresses />
+              </MainLayout>
             </ProtectedRoute>
           }
         />
