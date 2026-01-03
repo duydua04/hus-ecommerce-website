@@ -14,9 +14,7 @@ export default function useChat({ role = "seller" } = {}) {
 
   const activeConvRef = useRef(null);
 
-  /* =======================
-     CONVERSATIONS
-  ======================= */
+  /* CONVERSATIONS */
 
   const normalizeConversation = useCallback(
     (conv) => {
@@ -51,15 +49,13 @@ export default function useChat({ role = "seller" } = {}) {
 
       setConversations(list.map(normalizeConversation));
     } catch (err) {
-      console.error("❌ Load conversations error:", err);
+      console.error("Load conversations error:", err);
     } finally {
       setLoadingConversations(false);
     }
   }, [normalizeConversation]);
 
-  /* =======================
-     MESSAGES
-  ======================= */
+  /* MESSAGES */
 
   const normalizeMessage = (msg) => ({
     id: msg._id || `tmp_${Date.now()}_${Math.random()}`,
@@ -88,7 +84,7 @@ export default function useChat({ role = "seller" } = {}) {
         );
         setCursor(res.next_cursor || null);
       } catch (err) {
-        console.error("❌ Load messages error:", err);
+        console.error("Load messages error:", err);
       } finally {
         setLoadingMessages(false);
       }
@@ -113,15 +109,13 @@ export default function useChat({ role = "seller" } = {}) {
           )
         );
       } catch (err) {
-        console.error("❌ Mark as read error:", err);
+        console.error("Mark as read error:", err);
       }
     },
     [loadMessages]
   );
 
-  /* =======================
-     SEND MESSAGE
-  ======================= */
+  /*SEND MESSAGE */
 
   const getRecipientId = useCallback(() => {
     const conv = conversations.find((c) => c.id === activeConversationId);
@@ -192,9 +186,7 @@ export default function useChat({ role = "seller" } = {}) {
     [appendMessage, getRecipientId]
   );
 
-  /* =======================
-     WEBSOCKET
-  ======================= */
+  /* WEBSOCKET */
 
   useEffect(() => {
     WebSocketClient.connect();
@@ -240,17 +232,13 @@ export default function useChat({ role = "seller" } = {}) {
     return unsubscribe;
   }, [role, loadConversations]);
 
-  /* =======================
-     INIT
-  ======================= */
+  /* INIT */
 
   useEffect(() => {
     loadConversations();
   }, [loadConversations]);
 
-  /* =======================
-     PUBLIC API
-  ======================= */
+  /* PUBLIC API */
 
   const activeConversation = conversations.find(
     (c) => c.id === activeConversationId

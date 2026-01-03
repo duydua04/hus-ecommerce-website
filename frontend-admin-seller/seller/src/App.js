@@ -1,10 +1,9 @@
-import React, { useEffect } from "react";
+import React from "react";
 import {
   BrowserRouter as Router,
   Routes,
   Route,
   Navigate,
-  useLocation,
 } from "react-router-dom";
 
 // Auth Pages
@@ -23,48 +22,14 @@ import ChatPage from "./pages/ChatPage/ChatPage";
 
 // Protected Route Component
 import ProtectedRoute from "./components/ProtectedRoute";
-import { WebSocketClient } from "./hooks/websocket";
 
 // Global Styles
 import "./assets/styles/global.scss";
 import "boxicons/css/boxicons.min.css";
 
-// Component để quản lý WebSocket dựa trên auth status
-function WebSocketManager() {
-  const location = useLocation();
-
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    const isAuthPage = ["/login", "/register", "/forgot-password"].includes(
-      location.pathname
-    );
-
-    if (token && !isAuthPage) {
-      console.log("Connecting WebSocket...");
-      WebSocketClient.connect();
-    } else {
-      console.log("Disconnecting WebSocket (no auth or auth page)");
-      WebSocketClient.disconnect();
-    }
-  }, [location.pathname]);
-
-  return null;
-}
-
 function App() {
-  // Cleanup WebSocket khi app unmount
-  useEffect(() => {
-    return () => {
-      console.log("App unmounting, disconnecting WebSocket");
-      WebSocketClient.disconnect();
-    };
-  }, []);
-
   return (
     <Router>
-      {/* Quản lý connection dựa trên route */}
-      <WebSocketManager />
-
       <Routes>
         {/*Authentication*/}
         <Route path="/login" element={<SellerLogin />} />
@@ -72,7 +37,6 @@ function App() {
         <Route path="/forgot-password" element={<SellerForgotPassword />} />
 
         {/*SELLER*/}
-
         {/* Dashboard */}
         <Route
           path="/dashboard"

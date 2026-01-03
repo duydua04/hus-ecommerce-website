@@ -58,14 +58,14 @@ const NavbarRight = ({ profileImage = "" }) => {
     } catch (e) {
       console.error(e);
     } finally {
-      window.location.href = "/seller/login";
+      window.location.href = "/login";
     }
   };
 
   const handleProfileClick = () => {
     setIsDropdownOpen(false);
     setShowNotifications(false);
-    window.location.href = "/seller/profile";
+    window.location.href = "/profile";
   };
 
   return (

@@ -209,11 +209,6 @@ export default function CategoryContent() {
       ),
     },
     {
-      key: "category_id",
-      label: "ID",
-      className: "table__cell--id",
-    },
-    {
       key: "category_name",
       label: "Tên danh mục",
       className: "table__cell--name",

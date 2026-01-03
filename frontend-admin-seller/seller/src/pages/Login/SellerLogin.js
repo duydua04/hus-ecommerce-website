@@ -52,11 +52,6 @@ function SellerLogin() {
         { withCredentials: true }
       );
 
-      console.log(
-        "Login Response FULL:",
-        JSON.stringify(response.data, null, 2)
-      );
-
       // Lưu email nếu chọn remember
       if (remember) {
         localStorage.setItem("savedSellerEmail", email);

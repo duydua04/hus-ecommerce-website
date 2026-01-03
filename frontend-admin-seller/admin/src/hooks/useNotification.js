@@ -19,7 +19,7 @@ export default function useNotification({ role = "admin" } = {}) {
 
         const items = data.items.map((n) => ({
           ...n,
-          id: n._id, // map _id → id
+          id: n._id, 
         }));
 
         setNotifications((prev) => (reset ? items : [...prev, ...items]));
@@ -50,12 +50,6 @@ export default function useNotification({ role = "admin" } = {}) {
     } catch (err) {
       console.error("Mark read failed:", err);
     }
-  }, []);
-
-  /* MARK ALL AS READ */
-  const markAllAsRead = useCallback(() => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
-    setUnreadCount(0);
   }, []);
 
   /* WEBSOCKET REALTIME */
@@ -93,6 +87,5 @@ export default function useNotification({ role = "admin" } = {}) {
 
     loadNotifications,
     markAsRead,
-    markAllAsRead,
   };
 }
