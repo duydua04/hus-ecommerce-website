@@ -44,6 +44,12 @@ const SidebarMenu = () => {
       text: "Đánh giá",
       href: "/reviews",
     },
+    {
+      id: "chat",
+      icon: "bx bx-chat",
+      text: "Chat",
+      href: "/chat",
+    },
   ];
 
   return (

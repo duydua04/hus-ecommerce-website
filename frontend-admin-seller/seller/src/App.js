@@ -4,6 +4,7 @@ import {
   Routes,
   Route,
   Navigate,
+  useLocation,
 } from "react-router-dom";
 
 // Auth Pages
@@ -18,6 +19,7 @@ import OrderPage from "./pages/Order/OrderPage";
 import LocationPage from "./pages/Location/LocationPage";
 import ProfilePage from "./pages/Profile/ProfilePage";
 import ReviewPage from "./pages/Review/ReviewPage";
+import ChatPage from "./pages/ChatPage/ChatPage";
 
 // Protected Route Component
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -27,17 +29,47 @@ import { WebSocketClient } from "./hooks/websocket";
 import "./assets/styles/global.scss";
 import "boxicons/css/boxicons.min.css";
 
-function App() {
-  /* INIT WEBSOCKET */
-  useEffect(() => {
-    WebSocketClient.connect();
+// Component để quản lý WebSocket dựa trên auth status
+function WebSocketManager() {
+  const location = useLocation();
 
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const isAuthPage = ["/login", "/register", "/forgot-password"].includes(
+      location.pathname
+    );
+
+    // Chỉ connect WebSocket khi:
+    // 1. Có token (user đã đăng nhập)
+    // 2. Không phải trang auth
+    if (token && !isAuthPage) {
+      console.log("🚀 Connecting WebSocket...");
+      WebSocketClient.connect();
+    } else {
+      console.log("🔌 Disconnecting WebSocket (no auth or auth page)");
+      WebSocketClient.disconnect();
+    }
+
+    // Cleanup không cần thiết ở đây vì WebSocket tự quản lý reconnect
+  }, [location.pathname]);
+
+  return null;
+}
+
+function App() {
+  // Cleanup WebSocket khi app unmount
+  useEffect(() => {
     return () => {
+      console.log("🔌 App unmounting, disconnecting WebSocket");
       WebSocketClient.disconnect();
     };
   }, []);
+
   return (
     <Router>
+      {/* WebSocket Manager - Quản lý connection dựa trên route */}
+      <WebSocketManager />
+
       <Routes>
         {/* ===== PUBLIC ROUTES - Authentication ===== */}
         <Route path="/login" element={<SellerLogin />} />
@@ -102,6 +134,16 @@ function App() {
           element={
             <ProtectedRoute allowedRoles={["seller"]}>
               <ProfilePage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Chat với khách hàng */}
+        <Route
+          path="/chat"
+          element={
+            <ProtectedRoute allowedRoles={["seller"]}>
+              <ChatPage />
             </ProtectedRoute>
           }
         />

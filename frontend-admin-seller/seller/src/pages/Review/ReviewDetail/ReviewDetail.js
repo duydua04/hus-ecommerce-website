@@ -11,6 +11,8 @@ import {
 } from "lucide-react";
 import "./ReviewDetail.scss";
 
+import { formatDetailedTime } from "../../../utils/timeUtils";
+
 export default function ReviewDetailModal({
   isOpen,
   review,
@@ -33,17 +35,6 @@ export default function ReviewDetailModal({
         ))}
       </div>
     );
-  };
-
-  const formatDate = (dateString) => {
-    if (!dateString) return "N/A";
-    return new Date(dateString).toLocaleDateString("vi-VN", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
   };
 
   return (
@@ -122,7 +113,9 @@ export default function ReviewDetailModal({
 
               <div className="review-date">
                 <Calendar size={16} />
-                <span>{formatDate(review.created_at)}</span>
+                <span className="info-value">
+                  {formatDetailedTime(review.created_at)}
+                </span>
               </div>
 
               {review.review_text && (
@@ -196,7 +189,7 @@ export default function ReviewDetailModal({
                           Shop
                         </span>
                         <span className="reply-date">
-                          {formatDate(reply.reply_date)}
+                          {formatDetailedTime(reply.reply_date)}
                         </span>
                       </div>
                       <p className="reply-text">{reply.reply_text}</p>
