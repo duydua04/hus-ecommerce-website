@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query, WebSocket, WebSocketDisconnect, status
+from fastapi import APIRouter, Depends, Query, WebSocket, WebSocketDisconnect, status, Cookie
 from sqlalchemy.ext.asyncio import AsyncSession
 from ...config.db import get_db
 
@@ -14,33 +14,42 @@ router = APIRouter(
 @router.websocket("/")
 async def chat_socket_endpoint(
         websocket: WebSocket,
-        token: str = Query(..., description="JWT Token for authentication"),
+        access_token: str | None = Cookie(default=None),
+        token: str | None = Query(default=None),
+
         db: AsyncSession = Depends(get_db),
 ):
     """
-    [STREAM] Cổng kết nối WebSocket chung cho Chat và Notifications.
+    [STREAM] Cổng kết nối WebSocket chung.
+    Hỗ trợ cả Cookie (Secure) và Query Param.
     """
 
-    # Xác thực Token
-    user_id, role = await ChatService.get_user_from_token(token, db)
+    final_token = access_token if access_token else token
 
-    if not user_id:
+    if not final_token:
+        print("❌ [WS] No token found in Cookie or Query")
         await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
         return
 
-    # 2. Kết nối vào Manager (Lưu socket vào RAM)
+    # Authenticate
+    user_id, role = await ChatService.get_user_from_token(final_token, db)
+
+    if not user_id:
+        print(f"❌ [WS] Invalid Token: {final_token[:10]}...")
+        await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+        return
+
+    # Connect to Manager
     await socket_manager.connect_socket(websocket, user_id, role)
 
     try:
         while True:
-            # Giữ kết nối (User không gửi tin nhắn qua đây, họ dùng API /chat/send)
+            # Keep connection alive
             await websocket.receive_text()
 
     except WebSocketDisconnect:
-        # 3. Ngắt kết nối
         socket_manager.disconnect_socket(websocket, user_id, role)
 
     except Exception as e:
-        # Xử lý các lỗi khác (ví dụ: lỗi mạng)
         print(f"WebSocket Error: {e}")
         socket_manager.disconnect_socket(websocket, user_id, role)
