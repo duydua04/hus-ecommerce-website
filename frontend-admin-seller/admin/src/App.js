@@ -33,12 +33,13 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* ===== PUBLIC ROUTE ===== */}
+        {/* PUBLIC */}
         <Route path="/login" element={<LoginPage />} />
 
-        {/* ===== PROTECTED ROUTES - ADMIN ===== */}
+        {/* ROOT */}
+        <Route path="/" element={<Navigate to="/login" replace />} />
 
-        {/* Dashboard */}
+        {/* ADMIN */}
         <Route
           path="/dashboard"
           element={
@@ -48,7 +49,6 @@ function App() {
           }
         />
 
-        {/* Category */}
         <Route
           path="/category"
           element={
@@ -58,7 +58,6 @@ function App() {
           }
         />
 
-        {/* Buyer */}
         <Route
           path="/buyer"
           element={
@@ -68,7 +67,6 @@ function App() {
           }
         />
 
-        {/* Seller */}
         <Route
           path="/seller"
           element={
@@ -78,7 +76,6 @@ function App() {
           }
         />
 
-        {/* Discount */}
         <Route
           path="/discount"
           element={
@@ -88,22 +85,11 @@ function App() {
           }
         />
 
-        {/* Transport */}
         <Route
           path="/transport"
           element={
             <ProtectedRoute allowedRoles={["admin"]}>
               <TransportPage />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Root → Dashboard */}
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute allowedRoles={["admin"]}>
-              <Navigate to="/dashboard" replace />
             </ProtectedRoute>
           }
         />
@@ -115,9 +101,7 @@ function App() {
   );
 }
 
-/* ======================
-   404 PAGE
-====================== */
+/* 404 PAGE */
 
 function NotFoundPage() {
   return (

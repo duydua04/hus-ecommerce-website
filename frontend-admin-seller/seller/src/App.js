@@ -39,18 +39,13 @@ function WebSocketManager() {
       location.pathname
     );
 
-    // Chỉ connect WebSocket khi:
-    // 1. Có token (user đã đăng nhập)
-    // 2. Không phải trang auth
     if (token && !isAuthPage) {
-      console.log("🚀 Connecting WebSocket...");
+      console.log("Connecting WebSocket...");
       WebSocketClient.connect();
     } else {
-      console.log("🔌 Disconnecting WebSocket (no auth or auth page)");
+      console.log("Disconnecting WebSocket (no auth or auth page)");
       WebSocketClient.disconnect();
     }
-
-    // Cleanup không cần thiết ở đây vì WebSocket tự quản lý reconnect
   }, [location.pathname]);
 
   return null;
@@ -60,25 +55,25 @@ function App() {
   // Cleanup WebSocket khi app unmount
   useEffect(() => {
     return () => {
-      console.log("🔌 App unmounting, disconnecting WebSocket");
+      console.log("App unmounting, disconnecting WebSocket");
       WebSocketClient.disconnect();
     };
   }, []);
 
   return (
     <Router>
-      {/* WebSocket Manager - Quản lý connection dựa trên route */}
+      {/* Quản lý connection dựa trên route */}
       <WebSocketManager />
 
       <Routes>
-        {/* ===== PUBLIC ROUTES - Authentication ===== */}
+        {/*Authentication*/}
         <Route path="/login" element={<SellerLogin />} />
         <Route path="/register" element={<SellerRegister />} />
         <Route path="/forgot-password" element={<SellerForgotPassword />} />
 
-        {/* ===== PROTECTED ROUTES - CHỈ SELLER ===== */}
+        {/*SELLER*/}
 
-        {/* Dashboard - Tổng quan */}
+        {/* Dashboard */}
         <Route
           path="/dashboard"
           element={
@@ -151,7 +146,7 @@ function App() {
         {/* Root path "/" redirect về login */}
         <Route path="/" element={<Navigate to="/login" replace />} />
 
-        {/* 404 NOT FOUND - Phải đặt cuối cùng */}
+        {/* 404 NOT FOUND */}
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Router>
