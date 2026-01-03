@@ -11,89 +11,72 @@ from ..services.admin.admin_dashboard_service import AdminDashboardService
 logger = logging.getLogger(__name__)
 
 
-async def init_resources():
-    """Tạo kết nối DB và Redis mới cho Worker"""
+async def run_task_with_resources(task_logic, *args, **kwargs):
+    """Wrapper để khởi tạo và dọn dẹp DB + Redis"""
     db = AsyncSessionLocal()
 
-    # 2. Redis Client
+    # 1. Tạo Redis riêng
     redis_client = redis.from_url(
         settings.redis_url_cache,
         encoding="utf-8",
         decode_responses=True
     )
 
-    if socket_manager.redis is None:
-        socket_manager.redis = redis.from_url(
-            settings.redis_url_broker,
-            encoding="utf-8",
-            decode_responses=True
-        )
+    try:
+        # Truyền redis_client vào logic chính
+        await task_logic(db, redis_client, *args, **kwargs)
+    except Exception as e:
+        logger.error(f"[ADMIN TASK ERROR] {e}")
+    finally:
+        await db.close()
+        await redis_client.close()  # 3. Đóng Redis
 
-    return db, redis_client
 
+# --- CÁC TASK ---
 
 @celery_app.task(name="task_admin_add_order_stats")
 def task_admin_add_order_stats(order_data: dict):
-    async def _process():
-        db = None
-        redis_client = None
-        try:
-            # 1. Khởi tạo tài nguyên
-            db, redis_client = await init_resources()
-            service = AdminDashboardService(db, redis_client)
+    async def _logic(db, redis_client):
+        service = AdminDashboardService(db, redis_client)
+        await service.handle_new_order_stats(order_data)
 
-            await service.handle_new_order_stats(order_data)
-            await socket_manager.broadcast_admin("DATA_UPDATED")
+        # 2. Truyền redis_client vào external_redis
+        msg = {
+            "type": "DATA_UPDATED",
+            "action": "NEW_ORDER",
+            "data": order_data
+        }
+        await socket_manager.broadcast_admin(msg, external_redis=redis_client)
 
-            logger.info(f"[ADMIN TASK] Added stats for Order #{order_data.get('order_id')}")
+        logger.info(f"[ADMIN TASK] Added stats for Order #{order_data.get('order_id')}")
 
-        except Exception as e:
-            logger.error(f"[ADMIN TASK] Error adding stats: {e}")
-        finally:
-            # 5. Dọn dẹp
-            if db: await db.close()
-            if redis_client: await redis_client.close()
-
-    asyncio.run(_process())
+    asyncio.run(run_task_with_resources(_logic))
 
 
 @celery_app.task(name="task_admin_revert_order_stats")
 def task_admin_revert_order_stats(order_data: dict):
-    async def _process():
-        db = None
-        redis_client = None
-        try:
-            db, redis_client = await init_resources()
-            service = AdminDashboardService(db, redis_client)  # Init mới
+    async def _logic(db, redis_client):
+        service = AdminDashboardService(db, redis_client)
+        await service.handle_revert_order_stats(order_data)
 
-            await service.handle_revert_order_stats(order_data)
-            await socket_manager.broadcast_admin("DATA_UPDATED")
+        await socket_manager.broadcast_admin(
+            {"type": "DATA_UPDATED", "action": "REVERT_ORDER"},
+            external_redis=redis_client
+        )
+        logger.info(f"[ADMIN TASK] Reverted stats for Order #{order_data.get('order_id')}")
 
-            logger.info(f"[ADMIN TASK] Reverted stats for Order #{order_data.get('order_id')}")
-        except Exception as e:
-            logger.error(f"[ADMIN TASK] Error reverting stats: {e}")
-        finally:
-            if db: await db.close()
-            if redis_client: await redis_client.close()
-
-    asyncio.run(_process())
+    asyncio.run(run_task_with_resources(_logic))
 
 
 @celery_app.task(name="task_admin_update_user_count")
 def task_admin_update_user_count(role: str, action: str):
-    async def _process():
-        db = None
-        redis_client = None
-        try:
-            db, redis_client = await init_resources()
-            service = AdminDashboardService(db, redis_client)
+    async def _logic(db, redis_client):
+        service = AdminDashboardService(db, redis_client)
+        await service.handle_user_count(role, action)
 
-            await service.handle_user_count(role, action)
-            await socket_manager.broadcast_admin("DATA_UPDATED")
-        except Exception as e:
-            logger.error(f"[ADMIN TASK] Error updating user count: {e}")
-        finally:
-            if db: await db.close()
-            if redis_client: await redis_client.close()
+        await socket_manager.broadcast_admin(
+            {"type": "DATA_UPDATED", "action": "USER_COUNT_CHANGE"},
+            external_redis=redis_client
+        )
 
-    asyncio.run(_process())
+    asyncio.run(run_task_with_resources(_logic))

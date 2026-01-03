@@ -1,46 +1,55 @@
+import asyncio
+import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
-import asyncio
+
 from .config.mongo import init_mongo
 from .utils.socket_manager import socket_manager
+
+logger = logging.getLogger("uvicorn.startup")
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """
-    Hàm quản lý vòng đời ứng dụng (Startup và Shutdown):
-    1. Khởi tạo MongoDB (Beanie).
-    2. Khởi tạo và chạy Redis Listener cho WebSocket.
+    Quản lý vòng đời Main Server:
+    - Startup: Kết nối Mongo, Redis và Bật chế độ 'Hóng chuyện' (Listener).
+    - Shutdown: Tắt Listener, Đóng kết nối.
     """
 
-    print("[STARTUP] Starting Application...")
+    logger.info(">>> [LIFESPAN] STARTING APP...")
 
-    print("[STARTUP] Connecting to MongoDB...")
     try:
         await init_mongo()
-        print("[STARTUP] MongoDB Connected & Beanie Initialized!")
+        logger.info(">>> [LIFESPAN] MongoDB Connected!")
     except Exception as e:
-        print(f"[STARTUP] MongoDB Connection Failed: {e}")
+        logger.critical(f">>> [LIFESPAN] Mongo Failed: {e}")
         raise e
 
-    print("[STARTUP] Starting Redis Pub/Sub Listener...")
+    # B. Kết nối Redis (Giữ kết nối này SỐNG mãi để nghe tin)
+    try:
+        await socket_manager.connect_redis()
+        logger.info(">>> [LIFESPAN] Redis Connected for Socket.")
+    except Exception as e:
+        logger.error(f">>> [LIFESPAN] Redis Failed: {e}")
 
-    await socket_manager.connect_redis()
 
     listener_task = asyncio.create_task(socket_manager.run_redis_listener())
+    logger.info(">>> [LIFESPAN] Redis Listener Started.")
 
     yield
 
-    print("[SHUTDOWN] Application is stopping...")
+    logger.info(">>> [LIFESPAN] SHUTTING DOWN...")
 
-    listener_task.cancel()
-    try:
-        # Đợi task kết thúc
-        await listener_task
-    except asyncio.CancelledError:
-        pass
+    if listener_task:
+        listener_task.cancel()
+        try:
+            await listener_task
+        except asyncio.CancelledError:
+            logger.info(">>> [LIFESPAN] Listener Task Stopped.")
 
+    # B. Đóng kết nối Redis
     await socket_manager.close_redis()
-    print("[SHUTDOWN] Redis Chat Closed.")
+    logger.info(">>> [LIFESPAN] Redis Connection Closed.")
 
-    print("[SHUTDOWN] Application successfully stopped.")
+    logger.info(">>> [LIFESPAN] Bye Bye!")
