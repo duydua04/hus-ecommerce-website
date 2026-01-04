@@ -66,37 +66,60 @@ const Chat = forwardRef((props, ref) => {
   }, []);
 
   // Load messages
-  const loadMessages = async (conversationId, cursor = null) => {
-    if (!conversationId) {
-      setMessages([]);
-      setHasMoreMessages(false);
-      setMessageCursor(null);
-      return;
-    }
-
-    try {
-      const data = await chatAPI.getMessages(conversationId, cursor);
-
-      if (cursor) {
-        setMessages(prev => [...data.messages, ...prev]);
-      } else {
-        setMessages(data.messages || []);
-        setTimeout(scrollToBottom, 100);
+    const loadMessages = async (conversationId, cursor = null) => {
+      if (!conversationId) {
+        setMessages([]);
+        setHasMoreMessages(false);
+        setMessageCursor(null);
+        return;
       }
 
-      setHasMoreMessages(!!data.next_cursor);
-      setMessageCursor(data.next_cursor || null);
+      try {
+        const data = await chatAPI.getMessages(conversationId, cursor);
 
-      if (!cursor && conversationId) {
-        setViewedConversations(prev => new Set([...prev, conversationId]));
+        // Set messages
+        if (cursor) {
+          // Load more tin nhắn cũ → thêm vào đầu mảng
+          setMessages(prev => [...data.messages, ...prev]);
+        } else {
+          // Load lần đầu → set toàn bộ và scroll xuống cuối
+          setMessages(data.messages || []);
+
+          // Scroll xuống tin mới nhất ngay lập tức
+          setTimeout(() => {
+            if (messagesEndRef.current) {
+              messagesEndRef.current.scrollIntoView({ behavior: 'instant' });
+            }
+          }, 50);
+        }
+
+        setHasMoreMessages(!!data.next_cursor);
+        setMessageCursor(data.next_cursor || null);
+
+        if (!cursor && conversationId) {
+          try {
+            await chatAPI.markAsRead(conversationId);
+
+            // Reset unread count
+            setConversations(prev => prev.map(conv =>
+              conv.conversation_id === conversationId
+                ? { ...conv, unread_counts: { ...conv.unread_counts, buyer: 0 } }
+                : conv
+            ));
+
+            // Set viewed SAU KHI gọi API thành công
+            setViewedConversations(prev => new Set([...prev, conversationId]));
+          } catch (error) {
+            console.error('Mark as read error:', error);
+          }
+        }
+      } catch (error) {
+        console.error('Load messages error:', error);
+        setMessages([]);
+        setHasMoreMessages(false);
+        setMessageCursor(null);
       }
-    } catch (error) {
-      console.error('Load messages error:', error);
-      setMessages([]);
-      setHasMoreMessages(false);
-      setMessageCursor(null);
-    }
-  };
+    };
 
   // Load more messages
   const loadMoreMessages = async () => {
@@ -137,7 +160,7 @@ const Chat = forwardRef((props, ref) => {
         textareaRef.current.style.height = 'auto';
       }
 
-      setTimeout(scrollToBottom, 100);
+      setTimeout(() => scrollToBottom('instant'), 50);
       loadConversations();
     } catch (error) {
       console.error('Send message error:', error);
@@ -174,42 +197,72 @@ const Chat = forwardRef((props, ref) => {
   };
 
   // WebSocket listener
-  useEffect(() => {
-    if (!isOpen) return;
+    useEffect(() => {
+      if (!isOpen) return;
 
-    const unsubscribe = websocketAPI.onMessage('CHAT', (payload) => {
-      console.log('📨 New chat message:', payload);
+      const unsubscribe = websocketAPI.onMessage('CHAT', (payload) => {
+        console.log('📨 New chat message:', payload);
 
-      if (selectedConversation?.conversation_id === payload.conversation_id) {
-        const newMsg = {
-          _id: Date.now().toString(),
-          conversation_id: payload.conversation_id,
-          sender: payload.sender,
-          content: payload.content,
-          images: payload.images || [],
-          is_read: false,
-          created_at: payload.created_at
-        };
-        setMessages(prev => [...prev, newMsg]);
-        setTimeout(scrollToBottom, 100);
+        // Nếu đang xem cuộc trò chuyện này
+        if (selectedConversation?.conversation_id === payload.conversation_id) {
+          const newMsg = {
+            _id: Date.now().toString(),
+            conversation_id: payload.conversation_id,
+            sender: payload.sender,
+            content: payload.content,
+            images: payload.images || [],
+            is_read: false,
+            created_at: payload.created_at
+          };
+          setMessages(prev => [...prev, newMsg]);
+          setTimeout(() => scrollToBottom('smooth'), 100);
 
-        if (payload.sender === 'seller') {
-          setViewedConversations(prev => new Set([...prev, payload.conversation_id]));
+          if (payload.sender === 'seller') {
+            chatAPI.markAsRead(payload.conversation_id).catch(err =>
+              console.error('Auto mark as read error:', err)
+            );
+
+            // Reset unread count trong local state
+            setConversations(prev => prev.map(conv =>
+              conv.conversation_id === payload.conversation_id
+                ? { ...conv, unread_counts: { ...conv.unread_counts, buyer: 0 } }
+                : conv
+            ));
+          }
+        } else {
+
+          // Tăng unread count
+          setConversations(prev => prev.map(conv =>
+            conv.conversation_id === payload.conversation_id
+              ? {
+                  ...conv,
+                  unread_counts: {
+                    ...conv.unread_counts,
+                    buyer: (conv.unread_counts?.buyer || 0) + 1
+                  },
+                  last_message: payload.content,
+                  last_message_at: payload.created_at
+                }
+              : conv
+          ));
+
+          setViewedConversations(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(payload.conversation_id);
+            return newSet;
+          });
         }
-      }
 
-      loadConversations();
-    });
+      });
 
-    return () => unsubscribe();
-  }, [isOpen, selectedConversation, loadConversations]);
+      return () => unsubscribe();
+    }, [isOpen, selectedConversation]);
 
   // Load conversations when open
   useEffect(() => {
     if (isOpen) {
-      loadConversations();
     }
-  }, [isOpen, loadConversations]);
+  }, [isOpen]);
 
   // Load messages when select conversation
   useEffect(() => {
@@ -249,8 +302,10 @@ const Chat = forwardRef((props, ref) => {
     }
   }, [handleScroll]);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  const scrollToBottom = (behavior = 'smooth') => {
+      if (messagesEndRef.current) {
+        messagesEndRef.current.scrollIntoView({ behavior });
+      }
   };
 
   // Calculate unread count
@@ -387,9 +442,26 @@ const Chat = forwardRef((props, ref) => {
                     <div
                       key={conv.conversation_id}
                       className={`conversation-item ${isSelected ? 'selected' : ''} ${unreadCount > 0 ? 'unread' : ''}`}
-                      onClick={() => {
+                      onClick={async () => {
                         setSelectedConversation(conv);
-                        setViewedConversations(prev => new Set([...prev, conv.conversation_id]));
+
+                        if (conv.conversation_id) {
+                          try {
+                            await chatAPI.markAsRead(conv.conversation_id);
+
+                            // ✅ Reset unread count trong local state
+                            setConversations(prev => prev.map(c =>
+                              c.conversation_id === conv.conversation_id
+                                ? { ...c, unread_counts: { ...c.unread_counts, buyer: 0 } }
+                                : c
+                            ));
+
+                            // ✅ CHỈ SAU KHI GỌI API THÀNH CÔNG mới set viewed
+                            setViewedConversations(prev => new Set([...prev, conv.conversation_id]));
+                          } catch (error) {
+                            console.error('Mark as read error:', error);
+                          }
+                        }
                       }}
                     >
                       <div className="conv-avatar">
