@@ -1,32 +1,34 @@
-import { useCallback, useEffect, useState, useRef } from "react";
+import { useCallback, useEffect, useState } from "react";
 import NotificationService from "../api/NotificationService";
 import { WebSocketClient } from "./websocket";
 
-export default function useNotification({ role = "admin" } = {}) {
+const normalizeNotification = (n) => ({
+  ...n,
+  id: n._id,
+});
+
+export default function useNotification() {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [cursor, setCursor] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const isInitialized = useRef(false);
-
   const loadNotifications = useCallback(
     async ({ reset = false } = {}) => {
       setLoading(true);
       try {
-        const data = await NotificationService.getNotifications({
-          cursor: reset ? null : cursor,
-        });
+        const { items, next_cursor } =
+          await NotificationService.getNotifications({
+            cursor: reset ? null : cursor,
+          });
 
-        const items = data.items.map((n) => ({
-          ...n,
-          id: n._id,
-        }));
+        const normalized = items.map(normalizeNotification);
+        const unread = normalized.filter((n) => !n.is_read).length;
 
-        setNotifications((prev) => (reset ? items : [...prev, ...items]));
-        setCursor(data.next_cursor || null);
-
-        const unread = items.filter((n) => !n.is_read).length;
+        setNotifications((prev) =>
+          reset ? normalized : [...prev, ...normalized]
+        );
+        setCursor(next_cursor || null);
         setUnreadCount((prev) => (reset ? unread : prev + unread));
       } catch (err) {
         console.error("Load notifications error:", err);
@@ -44,40 +46,40 @@ export default function useNotification({ role = "admin" } = {}) {
       setNotifications((prev) =>
         prev.map((n) => (n.id === notifId ? { ...n, is_read: true } : n))
       );
-
       setUnreadCount((prev) => Math.max(prev - 1, 0));
     } catch (err) {
       console.error("Mark as read failed:", err);
     }
   }, []);
 
-  // WebSocket connection and subscription (once only)
+  // WebSocket real-time notifications
   useEffect(() => {
-    if (isInitialized.current) return;
-
-    isInitialized.current = true;
     WebSocketClient.connect();
 
     const unsubscribe = WebSocketClient.subscribe("notification", (message) => {
-      if (!message?.payload) return;
+      if (message?.type?.toUpperCase() !== "NOTIFICATION") return;
 
       const notif = {
-        ...message.payload,
-        id: message.payload._id,
+        _id: message.id,
+        id: message.id,
+        title: message.title,
+        message: message.message,
+        data: message.data,
+        is_read: false,
+        created_at: new Date().toISOString(),
       };
 
       setNotifications((prev) => [notif, ...prev]);
       setUnreadCount((prev) => prev + 1);
     });
 
-    return () => {
-      unsubscribe();
-    };
+    return unsubscribe;
   }, []);
 
-  // Load initial notifications (once only)
+  // Load initial notifications
   useEffect(() => {
     loadNotifications({ reset: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return {
