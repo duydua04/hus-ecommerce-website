@@ -82,20 +82,14 @@ export default function ProfileContent() {
   const handleAvatarUpload = async (file) => {
     try {
       const result = await uploadAvatar(file);
-
-      if (result.success) {
+      if (result && result.success) {
         setIsAvatarModalOpen(false);
         setSuccessMessage("Cập nhật avatar thành công");
         setTimeout(() => setSuccessMessage(""), 3000);
-
-        // Refresh profile để lấy avatar mới
         await fetchProfile();
-      } else {
-        throw new Error(result.error);
       }
     } catch (err) {
       console.error("Error upload avatar:", err);
-      throw err; // Để modal hiển thị lỗi
     }
   };
 

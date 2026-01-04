@@ -1,12 +1,12 @@
-import React from "react";
+import { Link } from "react-router-dom";
 import "./SidebarBrand.scss";
 
 const SidebarBrand = () => {
   return (
-    <a href="#" className="sidebar__brand">
-      <i className="bx bx-cube-alt sidebar__brand-icon"></i>
-      <span className="sidebar__brand-text">AdminHub</span>
-    </a>
+    <Link to="/dashboard" className="sidebar__brand">
+      <img src="/logo.png" alt="FASTBUY" className="sidebar__brand-icon" />
+      <span className="sidebar__brand-text">Fastbuy</span>
+    </Link>
   );
 };
 

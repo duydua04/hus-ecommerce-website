@@ -52,11 +52,6 @@ function SellerLogin() {
         { withCredentials: true }
       );
 
-      console.log(
-        "Login Response FULL:",
-        JSON.stringify(response.data, null, 2)
-      );
-
       // Lưu email nếu chọn remember
       if (remember) {
         localStorage.setItem("savedSellerEmail", email);
@@ -85,8 +80,7 @@ function SellerLogin() {
         role: localStorage.getItem("userRole"),
       });
 
-      // Chuyển đến trang products sau khi đăng nhập thành công
-      navigate("/products", { replace: true });
+      navigate("/dashboard", { replace: true });
     } catch (err) {
       const status = err.response?.status;
       const detail = err.response?.data?.detail;
@@ -110,8 +104,6 @@ function SellerLogin() {
   };
 
   const handleGoogleLogin = () => {
-    // Backend endpoint: /auth/google/login/seller
-    // Không cần truyền role vì đã có trong URL
     window.location.href = `${API_URL}/auth/google/login/seller`;
   };
 

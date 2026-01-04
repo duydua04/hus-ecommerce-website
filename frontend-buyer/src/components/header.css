@@ -49,12 +49,13 @@
 }
 
 .header-avatar {
-  width: 28px;
-  height: 28px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   object-fit: cover;
   object-position: center;
   display: block;
+  border: 2px solid var(--blue-200);
 }
 
 .header-avatar--fallback {
@@ -79,6 +80,9 @@
     font-family: var(--font-family);
     font-size: 1.25rem;
     font-weight: 700;
+}
+.brand__name {
+    color: var(--blue-700);
 }
 .brand__logo {
     width: 60px;
@@ -192,6 +196,19 @@
 .icon-group__button:focus {
     outline: 3px solid rgba(50,168,82,0.18);
     outline-offset: 3px;
+}
+/* bỏ background xanh khi có avatar */
+.icon-group__button:has(.header-avatar),
+.icon-group__button:has(.header-avatar--fallback) {
+    background-color: transparent;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.icon-group__button:has(.header-avatar):hover {
+    background-color: transparent;
+    transform: translateY(-2px) scale(1.05);
 }
 
 /* menu thông tin đăng nhập*/

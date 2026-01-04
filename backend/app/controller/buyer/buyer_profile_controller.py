@@ -12,7 +12,7 @@ router = APIRouter(
 )
 
 # ==================== LẤY THÔNG TIN HỒ SƠ BUYER ====================
-@router.get("/", response_model=BuyerResponse)
+@router.get("", response_model=BuyerResponse)
 async def get_my_profile(
         buyer_info=Depends(require_buyer),
         service: BuyerProfileService = Depends(get_buyer_profile_service)
@@ -24,7 +24,7 @@ async def get_my_profile(
 
 
 # ==================== CẬP NHẬT THÔNG TIN HỒ SƠ BUYER ====================
-@router.put("/", response_model=BuyerResponse)
+@router.put("", response_model=BuyerResponse)
 async def update_my_profile(
         payload: BuyerUpdate,
         buyer_info=Depends(require_buyer),

@@ -1,5 +1,6 @@
 import React from "react";
 import { X, MapPin, CreditCard, User, Phone, Mail } from "lucide-react";
+import { formatDetailedTime } from "../../../utils/timeUtils";
 
 import "../../../assets/styles/modal.scss";
 import "./OrderDetail.scss";
@@ -36,17 +37,6 @@ export default function OrderDetailModal({
   onCancel,
 }) {
   if (!isOpen || !orderDetail) return null;
-
-  const formatDate = (dateString) => {
-    if (!dateString) return "N/A";
-    return new Date(dateString).toLocaleDateString("vi-VN", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
 
   const formatPrice = (price) => {
     return `${Number(price).toLocaleString("vi-VN")} ₫`;
@@ -89,7 +79,7 @@ export default function OrderDetailModal({
               <div className="info-item">
                 <span className="info-label">Ngày đặt:</span>
                 <span className="info-value">
-                  {formatDate(orderDetail.order_date)}
+                  {formatDetailedTime(orderDetail.order_date)}
                 </span>
               </div>
               <div className="info-item">
@@ -105,7 +95,7 @@ export default function OrderDetailModal({
                 <div className="info-item">
                   <span className="info-label">Ngày giao:</span>
                   <span className="info-value">
-                    {formatDate(orderDetail.delivery_date)}
+                    {formatDetailedTime(orderDetail.delivery_date)}
                   </span>
                 </div>
               )}

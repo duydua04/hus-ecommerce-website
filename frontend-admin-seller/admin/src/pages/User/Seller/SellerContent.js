@@ -170,7 +170,7 @@ export default function SellerContent() {
         title="Người bán"
         breadcrumbs={[
           { label: "Trang chủ", path: "/dashboard" },
-          { label: "Seller", path: "/admin/sellers" },
+          { label: "Người bán", path: "/admin/seller" },
         ]}
       />
 

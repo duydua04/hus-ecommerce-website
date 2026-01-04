@@ -2,19 +2,28 @@ import axios from "axios";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
 
-// DEBUG: Log để kiểm tra API_URL
 console.log("Axios Config - API URL:", API_URL);
 
-// Tạo axios instance
 const axiosInstance = axios.create({
   baseURL: API_URL,
-  withCredentials: true, //
-  headers: {
-    "Content-Type": "application/json",
-  },
+  withCredentials: true,
 });
 
-// Flag để tránh refresh token nhiều lần đồng thời
+// Set Content-Type có điều kiện
+axiosInstance.interceptors.request.use(
+  (config) => {
+    // Chỉ set Content-Type cho non-FormData requests
+    if (!(config.data instanceof FormData)) {
+      config.headers["Content-Type"] = "application/json";
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Quản lý refresh token queue
 let isRefreshing = false;
 let failedQueue = [];
 
@@ -29,10 +38,9 @@ const processQueue = (error, token = null) => {
   failedQueue = [];
 };
 
-// Tự động refresh token khi 401
+// Auto refresh token khi 401
 axiosInstance.interceptors.response.use(
   (response) => response,
-
   async (error) => {
     const originalRequest = error.config;
 
@@ -41,7 +49,6 @@ axiosInstance.interceptors.response.use(
     }
 
     if (originalRequest.url?.includes("/auth/refresh")) {
-      // Redirect về login nếu refresh token hết hạn
       localStorage.removeItem("userRole");
       window.location.href = "/login";
       return Promise.reject(error);
@@ -51,12 +58,8 @@ axiosInstance.interceptors.response.use(
       return new Promise((resolve, reject) => {
         failedQueue.push({ resolve, reject });
       })
-        .then(() => {
-          return axiosInstance(originalRequest); // Retry request sau khi refresh xong
-        })
-        .catch((err) => {
-          return Promise.reject(err);
-        });
+        .then(() => axiosInstance(originalRequest))
+        .catch((err) => Promise.reject(err));
     }
 
     originalRequest._retry = true;
@@ -64,13 +67,10 @@ axiosInstance.interceptors.response.use(
 
     try {
       await axiosInstance.post("/auth/refresh");
-      // Backend đã set cookies mới -> không cần lưu gì
       isRefreshing = false;
       processQueue(null);
-      // Retry request ban đầu với token mới (tự động lấy từ cookies)
       return axiosInstance(originalRequest);
     } catch (refreshError) {
-      // Refresh token hết hạn hoặc invalid -> logout
       isRefreshing = false;
       processQueue(refreshError, null);
       localStorage.removeItem("userRole");

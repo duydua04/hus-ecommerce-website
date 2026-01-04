@@ -64,7 +64,7 @@ function LoginPage() {
         localStorage.setItem("userRole", response.data.scope);
       }
 
-      navigate("/transport", { replace: true });
+      navigate("/dashboard", { replace: true });
     } catch (err) {
       const status = err.response?.status;
       const detail = err.response?.data?.detail;

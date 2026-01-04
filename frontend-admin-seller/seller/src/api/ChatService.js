@@ -1,39 +1,51 @@
-import axios from "axios";
+import axiosInstance from "../utils/axiosConfig";
 
-//const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
-const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:8000";
-
-export const chatApi = {
-  // Gửi message qua REST API (không qua WebSocket)
-  sendMessage: async (conversationId, content, imageUrls = []) => {
-    const response = await axios.post(`${API_BASE}/chat/send`, {
-      conversation_id: conversationId,
-      content: content,
-      image_urls: imageUrls,
-    });
-    return response.data;
-  },
-
-  uploadImages: async (files) => {
+const ChatService = {
+  /* UPLOAD IMAGE */
+  async uploadImages(files) {
     const formData = new FormData();
-    files.forEach((file) => formData.append("files", file));
-
-    const response = await axios.post(`${API_BASE}/chat/upload`, formData, {
-      headers: { "Content-Type": "multipart/form-data" },
+    files.forEach((file) => {
+      formData.append("files", file);
     });
-    return response.data;
+
+    const res = await axiosInstance.post("/chat/upload", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    return res.data;
   },
 
-  getConversations: async () => {
-    const response = await axios.get(`${API_BASE}/chat/conversations`);
-    return response.data;
+  /* SEND MESSAGE */
+  async sendMessage(payload) {
+    const res = await axiosInstance.post("/chat/send", payload);
+    return res.data;
   },
 
-  getMessages: async (conversationId, cursor = null, limit = 20) => {
-    const response = await axios.get(
-      `${API_BASE}/chat/${conversationId}/messages`,
-      { params: { cursor, limit } }
-    );
-    return response.data;
+  /* CONVERSATIONS */
+  async getConversations() {
+    const res = await axiosInstance.get("/chat/conversations");
+    return res.data;
+  },
+
+  /* MESSAGES */
+  async getMessages(conversationId, { cursor = null, limit = 20 } = {}) {
+    const params = { limit };
+    if (cursor) params.cursor = cursor;
+
+    const res = await axiosInstance.get(`/chat/${conversationId}/messages`, {
+      params,
+    });
+
+    return res.data;
+  },
+
+  /* MARK AS READ */
+  async markAsRead(conversationId) {
+    const res = await axiosInstance.patch(`/chat/${conversationId}/read`);
+    return res.data;
   },
 };
+
+export default ChatService;

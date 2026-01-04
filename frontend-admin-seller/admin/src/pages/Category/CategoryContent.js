@@ -7,10 +7,12 @@ import Button from "../../components/common/Button/Button";
 import SearchBox from "../../components/common/SearchBox/SearchBox";
 import CategoryModal from "./AddCategory/AddCategory";
 import CategoryDetailModal from "./CategoryDetail/CategoryDetail";
-import AvatarUploadModal from "../../components/common/AvatarUpload/AvatarUpload";
+import AvatarUploadModal from "../../components/common/ImageUpload/ImageUpload";
 import ConfirmModal from "../../components/common/ConfirmModal/ConfirmModal";
 import useCategory from "../../hooks/useCategory";
+
 import "../../assets/styles/page.scss";
+import "../../assets/styles/modal.scss";
 
 // Avatar mặc định
 import defaultAvatar from "../../assets/images/default-avatar-category.png";
@@ -155,9 +157,11 @@ export default function CategoryContent() {
     setCategoryToDelete(null);
   };
 
-  const handleAvatarUpload = async (categoryId, file) => {
+  const handleAvatarUpload = async (file) => {
+    if (!selectedCategoryId) return;
+
     try {
-      await uploadCategoryImage(categoryId, file);
+      await uploadCategoryImage(selectedCategoryId, file);
 
       setIsAvatarModalOpen(false);
       setSelectedCategoryId(null);
@@ -182,43 +186,32 @@ export default function CategoryContent() {
       label: "Hình ảnh",
       className: "table__cell--avatar",
       render: (value, row) => (
-        <img
-          src={value || DEFAULT_AVATAR}
-          alt="Category image"
-          className="table__img table__img--clickable"
-          title="Click để cập nhật hình ảnh"
+        <div
+          className="table__img-wrapper"
           onClick={() => {
             setSelectedCategoryId(row.category_id);
             setIsAvatarModalOpen(true);
           }}
-          onError={(e) => {
-            e.target.src = DEFAULT_AVATAR;
-          }}
-        />
+        >
+          <img
+            src={value || DEFAULT_AVATAR}
+            alt="Category"
+            className="table__img"
+            onError={(e) => {
+              e.target.src = DEFAULT_AVATAR;
+            }}
+          />
+          <div className="table__img-overlay">
+            <i className="bx bx-camera"></i>
+            <span>Cập nhật</span>
+          </div>
+        </div>
       ),
-    },
-    {
-      key: "category_id",
-      label: "ID",
-      className: "table__cell--id",
     },
     {
       key: "category_name",
       label: "Tên danh mục",
       className: "table__cell--name",
-    },
-    {
-      key: "created_at",
-      label: "Ngày tạo",
-      className: "table__cell--date",
-      render: (value) => {
-        if (!value) return "-";
-        return new Date(value).toLocaleDateString("vi-VN", {
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric",
-        });
-      },
     },
   ];
 
@@ -250,7 +243,7 @@ export default function CategoryContent() {
         title="Danh mục"
         breadcrumbs={[
           { label: "Trang chủ", path: "/dashboard" },
-          { label: "Danh mục", path: "/categories" },
+          { label: "Danh mục", path: "/category" },
         ]}
       />
 

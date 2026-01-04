@@ -55,13 +55,6 @@ const CategoryDetailModal = ({ isOpen, category, onClose }) => {
                 </p>
               </div>
 
-              <div className="detail__group">
-                <label className="detail__label">Ngày tạo</label>
-                <p className="detail__value">
-                  {formatDate(category.created_at)}
-                </p>
-              </div>
-
               {category.updated_at && (
                 <div className="detail__group">
                   <label className="detail__label">Cập nhật lần cuối</label>
