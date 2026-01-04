@@ -76,25 +76,6 @@ const Payment = () => {
     return weight;
   }, [orderData]);
 
-  // ================= API CALL =================
-  const createOrderDirectly = useCallback(async (payload) => {
-    const token = localStorage.getItem('access_token');
-    const response = await fetch('http://localhost:8000/buyer/orders', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify(payload)
-    });
-
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({ detail: 'Network error' }));
-      throw new Error(JSON.stringify(error));
-    }
-    return response.json();
-  }, []);
-
   // ================= LOAD DỮ LIỆU BAN ĐẦU =================
   useEffect(() => {
     if (selectedItemIds.length === 0) {
@@ -297,7 +278,8 @@ const Payment = () => {
         notes: notes.trim() || null
       };
 
-      const response = await createOrderDirectly(payload);
+      // ✅ [FIX] SỬ DỤNG api.order.createOrder ĐỂ GỌI API CHUẨN (CÓ COOKIE)
+      const response = await api.order.createOrder(payload);
 
       // Clear cart items
       try {
