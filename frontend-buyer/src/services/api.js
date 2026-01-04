@@ -16,7 +16,7 @@ const handleResponse = async (response) => {
       }
     }
 
-    throw new Error(error.detail || `HTTP error! status: ${response.status}`);
+    throw new Error(JSON.stringify(error));
   }
   return response.json();
 };
@@ -67,6 +67,238 @@ export const authAPI = {
 };
 
 // ============================================
+// WEBSOCKET APIs (Realtime)
+// ============================================
+export const websocketAPI = {
+  // Biến lưu trữ kết nối WebSocket
+  socket: null,
+  reconnectAttempts: 0,
+  maxReconnectAttempts: 5,
+  reconnectDelay: 3000,
+  messageHandlers: new Map(), // Map để lưu các handler cho từng loại message
+  connectionListeners: [], // Listeners cho sự kiện connection
+
+  // Khởi tạo kết nối WebSocket
+  initialize: function() {
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+      console.warn('No token available for WebSocket connection');
+      return;
+    }
+
+    if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+      console.log('WebSocket already connected');
+      return;
+    }
+
+    try {
+      // Tạo kết nối WebSocket với token
+      const wsUrl = `ws://localhost:8000/websocket/?token=${encodeURIComponent(token)}`;
+      this.socket = new WebSocket(wsUrl);
+
+      // Sự kiện khi kết nối thành công
+      this.socket.onopen = () => {
+        console.log('✅ WebSocket connected successfully');
+        this.reconnectAttempts = 0;
+
+        // Thông báo cho tất cả connection listeners
+        this.connectionListeners.forEach(listener => {
+          try {
+            listener({ type: 'connected', timestamp: new Date() });
+          } catch (err) {
+            console.error('Error in connection listener:', err);
+          }
+        });
+      };
+
+      // Sự kiện khi nhận message
+      this.socket.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          console.log('📨 WebSocket message received:', data);
+
+          // Xử lý message theo type
+          this.handleMessage(data);
+        } catch (err) {
+          console.error('Error parsing WebSocket message:', err, 'Raw data:', event.data);
+        }
+      };
+
+      // Sự kiện khi có lỗi
+      this.socket.onerror = (error) => {
+        console.error('❌ WebSocket error:', error);
+
+        this.connectionListeners.forEach(listener => {
+          try {
+            listener({ type: 'error', error, timestamp: new Date() });
+          } catch (err) {
+            console.error('Error in connection listener:', err);
+          }
+        });
+      };
+
+      // Sự kiện khi đóng kết nối
+      this.socket.onclose = (event) => {
+        console.log(`🔌 WebSocket disconnected. Code: ${event.code}, Reason: ${event.reason}`);
+
+        // Thông báo cho connection listeners
+        this.connectionListeners.forEach(listener => {
+          try {
+            listener({ type: 'disconnected', code: event.code, reason: event.reason, timestamp: new Date() });
+          } catch (err) {
+            console.error('Error in connection listener:', err);
+          }
+        });
+
+        // Tự động reconnect nếu không phải do logout
+        if (event.code !== 1000 && this.reconnectAttempts < this.maxReconnectAttempts) {
+          setTimeout(() => {
+            this.reconnectAttempts++;
+            console.log(`🔄 Attempting to reconnect (${this.reconnectAttempts}/${this.maxReconnectAttempts})...`);
+            this.initialize();
+          }, this.reconnectDelay);
+        }
+      };
+    } catch (error) {
+      console.error('Error initializing WebSocket:', error);
+    }
+  },
+
+  // Đăng ký handler cho loại message cụ thể
+  onMessage: function(messageType, handler) {
+    if (!this.messageHandlers.has(messageType)) {
+      this.messageHandlers.set(messageType, []);
+    }
+    this.messageHandlers.get(messageType).push(handler);
+
+    // Trả về hàm để hủy đăng ký
+    return () => {
+      const handlers = this.messageHandlers.get(messageType);
+      if (handlers) {
+        const index = handlers.indexOf(handler);
+        if (index > -1) {
+          handlers.splice(index, 1);
+        }
+      }
+    };
+  },
+
+  // Đăng ký listener cho sự kiện connection
+  onConnectionChange: function(listener) {
+    this.connectionListeners.push(listener);
+
+    // Trả về hàm để hủy đăng ký
+    return () => {
+      const index = this.connectionListeners.indexOf(listener);
+      if (index > -1) {
+        this.connectionListeners.splice(index, 1);
+      }
+    };
+  },
+
+  // Xử lý message nhận được
+  handleMessage: function(data) {
+    const { type, payload } = data;
+
+    // Gọi tất cả handlers cho loại message này
+    const handlers = this.messageHandlers.get(type);
+    if (handlers) {
+      handlers.forEach(handler => {
+        try {
+          handler(payload);
+        } catch (err) {
+          console.error('Error in message handler:', err);
+        }
+      });
+    }
+
+    // Gọi handlers cho tất cả message types (wildcard)
+    const allHandlers = this.messageHandlers.get('*');
+    if (allHandlers) {
+      allHandlers.forEach(handler => {
+        try {
+          handler({ type, payload });
+        } catch (err) {
+          console.error('Error in wildcard message handler:', err);
+        }
+      });
+    }
+  },
+
+  // Gửi message qua WebSocket
+  send: function(type, payload) {
+    if (!this.socket || this.socket.readyState !== WebSocket.OPEN) {
+      console.warn('WebSocket is not connected. Cannot send message.');
+      return false;
+    }
+
+    try {
+      const message = JSON.stringify({ type, payload });
+      this.socket.send(message);
+      console.log('📤 WebSocket message sent:', { type, payload });
+      return true;
+    } catch (error) {
+      console.error('Error sending WebSocket message:', error);
+      return false;
+    }
+  },
+
+  // Đóng kết nối WebSocket
+  disconnect: function() {
+    if (this.socket) {
+      this.socket.close(1000, 'User initiated disconnect');
+      this.socket = null;
+      this.reconnectAttempts = 0;
+      console.log('WebSocket connection closed by user');
+    }
+  },
+
+  // Kiểm tra trạng thái kết nối
+  isConnected: function() {
+    return this.socket && this.socket.readyState === WebSocket.OPEN;
+  },
+
+  // Ping để giữ kết nối
+  ping: function() {
+    this.send('ping', { timestamp: Date.now() });
+  }
+};
+
+// Khởi tạo WebSocket khi có token
+const initializeWebSocket = () => {
+  const token = localStorage.getItem('access_token');
+  if (token && !websocketAPI.socket) {
+    console.log('🔌 Initializing WebSocket connection...');
+    websocketAPI.initialize();
+
+    // Ping định kỳ để giữ kết nối
+    setInterval(() => {
+      if (websocketAPI.isConnected()) {
+        websocketAPI.ping();
+      }
+    }, 30000); // Ping mỗi 30 giây
+  }
+};
+
+// Kiểm tra token và khởi tạo WebSocket
+if (localStorage.getItem('access_token')) {
+  setTimeout(initializeWebSocket, 1000); // Delay 1 giây để tránh conflict
+}
+
+// Lắng nghe thay đổi localStorage để reconnect khi login/logout
+window.addEventListener('storage', (event) => {
+  if (event.key === 'access_token') {
+    if (event.newValue) {
+      // Có token mới - khởi tạo WebSocket
+      setTimeout(initializeWebSocket, 500);
+    } else {
+      // Token bị xóa - đóng WebSocket
+      websocketAPI.disconnect();
+    }
+  }
+});
+
+// ============================================
 // CATEGORY APIs
 // ============================================
 export const categoryAPI = {
@@ -106,11 +338,16 @@ export const productAPI = {
     }),
   getByCategory: (categoryId, params = {}) => {
     const queryParams = {
-      limit: params.limit || 10,
+      limit: params.limit || 12,
       offset: params.offset || 0,
     };
 
+    // Thêm tất cả các filter params
     if (params.q) queryParams.q = params.q;
+    if (params.min_price !== undefined) queryParams.min_price = params.min_price;
+    if (params.max_price !== undefined) queryParams.max_price = params.max_price;
+    if (params.rating_filter) queryParams.rating_filter = params.rating_filter;
+    if (params.sort) queryParams.sort = params.sort;
 
     const query = new URLSearchParams(queryParams);
     return apiCall(`/buyer/products/categories/${categoryId}?${query}`);
@@ -193,7 +430,7 @@ export const cartAPI = {
 };
 
 // ============================================
-// ORDER APIs - CẬP NHẬT HOÀN CHỈNH
+// ORDER APIs
 // ============================================
 export const orderAPI = {
   // GET /buyer/orders/tracking?tab=
@@ -417,7 +654,6 @@ export const reviewAPI = {
     }
 
     return response.json();
-    // backend trả về: ["url1", "url2"]
   },
 
   // 🔹 Tạo review
@@ -449,42 +685,109 @@ export const reviewAPI = {
     apiCall(`/buyer/reviews/${productId}/${orderId}`, {
       method: 'DELETE',
     }),
+
+  getReplies: (reviewId) => {
+    return request.get(`/reviews/${reviewId}/replies`);
+  },
 };
 
 // ============================================
 // CARRIER APIs (Shipping)
 // ============================================
 export const carrierAPI = {
-  getAll: () => apiCall('/carriers'),
-  calculateFee: (carrierId, addressId, weight) =>
-    apiCall('/carriers/calculate-fee', {
+  // GET /buyer/carriers/
+  getAll: () => apiCall('/buyer/carriers/'),
+
+  // POST /buyer/carriers/calculate
+  calculateFee: (carrierId, addressId, weight, cartTotal) =>
+    apiCall('/buyer/carriers/calculate', {
       method: 'POST',
       body: JSON.stringify({
         carrier_id: carrierId,
-        address_id: addressId,
-        weight,
+        address_id: addressId,  // Thêm address_id từ request schema
+        weight: weight,
+        cart_total: cartTotal
       }),
     }),
+
+  // POST /buyer/carriers/available
+  getAvailable: (addressId, weight, cartTotal) =>
+    apiCall('/buyer/carriers/available', {
+      method: 'POST',
+      body: JSON.stringify({
+        address_id: addressId,
+        weight: weight,
+        cart_total: cartTotal
+      }),
+    }),
+
+  // GET /buyer/carriers/{carrier_id}
+  getById: (carrierId) => apiCall(`/buyer/carriers/${carrierId}`),
 };
 
 // ============================================
 // DISCOUNT APIs (Vouchers)
 // ============================================
 export const discountAPI = {
-  getAvailable: () => apiCall('/buyer/discounts/available'),
-  applyCode: (code, cartTotal) =>
-    apiCall('/buyer/discounts/apply', {
+  // GET /buyer/discount/available?cart_total=&q=&limit=&offset=
+  getAvailable: (params = {}) => {
+    const queryParams = new URLSearchParams();
+
+    if (params.cart_total !== undefined) queryParams.append('cart_total', params.cart_total);
+    if (params.q) queryParams.append('q', params.q);
+    queryParams.append('limit', params.limit || 10);
+    queryParams.append('offset', params.offset || 0);
+
+    return apiCall(`/buyer/discount/available?${queryParams}`);
+  },
+
+  // POST /buyer/discount/validate (validate bằng code)
+  validateByCode: (code, cartTotal) =>
+    apiCall('/buyer/discount/validate', {
       method: 'POST',
       body: JSON.stringify({
-        code,
-        cart_total: cartTotal,
+        code: code,
+        cart_total: cartTotal
       }),
     }),
-  validate: (discountId, cartTotal) =>
-    apiCall(`/buyer/discounts/${discountId}/validate`, {
+
+  // POST /buyer/discount/validate (validate bằng discount_id)
+  validateById: (discountId, cartTotal) =>
+    apiCall('/buyer/discount/validate', {
       method: 'POST',
-      body: JSON.stringify({ cart_total: cartTotal }),
+      body: JSON.stringify({
+        discount_id: discountId,
+        cart_total: cartTotal
+      }),
     }),
+
+  // GET /buyer/discount/best?cart_total=
+  getBest: (cartTotal) => {
+    const params = new URLSearchParams({ cart_total: cartTotal });
+    return apiCall(`/buyer/discount/best?${params}`);
+  },
+
+  // POST /buyer/discount/preview
+  preview: (discountId, cartTotal) =>
+    apiCall('/buyer/discount/preview', {
+      method: 'POST',
+      body: JSON.stringify({
+        discount_id: discountId,
+        cart_total: cartTotal
+      }),
+    }),
+
+  // GET /buyer/discount/{discount_id}
+  getById: (discountId) => apiCall(`/buyer/discount/${discountId}`),
+
+  // GET /buyer/discount/?limit=&offset=
+  getAll: (params = {}) => {
+    const query = new URLSearchParams({
+      limit: params.limit || 10,
+      offset: params.offset || 0,
+    });
+    return apiCall(`/buyer/discount/?${query}`);
+  },
 };
 
 // ============================================
@@ -492,6 +795,7 @@ export const discountAPI = {
 // ============================================
 export default {
   auth: authAPI,
+  websocket: websocketAPI,
   category: categoryAPI,
   product: productAPI,
   notification: notificationAPI,

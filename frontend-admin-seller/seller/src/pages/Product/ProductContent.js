@@ -7,9 +7,10 @@ import Button from "../../components/common/Button/Button";
 import SearchBox from "../../components/common/SearchBox/SearchBox";
 import ProductModal from "./AddProduct/AddProduct";
 import ProductDetailModal from "./ProductDetail/ProductDetail";
-import ImageUploadModal from "../../components/common/AvatarUpload/AvatarUpload";
+import ImageUploadModal from "../../components/common/ImageUpload/ImageUpload";
 import ConfirmModal from "../../components/common/ConfirmModal/ConfirmModal";
 import useProduct from "../../hooks/useProduct";
+import "../../assets/styles/page.scss";
 import "./Product.scss";
 
 // Avatar mặc định
@@ -167,14 +168,16 @@ export default function ProductContent() {
     setProductToDelete(null);
   };
 
-  const handleImageUpload = async (productId, files, primaryIndex) => {
+  // Callback chỉ nhận file, logic xử lý productId nằm ở đây
+  const handleImageUpload = async (files, primaryIndex) => {
     try {
-      await uploadProductImages(productId, files, primaryIndex);
+      // selectedProductId đã được set trước đó khi click vào ảnh
+      await uploadProductImages(selectedProductId, files, primaryIndex);
 
       setIsImageModalOpen(false);
       setSelectedProductId(null);
 
-      setSuccessMessage("Tải lên avatar thành công");
+      setSuccessMessage("Tải lên hình ảnh thành công");
       setTimeout(() => setSuccessMessage(""), 3000);
 
       fetchProducts({
@@ -185,6 +188,7 @@ export default function ProductContent() {
       });
     } catch (err) {
       console.error("Error upload images:", err);
+      throw err; // Để ImageUploadModal có thể catch và hiển thị lỗi
     }
   };
 
@@ -200,19 +204,26 @@ export default function ProductContent() {
       label: "Hình ảnh",
       className: "table__cell--avatar",
       render: (value, row) => (
-        <img
-          src={value || DEFAULT_IMAGE}
-          alt="Product"
-          className="table__img table__img--clickable"
-          title="Click để cập nhật hình ảnh"
+        <div
+          className="table__img-wrapper"
           onClick={() => {
             setSelectedProductId(row.product_id);
             setIsImageModalOpen(true);
           }}
-          onError={(e) => {
-            e.target.src = DEFAULT_IMAGE;
-          }}
-        />
+        >
+          <img
+            src={value || DEFAULT_IMAGE}
+            alt="Product"
+            className="table__img"
+            onError={(e) => {
+              e.target.src = DEFAULT_IMAGE;
+            }}
+          />
+          <div className="table__img-overlay">
+            <i className="bx bx-camera"></i>
+            <span>Thêm ảnh</span>
+          </div>
+        </div>
       ),
     },
     {
@@ -378,15 +389,17 @@ export default function ProductContent() {
         }}
       />
 
+      {/* Upload ảnh*/}
       <ImageUploadModal
         isOpen={isImageModalOpen}
-        productId={selectedProductId}
         onUpload={handleImageUpload}
         onClose={() => {
           setIsImageModalOpen(false);
           setSelectedProductId(null);
         }}
         multiple={true}
+        title="Cập nhật hình ảnh sản phẩm"
+        maxSizeMB={5}
       />
 
       <ConfirmModal

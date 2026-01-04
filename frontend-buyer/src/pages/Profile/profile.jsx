@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from 'react-router-dom';
 import api from "../../services/api";
 import { useUser } from "../../context/UserContext";
+import NotificationSidebar from "../../components/notificationSidebar";
 import "./profile.css";
 import Addresses from "../Addresses/addresses";
 
@@ -133,98 +134,15 @@ export default function Profile() {
     }
   };
 
-  // Helper hiển thị avatar
   const getCurrentAvatarUrl = () => {
     return avatarPreview || profile.avt_url || user?.avt_url || user?.avatar_url;
   };
-
-  // Helper hiển thị tên (Ưu tiên Họ + Tên cho người Việt)
-  const getDisplayName = () => {
-    if (user.lname || user.fname) {
-      // SỬA: lname (Họ) đứng trước, fname (Tên) đứng sau
-      return `${user.lname || ''} ${user.fname || ''}`.trim();
-    }
-    return user.email;
-  }
 
   /* ================= UI ================= */
   return (
     <div className="main-container">
       {/* ================= SIDEBAR ================= */}
-      <aside className="sidebar">
-        <div className="user-info">
-          <div className="user-avatar">
-            {getCurrentAvatarUrl() ? (
-              <img
-                src={getCurrentAvatarUrl()}
-                alt="avatar"
-                style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }}
-              />
-            ) : (
-              <div className="avatar-fallback">👤</div>
-            )}
-          </div>
-          <div>
-            <div className="user-name">{getDisplayName()}</div>
-            <a
-              href="#"
-              className="user-edit"
-              onClick={(e) => {
-                e.preventDefault();
-                setActiveSection("profile");
-              }}
-            >
-              ✏️ Sửa Hồ Sơ
-            </a>
-          </div>
-        </div>
-
-        <ul className="sidebar-menu">
-          <li className="sidebar-menu__item">
-            <Link to="/notifications" className="sidebar-menu__link">
-              <span>🔔</span>
-              <span>Thông Báo</span>
-            </Link>
-          </li>
-
-          <li className="sidebar-menu__item">
-            <a
-              className={`sidebar-menu__link ${
-                ["profile", "address"].includes(activeSection) ? "active" : ""
-              }`}
-            >
-              <span>👤</span>
-              <span>Tài Khoản Của Tôi</span>
-            </a>
-
-            <ul className="submenu show">
-              <li>
-                <a
-                  className={`submenu__link ${activeSection === "profile" ? "active" : ""}`}
-                  onClick={() => setActiveSection("profile")}
-                >
-                  Hồ Sơ
-                </a>
-              </li>
-              <li>
-                <a
-                  className={`submenu__link ${activeSection === "address" ? "active" : ""}`}
-                  onClick={() => setActiveSection("address")}
-                >
-                  Địa Chỉ
-                </a>
-              </li>
-            </ul>
-          </li>
-
-          <li className="sidebar-menu__item">
-            <Link to="/tracking" className="sidebar-menu__link">
-              <span>📄</span>
-              <span>Đơn Mua</span>
-            </Link>
-          </li>
-        </ul>
-      </aside>
+      <NotificationSidebar user={user} />
 
       {/* ================= CONTENT ================= */}
       <main className="content">
@@ -240,7 +158,6 @@ export default function Profile() {
               <input className="form-input" value={profile.email || ""} disabled />
             </div>
 
-            {/* SỬA: Đổi Label Họ -> lname */}
             <div className="form-group">
               <label className="form-label">Họ</label>
               <input
@@ -252,7 +169,6 @@ export default function Profile() {
               />
             </div>
 
-            {/* SỬA: Đổi Label Tên -> fname */}
             <div className="form-group">
               <label className="form-label">Tên</label>
               <input

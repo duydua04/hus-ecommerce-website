@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../../context/UserContext';
 import api from '../../services/api';
+import NotificationSidebar from "../../components/notificationSidebar";
 import './order_tracking.css';
 
 export default function OrderTracking() {
@@ -15,6 +16,19 @@ export default function OrderTracking() {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [orderDetail, setOrderDetail] = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
+
+  // Review modal states
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [reviewItem, setReviewItem] = useState(null);
+  const [reviewData, setReviewData] = useState({
+    rating: 5,
+    content: '',
+    images: [],
+    videos: []
+  });
+  const [uploadingFiles, setUploadingFiles] = useState(false);
+  const [submittingReview, setSubmittingReview] = useState(false);
+  const [previewFiles, setPreviewFiles] = useState([]); // Preview local files
 
   const tabs = [
     { key: 'all', label: 'Tất cả' },
@@ -52,14 +66,11 @@ export default function OrderTracking() {
     try {
       setLoading(true);
       const tabParam = activeTab === 'all' ? null : activeTab;
-
-      // Gọi API tracking mới
       const data = await api.order.getOrdersTracking(tabParam);
       setOrders(data || []);
     } catch (error) {
       console.error('Error loading orders:', error);
       setOrders([]);
-
       if (error.message.includes('401')) {
         navigate('/login');
       }
@@ -119,6 +130,163 @@ export default function OrderTracking() {
     setOrderDetail(null);
   };
 
+  // Review handlers
+  const openReviewModal = (item) => {
+    setReviewItem(item);
+    setReviewData({
+      rating: 5,
+      content: '',
+      images: [],
+      videos: []
+    });
+    setPreviewFiles([]);
+    setShowReviewModal(true);
+  };
+
+  const closeReviewModal = () => {
+    setShowReviewModal(false);
+    setReviewItem(null);
+    setReviewData({
+      rating: 5,
+      content: '',
+      images: [],
+      videos: []
+    });
+    setPreviewFiles([]);
+  };
+
+  const handleFileUpload = async (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
+
+    // Validate files
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    const validFiles = files.filter(file => {
+      if (file.size > maxSize) {
+        alert(`File ${file.name} quá lớn. Tối đa 10MB`);
+        return false;
+      }
+      return true;
+    });
+
+    if (validFiles.length === 0) return;
+
+    try {
+      setUploadingFiles(true);
+
+      // Create preview URLs for immediate display
+      const newPreviews = validFiles.map(file => ({
+        file,
+        type: file.type.startsWith('image/') ? 'image' : 'video',
+        preview: URL.createObjectURL(file)
+      }));
+
+      setPreviewFiles(prev => [...prev, ...newPreviews]);
+
+      // Upload to server
+      const response = await api.review.uploadFiles(validFiles);
+
+      // Backend trả về { files: [ { public_url, ... }, ... ] }
+      const uploadedFiles = response.files || [];
+
+      // Phân loại images và videos dựa trên content_type
+      const newImages = [];
+      const newVideos = [];
+
+      uploadedFiles.forEach(fileData => {
+        const url = fileData.public_url;
+        if (fileData.content_type.startsWith('image/')) {
+          newImages.push(url);
+        } else if (fileData.content_type.startsWith('video/')) {
+          newVideos.push(url);
+        }
+      });
+
+      setReviewData(prev => ({
+        ...prev,
+        images: [...prev.images, ...newImages],
+        videos: [...prev.videos, ...newVideos]
+      }));
+
+    } catch (error) {
+      console.error('Upload error:', error);
+      alert('Không thể upload file: ' + error.message);
+      // Remove failed previews
+      setPreviewFiles(prev => prev.slice(0, prev.length - validFiles.length));
+    } finally {
+      setUploadingFiles(false);
+    }
+  };
+
+  const removeMedia = (index) => {
+    // Remove from both preview and uploaded data
+    const preview = previewFiles[index];
+
+    if (preview) {
+      URL.revokeObjectURL(preview.preview);
+      setPreviewFiles(prev => prev.filter((_, i) => i !== index));
+
+      // Also remove from uploaded data
+      if (preview.type === 'image') {
+        setReviewData(prev => ({
+          ...prev,
+          images: prev.images.filter((_, i) => i !== index)
+        }));
+      } else {
+        setReviewData(prev => ({
+          ...prev,
+          videos: prev.videos.filter((_, i) => i !== index)
+        }));
+      }
+    }
+  };
+
+  const handleSubmitReview = async () => {
+    if (!reviewData.content.trim()) {
+      alert('Vui lòng nhập nội dung đánh giá');
+      return;
+    }
+
+    if (reviewData.rating < 1 || reviewData.rating > 5) {
+      alert('Vui lòng chọn số sao từ 1 đến 5');
+      return;
+    }
+
+    try {
+      setSubmittingReview(true);
+
+      await api.review.create({
+        product_id: reviewItem.product_id,
+        order_id: orderDetail.order.order_id,
+        rating: reviewData.rating,
+        content: reviewData.content,
+        images: reviewData.images,
+        videos: reviewData.videos
+      });
+
+      alert('Đánh giá thành công!');
+      closeReviewModal();
+
+      // Reload order detail to update review status
+      await loadOrderDetail(orderDetail.order.order_id);
+    } catch (error) {
+      console.error('Submit review error:', error);
+
+      // Parse error message
+      let errorMsg = 'Không thể gửi đánh giá';
+      try {
+        const errorData = JSON.parse(error.message);
+        errorMsg = errorData.detail || errorMsg;
+      } catch (e) {
+        errorMsg = error.message || errorMsg;
+      }
+
+      alert(errorMsg);
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
+
   const filteredOrders = orders.filter(order => {
     if (!searchQuery) return true;
     const query = searchQuery.toLowerCase();
@@ -168,29 +336,11 @@ export default function OrderTracking() {
     });
   };
 
-  // Get display name for user
-  const getUserDisplayName = () => {
-    if (!user) return 'User';
-    return user.fullname || user.fname || user.email?.split('@')[0] || 'User';
-  };
-
-  // Get user avatar
-  const getUserAvatar = () => {
-    if (user?.avatar_url) {
-      return (
-        <img
-          src={user.avatar_url}
-          alt="avatar"
-          style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            borderRadius: '50%'
-          }}
-        />
-      );
-    }
-    return '👤';
+  // Check if product has been reviewed
+  const hasReviewed = (productId) => {
+    if (!orderDetail?.items) return false;
+    const item = orderDetail.items.find(i => i.product_id === productId);
+    return item?.has_reviewed === true;
   };
 
   return (
@@ -198,46 +348,7 @@ export default function OrderTracking() {
       {/* Main Container */}
       <div className="main-container">
         {/* Sidebar */}
-        <aside className="sidebar">
-          <div className="user-info">
-            <div className="user-avatar">
-              {getUserAvatar()}
-            </div>
-            <div>
-              <div className="user-name">{getUserDisplayName()}</div>
-              <a href="#" className="user-edit" onClick={(e) => {
-                e.preventDefault();
-                navigate('/profile');
-              }}>✏️ Sửa Hồ Sơ</a>
-            </div>
-          </div>
-          <ul className="sidebar-menu">
-            <li className="sidebar-menu__item">
-              <a href="#" className="sidebar-menu__link" onClick={(e) => {
-                e.preventDefault();
-                navigate('/notifications');
-              }}>
-                <span>🔔</span>
-                <span>Thông Báo</span>
-              </a>
-            </li>
-            <li className="sidebar-menu__item">
-              <a href="#" className="sidebar-menu__link" onClick={(e) => {
-                e.preventDefault();
-                navigate('/profile');
-              }}>
-                <span>👤</span>
-                <span>Hồ sơ của tôi</span>
-              </a>
-            </li>
-            <li className="sidebar-menu__item">
-              <a href="#" className="sidebar-menu__link active">
-                <span>📄</span>
-                <span>Đơn Mua</span>
-              </a>
-            </li>
-          </ul>
-        </aside>
+        <NotificationSidebar user={user} />
 
         {/* Content */}
         <main className="content">
@@ -272,12 +383,12 @@ export default function OrderTracking() {
               <p>Đang tải đơn hàng...</p>
             </div>
           ) : filteredOrders.length === 0 ? (
-            <div className="empty-state" id="emptyState">
+            <div className="empty-state">
               <div className="empty-state__icon">📦</div>
               <div className="empty-state__text">Chưa có đơn hàng</div>
             </div>
           ) : (
-            <div className="orders-container" id="ordersContainer">
+            <div className="orders-container">
               {filteredOrders.map(order => (
                 <div
                   key={order.order_id}
@@ -291,7 +402,7 @@ export default function OrderTracking() {
                       <span className="shop-name">{order.shop_name}</span>
                     </div>
                     <div className="order-status">
-                      <span 
+                      <span
                         className="status-badge"
                         style={{ backgroundColor: getStatusBadgeColor(order.order_status) }}
                       >
@@ -389,7 +500,7 @@ export default function OrderTracking() {
                   <div className="detail-section">
                     <div className="detail-row">
                       <span className="detail-label">Trạng thái:</span>
-                      <span 
+                      <span
                         className="status-badge"
                         style={{ backgroundColor: getStatusBadgeColor(orderDetail.order.order_status) }}
                       >
@@ -412,10 +523,9 @@ export default function OrderTracking() {
                   <div className="detail-section">
                     <h4 className="section-title">Địa chỉ giao hàng</h4>
                     <div className="address-box">
-                      <p><strong>{orderDetail.shipping_address.fullname}</strong></p>
-                      <p>{orderDetail.shipping_address.phone}</p>
-                      <p>
-                        {orderDetail.shipping_address.street}, {orderDetail.shipping_address.ward}, {orderDetail.shipping_address.district}, {orderDetail.shipping_address.province}
+                      <p>Tên người nhận: <strong>{orderDetail.shipping_address.fullname}</strong></p>
+                      <p>Số điện thoại: {orderDetail.shipping_address.phone}</p>
+                      <p>Địa chỉ: {orderDetail.shipping_address.street}, {orderDetail.shipping_address.ward}, {orderDetail.shipping_address.district}, {orderDetail.shipping_address.province}
                       </p>
                     </div>
                   </div>
@@ -444,11 +554,33 @@ export default function OrderTracking() {
                             </div>
                           )}
                           <div className="item-seller">Shop: {item.seller}</div>
+                          <div className="item-quantity-info">Số lượng: x{item.quantity}</div>
                         </div>
-                        <div className="item-quantity">x{item.quantity}</div>
                         <div className="item-price">
                           {formatCurrency(item.unit_price)}
                         </div>
+
+                        {/* Review button for delivered orders - Only show if not reviewed */}
+                        {orderDetail.order.order_status === 'delivered' && !hasReviewed(item.product_id) && (
+                          <div className="item-review-action">
+                            <button
+                              className="btn-review"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openReviewModal(item);
+                              }}
+                            >
+                              ⭐ Đánh giá
+                            </button>
+                          </div>
+                        )}
+
+                        {/* Show reviewed badge if already reviewed */}
+                        {hasReviewed(item.product_id) && (
+                          <div className="item-review-action">
+                            <span className="reviewed-badge">✓ Đã đánh giá</span>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -520,6 +652,127 @@ export default function OrderTracking() {
                 </div>
               </>
             ) : null}
+          </div>
+        </div>
+      )}
+
+      {/* Review Modal */}
+      {showReviewModal && reviewItem && (
+        <div className="modal-overlay" onClick={closeReviewModal}>
+          <div className="modal-content review-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3 className="modal-title">Đánh giá sản phẩm</h3>
+              <button className="close-button" onClick={closeReviewModal}>✕</button>
+            </div>
+
+            <div className="modal-body">
+              {/* Product Info */}
+              <div className="review-product-info">
+                <div className="review-product-image">
+                  {reviewItem.public_image_url ? (
+                    <img src={reviewItem.public_image_url} alt={reviewItem.product_id_name} />
+                  ) : (
+                    <div className="no-image">📷</div>
+                  )}
+                </div>
+                <div className="review-product-details">
+                  <div className="review-product-name">{reviewItem.product_id_name}</div>
+                  {reviewItem.variant_name && (
+                    <div className="review-product-variant">
+                      {reviewItem.variant_name}{reviewItem.size_name && ` - ${reviewItem.size_name}`}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Rating */}
+              <div className="review-section">
+                <label className="review-label">Chất lượng sản phẩm</label>
+                <div className="review-stars">
+                  {[1, 2, 3, 4, 5].map(star => (
+                    <button
+                      key={star}
+                      className={`star-btn ${star <= reviewData.rating ? 'active' : ''}`}
+                      onClick={() => setReviewData(prev => ({ ...prev, rating: star }))}
+                    >
+                      ★
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Content */}
+              <div className="review-section">
+                <label className="review-label">Nhận xét</label>
+                <textarea
+                  className="review-textarea"
+                  placeholder="Hãy chia sẻ những điều bạn thích về sản phẩm này với những người mua khác nhé"
+                  value={reviewData.content}
+                  onChange={(e) => setReviewData(prev => ({ ...prev, content: e.target.value }))}
+                  rows={5}
+                />
+              </div>
+
+              {/* Media Upload */}
+              <div className="review-section">
+                <label className="review-label">Thêm hình ảnh/video</label>
+                <div className="review-media-upload">
+                  <div className="review-media-preview">
+                    {/* Preview uploaded media */}
+                    {previewFiles.map((preview, index) => (
+                      <div key={index} className="review-media-item">
+                        {preview.type === 'image' ? (
+                          <img src={preview.preview} alt={`Preview ${index + 1}`} />
+                        ) : (
+                          <video src={preview.preview} controls />
+                        )}
+                        <button
+                          className="remove-media-btn"
+                          onClick={() => removeMedia(index)}
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+
+                    {/* Upload button */}
+                    <label className="review-upload-btn">
+                      <input
+                        type="file"
+                        multiple
+                        accept="image/*,video/*"
+                        onChange={handleFileUpload}
+                        disabled={uploadingFiles}
+                        style={{ display: 'none' }}
+                      />
+                      <div className="upload-icon">
+                        {uploadingFiles ? '⏳' : '📷'}
+                      </div>
+                      <div className="upload-text">
+                        {uploadingFiles ? 'Đang tải...' : 'Thêm ảnh/video'}
+                      </div>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="modal-footer">
+              <button
+                className="btn-cancel"
+                onClick={closeReviewModal}
+                disabled={submittingReview}
+              >
+                Hủy
+              </button>
+              <button
+                className="btn-submit-review"
+                onClick={handleSubmitReview}
+                disabled={submittingReview || !reviewData.content.trim()}
+              >
+                {submittingReview ? 'Đang gửi...' : 'Gửi đánh giá'}
+              </button>
+            </div>
           </div>
         </div>
       )}

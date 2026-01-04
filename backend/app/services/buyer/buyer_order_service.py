@@ -1,17 +1,21 @@
 import asyncio
 from decimal import Decimal
 from datetime import datetime
+from http.client import RemoteDisconnected
+
 from fastapi import HTTPException, status
-from sqlalchemy import select, and_, desc, update, func
+from sqlalchemy import select, and_, desc, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
-
+from redis.asyncio import Redis
 
 from ...config.db import get_db
 from datetime import datetime, date
+
+from ...config.redis import get_redis_client
 from ...config.s3 import public_url
 from ...models import (
     Order,
@@ -33,13 +37,12 @@ from ...schemas.order import OrderCreate, OrderDetailResponse, OrderDetailRespon
 from ...schemas.address import AddressResponse, AddressUpdate
 from ...schemas.carrier import CarrierCalculateResponse, CarrierResponse
 from ...schemas.common import OrderStatus, PaymentStatus
-from app.tasks.admin_dashboard_task import task_admin_add_order_stats
-from app.tasks.seller_dashboard_task import task_seller_recalc_dashboard
-from app.tasks.notification_task import task_send_notification
-from app.tasks.inventory import update_stock_db
+from ...tasks.admin_dashboard_task import task_admin_add_order_stats
+from ...tasks.seller_dashboard_task import task_seller_recalc_dashboard
+from ...tasks.notification_task import task_send_notification
+from ...tasks.inventory import update_stock_db
+from ...services.buyer.buyer_cart_service import CartServiceAsync
 
-from ...config.db import engine
-from sqlalchemy.ext.asyncio import async_sessionmaker
 # ===================== TAB MAPPING =====================
 TAB_MAPPING = {
     "all": {},
@@ -70,8 +73,10 @@ TAB_MAPPING = {
 }
 
 class BuyerOrderService:
-    def __init__(self, db: AsyncSession):
+    def __init__(self, db: AsyncSession, cart_service: CartServiceAsync):
         self.db = db
+        self.cart_service = cart_service
+
     async def _get_order_with_items(self, buyer_id: int, order_id: int) -> Order:
         """Lấy thông tin đơn hàng kèm danh sách items"""
         from sqlalchemy.orm import selectinload
@@ -268,7 +273,7 @@ class BuyerOrderService:
         # Tổng tiền
         total_price = subtotal + shipping_price - discount_amount
 
-        # 1. TẠO ĐƠN HÀNG VÀ ITEMS (Chưa commit)
+        #Tạo Order
         order = Order(
             buyer_id=buyer_id,
             buyer_address_id=payload.buyer_address_id,
@@ -284,20 +289,13 @@ class BuyerOrderService:
             notes=payload.notes
         )
         self.db.add(order)
-        await self.db.flush() 
+        await self.db.flush()  # để lấy order_id
 
+        #Tạo OrderItem
         for item in selected_items:
-            # Trừ kho đồng bộ ngay tại đây (An toàn nhất)
-            stock_stmt = select(ProductSize).where(ProductSize.size_id == item.size_id).with_for_update()
-            size_obj = (await self.db.execute(stock_stmt)).scalar_one_or_none()
-            if not size_obj or size_obj.available_units < item.quantity:
-                raise HTTPException(400, f"Sản phẩm {item.product.name} đã hết hàng")
-            size_obj.available_units -= item.quantity
-
-            # Tạo OrderItem
             variant_price = item.variant.price_adjustment if item.variant else 0
             unit_price = (item.product.base_price + variant_price) * (100 - item.product.discount_percent) / 100
-            self.db.add(OrderItem(
+            order_item = OrderItem(
                 order_id=order.order_id,
                 product_id=item.product_id,
                 variant_id=item.variant_id,
@@ -305,8 +303,11 @@ class BuyerOrderService:
                 quantity=item.quantity,
                 unit_price=unit_price,
                 total_price=unit_price * item.quantity
-            ))
-            # Xóa khỏi giỏ hàng
+            )
+            self.db.add(order_item)
+
+        # 5. CLEAR CÁC ITEM ĐÃ MUA KHỎI GIỎ HÀNG TRONG DATABASE
+        for item in selected_items:
             await self.db.delete(item)
         # 1.5 CẬP NHẬT USED_COUNT CỦA DISCOUNT (Nếu có dùng mã)
         if payload.discount_id is not None:
@@ -322,23 +323,34 @@ class BuyerOrderService:
                 # Tăng số lần đã dùng
                 discount_obj.used_count += 1
 
-        # 2. LẤY SELLER_ID TRƯỚC KHI COMMIT (Rất quan trọng)
-        seller_id = selected_items[0].product.seller_id
-
-        # 3. CHỐT TRANSACTION DUY NHẤT
+        # 6. COMMIT DATABASE
+        # Bước này chốt hạ dữ liệu trong MySQL
         await self.db.commit()
         await self.db.refresh(order)
 
-        # 4. GỌI CELERY (Sau khi mọi thứ ở DB đã xong)
+        await self.cart_service._refresh_cart_cache(buyer_id)
+        # 7. GỌI CÁC TASK CHẠY NGẦM (CELERY) SAU KHI COMMIT THÀNH CÔNG
+        # Chỉ trừ kho thực tế sau khi đơn hàng đã chắc chắn được tạo thành công
+        for item in selected_items:
+            # update_stock_db.delay thực hiện trừ (-) số lượng trong bảng ProductSize
+            update_stock_db.delay(item.size_id, -item.quantity)
+
+        # Lấy seller_id (giả sử đơn hàng thuộc về 1 seller hoặc lấy seller của item đầu tiên)
+        seller_id = selected_items[0].product.seller_id
+
+        # Cập nhật thông số Dashboard cho người bán (nặng nề nên chạy ngầm)
         task_seller_recalc_dashboard.delay(seller_id) 
+        
+        # Gửi thông báo Notification cho người bán (phụ thuộc bên thứ 3 nên chạy ngầm)
         task_send_notification.delay(
             user_id=seller_id,
-            role="seller",
-            title="Đơn hàng mới",
-            message=f"Bạn có đơn hàng mới #{order.order_id}",
-            event_type="NEW_ORDER",
+            role="seller",          # Sửa từ user_type thành role
+            title="Đơn hàng mới",    # Thêm title (hàm yêu cầu)
+            message=f"Đơn hàng mới #{order.order_id}",
+            event_type="NEW_ORDER", # Thêm event_type (hàm yêu cầu)
             data={"order_id": order.order_id}
         )
+
 
         return order
 
@@ -606,6 +618,7 @@ class BuyerOrderService:
         ]
     
     # ===================== BUYER HỦY ĐƠN =====================
+    # ===================== BUYER HỦY ĐƠN (FULL HOÀN THIỆN) =====================
     async def cancel_order(self, buyer_id: int, order_id: int):
         # 1. Lấy thông tin đơn hàng
         order = await self._get_order_with_items(buyer_id, order_id)
@@ -691,15 +704,17 @@ class BuyerOrderService:
         order.delivery_date = datetime.now()
         order.payment_status = "paid"
 
-        ## Lấy thông tin cần thiết trước khi commit
-        items_data = [{"product_id": item.product_id, "quantity": item.quantity} for item in order.items]
-        seller_id = order.items[0].product.seller_id
+        for item in order.items:
+            stmt_update_sold = (
+                update(Product)
+                .where(Product.product_id == item.product_id)
+                .values(sold_quantity=Product.sold_quantity + item.quantity)
+            )
+            await self.db.execute(stmt_update_sold)
 
         await self.db.commit()
+        await self.db.refresh(order)
 
-        # 2. Kích hoạt task chạy ngầm để cập nhật số lượng bán
-        # Truyền danh sách items để update từng sản phẩm
-        await self._bg_sync_sold_stats(items_data, seller_id)
         # 4. CHUẨN BỊ PAYLOAD CHO HỆ THỐNG THỐNG KÊ (ANALYTICS)
         # Giả định đơn hàng thuộc về một seller
         seller_id = order.items[0].product.seller_id
@@ -740,28 +755,9 @@ class BuyerOrderService:
 
         return order
     
-    async def _bg_sync_sold_stats(self, items_data: list, seller_id: int):
-        async_session = async_sessionmaker(engine, expire_on_commit=False)
-
-        async with async_session() as new_db:
-            try:
-                for item in items_data:
-                    await new_db.execute(
-                        update(Product)
-                        .where(Product.product_id == item["product_id"])
-                        .values(
-                            sold_quantity=Product.sold_quantity + item["quantity"]
-                        )
-                    )
-
-                # ✅ BẮT BUỘC
-                await new_db.commit()
-
-            except Exception as e:
-                await new_db.rollback()
-                print(f"❌ Failed to sync sold stats: {str(e)}")
-            
 def get_buyer_order_service(
     db: AsyncSession = Depends(get_db),
+    redis: Redis = Depends(get_redis_client)
 ):
-    return BuyerOrderService(db)
+    cart_service = CartServiceAsync(db, redis)
+    return BuyerOrderService(db,cart_service)

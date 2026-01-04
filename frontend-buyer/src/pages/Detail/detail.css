@@ -304,9 +304,9 @@
 }
 
 .purchase__price {
-  font-size: 32px;
+  font-size: 30px;
   font-weight: 700;
-  color: #ff4d4f;
+  color: var(--blue-600);
   margin-bottom: 24px;
 }
 
@@ -562,6 +562,73 @@
 .reviews__view-all:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+/* ========== SELLER REPLY ========== */
+.seller-replies {
+  margin-top: 16px;
+  padding: 12px;
+  background-color: var(--neutral-100);
+  border-radius: 8px;
+  border-left: 4px solid var(--blue-600);
+}
+
+.seller-replies__header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.seller-replies__icon {
+  margin-right: 8px;
+  font-size: 16px;
+}
+
+.seller-replies__title {
+  font-weight: 600;
+  color: #333;
+}
+
+.seller-reply {
+  margin-bottom: 8px;
+  padding: 8px 0;
+}
+
+.seller-reply__text {
+  color: #555;
+  line-height: 1.5;
+}
+
+.seller-reply__date {
+  font-size: 12px;
+  color: #888;
+  margin-top: 4px;
+  text-align: right;
+}
+
+.view-replies-btn {
+  background: none;
+  border: 1px solid #ddd;
+  color: #666;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-top: 12px;
+  transition: all 0.2s;
+}
+
+.view-replies-btn:hover {
+  background-color: #f5f5f5;
+  border-color: #ccc;
+}
+
+.loading-replies {
+  text-align: center;
+  color: #888;
+  font-size: 14px;
+  margin-top: 12px;
+  padding: 8px;
 }
 
 /* Loading */

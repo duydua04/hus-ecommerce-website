@@ -1,18 +1,22 @@
 import React, { useEffect, useState } from "react";
-import {Link} from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import api from "../../services/api";
 import { useUser } from "../../context/UserContext";
+import { useNotifications } from "../../context/useNotifications";
+import NotificationSidebar from "../../components/notificationSidebar";
 import "../Profile/profile.css";
 import "./notifications.css";
 
 export default function Notifications() {
   const { user } = useUser();
+  const { unreadCount, incrementUnread, decrementUnread, resetUnread } = useNotifications();
 
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [cursor, setCursor] = useState(null);
   const [hasMore, setHasMore] = useState(false);
   const [unreadOnly, setUnreadOnly] = useState(false);
+  const [markingAllRead, setMarkingAllRead] = useState(false);
 
   /* ================= FETCH NOTIFICATIONS ================= */
   const loadNotifications = async (reset = false) => {
@@ -21,7 +25,7 @@ export default function Notifications() {
 
       const res = await api.notification.getAll({
         limit: 20,
-        cursor,
+        cursor: reset ? null : cursor,
         unread_only: unreadOnly,
       });
 
@@ -33,6 +37,8 @@ export default function Notifications() {
       setCursor(next_cursor);
       setHasMore(has_more);
 
+      // Đếm sẽ được quản lý bởi useNotifications hook
+
     } catch (err) {
       console.error("Load notifications error:", err);
     } finally {
@@ -40,24 +46,90 @@ export default function Notifications() {
     }
   };
 
+  // Load lại khi filter thay đổi
   useEffect(() => {
     loadNotifications(true);
   }, [unreadOnly]);
+
+  /* ================= WEBSOCKET REALTIME ================= */
+  useEffect(() => {
+    // Lắng nghe thông báo mới qua WebSocket
+    const unsubscribe = api.websocket.onMessage('NOTIFICATION', (payload) => {
+      console.log('📨 New notification received:', payload);
+
+      // Tạo notification object từ payload
+      const newNotif = {
+        _id: payload.id,
+        title: payload.title,
+        message: payload.message,
+        event_type: payload.data?.event_type || 'general',
+        is_read: false,
+        created_at: new Date().toISOString(),
+        ...payload.data
+      };
+
+      // Thêm vào đầu danh sách
+      setNotifications(prev => [newNotif, ...prev]);
+
+      // Count sẽ tự động tăng qua hook
+
+      // Hiển thị toast hoặc notification browser (optional)
+      if (Notification.permission === 'granted') {
+        new Notification(payload.title, {
+          body: payload.message,
+          icon: '/notification-icon.png'
+        });
+      }
+    });
+
+    // Request permission cho browser notifications (optional)
+    if (Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+
+    // Cleanup khi unmount
+    return () => {
+      unsubscribe();
+    };
+  }, []);
 
   /* ================= HANDLERS ================= */
   const handleMarkRead = async (notifId) => {
     try {
       await api.notification.markAsRead(notifId);
 
+      // Update state
       setNotifications(prev =>
         prev.map(n =>
           n._id === notifId ? { ...n, is_read: true } : n
         )
       );
 
-    setUnreadCount(prev => Math.max(prev - 1, 0));
+      // Giảm unread count qua hook
+      decrementUnread();
+
     } catch (err) {
       console.error("Mark read error:", err);
+    }
+  };
+
+  const handleMarkAllRead = async () => {
+    try {
+      setMarkingAllRead(true);
+      await api.notification.markAllAsRead();
+
+      // Update tất cả thông báo thành đã đọc
+      setNotifications(prev =>
+        prev.map(n => ({ ...n, is_read: true }))
+      );
+
+      // Reset unread count qua hook
+      resetUnread();
+
+    } catch (err) {
+      console.error("Mark all read error:", err);
+    } finally {
+      setMarkingAllRead(false);
     }
   };
 
@@ -65,90 +137,61 @@ export default function Notifications() {
   return (
     <div className="main-container">
       {/* ================= SIDEBAR ================= */}
-      <aside className="sidebar">
-        <div className="user-info">
-          <div className="user-avatar">
-            <div className="user-avatar">
-              {user?.avatar_url ? (
-                <img
-                  src={user.avatar_url}
-                  alt="avatar"
-                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                />
-              ) : (
-                <div className="avatar-fallback">👤</div>
-              )}
-            </div>
-          </div>
-          <div>
-            <div className="user-name">
-              {user?.fullname || user?.fname || user?.email || "Người dùng"}
-            </div>
-            <a
-              href="#"
-              className="user-edit"
-              onClick={(e) => {
-                e.preventDefault();
-                setActiveSection("profile");
-              }}
-            >
-              ✏️ Sửa Hồ Sơ
-            </a>
-          </div>
-        </div>
-
-        <ul className="sidebar-menu">
-          <li className="sidebar-menu__item">
-            <Link to="/notifications" className="sidebar-menu__link">
-              <span>🔔</span>
-              <span>Thông Báo</span>
-            </Link>
-          </li>
-
-          <li className="sidebar-menu__item">
-            <Link to="/profile" className="sidebar-menu__link">
-              <span>👤</span>
-              <span>Tài Khoản Của Tôi</span>
-            </Link>
-          </li>
-
-          <li className="sidebar-menu__item">
-            <a className="sidebar-menu__link">
-              <span>📄</span>
-              <span>Đơn Mua</span>
-            </a>
-          </li>
-        </ul>
-      </aside>
+      <NotificationSidebar user={user} />
 
       {/* ============ CONTENT ============ */}
       <main className="content">
-        <h2 className="section-title">Thông Báo</h2>
-        <p className="section-subtitle">
-          Quản lý và theo dõi các thông báo của bạn
-        </p>
+        <div className="notification-header-section">
+          <div>
+            <h2 className="section-title">Thông Báo</h2>
+            <p className="section-subtitle">
+              Quản lý và theo dõi các thông báo của bạn
+            </p>
+          </div>
+
+          {/* Nút đánh dấu tất cả đã đọc */}
+          {unreadCount > 0 && (
+            <button
+              className="mark-all-read-btn"
+              onClick={handleMarkAllRead}
+              disabled={markingAllRead}
+            >
+              {markingAllRead ? "Đang xử lý..." : "Đánh dấu tất cả đã đọc"}
+            </button>
+          )}
+        </div>
 
         {/* FILTER */}
         <div className="notification-filter">
-          <label>
+          <label className="filter-checkbox">
             <input
               type="checkbox"
               checked={unreadOnly}
               onChange={(e) => setUnreadOnly(e.target.checked)}
             />
-            Chỉ hiển thị chưa đọc
+            <span>Chỉ hiển thị chưa đọc ({unreadCount})</span>
           </label>
         </div>
 
         {/* LIST */}
         {loading && notifications.length === 0 ? (
-          <p style={{ textAlign: "center", padding: 40 }}>
-            Đang tải thông báo...
-          </p>
+          <div className="notification-loading">
+            <div className="spinner"></div>
+            <p>Đang tải thông báo...</p>
+          </div>
         ) : notifications.length === 0 ? (
-          <p style={{ textAlign: "center", padding: 40, color: "#888" }}>
-            Không có thông báo nào
-          </p>
+          <div className="notification-empty">
+            <span className="empty-icon">🔔</span>
+            <p>Không có thông báo nào</p>
+            {unreadOnly && (
+              <button
+                className="show-all-btn"
+                onClick={() => setUnreadOnly(false)}
+              >
+                Hiển thị tất cả thông báo
+              </button>
+            )}
+          </div>
         ) : (
           <ul className="notification-list">
             {notifications.map((n) => (
@@ -166,9 +209,23 @@ export default function Notifications() {
 
                 <p className="notification-message">{n.message}</p>
 
-                <span className="notification-time">
-                  {new Date(n.created_at).toLocaleString("vi-VN")}
-                </span>
+                <div className="notification-footer">
+                  <span className="notification-time">
+                    {new Date(n.created_at).toLocaleString("vi-VN", {
+                      year: "numeric",
+                      month: "2-digit",
+                      day: "2-digit",
+                      hour: "2-digit",
+                      minute: "2-digit"
+                    })}
+                  </span>
+
+                  {n.event_type && (
+                    <span className="notification-type">
+                      {n.event_type}
+                    </span>
+                  )}
+                </div>
               </li>
             ))}
           </ul>
@@ -176,13 +233,21 @@ export default function Notifications() {
 
         {/* LOAD MORE */}
         {hasMore && !loading && (
-          <div style={{ textAlign: "center", marginTop: 20 }}>
+          <div className="load-more-section">
             <button
-              className="avatar-button"
-              onClick={() => loadNotifications()}
+              className="load-more-btn"
+              onClick={() => loadNotifications(false)}
             >
               Tải thêm
             </button>
+          </div>
+        )}
+
+        {/* Loading indicator khi load more */}
+        {loading && notifications.length > 0 && (
+          <div className="loading-more">
+            <div className="spinner-small"></div>
+            <span>Đang tải...</span>
           </div>
         )}
       </main>

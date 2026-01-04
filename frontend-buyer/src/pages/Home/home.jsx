@@ -99,9 +99,10 @@ const Home = () => {
     navigate(`/product/${productId}`);
   };
 
-  // ================= Handle Category Click =================
-  const handleCategoryClick = (categoryId) => {
-    navigate(`/search?category=${categoryId}`);
+  // ================= Handle Category Click - SỬA LẠI =================
+  const handleCategoryClick = (categoryId, categoryName) => {
+    // Chuyển đến trang search với điều kiện lọc: mới nhất + danh mục đã chọn
+    navigate(`/search?sort=newest&category=${categoryId}&categoryName=${encodeURIComponent(categoryName)}`);
   };
 
   if (loading) {
@@ -133,7 +134,7 @@ const Home = () => {
                   </a>
                 </div>
                 <img
-                  src="/assets/banners/main-interior.png"
+                  src="src/assets/banners/main-interior.png"
                   alt="Main banner"
                   className="banner__image"
                 />
@@ -143,7 +144,7 @@ const Home = () => {
             <aside className="banner__small">
               <article className="banner__small-inner">
                 <img
-                  src="/assets/banners/small-interior.png"
+                  src="src/assets/banners/small-interior.png"
                   alt="Small banner"
                   className="banner__bg-image"
                 />
@@ -173,16 +174,15 @@ const Home = () => {
               <article
                 className="popular__card"
                 key={category.category_id}
-                onClick={() => handleCategoryClick(category.category_id)}
+                onClick={() => handleCategoryClick(category.category_id, category.category_name)}
                 style={{ cursor: 'pointer' }}
               >
                 <img
-                  src={category.image_url || '/assets/placeholder-category.png'}
+                  src={category.image_url || 'src/assets/confligloading/null.png'}
                   alt={category.category_name}
                   className="popular__image"
                   onError={(e) => {
                     e.target.onerror = null;
-                    e.target.src = '/assets/placeholder-category.png';
                   }}
                 />
                 <p className="popular__label">{category.category_name}</p>
@@ -212,12 +212,11 @@ const Home = () => {
                 style={{ cursor: 'pointer' }}
               >
                 <img
-                  src={product.public_primary_image_url || '/assets/placeholder-product.png'}
+                  src={product.public_primary_image_url || '/assets/confligloading/null.png'}
                   alt={product.name}
                   className="product-card__image"
                   onError={(e) => {
                     e.target.onerror = null;
-                    e.target.src = '/assets/placeholder-product.png';
                   }}
                 />
 

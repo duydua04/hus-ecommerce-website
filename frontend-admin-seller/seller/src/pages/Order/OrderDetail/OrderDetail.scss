@@ -1,0 +1,359 @@
+.order-section {
+  margin-bottom: 28px;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  transition: var(--transition);
+
+  &:hover {
+    border-color: var(--blue);
+  }
+
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 18px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--border-color);
+
+    svg {
+      color: var(--blue);
+    }
+  }
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  background: #eceff4;
+  border-radius: 8px;
+  transition: var(--transition);
+
+  &:hover {
+    background: var(--blue-light);
+    transform: translateY(-2px);
+  }
+
+  .info-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: bold;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+
+    svg {
+      color: #9ca3af;
+    }
+  }
+
+  .info-value {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1f2937;
+  }
+}
+
+.status-badge {
+  &--pending {
+    background: #fde68a;
+    color: #92400e;
+  }
+
+  &--processing {
+    background: #bfdbfe;
+    color: var(--blue-dark);
+  }
+
+  &--shipped {
+    background: #c7d2fe;
+    color: #0a256f;
+  }
+
+  &--delivered {
+    background: #a7f3d0;
+    color: var(--green);
+  }
+
+  &--cancelled {
+    background: #fecaca;
+    color: var(--red);
+  }
+
+  &--unpaid {
+    background: #fde68a;
+    color: #92400e;
+  }
+
+  &--paid {
+    background: #a7f3d0;
+    color: var(--green);
+  }
+
+  &--refunded {
+    background: #c7d2fe;
+    color: var(--blue-dark);
+  }
+}
+
+/* danh sách sản phẩm trong đơn*/
+
+.items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.item-card {
+  display: flex;
+  gap: 18px;
+  padding: 18px;
+  border-radius: 10px;
+  background: #eceff4;
+  border: 1px solid var(--border-color);
+  transition: all 0.2s;
+
+  &:hover {
+    background: var(--blue-light);
+    transform: translateY(-2px);
+  }
+
+  // Ảnh sản phẩm
+  .item-image {
+    flex-shrink: 0;
+    width: 160px;
+    height: 160px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: var(--transition);
+    }
+  }
+
+  // Thông tin sản phẩm
+  .item-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  // Product Info
+  .item-info {
+    flex: 1;
+
+    .item-name {
+      font-size: 15px;
+      font-weight: bold;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    .item-details {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      font-size: 13px;
+
+      .item-variant,
+      .item-size {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 10px;
+        background: var(--bg-white);
+        border-radius: 6px;
+        border: 1px solid var(--border-color);
+        color: var(--text-secondary);
+        font-weight: 500;
+      }
+    }
+  }
+
+  // Pricing section
+  .item-pricing {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: auto;
+
+    .item-quantity {
+      font-size: 14px;
+      color: var(--text-secondary);
+      text-align: center;
+      padding: 6px 12px;
+      background: var(--bg-white);
+      border-radius: 8px;
+      font-weight: bold;
+      border: 1px solid var(--border-color);
+      white-space: nowrap;
+    }
+
+    .item-prices {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
+
+      .item-unit-price {
+        font-size: 13px;
+        color: var(--text-secondary);
+      }
+
+      .item-subtotal {
+        font-size: 16px;
+        font-weight: bold;
+        color: var(--blue);
+      }
+    }
+  }
+
+  // Responsive
+  @media (max-width: 640px) {
+    flex-direction: column;
+    align-items: stretch;
+
+    .item-image {
+      width: 100%;
+      height: 180px;
+    }
+
+    .item-pricing {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 12px;
+
+      .item-quantity {
+        text-align: left;
+      }
+
+      .item-prices {
+        align-items: flex-start;
+      }
+    }
+  }
+}
+
+/* Tổng giá*/
+.price-summary {
+  padding: 24px;
+  background: #eceff4;
+  border-radius: 12px;
+  border: 2px solid var(--border-color);
+  position: relative;
+  overflow: hidden;
+}
+
+.price-row {
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+
+  &--total {
+    padding-top: 18px;
+    margin-top: 12px;
+    border-top: 2px solid #cbd5e1;
+  }
+
+  .price-label {
+    font-size: 14px;
+    color: var(--text-secondary);
+  }
+
+  .price-value {
+    font-size: 16px;
+    color: var(--text-primary);
+
+    &--discount {
+      color: var(--red);
+    }
+
+    &--total {
+      font-size: 18px;
+      color: var(--blue-dark);
+    }
+  }
+}
+
+/* ghi chú của khách */
+.notes-box {
+  padding: 16px;
+  background: #fef3c7;
+  border-left: 4px solid var(--orange);
+  border-radius: 8px;
+  margin-top: 8px;
+
+  p {
+    margin: 0;
+    font-size: 14px;
+    color: #78350f;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+}
+
+/* Các hành động */
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  &--success {
+    background: #059669;
+    color: white;
+
+    &:hover:not(:disabled) {
+      background: #047857;
+    }
+  }
+
+  &--info {
+    background: #2563eb;
+    color: white;
+
+    &:hover:not(:disabled) {
+      background: #1d4ed8;
+    }
+  }
+
+  &--danger {
+    background: #dc2626;
+    color: white;
+
+    &:hover:not(:disabled) {
+      background: #b91c1c;
+    }
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+}
