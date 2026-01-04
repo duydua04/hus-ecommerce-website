@@ -2,12 +2,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
-import Modal from '../../components/modal.jsx';
+import Modal, { useModal, showSuccessModal, showErrorModal } from '../../components/modal.jsx';
 import './payment.css';
 
 const Payment = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { openModal, Modal: AlertModal } = useModal();
   const selectedItemIds = location.state?.selectedItems || [];
 
   const [loading, setLoading] = useState(true);
@@ -213,17 +214,28 @@ const Payment = () => {
         setDiscountAmount(validation.discount_amount);
         setVoucherCode(discount.code);
         setShowVoucherModal(false);
-        alert(`✅ Áp dụng voucher "${discount.code}" thành công! Giảm ${formatCurrency(validation.discount_amount)}`);
+
+        // Thay alert bằng openModal success
+        openModal(showSuccessModal(
+          `Áp dụng voucher "${discount.code}" thành công! Giảm ${formatCurrency(validation.discount_amount)}`
+        ));
       } else {
-        alert(`❌ ${validation.message || 'Không thể áp dụng voucher này'}`);
+        // Thay alert bằng openModal error
+        openModal(showErrorModal(
+          validation.message || 'Không thể áp dụng voucher này'
+        ));
       }
     } catch (err) {
-      alert('❌ Áp dụng voucher thất bại');
+      openModal(showErrorModal('Áp dụng voucher thất bại'));
     }
   };
 
+  // SỬA HÀM applyVoucherByCode
   const applyVoucherByCode = async () => {
-    if (!voucherCode.trim()) return alert('Vui lòng nhập mã voucher');
+    if (!voucherCode.trim()) {
+      openModal(showErrorModal('Vui lòng nhập mã voucher'));
+      return;
+    }
 
     try {
       const subtotal = calculateSubtotal();
@@ -233,12 +245,19 @@ const Payment = () => {
         const discount = availableDiscounts.find(d => d.code === voucherCode.trim());
         setSelectedDiscount(discount || { code: voucherCode.trim(), discount_id: null });
         setDiscountAmount(validation.discount_amount);
-        alert(`✅ Áp dụng voucher "${voucherCode.trim()}" thành công! Giảm ${formatCurrency(validation.discount_amount)}`);
+
+        // Thay alert bằng openModal success
+        openModal(showSuccessModal(
+          `Áp dụng voucher "${voucherCode.trim()}" thành công! Giảm ${formatCurrency(validation.discount_amount)}`
+        ));
       } else {
-        alert(`❌ ${validation.message || 'Mã voucher không hợp lệ'}`);
+        // Thay alert bằng openModal error
+        openModal(showErrorModal(
+          validation.message || 'Mã voucher không hợp lệ'
+        ));
       }
     } catch (err) {
-      alert('❌ Áp dụng voucher thất bại');
+      openModal(showErrorModal('Áp dụng voucher thất bại'));
     }
   };
 

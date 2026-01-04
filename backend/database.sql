@@ -2,10 +2,10 @@
 -- PostgreSQL database dump
 --
 
-\restrict g6fgmjlk3AqweN7ZCXMaW8RUjOF9vdpKUuYNgtF246AJT2YbfrDxMv6mEg2WhZ9
+\restrict RyHpVLtfWqb0vvxt6J5XHkX1zn9E5PSxZMKJes4gQwUphICF67x6qsUdR1l9TWs
 
--- Dumped from database version 16.10 (Debian 16.10-1.pgdg13+1)
--- Dumped by pg_dump version 16.10 (Debian 16.10-1.pgdg13+1)
+-- Dumped from database version 16.11 (Debian 16.11-1.pgdg13+1)
+-- Dumped by pg_dump version 16.11 (Debian 16.11-1.pgdg13+1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -765,7 +765,7 @@ COPY public.category (category_id, category_name, image_url) FROM stdin;
 
 COPY public.discount (discount_id, code, discount_percent, min_order_value, max_discount, start_date, end_date, usage_limit, used_count, is_active) FROM stdin;
 2	MNP123	10.00	2.00	0.00	2025-12-22	2025-12-30	10	0	f
-1	ABC123	10.00	0.00	100000.00	2025-12-31	2026-12-31	100	0	t
+1	ABC123	10.00	0.00	100000.00	2025-12-31	2026-12-31	100	2	t
 \.
 
 
@@ -805,6 +805,8 @@ COPY public."order" (order_id, buyer_id, buyer_address_id, payment_method, subto
 29	2	9	cod	180000.00	14380.00	0.00	194380.00	2026-01-04 09:00:33.96176	2026-01-04 09:01:25.399338	delivered	paid	\N	1	\N
 30	2	9	cod	322000.00	20920.00	0.00	342920.00	2026-01-04 09:04:20.950784	\N	cancelled	failed	\N	1	\N
 31	1	1	cod	189000.00	13780.00	0.00	202780.00	2026-01-04 09:23:27.076688	\N	processing	pending	\N	1	\N
+33	1	1	cod	738000.00	18580.00	73800.00	682780.00	2026-01-04 15:24:23.154832	\N	pending	pending	1	1	\N
+34	1	1	cod	145270.00	16060.00	14527.00	146803.00	2026-01-04 15:26:24.369283	\N	pending	pending	1	1	\N
 \.
 
 
@@ -847,6 +849,8 @@ COPY public.order_item (order_item_id, order_id, product_id, variant_id, size_id
 32	30	67	80	174	1	322000.00	322000.00
 33	31	45	43	61	1	189000.00	189000.00
 34	32	45	43	61	1	189000.00	189000.00
+35	33	71	74	167	1	738000.00	738000.00
+36	34	34	64	129	1	145270.00	145270.00
 \.
 
 
@@ -1323,7 +1327,6 @@ COPY public.product_size (size_id, variant_id, size_name, available_units, in_st
 126	61	Freesize	500	t
 127	62	Freesize	386	t
 128	63	Freesize	200	t
-129	64	Size M (38-48kg)	111	t
 130	64	Size XL (59-68kg)	111	t
 131	64	Size 2XL (69-78kg)	111	t
 132	64	Size 3XL (79-90kg)	77	t
@@ -1390,11 +1393,12 @@ COPY public.product_size (size_id, variant_id, size_name, available_units, in_st
 173	79	1.9L	99	t
 182	85	250g	549	t
 176	81	Full bộ	387	t
-167	74	3L	99	t
 178	82	900ml	188	t
 43	39	S	199	t
 63	44	Freesize	299	t
 174	80	700ml	327	t
+167	74	3L	98	t
+129	64	Size M (38-48kg)	110	t
 \.
 
 
@@ -1583,14 +1587,14 @@ SELECT pg_catalog.setval('public.discount_discount_id_seq', 2, true);
 -- Name: order_item_order_item_id_seq; Type: SEQUENCE SET; Schema: public; Owner: mywebsite
 --
 
-SELECT pg_catalog.setval('public.order_item_order_item_id_seq', 34, true);
+SELECT pg_catalog.setval('public.order_item_order_item_id_seq', 36, true);
 
 
 --
 -- Name: order_order_id_seq; Type: SEQUENCE SET; Schema: public; Owner: mywebsite
 --
 
-SELECT pg_catalog.setval('public.order_order_id_seq', 32, true);
+SELECT pg_catalog.setval('public.order_order_id_seq', 34, true);
 
 
 --
@@ -1639,7 +1643,7 @@ SELECT pg_catalog.setval('public.seller_seller_id_seq', 8, true);
 -- Name: shopping_cart_item_shopping_cart_item_id_seq; Type: SEQUENCE SET; Schema: public; Owner: mywebsite
 --
 
-SELECT pg_catalog.setval('public.shopping_cart_item_shopping_cart_item_id_seq', 45, true);
+SELECT pg_catalog.setval('public.shopping_cart_item_shopping_cart_item_id_seq', 47, true);
 
 
 --
@@ -2131,5 +2135,5 @@ ALTER PUBLICATION pub_all OWNER TO mywebsite;
 -- PostgreSQL database dump complete
 --
 
-\unrestrict g6fgmjlk3AqweN7ZCXMaW8RUjOF9vdpKUuYNgtF246AJT2YbfrDxMv6mEg2WhZ9
+\unrestrict RyHpVLtfWqb0vvxt6J5XHkX1zn9E5PSxZMKJes4gQwUphICF67x6qsUdR1l9TWs
 

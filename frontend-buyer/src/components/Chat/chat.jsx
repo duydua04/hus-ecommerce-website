@@ -261,8 +261,9 @@ const Chat = forwardRef((props, ref) => {
   // Load conversations when open
   useEffect(() => {
     if (isOpen) {
+      loadConversations();
     }
-  }, [isOpen]);
+  }, [isOpen, loadConversations]);
 
   // Load messages when select conversation
   useEffect(() => {
