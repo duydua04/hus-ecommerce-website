@@ -1,0 +1,85 @@
+.table__header--actions {
+  text-align: right;
+  width: 150px;
+}
+
+.table__cell--actions {
+  text-align: right;
+}
+
+.table__cell--price {
+  font-weight: 600;
+  color: var(--blue);
+}
+
+.table__cell--order-id {
+  font-weight: bold;
+  color: var(--blue);
+}
+
+/* Status Badges - Trạng thái đơn hàng */
+.table__cell--hide-mobile {
+  position: relative;
+}
+
+.status-badge {
+  display: inline-flex;
+  font-weight: bold;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 500;
+  width: 110px;
+  justify-content: center;
+}
+
+.status-badge::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+
+.status-badge:hover {
+  opacity: 0.9;
+  transform: scale(1.05);
+  transition: var(--transition);
+}
+
+.status-badge--shipping {
+  background-color: var(--blue-light);
+  color: var(--blue-dark);
+}
+
+.status-badge--shipping::before {
+  background-color: var(--blue);
+}
+
+.status-badge--completed {
+  background-color: #d1e7dd;
+  color: #0f5132;
+}
+
+.status-badge--completed::before {
+  background-color: var(--green);
+}
+
+.status-badge--pending {
+  background-color: #fff3cd;
+  color: #664d03;
+}
+
+.status-badge--pending::before {
+  background-color: var(--orange);
+}
+
+.status-badge--cancelled {
+  background-color: #f8d7da;
+  color: #842029;
+}
+
+.status-badge--cancelled::before {
+  background-color: var(--red);
+}

@@ -4,9 +4,21 @@ import { Link, useLocation } from 'react-router-dom';
 import { useNotifications } from '../context/useNotifications';
 import './sidebar.css';
 
-export default function NotificationSidebar({ user, activeSection = "profile" }) {
+export default function NotificationSidebar({ user }) {
   const { unreadCount } = useNotifications();
   const location = useLocation();
+
+  // Tự động xác định active section dựa trên URL
+  const getActiveSection = () => {
+    const path = location.pathname;
+    if (path === '/notifications') return 'notifications';
+    if (path === '/profile') return 'profile';
+    if (path === '/addresses') return 'address';
+    if (path === '/tracking') return 'tracking';
+    return 'profile'; // Mặc định
+  };
+
+  const activeSection = getActiveSection();
 
   const getUserDisplayName = () => {
     if (user?.lname || user?.fname) {

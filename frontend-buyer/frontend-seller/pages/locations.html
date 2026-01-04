@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!--Boxicons-->
+    <link
+      href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
+      rel="stylesheet"
+    />
+    <!--My css-->
+    <link rel="stylesheet" href="../css/base.css" />
+    <link rel="stylesheet" href="../css/layout.css" />
+    <link rel="stylesheet" href="../css/components.css" />
+    <link rel="stylesheet" href="../css/pages/pages.css" />
+    <link rel="stylesheet" href="../css/pages/locations.css" />
+
+    <title>SellerHub</title>
+  </head>
+  <body>
+    <!--SIDEBAR - Block: sidebar-->
+    <section class="sidebar">
+      <a href="#" class="sidebar__brand">
+        <i class="bx bx-store sidebar__brand-icon"></i>
+        <span class="sidebar__brand-text">SellerHub</span>
+      </a>
+      <ul class="sidebar__menu">
+        <li class="sidebar__menu-item">
+          <a href="dashboard.html" class="sidebar__menu-link">
+            <i class="bx bx-grid-alt sidebar__menu-icon"></i>
+            <span class="sidebar__menu-text">Dashboard</span>
+          </a>
+        </li>
+        <li class="sidebar__menu-item">
+          <a href="products.html" class="sidebar__menu-link">
+            <i class="bx bx-box sidebar__menu-icon"></i>
+            <span class="sidebar__menu-text">Sản phẩm</span>
+          </a>
+        </li>
+        <li class="sidebar__menu-item">
+          <a href="orders.html" class="sidebar__menu-link">
+            <i class="bx bx-shopping-bag sidebar__menu-icon"></i>
+            <span class="sidebar__menu-text">Đơn hàng</span>
+          </a>
+        </li>
+        <li class="sidebar__menu-item sidebar__menu-item--active">
+          <a href="locations.html" class="sidebar__menu-link">
+            <i class="bx bx-map sidebar__menu-icon"></i>
+            <span class="sidebar__menu-text">Địa chỉ</span>
+          </a>
+        </li>
+        <li class="sidebar__menu-item">
+          <a href="profile.html" class="sidebar__menu-link">
+            <i class="bx bx-user-circle sidebar__menu-icon"></i>
+            <span class="sidebar__menu-text">Hồ sơ</span>
+          </a>
+        </li>
+        <li class="sidebar__menu-item">
+          <a href="reviews.html" class="sidebar__menu-link">
+            <i class="bx bx-star sidebar__menu-icon"></i>
+            <span class="sidebar__menu-text">Đánh giá</span>
+          </a>
+        </li>
+      </ul>
+    </section>
+
+    <!--CONTENT - Block: content-->
+    <section class="content">
+      <!--NAVBAR - Block: navbar-->
+      <nav class="navbar">
+        <div class="navbar__left">
+          <i class="bx bx-menu navbar__menu-icon"></i>
+          <div class="navbar__search">
+            <i class="bx bx-search navbar__search-icon"></i>
+            <input
+              type="text"
+              class="navbar__search-input"
+              placeholder="Tìm kiếm..."
+            />
+          </div>
+        </div>
+        <div class="navbar__right">
+          <a href="#" class="navbar__notification">
+            <i class="bx bx-bell navbar__notification-icon"></i>
+            <span class="navbar__notification-badge">22</span>
+          </a>
+          <a href="#" class="navbar__profile">
+            <img
+              src="../img/balloon-sky.webp"
+              alt="Profile"
+              class="navbar__profile-img"
+            />
+          </a>
+        </div>
+      </nav>
+
+      <!--MAIN - Block: main-->
+      <main class="main">
+        <!-- Block: page-header -->
+        <div class="page-header">
+          <h1 class="page-header__title">Địa chỉ</h1>
+          <ul class="page-header__breadcrumb breadcrumb">
+            <li class="breadcrumb__item">
+              <a href="dashboard.html" class="breadcrumb__link">Trang chủ</a>
+            </li>
+            <li class="breadcrumb__item">
+              <i class="bx bx-chevron-right breadcrumb__separator"></i>
+            </li>
+            <li class="breadcrumb__item">
+              <a
+                href="locations.html"
+                class="breadcrumb__link breadcrumb__link--active"
+                >Địa chỉ</a
+              >
+            </li>
+          </ul>
+        </div>
+
+        <!-- Block: toolbar -->
+        <div class="toolbar">
+          <!-- Element: toolbar__header -->
+          <div class="toolbar__header">
+            <div class="toolbar__title">
+              <h3 class="toolbar__title-text">Địa chỉ của tôi</h3>
+              <p class="toolbar__title-desc">
+                Quản lý và theo dõi sản phẩm của cửa hàng
+              </p>
+            </div>
+            <button class="toolbar__btn-add btn btn--primary">
+              <i class="bx bx-plus btn__icon"></i>
+              <span class="btn__text">Thêm địa chỉ</span>
+            </button>
+          </div>
+
+          <!-- Element: toolbar__table -->
+          <div class="toolbar__table">
+            <!-- Address Card 1 -->
+            <div class="address-card">
+              <div class="address-card__header">
+                <div>
+                  <span class="address-card__name">Kiều Na</span>
+                  <span class="address-card__phone">(+84) 362 719 509</span>
+                </div>
+                <div class="address-card__actions">
+                  <a href="#" class="address-card__action-link">Cập nhật</a>
+                </div>
+              </div>
+              <div class="address-card__body">
+                <div class="address-card__address">Số 33, Ngõ 1 Nhân Hòa</div>
+                <div class="address-card__address">
+                  Phường Nhân Chính, Quận Thanh Xuân, Hà Nội
+                </div>
+              </div>
+              <div class="address-card__footer">
+                <span class="address-card__badge">Mặc định</span>
+              </div>
+            </div>
+
+            <!-- Address Card 2 -->
+            <div class="address-card">
+              <div class="address-card__header">
+                <div>
+                  <span class="address-card__name">Na</span>
+                  <span class="address-card__phone">(+84) 362 719 509</span>
+                </div>
+                <div class="address-card__actions">
+                  <a href="#" class="address-card__action-link">Cập nhật</a>
+                  <a href="#" class="address-card__action-link">Xóa</a>
+                </div>
+              </div>
+              <div class="address-card__body">
+                <div class="address-card__address">TT Yên Lập</div>
+                <div class="address-card__address">
+                  TT Yên Lập, Huyện Yên Lập, Phú Thọ
+                </div>
+              </div>
+              <div class="address-card__footer">
+                <button class="address-card__set-default">
+                  Thiết lập mặc định
+                </button>
+              </div>
+            </div>
+            <!-- Address Card 3 -->
+            <div class="address-card">
+              <div class="address-card__header">
+                <div>
+                  <span class="address-card__name">Đinh Kiều Na</span>
+                  <span class="address-card__phone">(+84) 362 719 509</span>
+                </div>
+                <div class="address-card__actions">
+                  <a href="#" class="address-card__action-link">Cập nhật</a>
+                  <a href="#" class="address-card__action-link">Xóa</a>
+                </div>
+              </div>
+              <div class="address-card__body">
+                <div class="address-card__address">334 Nguyễn Trãi</div>
+                <div class="address-card__address">
+                  Thanh Xuân Trung, Quận Thanh Xuân, Hà Nội
+                </div>
+              </div>
+              <div class="address-card__footer">
+                <button class="address-card__set-default">
+                  Thiết lập mặc định
+                </button>
+              </div>
+            </div>
+            <!-- Address Card 4 -->
+            <div class="address-card">
+              <div class="address-card__header">
+                <div>
+                  <span class="address-card__name">Nguyễn Hòa</span>
+                  <span class="address-card__phone">(+84) ..</span>
+                </div>
+                <div class="address-card__actions">
+                  <a href="#" class="address-card__action-link">Cập nhật</a>
+                  <a href="#" class="address-card__action-link">Xóa</a>
+                </div>
+              </div>
+              <div class="address-card__body">
+                <div class="address-card__address">334 Nguyễn Trãi</div>
+                <div class="address-card__address">
+                  Thanh Xuân Trung, Quận Thanh Xuân, Hà Nội
+                </div>
+              </div>
+              <div class="address-card__footer">
+                <button class="address-card__set-default">
+                  Thiết lập mặc định
+                </button>
+              </div>
+            </div>
+            <!-- Address Card 5 -->
+            <div class="address-card">
+              <div class="address-card__header">
+                <div>
+                  <span class="address-card__name">Lê Trang Thu</span>
+                  <span class="address-card__phone">(+84) ..</span>
+                </div>
+                <div class="address-card__actions">
+                  <a href="#" class="address-card__action-link">Cập nhật</a>
+                  <a href="#" class="address-card__action-link">Xóa</a>
+                </div>
+              </div>
+              <div class="address-card__body">
+                <div class="address-card__address">334 Nguyễn Trãi</div>
+                <div class="address-card__address">
+                  Thanh Xuân Trung, Quận Thanh Xuân, Hà Nội
+                </div>
+              </div>
+              <div class="address-card__footer">
+                <button class="address-card__set-default">
+                  Thiết lập mặc định
+                </button>
+              </div>
+            </div>
+            <!-- Address Card 3 -->
+            <div class="address-card">
+              <div class="address-card__header">
+                <div>
+                  <span class="address-card__name">Hoàng Đình Duy</span>
+                  <span class="address-card__phone">(+84) ..</span>
+                </div>
+                <div class="address-card__actions">
+                  <a href="#" class="address-card__action-link">Cập nhật</a>
+                  <a href="#" class="address-card__action-link">Xóa</a>
+                </div>
+              </div>
+              <div class="address-card__body">
+                <div class="address-card__address">334 Nguyễn Trãi</div>
+                <div class="address-card__address">
+                  Thanh Xuân Trung, Quận Thanh Xuân, Hà Nội
+                </div>
+              </div>
+              <div class="address-card__footer">
+                <button class="address-card__set-default">
+                  Thiết lập mặc định
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </section>
+    <!-- Components (load trước) -->
+    <script src="../js/components.js"></script>
+
+    <!-- Pages -->
+    <!--
+    <script src="../js/pages/user.js"></script>
+    -->
+
+    <!-- Main (load sau cùng) -->
+    <script src="../js/main.js"></script>
+  </body>
+</html>

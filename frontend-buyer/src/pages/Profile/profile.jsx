@@ -20,6 +20,34 @@ export default function Profile() {
   const [avatarPreview, setAvatarPreview] = useState(null);
   const [avatarFile, setAvatarFile] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
+
+  /* ================= VALIDATION FUNCTIONS ================= */
+  const validatePhoneNumber = (phone) => {
+    // Regex cho số điện thoại Việt Nam
+    const phoneRegex = /^(0[1-9])+([0-9]{8})$/;
+    return phoneRegex.test(phone);
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    // Validate số điện thoại
+    if (profile.phone && !validatePhoneNumber(profile.phone.trim())) {
+      newErrors.phone = "Số điện thoại không đúng định dạng Việt Nam (vd: 0987654321)";
+    }
+
+    // Validate họ và tên (tuỳ chọn)
+    if (!profile.lname.trim()) {
+      newErrors.lname = "Vui lòng nhập họ";
+    }
+
+    if (!profile.fname.trim()) {
+      newErrors.fname = "Vui lòng nhập tên";
+    }
+
+    return newErrors;
+  };
 
   /* ================= FETCH PROFILE ================= */
   useEffect(() => {
@@ -38,12 +66,27 @@ export default function Profile() {
 
   /* ================= HANDLERS ================= */
   const handleChange = (e) => {
-    setProfile({ ...profile, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setProfile({ ...profile, [name]: value });
+
+    // Clear error khi người dùng bắt đầu nhập
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: null }));
+    }
   };
 
   const handleSaveProfile = async () => {
+    // Validate trước khi lưu
+    const validationErrors = validateForm();
+
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      alert("Vui lòng kiểm tra lại thông tin");
+      return;
+    }
     try {
       setLoading(true);
+      setErrors({});
 
       const updatedData = await api.profile.updateProfile({
         fname: profile.fname,
@@ -182,14 +225,20 @@ export default function Profile() {
 
             <div className="form-group">
               <label className="form-label">Số điện thoại</label>
-              <input
-                className="form-input"
-                name="phone"
-                value={profile.phone || ""}
-                onChange={handleChange}
-                placeholder="Nhập số điện thoại"
-              />
+              <div>
+                <input
+                  className={`form-input ${errors.phone ? 'error-input' : ''}`}
+                  name="phone"
+                  value={profile.phone || ""}
+                  onChange={handleChange}
+                  placeholder="Nhập số điện thoại (vd: 0987654321)"
+                  maxLength="10"
+                />
+                {errors.phone && <div className="error-message">{errors.phone}</div>}
+
+              </div>
             </div>
+
 
             <div className="form-group">
               <label className="form-label">Avatar</label>
@@ -286,9 +335,6 @@ export default function Profile() {
           </div>
         )}
 
-        {activeSection === "address" && (
-          <Addresses />
-        )}
       </main>
     </div>
   );

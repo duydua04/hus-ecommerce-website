@@ -299,6 +299,53 @@ window.addEventListener('storage', (event) => {
 });
 
 // ============================================
+// CHAT APIs
+// ============================================
+export const chatAPI = {
+  // GET /chat/conversations - Lấy danh sách cuộc trò chuyện
+  getConversations: () => apiCall('/chat/conversations'),
+
+  // GET /chat/{conversation_id}/messages - Lấy tin nhắn
+  getMessages: (conversationId, cursor = null, limit = 20) => {
+    const params = new URLSearchParams({ limit });
+    if (cursor) params.append('cursor', cursor);
+    return apiCall(`/chat/${conversationId}/messages?${params}`);
+  },
+
+  // POST /chat/send - Gửi tin nhắn
+  sendMessage: (payload) =>
+    apiCall('/chat/send', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+
+  // POST /chat/upload - Upload ảnh
+  uploadImages: async (files) => {
+    const token = localStorage.getItem('access_token');
+    const formData = new FormData();
+
+    files.forEach(file => {
+      formData.append('files', file);
+    });
+
+    const response = await fetch(`${API_BASE_URL}/chat/upload`, {
+      method: 'POST',
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ detail: 'Upload failed' }));
+      throw new Error(error.detail || 'Upload failed');
+    }
+
+    return response.json();
+  },
+};
+
+// ============================================
 // CATEGORY APIs
 // ============================================
 export const categoryAPI = {
@@ -796,6 +843,7 @@ export const discountAPI = {
 export default {
   auth: authAPI,
   websocket: websocketAPI,
+  chat: chatAPI,
   category: categoryAPI,
   product: productAPI,
   notification: notificationAPI,

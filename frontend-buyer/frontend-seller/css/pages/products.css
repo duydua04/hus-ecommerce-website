@@ -1,0 +1,8 @@
+.table__header--actions {
+  text-align: right;
+  width: 150px;
+}
+
+.table__cell--actions {
+  text-align: right;
+}

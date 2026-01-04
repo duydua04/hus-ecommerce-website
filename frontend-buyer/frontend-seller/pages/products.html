@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!--Boxicons-->
+    <link
+      href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
+      rel="stylesheet"
+    />
+    <!--My css-->
+    <link rel="stylesheet" href="../css/base.css" />
+    <link rel="stylesheet" href="../css/layout.css" />
+    <link rel="stylesheet" href="../css/components.css" />
+    <link rel="stylesheet" href="../css/pages/pages.css" />
+    <link rel="stylesheet" href="../css/pages/products.css" />
+
+    <title>SellerHub</title>
+  </head>
+  <body>
+    <!--SIDEBAR - Block: sidebar-->
+    <section class="sidebar">
+      <a href="#" class="sidebar__brand">
+        <i class="bx bx-store sidebar__brand-icon"></i>
+        <span class="sidebar__brand-text">SellerHub</span>
+      </a>
+      <ul class="sidebar__menu">
+        <li class="sidebar__menu-item">
+          <a href="dashboard.html" class="sidebar__menu-link">
+            <i class="bx bx-grid-alt sidebar__menu-icon"></i>
+            <span class="sidebar__menu-text">Dashboard</span>
+          </a>
+        </li>
+        <li class="sidebar__menu-item sidebar__menu-item--active">
+          <a href="products.html" class="sidebar__menu-link">
+            <i class="bx bx-box sidebar__menu-icon"></i>
+            <span class="sidebar__menu-text">Sản phẩm</span>
+          </a>
+        </li>
+        <li class="sidebar__menu-item">
+          <a href="orders.html" class="sidebar__menu-link">
+            <i class="bx bx-shopping-bag sidebar__menu-icon"></i>
+            <span class="sidebar__menu-text">Đơn hàng</span>
+          </a>
+        </li>
+        <li class="sidebar__menu-item">
+          <a href="locations.html" class="sidebar__menu-link">
+            <i class="bx bx-map sidebar__menu-icon"></i>
+            <span class="sidebar__menu-text">Địa chỉ</span>
+          </a>
+        </li>
+        <li class="sidebar__menu-item">
+          <a href="profile.html" class="sidebar__menu-link">
+            <i class="bx bx-user-circle sidebar__menu-icon"></i>
+            <span class="sidebar__menu-text">Hồ sơ</span>
+          </a>
+        </li>
+        <li class="sidebar__menu-item">
+          <a href="reviews.html" class="sidebar__menu-link">
+            <i class="bx bx-star sidebar__menu-icon"></i>
+            <span class="sidebar__menu-text">Đánh giá</span>
+          </a>
+        </li>
+      </ul>
+    </section>
+
+    <!--CONTENT - Block: content-->
+    <section class="content">
+      <!--NAVBAR - Block: navbar-->
+      <nav class="navbar">
+        <div class="navbar__left">
+          <i class="bx bx-menu navbar__menu-icon"></i>
+          <div class="navbar__search">
+            <i class="bx bx-search navbar__search-icon"></i>
+            <input
+              type="text"
+              class="navbar__search-input"
+              placeholder="Tìm kiếm..."
+            />
+          </div>
+        </div>
+        <div class="navbar__right">
+          <a href="#" class="navbar__notification">
+            <i class="bx bx-bell navbar__notification-icon"></i>
+            <span class="navbar__notification-badge">8</span>
+          </a>
+          <a href="#" class="navbar__profile">
+            <img
+              src="../img/balloon-sky.webp"
+              alt="Profile"
+              class="navbar__profile-img"
+            />
+          </a>
+        </div>
+      </nav>
+
+      <!--MAIN - Block: main-->
+      <main class="main">
+        <!-- Block: page-header -->
+        <div class="page-header">
+          <h1 class="page-header__title">Sản phẩm</h1>
+          <ul class="page-header__breadcrumb breadcrumb">
+            <li class="breadcrumb__item">
+              <a href="dashboard.html" class="breadcrumb__link">Trang chủ</a>
+            </li>
+            <li class="breadcrumb__item">
+              <i class="bx bx-chevron-right breadcrumb__separator"></i>
+            </li>
+            <li class="breadcrumb__item">
+              <a
+                href="products.html"
+                class="breadcrumb__link breadcrumb__link--active"
+                >Sản phẩm</a
+              >
+            </li>
+          </ul>
+        </div>
+
+        <!-- Block: toolbar -->
+        <div class="toolbar">
+          <!-- Element: toolbar__header -->
+          <div class="toolbar__header">
+            <div class="toolbar__title">
+              <h3 class="toolbar__title-text">Danh sách sản phẩm</h3>
+              <p class="toolbar__title-desc">
+                Quản lý và theo dõi sản phẩm của cửa hàng
+              </p>
+            </div>
+            <button class="toolbar__btn-add btn btn--primary">
+              <i class="bx bx-plus btn__icon"></i>
+              <span class="btn__text">Thêm sản phẩm</span>
+            </button>
+          </div>
+
+          <!-- Element: toolbar__actions -->
+          <div class="toolbar__actions">
+            <div class="toolbar__search search-box">
+              <i class="bx bx-search search-box__icon"></i>
+              <input
+                type="text"
+                class="search-box__input"
+                placeholder="Tìm kiếm sản phẩm..."
+              />
+            </div>
+            <button class="toolbar__btn-filter btn btn--secondary">
+              <i class="bx bx-filter btn__icon"></i>
+              <span class="btn__text">Lọc</span>
+            </button>
+          </div>
+
+          <!-- Element: toolbar__table -->
+          <div class="toolbar__table">
+            <table class="table">
+              <thead class="table__head">
+                <tr class="table__row">
+                  <th class="table__header">Hình ảnh</th>
+                  <th class="table__header">Tên sản phẩm</th>
+                  <th class="table__header table__header--hide-mobile">
+                    Danh mục
+                  </th>
+                  <th class="table__header table__header--hide-mobile">
+                    Đánh giá
+                  </th>
+                  <th class="table__header">Giá</th>
+                  <th class="table__header table__header--hide-tablet">
+                    Cân nặng
+                  </th>
+                  <th class="table__header table__header--actions">
+                    Hành động
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="table__body">
+                <tr class="table__row">
+                  <td class="table__cell">
+                    <img
+                      src="../img/asus-rog-gaming-laptop.png"
+                      alt="ASUS Laptop"
+                      class="table__img"
+                    />
+                  </td>
+                  <td class="table__cell">ASUS ROG Gaming Laptop</td>
+                  <td class="table__cell table__cell--hide-mobile">Laptop</td>
+                  <td class="table__cell table__cell--hide-mobile">
+                    ⭐⭐⭐⭐☆
+                  </td>
+                  <td class="table__cell table__cell--price">$2,199</td>
+                  <td class="table__cell table__cell--hide-tablet">2.5kg</td>
+                  <td class="table__cell table__cell--actions">
+                    <button class="action-btn action-btn--view" title="Xem">
+                      <i class="bx bx-show action-btn__icon"></i>
+                    </button>
+                    <button class="action-btn action-btn--edit" title="Sửa">
+                      <i class="bx bx-edit action-btn__icon"></i>
+                    </button>
+                    <button class="action-btn action-btn--delete" title="Xóa">
+                      <i class="bx bx-trash action-btn__icon"></i>
+                    </button>
+                  </td>
+                </tr>
+                <tr class="table__row">
+                  <td class="table__cell">
+                    <img
+                      src="../img/airpods-pro-2nd-gen.jpg"
+                      alt="Airpods"
+                      class="table__img"
+                    />
+                  </td>
+                  <td class="table__cell">Airpods Pro 2nd Gen</td>
+                  <td class="table__cell table__cell--hide-mobile">
+                    Accessories
+                  </td>
+                  <td class="table__cell table__cell--hide-mobile">
+                    ⭐⭐⭐⭐⭐
+                  </td>
+                  <td class="table__cell table__cell--price">$839</td>
+                  <td class="table__cell table__cell--hide-tablet">200g</td>
+                  <td class="table__cell table__cell--actions">
+                    <button class="action-btn action-btn--view" title="Xem">
+                      <i class="bx bx-show action-btn__icon"></i>
+                    </button>
+                    <button class="action-btn action-btn--edit" title="Sửa">
+                      <i class="bx bx-edit action-btn__icon"></i>
+                    </button>
+                    <button class="action-btn action-btn--delete" title="Xóa">
+                      <i class="bx bx-trash action-btn__icon"></i>
+                    </button>
+                  </td>
+                </tr>
+                <tr class="table__row">
+                  <td class="table__cell">
+                    <img
+                      src="../img/apple-watch-ultra.png"
+                      alt="Apple Watch"
+                      class="table__img"
+                    />
+                  </td>
+                  <td class="table__cell">Apple Watch Ultra</td>
+                  <td class="table__cell table__cell--hide-mobile">Watch</td>
+                  <td class="table__cell table__cell--hide-mobile">
+                    ⭐⭐⭐⭐☆
+                  </td>
+                  <td class="table__cell table__cell--price">$1,579</td>
+                  <td class="table__cell table__cell--hide-tablet">80g</td>
+                  <td class="table__cell table__cell--actions">
+                    <button class="action-btn action-btn--view" title="Xem">
+                      <i class="bx bx-show action-btn__icon"></i>
+                    </button>
+                    <button class="action-btn action-btn--edit" title="Sửa">
+                      <i class="bx bx-edit action-btn__icon"></i>
+                    </button>
+                    <button class="action-btn action-btn--delete" title="Xóa">
+                      <i class="bx bx-trash action-btn__icon"></i>
+                    </button>
+                  </td>
+                </tr>
+                <tr class="table__row">
+                  <td class="table__cell">
+                    <img
+                      src="../img/samsung-galaxy-s23-ultra.png"
+                      alt="Samsung Galaxy"
+                      class="table__img"
+                    />
+                  </td>
+                  <td class="table__cell">Samsung Galaxy S23 Ultra</td>
+                  <td class="table__cell table__cell--hide-mobile">Phone</td>
+                  <td class="table__cell table__cell--hide-mobile">
+                    ⭐⭐⭐⭐⭐
+                  </td>
+                  <td class="table__cell table__cell--price">$1,299</td>
+                  <td class="table__cell table__cell--hide-tablet">210g</td>
+                  <td class="table__cell table__cell--actions">
+                    <button class="action-btn action-btn--view" title="Xem">
+                      <i class="bx bx-show action-btn__icon"></i>
+                    </button>
+                    <button class="action-btn action-btn--edit" title="Sửa">
+                      <i class="bx bx-edit action-btn__icon"></i>
+                    </button>
+                    <button class="action-btn action-btn--delete" title="Xóa">
+                      <i class="bx bx-trash action-btn__icon"></i>
+                    </button>
+                  </td>
+                </tr>
+                <tr class="table__row">
+                  <td class="table__cell">
+                    <img
+                      src="../img/sony-wh-1000xm5.jpg"
+                      alt="Sony Headphones"
+                      class="table__img"
+                    />
+                  </td>
+                  <td class="table__cell">Sony WH-1000XM5</td>
+                  <td class="table__cell table__cell--hide-mobile">Audio</td>
+                  <td class="table__cell table__cell--hide-mobile">
+                    ⭐⭐⭐⭐⭐
+                  </td>
+                  <td class="table__cell table__cell--price">$399</td>
+                  <td class="table__cell table__cell--hide-tablet">250g</td>
+                  <td class="table__cell table__cell--actions">
+                    <button class="action-btn action-btn--view" title="Xem">
+                      <i class="bx bx-show action-btn__icon"></i>
+                    </button>
+                    <button class="action-btn action-btn--edit" title="Sửa">
+                      <i class="bx bx-edit action-btn__icon"></i>
+                    </button>
+                    <button class="action-btn action-btn--delete" title="Xóa">
+                      <i class="bx bx-trash action-btn__icon"></i>
+                    </button>
+                  </td>
+                </tr>
+                <tr class="table__row">
+                  <td class="table__cell">
+                    <img
+                      src="../img/macbook-pro-16.jpg"
+                      alt="iPhone 14"
+                      class="table__img"
+                    />
+                  </td>
+                  <td class="table__cell">Macbook 16 Pro</td>
+                  <td class="table__cell table__cell--hide-mobile">Laptop</td>
+                  <td class="table__cell table__cell--hide-mobile">
+                    ⭐⭐⭐⭐⭐
+                  </td>
+                  <td class="table__cell table__cell--price">$1000</td>
+                  <td class="table__cell table__cell--hide-tablet">1.2kg</td>
+                  <td class="table__cell table__cell--actions">
+                    <button class="action-btn action-btn--view" title="Xem">
+                      <i class="bx bx-show action-btn__icon"></i>
+                    </button>
+                    <button class="action-btn action-btn--edit" title="Sửa">
+                      <i class="bx bx-edit action-btn__icon"></i>
+                    </button>
+                    <button class="action-btn action-btn--delete" title="Xóa">
+                      <i class="bx bx-trash action-btn__icon"></i>
+                    </button>
+                  </td>
+                </tr>
+
+                <tr class="table__row">
+                  <td class="table__cell">
+                    <img
+                      src="../img/dell-xps-15.jpg"
+                      alt="Dell XPS 13"
+                      class="table__img"
+                    />
+                  </td>
+                  <td class="table__cell">Dell XPS 13</td>
+                  <td class="table__cell table__cell--hide-mobile">Laptop</td>
+                  <td class="table__cell table__cell--hide-mobile">⭐⭐⭐⭐</td>
+                  <td class="table__cell table__cell--price">$999</td>
+                  <td class="table__cell table__cell--hide-tablet">1.2kg</td>
+                  <td class="table__cell table__cell--actions">
+                    <button class="action-btn action-btn--view" title="Xem">
+                      <i class="bx bx-show action-btn__icon"></i>
+                    </button>
+                    <button class="action-btn action-btn--edit" title="Sửa">
+                      <i class="bx bx-edit action-btn__icon"></i>
+                    </button>
+                    <button class="action-btn action-btn--delete" title="Xóa">
+                      <i class="bx bx-trash action-btn__icon"></i>
+                    </button>
+                  </td>
+                </tr>
+
+                <tr class="table__row">
+                  <td class="table__cell">
+                    <img
+                      src="../img/fitbit-charge-6.jpg"
+                      alt="Fitbit Charge 6"
+                      class="table__img"
+                    />
+                  </td>
+                  <td class="table__cell">Fitbit Charge 5</td>
+                  <td class="table__cell table__cell--hide-mobile">Watch</td>
+                  <td class="table__cell table__cell--hide-mobile">⭐⭐⭐⭐</td>
+                  <td class="table__cell table__cell--price">$149</td>
+                  <td class="table__cell table__cell--hide-tablet">30g</td>
+                  <td class="table__cell table__cell--actions">
+                    <button class="action-btn action-btn--view" title="Xem">
+                      <i class="bx bx-show action-btn__icon"></i>
+                    </button>
+                    <button class="action-btn action-btn--edit" title="Sửa">
+                      <i class="bx bx-edit action-btn__icon"></i>
+                    </button>
+                    <button class="action-btn action-btn--delete" title="Xóa">
+                      <i class="bx bx-trash action-btn__icon"></i>
+                    </button>
+                  </td>
+                </tr>
+
+                <tr class="table__row">
+                  <td class="table__cell">
+                    <img
+                      src="../img/son-playstation-5.jpg"
+                      alt="Sony Play Station 5"
+                      class="table__img"
+                    />
+                  </td>
+                  <td class="table__cell">Sony PlayStation 5</td>
+                  <td class="table__cell table__cell--hide-mobile">
+                    Accessories
+                  </td>
+                  <td class="table__cell table__cell--hide-mobile">
+                    ⭐⭐⭐⭐⭐
+                  </td>
+                  <td class="table__cell table__cell--price">$499</td>
+                  <td class="table__cell table__cell--hide-tablet">4.5kg</td>
+                  <td class="table__cell table__cell--actions">
+                    <button class="action-btn action-btn--view" title="Xem">
+                      <i class="bx bx-show action-btn__icon"></i>
+                    </button>
+                    <button class="action-btn action-btn--edit" title="Sửa">
+                      <i class="bx bx-edit action-btn__icon"></i>
+                    </button>
+                    <button class="action-btn action-btn--delete" title="Xóa">
+                      <i class="bx bx-trash action-btn__icon"></i>
+                    </button>
+                  </td>
+                </tr>
+
+                <tr class="table__row">
+                  <td class="table__cell">
+                    <img
+                      src="../img/bose-quietcomfort-earbuds.webp"
+                      alt="Bose QC35"
+                      class="table__img"
+                    />
+                  </td>
+                  <td class="table__cell">Bose QuietComfort 35</td>
+                  <td class="table__cell table__cell--hide-mobile">Audio</td>
+                  <td class="table__cell table__cell--hide-mobile">
+                    ⭐⭐⭐⭐⭐
+                  </td>
+                  <td class="table__cell table__cell--price">$299</td>
+                  <td class="table__cell table__cell--hide-tablet">240g</td>
+                  <td class="table__cell table__cell--actions">
+                    <button class="action-btn action-btn--view" title="Xem">
+                      <i class="bx bx-show action-btn__icon"></i>
+                    </button>
+                    <button class="action-btn action-btn--edit" title="Sửa">
+                      <i class="bx bx-edit action-btn__icon"></i>
+                    </button>
+                    <button class="action-btn action-btn--delete" title="Xóa">
+                      <i class="bx bx-trash action-btn__icon"></i>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Element: toolbar__pagination -->
+          <div class="toolbar__pagination pagination">
+            <button class="pagination__btn">
+              <i class="bx bx-chevron-left pagination__icon"></i>
+            </button>
+            <button class="pagination__btn pagination__btn--active">1</button>
+            <button class="pagination__btn">2</button>
+            <button class="pagination__btn">3</button>
+            <button class="pagination__btn pagination__btn--hide-mobile">
+              4
+            </button>
+            <span class="pagination__dots pagination__dots--hide-mobile"
+              >...</span
+            >
+            <button class="pagination__btn pagination__btn--hide-mobile">
+              10
+            </button>
+            <button class="pagination__btn">
+              <i class="bx bx-chevron-right pagination__icon"></i>
+            </button>
+          </div>
+        </div>
+      </main>
+    </section>
+    <!-- Components (load trước) -->
+    <script src="../js/components.js"></script>
+
+    <!-- Pages -->
+    <!--
+    <script src="../js/pages/user.js"></script>
+    -->
+
+    <!-- Main (load sau cùng) -->
+    <script src="../js/main.js"></script>
+  </body>
+</html>

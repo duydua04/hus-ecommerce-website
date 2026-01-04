@@ -6,10 +6,18 @@ import { useNotifications } from "../../context/useNotifications";
 import NotificationSidebar from "../../components/notificationSidebar";
 import "../Profile/profile.css";
 import "./notifications.css";
+import useTime from "../../context/useTime";
 
 export default function Notifications() {
   const { user } = useUser();
   const { unreadCount, incrementUnread, decrementUnread, resetUnread } = useNotifications();
+
+  const {
+    formatRelativeTime,
+    formatVietnameseDateTime,
+    sortByNewest,
+    getTimeInfo
+  } = useTime();
 
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -30,6 +38,15 @@ export default function Notifications() {
       });
 
       const { items, next_cursor, has_more } = res;
+
+      // Thêm thông tin thời gian đã chuyển đổi cho mỗi notification
+      const itemsWithTimeInfo = items.map(item => ({
+        ...item,
+        ...getTimeInfo(item.created_at)
+      }));
+
+      // Sắp xếp theo thời gian mới nhất lên đầu
+      const sortedItems = sortByNewest(itemsWithTimeInfo);
 
       setNotifications(prev =>
         reset ? items : [...prev, ...items]
@@ -57,6 +74,9 @@ export default function Notifications() {
     const unsubscribe = api.websocket.onMessage('NOTIFICATION', (payload) => {
       console.log('📨 New notification received:', payload);
 
+      // Tạo notification object từ payload với thời gian địa phương
+      const timeInfo = getTimeInfo(new Date().toISOString());
+
       // Tạo notification object từ payload
       const newNotif = {
         _id: payload.id,
@@ -65,14 +85,15 @@ export default function Notifications() {
         event_type: payload.data?.event_type || 'general',
         is_read: false,
         created_at: new Date().toISOString(),
+        ...timeInfo,
         ...payload.data
       };
 
       // Thêm vào đầu danh sách
       setNotifications(prev => [newNotif, ...prev]);
 
-      // Count sẽ tự động tăng qua hook
-
+      // Count sẽ tự động tăng qua context
+      incrementUnread();
       // Hiển thị toast hoặc notification browser (optional)
       if (Notification.permission === 'granted') {
         new Notification(payload.title, {
@@ -105,7 +126,7 @@ export default function Notifications() {
         )
       );
 
-      // Giảm unread count qua hook
+      // Giảm unread count qua context
       decrementUnread();
 
     } catch (err) {
@@ -123,7 +144,7 @@ export default function Notifications() {
         prev.map(n => ({ ...n, is_read: true }))
       );
 
-      // Reset unread count qua hook
+      // Reset unread count qua context
       resetUnread();
 
     } catch (err) {

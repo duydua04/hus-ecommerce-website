@@ -1,11 +1,12 @@
 // src/App.jsx
-import React from 'react';
+import React, { createContext, useState, useContext } from 'react'; // Đã sửa import
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
 // Import Components
 import Header from './components/header.jsx';
 import Footer from './components/footer.jsx';
 import NotFound from './components/NotFound/notFound.jsx';
+import Chat from './components/Chat/chat.jsx';
 
 // Import Pages
 import BuyerLogin from './pages/Login/BuyerLogin.jsx';
@@ -22,6 +23,46 @@ import SearchResult from './pages/Search/search.jsx';
 import Addresses from './pages/Addresses/addresses.jsx';
 
 import './App.css';
+
+// Tạo ChatContext
+export const ChatContext = createContext(null);
+
+// Hook để sử dụng ChatContext
+export const useChatContext = () => {
+  const context = useContext(ChatContext);
+  if (!context) {
+    throw new Error('useChatContext must be used within ChatProvider');
+  }
+  return context;
+};
+
+// ChatProvider component
+export const ChatProvider = ({ children }) => {
+  const [chatState, setChatState] = useState({
+    isOpen: false,
+    defaultPartner: null
+  });
+
+  const openChatWithPartner = (partner) => {
+    setChatState({
+      isOpen: true,
+      defaultPartner: partner
+    });
+  };
+
+  const closeChat = () => {
+    setChatState({
+      isOpen: false,
+      defaultPartner: null
+    });
+  };
+
+  return (
+    <ChatContext.Provider value={{ chatState, openChatWithPartner, closeChat }}>
+      {children}
+    </ChatContext.Provider>
+  );
+};
 
 // Protected Route Component
 function ProtectedRoute({ children }) {
@@ -61,6 +102,7 @@ function MainLayout({ children }) {
       <main className="main-content" style={{ marginTop: '100px', minHeight: '80vh' }}>
         {children}
       </main>
+      <Chat />
       <Footer />
     </div>
   );
@@ -69,128 +111,130 @@ function MainLayout({ children }) {
 function App() {
   return (
     <Router>
-      <Routes>
-        {/* Public Route - Login (không có Header/Footer) */}
-        <Route
-          path="/login"
-          element={
-            <PublicRoute>
-              <BuyerLogin />
-            </PublicRoute>
-          }
-        />
-        <Route
-          path="/register"
-          element={
-            <PublicRoute>
-              <BuyerRegister />
-            </PublicRoute>
-          }
-        />
-        <Route
-          path="/forgot-password"
-          element={
-            <PublicRoute>
-              <ForgotPassword />
-            </PublicRoute>
-          }
-        />
+      <ChatProvider> {/* Wrap toàn bộ app với ChatProvider */}
+        <Routes>
+          {/* Public Route - Login (không có Header/Footer) */}
+          <Route
+            path="/login"
+            element={
+              <PublicRoute>
+                <BuyerLogin />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/register"
+            element={
+              <PublicRoute>
+                <BuyerRegister />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/forgot-password"
+            element={
+              <PublicRoute>
+                <ForgotPassword />
+              </PublicRoute>
+            }
+          />
 
-        {/* 404 Route */}
-        <Route path="*" element={<NotFound />} />
+          {/* 404 Route */}
+          <Route path="*" element={<NotFound />} />
 
-        {/* Protected Routes với Header/Footer*/}
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <MainLayout>
-                <Home />
-              </MainLayout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/search"
-          element={
-            <ProtectedRoute>
-              <MainLayout>
-                <SearchResult />
-              </MainLayout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/product/:productId"
-          element={
-            <ProtectedRoute>
-              <MainLayout>
-                <Detail />
-              </MainLayout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/cart"
-          element={
-            <ProtectedRoute>
-              <MainLayout>
-                <Cart />
-              </MainLayout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/payment"
-          element={
-            <ProtectedRoute>
-              <MainLayout>
-                <Payment />
-              </MainLayout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/tracking"
-          element={
-            <ProtectedRoute>
-              <MainLayout>
-                <OrderTracking />
-              </MainLayout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/profile"
-          element={
-            <ProtectedRoute>
-              <MainLayout>
-                <Profile />
-              </MainLayout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/notifications"
-          element={
-            <ProtectedRoute>
-              <MainLayout>
-                <Notifications />
-              </MainLayout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/addresses"
-          element={
-            <ProtectedRoute>
-              <MainLayout>
-                <Addresses />
-              </MainLayout>
-            </ProtectedRoute>
-          }
-        />
-      </Routes>
+          {/* Protected Routes với Header/Footer*/}
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <Home />
+                </MainLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/search"
+            element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <SearchResult />
+                </MainLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/product/:productId"
+            element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <Detail />
+                </MainLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/cart"
+            element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <Cart />
+                </MainLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/payment"
+            element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <Payment />
+                </MainLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/tracking"
+            element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <OrderTracking />
+                </MainLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <Profile />
+                </MainLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/notifications"
+            element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <Notifications />
+                </MainLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/addresses"
+            element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <Addresses />
+                </MainLayout>
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </ChatProvider>
     </Router>
   );
 }

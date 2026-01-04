@@ -70,7 +70,15 @@ const Header = () => {
         <div className="header__left">
           <div className="brand">
             <Link to="/" className="brand__link">
-              <div className="brand__logo">🛍️</div>
+              <img
+                  src="src/assets/Logo/Logo.png"
+                  alt="FastBuy"
+                  className="brand__logo"
+                  style={{
+                    height: '40px',
+                    width: 'auto'
+                  }}
+                />
               <span className="brand__name">FastBuy</span>
             </Link>
           </div>
