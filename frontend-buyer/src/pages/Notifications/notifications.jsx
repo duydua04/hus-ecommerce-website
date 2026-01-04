@@ -2,18 +2,27 @@ import React, { useEffect, useState } from "react";
 import { Link } from 'react-router-dom';
 import api from "../../services/api";
 import { useUser } from "../../context/UserContext";
+import { useNotifications } from "../../context/useNotifications";
+import NotificationSidebar from "../../components/notificationSidebar";
 import "../Profile/profile.css";
 import "./notifications.css";
+import useTime from "../../context/useTime";
 
 export default function Notifications() {
   const { user } = useUser();
+  const { unreadCount, incrementUnread, decrementUnread, resetUnread } = useNotifications();
+
+  const {
+    formatRelativeTime,
+    formatVietnameseDateTime,
+    sortByNewest,
+    getTimeInfo
+  } = useTime();
 
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [cursor, setCursor] = useState(null);
   const [hasMore, setHasMore] = useState(false);
-  const [unreadOnly, setUnreadOnly] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
   const [markingAllRead, setMarkingAllRead] = useState(false);
 
   /* ================= FETCH NOTIFICATIONS ================= */
@@ -23,23 +32,26 @@ export default function Notifications() {
 
       const res = await api.notification.getAll({
         limit: 20,
-        cursor: reset ? null : cursor, // Reset cursor khi filter thay đổi
-        unread_only: unreadOnly,
+        cursor: reset ? null : cursor,
+        unread_only: false, // Luôn load tất cả
       });
 
       const { items, next_cursor, has_more } = res;
 
+      // Thêm thông tin thời gian đã chuyển đổi cho mỗi notification
+      const itemsWithTimeInfo = items.map(item => ({
+        ...item,
+        ...getTimeInfo(item.created_at)
+      }));
+
+      // Sắp xếp theo thời gian mới nhất lên đầu
+      const sortedItems = sortByNewest(itemsWithTimeInfo);
+
       setNotifications(prev =>
-        reset ? items : [...prev, ...items]
+        reset ? sortedItems : [...prev, ...sortedItems]
       );
       setCursor(next_cursor);
       setHasMore(has_more);
-
-      // Đếm số thông báo chưa đọc
-      if (reset) {
-        const unreadItems = items.filter(n => !n.is_read);
-        setUnreadCount(unreadItems.length);
-      }
 
     } catch (err) {
       console.error("Load notifications error:", err);
@@ -48,25 +60,62 @@ export default function Notifications() {
     }
   };
 
-  // Load lại khi filter thay đổi
+  // Load lần đầu
   useEffect(() => {
     loadNotifications(true);
-  }, [unreadOnly]);
+  }, []);
+
+  /* ================= WEBSOCKET REALTIME ================= */
+  useEffect(() => {
+    // Lắng nghe thông báo mới qua WebSocket
+    const unsubscribe = api.websocket.onMessage('NOTIFICATION', (payload) => {
+      console.log('📨 New notification received:', payload);
+
+      const timeInfo = getTimeInfo(new Date().toISOString());
+
+      const newNotif = {
+        _id: payload.id,
+        title: payload.title,
+        message: payload.message,
+        event_type: payload.data?.event_type || 'general',
+        is_read: false,
+        created_at: new Date().toISOString(),
+        ...timeInfo,
+        ...payload.data
+      };
+
+      setNotifications(prev => [newNotif, ...prev]);
+      incrementUnread();
+
+      if (Notification.permission === 'granted') {
+        new Notification(payload.title, {
+          body: payload.message,
+          icon: '/notification-icon.png'
+        });
+      }
+    });
+
+    if (Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
 
   /* ================= HANDLERS ================= */
   const handleMarkRead = async (notifId) => {
     try {
       await api.notification.markAsRead(notifId);
 
-      // Update state
       setNotifications(prev =>
         prev.map(n =>
           n._id === notifId ? { ...n, is_read: true } : n
         )
       );
 
-      // Giảm số lượng chưa đọc
-      setUnreadCount(prev => Math.max(prev - 1, 0));
+      decrementUnread();
 
     } catch (err) {
       console.error("Mark read error:", err);
@@ -78,12 +127,11 @@ export default function Notifications() {
       setMarkingAllRead(true);
       await api.notification.markAllAsRead();
 
-      // Update tất cả thông báo thành đã đọc
       setNotifications(prev =>
         prev.map(n => ({ ...n, is_read: true }))
       );
 
-      setUnreadCount(0);
+      resetUnread();
 
     } catch (err) {
       console.error("Mark all read error:", err);
@@ -92,95 +140,102 @@ export default function Notifications() {
     }
   };
 
+  /* ================= GROUP BY TIME ================= */
+  const groupNotificationsByTime = () => {
+    const now = new Date();
+    const groups = {
+      new: [],
+      today: [],
+      yesterday: [],
+      thisWeek: [],
+      older: []
+    };
+
+    // Sắp xếp: chưa đọc trước, đã đọc sau, trong mỗi nhóm sắp xếp theo thời gian mới nhất
+    const sortedNotifications = [...notifications].sort((a, b) => {
+      // Ưu tiên chưa đọc
+      if (a.is_read !== b.is_read) {
+        return a.is_read ? 1 : -1;
+      }
+      // Cùng trạng thái đọc thì sắp xếp theo thời gian mới nhất
+      return new Date(b.created_at) - new Date(a.created_at);
+    });
+
+    sortedNotifications.forEach(n => {
+      const notifDate = new Date(n.created_at);
+      const diffHours = (now - notifDate) / (1000 * 60 * 60);
+      const diffDays = (now - notifDate) / (1000 * 60 * 60 * 24);
+
+      if (diffHours < 2) {
+        groups.new.push(n);
+      } else if (diffDays < 1) {
+        groups.today.push(n);
+      } else if (diffDays < 2) {
+        groups.yesterday.push(n);
+      } else if (diffDays < 7) {
+        groups.thisWeek.push(n);
+      } else {
+        groups.older.push(n);
+      }
+    });
+
+    return groups;
+  };
+
+  const groupedNotifications = groupNotificationsByTime();
+
+  const getGroupLabel = (groupKey) => {
+    const labels = {
+      new: 'Đơn hàng mới',
+      today: 'Hôm nay',
+      yesterday: '1 ngày trước',
+      thisWeek: 'Tuần này',
+      older: 'Cũ hơn'
+    };
+    return labels[groupKey];
+  };
+
+  /* ================= INFINITE SCROLL ================= */
+  useEffect(() => {
+    const handleScroll = () => {
+      if (loading || !hasMore) return;
+
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const scrollHeight = document.documentElement.scrollHeight;
+      const clientHeight = document.documentElement.clientHeight;
+
+      if (scrollTop + clientHeight >= scrollHeight - 200) {
+        loadNotifications(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [loading, hasMore, cursor]);
+
   /* ================= UI ================= */
   return (
     <div className="main-container">
       {/* ================= SIDEBAR ================= */}
-      <aside className="sidebar">
-        <div className="user-info">
-          <div className="user-avatar">
-            {user?.avatar_url ? (
-              <img
-                src={user.avatar_url}
-                alt="avatar"
-                style={{ width: "100%", height: "100%", objectFit: "cover" }}
-              />
-            ) : (
-              <div className="avatar-fallback">👤</div>
-            )}
-          </div>
-          <div>
-            <div className="user-name">
-              {user?.fullname || user?.fname || user?.email || "Người dùng"}
-            </div>
-            <Link to="/profile" className="user-edit">
-              ✏️ Sửa Hồ Sơ
-            </Link>
-          </div>
-        </div>
-
-        <ul className="sidebar-menu">
-          <li className="sidebar-menu__item">
-            <Link to="/notifications" className="sidebar-menu__link sidebar-menu__link--active">
-              <span>🔔</span>
-              <span>Thông Báo</span>
-              {unreadCount > 0 && (
-                <span className="notification-badge">{unreadCount}</span>
-              )}
-            </Link>
-          </li>
-
-          <li className="sidebar-menu__item">
-            <Link to="/profile" className="sidebar-menu__link">
-              <span>👤</span>
-              <span>Tài Khoản Của Tôi</span>
-            </Link>
-          </li>
-
-          <li className="sidebar-menu__item">
-            <Link to="/tracking" className="sidebar-menu__link">
-              <span>📄</span>
-              <span>Đơn Mua</span>
-            </Link>
-          </li>
-        </ul>
-      </aside>
+      <NotificationSidebar user={user} />
 
       {/* ============ CONTENT ============ */}
       <main className="content">
         <div className="notification-header-section">
-          <div>
-            <h2 className="section-title">Thông Báo</h2>
-            <p className="section-subtitle">
-              Quản lý và theo dõi các thông báo của bạn
-            </p>
-          </div>
+          <h2>Thông báo</h2>
 
-          {/* Nút đánh dấu tất cả đã đọc */}
           {unreadCount > 0 && (
             <button
               className="mark-all-read-btn"
               onClick={handleMarkAllRead}
               disabled={markingAllRead}
             >
-              {markingAllRead ? "Đang xử lý..." : "Đánh dấu tất cả đã đọc"}
+              {markingAllRead ? "Đang xử lý..." : "Đánh dấu đã đọc"}
             </button>
           )}
         </div>
 
-        {/* FILTER */}
-        <div className="notification-filter">
-          <label className="filter-checkbox">
-            <input
-              type="checkbox"
-              checked={unreadOnly}
-              onChange={(e) => setUnreadOnly(e.target.checked)}
-            />
-            <span>Chỉ hiển thị chưa đọc ({unreadCount})</span>
-          </label>
-        </div>
-
-        {/* LIST */}
+        {/* LIST WITH TIME GROUPS */}
         {loading && notifications.length === 0 ? (
           <div className="notification-loading">
             <div className="spinner"></div>
@@ -190,64 +245,40 @@ export default function Notifications() {
           <div className="notification-empty">
             <span className="empty-icon">🔔</span>
             <p>Không có thông báo nào</p>
-            {unreadOnly && (
-              <button
-                className="show-all-btn"
-                onClick={() => setUnreadOnly(false)}
-              >
-                Hiển thị tất cả thông báo
-              </button>
-            )}
           </div>
         ) : (
-          <ul className="notification-list">
-            {notifications.map((n) => (
-              <li
-                key={n._id}
-                className={`notification-item ${
-                  n.is_read ? "" : "unread"
-                }`}
-                onClick={() => !n.is_read && handleMarkRead(n._id)}
-              >
-                <div className="notification-header">
-                  <span className="notification-title">{n.title}</span>
-                  {!n.is_read && <span className="dot"></span>}
+          <>
+            {Object.entries(groupedNotifications).map(([groupKey, items]) => {
+              if (items.length === 0) return null;
+
+              return (
+                <div key={groupKey} className="time-group">
+                  <h3 className="time-group-header">{getGroupLabel(groupKey)}</h3>
+
+                  <ul className="notification-list">
+                    {items.map((n) => (
+                      <li
+                        key={n._id}
+                        className={`notification-item ${n.is_read ? "" : "unread"}`}
+                        onClick={() => !n.is_read && handleMarkRead(n._id)}
+                      >
+                        <div className="notification-content">
+                          <span className="notification-title">{n.title}</span>
+                          <p className="notification-message">{n.message}</p>
+                          <span className="notification-time">
+                            {formatRelativeTime(n.created_at)}
+                          </span>
+                        </div>
+
+                        <div className={`notification-icon ${n.is_read ? 'read-check' : 'unread-dot'}`}>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-
-                <p className="notification-message">{n.message}</p>
-
-                <div className="notification-footer">
-                  <span className="notification-time">
-                    {new Date(n.created_at).toLocaleString("vi-VN", {
-                      year: "numeric",
-                      month: "2-digit",
-                      day: "2-digit",
-                      hour: "2-digit",
-                      minute: "2-digit"
-                    })}
-                  </span>
-
-                  {n.event_type && (
-                    <span className="notification-type">
-                      {n.event_type}
-                    </span>
-                  )}
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-
-        {/* LOAD MORE */}
-        {hasMore && !loading && (
-          <div className="load-more-section">
-            <button
-              className="load-more-btn"
-              onClick={() => loadNotifications(false)}
-            >
-              Tải thêm
-            </button>
-          </div>
+              );
+            })}
+          </>
         )}
 
         {/* Loading indicator khi load more */}

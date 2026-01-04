@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../../context/UserContext';
 import api from '../../services/api';
+import NotificationSidebar from "../../components/notificationSidebar";
+import Modal from "../../components/modal";
 import './order_tracking.css';
 
 export default function OrderTracking() {
@@ -16,6 +18,16 @@ export default function OrderTracking() {
   const [orderDetail, setOrderDetail] = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
 
+  // Modal states
+  const [modal, setModal] = useState({
+    isOpen: false,
+    type: 'info',
+    title: '',
+    message: '',
+    onConfirm: null,
+    showCancelButton: false
+  });
+
   // Review modal states
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [reviewItem, setReviewItem] = useState(null);
@@ -27,7 +39,7 @@ export default function OrderTracking() {
   });
   const [uploadingFiles, setUploadingFiles] = useState(false);
   const [submittingReview, setSubmittingReview] = useState(false);
-  const [previewFiles, setPreviewFiles] = useState([]); // Preview local files
+  const [previewFiles, setPreviewFiles] = useState([]);
 
   const tabs = [
     { key: 'all', label: 'Tất cả' },
@@ -37,6 +49,48 @@ export default function OrderTracking() {
     { key: 'delivered', label: 'Hoàn thành' },
     { key: 'cancelled', label: 'Đã hủy' }
   ];
+
+  // Helper functions for modal
+  const showModal = (config) => {
+    setModal({
+      isOpen: true,
+      ...config
+    });
+  };
+
+  const closeModal = () => {
+    setModal(prev => ({ ...prev, isOpen: false }));
+  };
+
+  const showSuccessModal = (message, title = "Thành công") => {
+    showModal({
+      type: 'success',
+      title,
+      message,
+      showCancelButton: false
+    });
+  };
+
+  const showErrorModal = (message, title = "Lỗi") => {
+    showModal({
+      type: 'error',
+      title,
+      message,
+      showCancelButton: false
+    });
+  };
+
+  const showConfirmModal = (message, onConfirm, title = "Xác nhận") => {
+    showModal({
+      type: 'confirm',
+      title,
+      message,
+      showCancelButton: true,
+      onConfirm,
+      okText: 'Đồng ý',
+      cancelText: 'Hủy'
+    });
+  };
 
   // Load user info if not available
   useEffect(() => {
@@ -85,7 +139,7 @@ export default function OrderTracking() {
       setOrderDetail(detail);
     } catch (error) {
       console.error('Error loading order detail:', error);
-      alert('Không thể tải chi tiết đơn hàng');
+      showErrorModal('Không thể tải chi tiết đơn hàng');
     } finally {
       setDetailLoading(false);
     }
@@ -97,34 +151,42 @@ export default function OrderTracking() {
   };
 
   const handleCancelOrder = async (orderId) => {
-    if (!window.confirm('Bạn có chắc muốn hủy đơn hàng này?')) return;
-
-    try {
-      await api.order.cancelOrder(orderId);
-      alert('Hủy đơn hàng thành công');
-      setSelectedOrder(null);
-      setOrderDetail(null);
-      loadOrders();
-    } catch (error) {
-      alert('Không thể hủy đơn hàng: ' + error.message);
-    }
+    showConfirmModal(
+      'Bạn có chắc muốn hủy đơn hàng này?',
+      async () => {
+        try {
+          await api.order.cancelOrder(orderId);
+          showSuccessModal('Hủy đơn hàng thành công');
+          setSelectedOrder(null);
+          setOrderDetail(null);
+          loadOrders();
+        } catch (error) {
+          showErrorModal('Không thể hủy đơn hàng: ' + error.message);
+        }
+      },
+      'Xác nhận hủy đơn'
+    );
   };
 
   const handleConfirmReceived = async (orderId) => {
-    if (!window.confirm('Xác nhận bạn đã nhận được hàng?')) return;
-
-    try {
-      await api.order.confirmReceived(orderId);
-      alert('Xác nhận đơn hàng thành công');
-      setSelectedOrder(null);
-      setOrderDetail(null);
-      loadOrders();
-    } catch (error) {
-      alert('Không thể xác nhận đơn hàng: ' + error.message);
-    }
+    showConfirmModal(
+      'Xác nhận bạn đã nhận được hàng?',
+      async () => {
+        try {
+          await api.order.confirmReceived(orderId);
+          showSuccessModal('Xác nhận đơn hàng thành công');
+          setSelectedOrder(null);
+          setOrderDetail(null);
+          loadOrders();
+        } catch (error) {
+          showErrorModal('Không thể xác nhận đơn hàng: ' + error.message);
+        }
+      },
+      'Xác nhận đã nhận hàng'
+    );
   };
 
-  const closeModal = () => {
+  const closeOrderModal = () => {
     setSelectedOrder(null);
     setOrderDetail(null);
   };
@@ -158,11 +220,10 @@ export default function OrderTracking() {
     const files = Array.from(e.target.files);
     if (files.length === 0) return;
 
-    // Validate files
     const maxSize = 10 * 1024 * 1024; // 10MB
     const validFiles = files.filter(file => {
       if (file.size > maxSize) {
-        alert(`File ${file.name} quá lớn. Tối đa 10MB`);
+        showErrorModal(`File ${file.name} quá lớn. Tối đa 10MB`);
         return false;
       }
       return true;
@@ -173,7 +234,6 @@ export default function OrderTracking() {
     try {
       setUploadingFiles(true);
 
-      // Create preview URLs for immediate display
       const newPreviews = validFiles.map(file => ({
         file,
         type: file.type.startsWith('image/') ? 'image' : 'video',
@@ -182,13 +242,9 @@ export default function OrderTracking() {
 
       setPreviewFiles(prev => [...prev, ...newPreviews]);
 
-      // Upload to server
       const response = await api.review.uploadFiles(validFiles);
-
-      // Backend trả về { files: [ { public_url, ... }, ... ] }
       const uploadedFiles = response.files || [];
 
-      // Phân loại images và videos dựa trên content_type
       const newImages = [];
       const newVideos = [];
 
@@ -209,8 +265,7 @@ export default function OrderTracking() {
 
     } catch (error) {
       console.error('Upload error:', error);
-      alert('Không thể upload file: ' + error.message);
-      // Remove failed previews
+      showErrorModal('Không thể upload file: ' + error.message);
       setPreviewFiles(prev => prev.slice(0, prev.length - validFiles.length));
     } finally {
       setUploadingFiles(false);
@@ -218,14 +273,12 @@ export default function OrderTracking() {
   };
 
   const removeMedia = (index) => {
-    // Remove from both preview and uploaded data
     const preview = previewFiles[index];
 
     if (preview) {
       URL.revokeObjectURL(preview.preview);
       setPreviewFiles(prev => prev.filter((_, i) => i !== index));
 
-      // Also remove from uploaded data
       if (preview.type === 'image') {
         setReviewData(prev => ({
           ...prev,
@@ -242,12 +295,12 @@ export default function OrderTracking() {
 
   const handleSubmitReview = async () => {
     if (!reviewData.content.trim()) {
-      alert('Vui lòng nhập nội dung đánh giá');
+      showErrorModal('Vui lòng nhập nội dung đánh giá');
       return;
     }
 
     if (reviewData.rating < 1 || reviewData.rating > 5) {
-      alert('Vui lòng chọn số sao từ 1 đến 5');
+      showErrorModal('Vui lòng chọn số sao từ 1 đến 5');
       return;
     }
 
@@ -263,15 +316,13 @@ export default function OrderTracking() {
         videos: reviewData.videos
       });
 
-      alert('Đánh giá thành công!');
+      showSuccessModal('Đánh giá thành công!');
       closeReviewModal();
 
-      // Reload order detail to update review status
       await loadOrderDetail(orderDetail.order.order_id);
     } catch (error) {
       console.error('Submit review error:', error);
 
-      // Parse error message
       let errorMsg = 'Không thể gửi đánh giá';
       try {
         const errorData = JSON.parse(error.message);
@@ -280,7 +331,7 @@ export default function OrderTracking() {
         errorMsg = error.message || errorMsg;
       }
 
-      alert(errorMsg);
+      showErrorModal(errorMsg);
     } finally {
       setSubmittingReview(false);
     }
@@ -335,30 +386,6 @@ export default function OrderTracking() {
     });
   };
 
-  const getUserDisplayName = () => {
-    if (!user) return 'User';
-    return user.fullname || user.fname || user.email?.split('@')[0] || 'User';
-  };
-
-  const getUserAvatar = () => {
-    if (user?.avatar_url) {
-      return (
-        <img
-          src={user.avatar_url}
-          alt="avatar"
-          style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            borderRadius: '50%'
-          }}
-        />
-      );
-    }
-    return '👤';
-  };
-
-  // Check if product has been reviewed
   const hasReviewed = (productId) => {
     if (!orderDetail?.items) return false;
     const item = orderDetail.items.find(i => i.product_id === productId);
@@ -370,46 +397,7 @@ export default function OrderTracking() {
       {/* Main Container */}
       <div className="main-container">
         {/* Sidebar */}
-        <aside className="sidebar">
-          <div className="user-info">
-            <div className="user-avatar">
-              {getUserAvatar()}
-            </div>
-            <div>
-              <div className="user-name">{getUserDisplayName()}</div>
-              <a href="#" className="user-edit" onClick={(e) => {
-                e.preventDefault();
-                navigate('/profile');
-              }}>✏️ Sửa Hồ Sơ</a>
-            </div>
-          </div>
-          <ul className="sidebar-menu">
-            <li className="sidebar-menu__item">
-              <a href="#" className="sidebar-menu__link" onClick={(e) => {
-                e.preventDefault();
-                navigate('/notifications');
-              }}>
-                <span>🔔</span>
-                <span>Thông Báo</span>
-              </a>
-            </li>
-            <li className="sidebar-menu__item">
-              <a href="#" className="sidebar-menu__link" onClick={(e) => {
-                e.preventDefault();
-                navigate('/profile');
-              }}>
-                <span>👤</span>
-                <span>Hồ sơ của tôi</span>
-              </a>
-            </li>
-            <li className="sidebar-menu__item">
-              <a href="#" className="sidebar-menu__link active">
-                <span>📄</span>
-                <span>Đơn Mua</span>
-              </a>
-            </li>
-          </ul>
-        </aside>
+        <NotificationSidebar user={user} />
 
         {/* Content */}
         <main className="content">
@@ -536,7 +524,7 @@ export default function OrderTracking() {
 
       {/* Order Detail Modal */}
       {selectedOrder && (
-        <div className="modal-overlay" onClick={closeModal}>
+        <div className="modal-overlay" onClick={closeOrderModal}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             {detailLoading ? (
               <div className="modal-loading">
@@ -550,7 +538,7 @@ export default function OrderTracking() {
                   <h3 className="modal-title">
                     Chi tiết đơn hàng #{orderDetail.order.order_id}
                   </h3>
-                  <button className="close-button" onClick={closeModal}>
+                  <button className="close-button" onClick={closeOrderModal}>
                     ✕
                   </button>
                 </div>
@@ -837,6 +825,19 @@ export default function OrderTracking() {
           </div>
         </div>
       )}
+
+      {/* Global Modal */}
+      <Modal
+        isOpen={modal.isOpen}
+        onClose={closeModal}
+        type={modal.type}
+        title={modal.title}
+        message={modal.message}
+        showCancelButton={modal.showCancelButton}
+        onOk={modal.onConfirm}
+        okText={modal.okText}
+        cancelText={modal.cancelText}
+      />
     </div>
   );
 }

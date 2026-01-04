@@ -40,6 +40,13 @@ export default function SearchResult() {
   const [sort, setSort] = useState(sortFromUrl);
   const [sortApplied, setSortApplied] = useState(false);
 
+  // ===== Collapse States =====
+  const [collapsedSections, setCollapsedSections] = useState({
+    category: false,    // Mặc định mở
+    price: false,       // Mặc định mở
+    rating: false,      // Mặc định mở
+  });
+
   // ===== Data =====
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
@@ -71,47 +78,26 @@ export default function SearchResult() {
         offset
       });
 
+      // Tạo query params chung
+      const queryParams = {
+        q: q || undefined,
+        min_price: minPrice || undefined,
+        max_price: maxPrice || undefined,
+        rating_filter: rating || undefined,
+        sort: sort,
+        limit: meta.limit,
+        offset,
+      };
+
       if (selectedCategory) {
+        // Có chọn danh mục cụ thể
         console.log(`📦 Fetching products by category: ${selectedCategory}`);
-
-        // Tạo query params cho các filter khác (giá, rating, sort, v.v.)
-        const queryParams = {
-          q: q || undefined,
-          min_price: minPrice || undefined,
-          max_price: maxPrice || undefined,
-          rating_filter: rating || undefined,
-          sort: sort, // QUAN TRỌNG: Đảm bảo sort được truyền vào
-          limit: meta.limit,
-          offset,
-        };
-
-        // Log để debug
-        console.log("🔧 Category API query params:", queryParams);
-
-        // Gọi API riêng cho category
         res = await api.product.getByCategory(selectedCategory, queryParams);
       } else {
-        // Nếu không có category, gọi API tất cả sản phẩm
+        // Tất cả danh mục
         console.log("📦 Fetching all products");
-
-        const queryParams = {
-          q: q || undefined,
-          min_price: minPrice || undefined,
-          max_price: maxPrice || undefined,
-          rating_filter: rating || undefined,
-          sort: sort, // QUAN TRỌNG: Đảm bảo sort được truyền vào
-          limit: meta.limit,
-          offset,
-        };
-
-        console.log("🔧 All products API query params:", queryParams);
-
         res = await api.product.getAll(queryParams);
       }
-
-      console.log("✅ Products response:", res);
-      console.log("📊 First product:", res.data?.[0]);
-      console.log("🎯 Total products:", res.meta?.total);
 
       setProducts(res.data || []);
       setMeta(res.meta || { total: 0, limit: 12, offset });
@@ -254,6 +240,15 @@ export default function SearchResult() {
     navigate(`/search?${params.toString()}`);
   };
 
+  // Toggle collapse section khi click vào tiêu đề
+  const handleTitleClick = (section, e) => {
+    e.stopPropagation(); // Ngăn sự kiện lan ra ngoài
+    setCollapsedSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  };
+
   // Hàm sắp xếp sản phẩm client-side nếu API không hỗ trợ
   const getSortedProducts = (products) => {
     if (!sortApplied || !products.length) return products;
@@ -310,107 +305,152 @@ export default function SearchResult() {
     <div className="products-section">
       {/* ===== Sidebar ===== */}
       <aside className="sidebar">
-        {/* Category */}
+        {/* Category Section với clickable title */}
         <div className="sidebar__section">
-          <h3 className="sidebar__title">Danh mục</h3>
-
-          {selectedCategory && (
-            <div className="current-category">
-              <strong>Đang xem:</strong> {getCurrentCategoryName()}
-            </div>
-          )}
-
-          <ul className="sidebar__list">
-            <li className="sidebar__item">
-              <label className="sidebar__label">
-                <input
-                  type="radio"
-                  name="category"
-                  checked={!selectedCategory}
-                  onChange={() => handleCategoryChange(null)}
-                />
-                <span className="sidebar__label-text">Tất cả danh mục</span>
-              </label>
-            </li>
-
-            {/* Các danh mục từ database */}
-            {categories.map((c) => (
-              <li key={c.category_id} className="sidebar__item">
-                <label className="sidebar__label">
-                  <input
-                    type="radio"
-                    name="category"
-                    checked={selectedCategory === c.category_id.toString()}
-                    onChange={() => handleCategoryChange(c.category_id)}
-                  />
-                  <span className="sidebar__label-text">{c.category_name}</span>
-                </label>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* Price */}
-        <div className="sidebar__section">
-          <h3 className="sidebar__title">Khoảng giá</h3>
-          <div className="sidebar__price-inputs">
-            <input
-              className="sidebar__input"
-              type="number"
-              placeholder="Min"
-              value={minPriceInput}
-              onChange={(e) => setMinPriceInput(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handlePriceFilterApply()}
-            />
-            <input
-              className="sidebar__input"
-              type="number"
-              placeholder="Max"
-              value={maxPriceInput}
-              onChange={(e) => setMaxPriceInput(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handlePriceFilterApply()}
-            />
+          <div className="sidebar__section-header">
+            <h3
+              className="sidebar__title clickable-title"
+              onClick={(e) => handleTitleClick('category', e)}
+            >
+              Danh mục
+              <span className="title-chevron">
+                {collapsedSections.category}
+              </span>
+            </h3>
           </div>
 
-          <button
-            className="sidebar__button"
-            onClick={handlePriceFilterApply}
-          >
-            Áp dụng
-          </button>
+          {!collapsedSections.category && (
+            <div className="sidebar__section-content">
+              {selectedCategory && (
+                <div className="current-category">
+                  <strong>Đang xem:</strong> {getCurrentCategoryName()}
+                </div>
+              )}
+
+              <ul className="sidebar__list">
+                <li className="sidebar__item">
+                  <label className="sidebar__label">
+                    <input
+                      type="radio"
+                      name="category"
+                      checked={!selectedCategory}
+                      onChange={() => handleCategoryChange(null)}
+                    />
+                    <span className="sidebar__label-text">Tất cả danh mục</span>
+                  </label>
+                </li>
+
+                {/* Các danh mục từ database */}
+                {categories.map((c) => (
+                  <li key={c.category_id} className="sidebar__item">
+                    <label className="sidebar__label">
+                      <input
+                        type="radio"
+                        name="category"
+                        checked={selectedCategory === c.category_id.toString()}
+                        onChange={() => handleCategoryChange(c.category_id)}
+                      />
+                      <span className="sidebar__label-text">{c.category_name}</span>
+                    </label>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
 
-        {/* Rating */}
+        {/* Price Section với clickable title */}
         <div className="sidebar__section">
-          <h3 className="sidebar__title">Đánh giá</h3>
-          <ul className="sidebar__list">
-            <li className="sidebar__item">
-              <label className="sidebar__label">
+          <div className="sidebar__section-header">
+            <h3
+              className="sidebar__title clickable-title"
+              onClick={(e) => handleTitleClick('price', e)}
+            >
+              Khoảng giá
+              <span className="title-chevron">
+                {collapsedSections.price}
+              </span>
+            </h3>
+          </div>
+
+          {!collapsedSections.price && (
+            <div className="sidebar__section-content">
+              <div className="sidebar__price-inputs">
                 <input
-                  type="radio"
-                  name="rating"
-                  checked={!rating}
-                  onChange={() => handleRatingChange(null)}
+                  className="sidebar__input"
+                  type="number"
+                  placeholder="Min"
+                  value={minPriceInput}
+                  onChange={(e) => setMinPriceInput(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handlePriceFilterApply()}
                 />
-                <span className="sidebar__label-text">Tất cả đánh giá</span>
-              </label>
-            </li>
-            {RATING_OPTIONS.map((r) => (
-              <li key={r.value} className="sidebar__item">
-                <label className="sidebar__label">
-                  <input
-                    type="radio"
-                    name="rating"
-                    checked={rating === r.value}
-                    onChange={() => handleRatingChange(r.value)}
-                  />
-                  <span className="sidebar__label-text">{r.label}</span>
-                </label>
-              </li>
-            ))}
-          </ul>
+                <input
+                  className="sidebar__input"
+                  type="number"
+                  placeholder="Max"
+                  value={maxPriceInput}
+                  onChange={(e) => setMaxPriceInput(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handlePriceFilterApply()}
+                />
+              </div>
+
+              <button
+                className="sidebar__button"
+                onClick={handlePriceFilterApply}
+              >
+                Áp dụng
+              </button>
+            </div>
+          )}
         </div>
-        {/* Clear All Filters Button */}
+
+        {/* Rating Section với clickable title */}
+        <div className="sidebar__section">
+          <div className="sidebar__section-header">
+            <h3
+              className="sidebar__title clickable-title"
+              onClick={(e) => handleTitleClick('rating', e)}
+            >
+              Đánh giá
+              <span className="title-chevron">
+                {collapsedSections.rating}
+              </span>
+            </h3>
+          </div>
+
+          {!collapsedSections.rating && (
+            <div className="sidebar__section-content">
+              <ul className="sidebar__list">
+                <li className="sidebar__item">
+                  <label className="sidebar__label">
+                    <input
+                      type="radio"
+                      name="rating"
+                      checked={!rating}
+                      onChange={() => handleRatingChange(null)}
+                    />
+                    <span className="sidebar__label-text">Tất cả đánh giá</span>
+                  </label>
+                </li>
+                {RATING_OPTIONS.map((r) => (
+                  <li key={r.value} className="sidebar__item">
+                    <label className="sidebar__label">
+                      <input
+                        type="radio"
+                        name="rating"
+                        checked={rating === r.value}
+                        onChange={() => handleRatingChange(r.value)}
+                      />
+                      <span className="sidebar__label-text">{r.label}</span>
+                    </label>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+
+        {/* Clear All Filters Button - Luôn hiển thị */}
         {(selectedCategory || minPrice || maxPrice || rating || sort !== "newest") && (
           <div className="sidebar__section">
             <button

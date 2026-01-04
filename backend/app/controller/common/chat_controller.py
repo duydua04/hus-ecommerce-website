@@ -82,3 +82,25 @@ async def get_messages(
         cursor=cursor,
         limit=limit
     )
+
+
+
+@router.patch("/{conversation_id}/read")
+async def mark_conversation_read(
+        conversation_id: str,
+        current_user: dict = Depends(get_current_user),
+        service: ChatService = Depends(get_chat_service)
+):
+    """
+    Đánh dấu một cuộc trò chuyện là đã đọc.
+    """
+    user = current_user['user']
+    role = current_user['role']
+
+    user_id = service.get_user_id(user, role)
+
+    return await service.mark_as_read(
+        conversation_id=conversation_id,
+        user_id=user_id,
+        role=role
+    )
