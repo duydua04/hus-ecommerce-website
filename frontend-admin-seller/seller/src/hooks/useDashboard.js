@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import dashboardService from "../api/DashboardService";
+import { WebSocketClient } from "./websocket";
 
 /* Utils  */
 
@@ -114,7 +115,6 @@ const useDashboard = () => {
     setSyncing(true);
     try {
       const result = await dashboardService.syncDashboard();
-      // Sau khi trigger sync, đợi 2-3 giây rồi fetch lại data
       setTimeout(() => {
         fetchDashboard("monthly");
       }, 2500);
@@ -164,6 +164,28 @@ const useDashboard = () => {
     },
     [fetchDashboard]
   );
+
+  /* Tự động cập nhật khi có đơn hàng mới */
+  useEffect(() => {
+    WebSocketClient.connect();
+
+    const unsubscribe = WebSocketClient.subscribe("dashboard", (message) => {
+      // message = {type: "DASHBOARD_UPDATED", data: {stats, chart, products}}
+      if (message?.type !== "DASHBOARD_UPDATED") return;
+
+      const { stats: s, chart: c, products: p } = message.data || {};
+
+      if (s) setStats(normalize.stats(s));
+      if (c) setChart(normalize.chart(c));
+      if (p) setTopProducts(normalize.products(p));
+
+      setLastUpdate(new Date());
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
 
   /* ===== Cleanup ===== */
   useEffect(() => {

@@ -19,11 +19,10 @@ export default function useSellerNotification() {
 
         const items = data.items.map((n) => ({
           ...n,
-          id: n._id, // map _id → id
+          id: n._id,
         }));
 
         setNotifications((prev) => (reset ? items : [...prev, ...items]));
-
         setCursor(data.next_cursor || null);
 
         const unread = items.filter((n) => !n.is_read).length;
@@ -64,23 +63,26 @@ export default function useSellerNotification() {
     }
   }, []);
 
-  /* WEBSOCKET REALTIME */
+  /* WEBSOCKET REALTIME - {type, id, title, message, data} */
   useEffect(() => {
     WebSocketClient.connect();
 
     const unsubscribe = WebSocketClient.subscribe("notification", (message) => {
-      if (!message?.payload) return;
+      // message = {type: "NOTIFICATION", id, title, message, data}
+      if (message?.type !== "NOTIFICATION") return;
 
       const notif = {
-        ...message.payload,
-        id: message.payload._id,
+        _id: message.id,
+        id: message.id,
+        title: message.title,
+        message: message.message,
+        data: message.data,
+        is_read: false,
+        created_at: new Date().toISOString(),
       };
 
-      // Chỉ nhận thông báo dành cho seller
-      if (notif.role === "seller") {
-        setNotifications((prev) => [notif, ...prev]);
-        setUnreadCount((prev) => prev + 1);
-      }
+      setNotifications((prev) => [notif, ...prev]);
+      setUnreadCount((prev) => prev + 1);
     });
 
     return () => {
@@ -93,7 +95,6 @@ export default function useSellerNotification() {
     loadNotifications({ reset: true });
   }, []);
 
-  /* PUBLIC API */
   return {
     notifications,
     unreadCount,
