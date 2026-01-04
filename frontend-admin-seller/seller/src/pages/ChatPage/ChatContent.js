@@ -1,7 +1,11 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Search, Send, Image as ImageIcon, X } from "lucide-react";
+import { Search, Send, Image, X } from "lucide-react";
 import useChat from "../../hooks/useChat";
-import { formatSmartTime, formatTimeOnly } from "../../utils/timeUtils";
+import {
+  formatSmartTime,
+  formatTimeOnly,
+  formatDateSeparator,
+} from "../../utils/timeUtils";
 import "./Chat.scss";
 
 export default function ChatContent() {
@@ -58,6 +62,17 @@ export default function ChatContent() {
     return statusMatch && searchMatch;
   });
 
+  // Hàm kiểm tra xem có cần hiển thị date separator không
+  const shouldShowDateSeparator = (currentMsg, previousMsg) => {
+    if (!previousMsg) return true;
+
+    // So sánh date separator string của 2 tin nhắn
+    const currentLabel = formatDateSeparator(currentMsg.created_at);
+    const previousLabel = formatDateSeparator(previousMsg.created_at);
+
+    return currentLabel !== previousLabel;
+  };
+
   // Hàm hiển thị avatar
   const renderAvatar = (conversation, type = "list") => {
     if (conversation.customer_avatar) {
@@ -95,12 +110,6 @@ export default function ChatContent() {
       e.target.value = "";
     }
   };
-
-  // Quick replies
-  const quickReplies = [
-    "Xin chào! Shop có thể giúp gì cho bạn?",
-    "Cảm ơn bạn đã mua hàng!",
-  ];
 
   // Handle scroll to load more
   const handleScroll = (e) => {
@@ -266,70 +275,75 @@ export default function ChatContent() {
                       index === 0 ||
                       messages[index - 1].sender_role !== msg.sender_role;
 
-                    // Lấy tên người gửi
-                    const senderName = isOwn
-                      ? "Bạn"
-                      : activeConversation.customer_name || "Khách hàng";
+                    // Kiểm tra xem có cần hiển thị date separator không
+                    const showDateSeparator = shouldShowDateSeparator(
+                      msg,
+                      messages[index - 1]
+                    );
 
                     return (
-                      <div
-                        key={msg.id}
-                        className={`chat-message ${isOwn ? "own" : "other"}`}
-                      >
-                        {/* Avatar cho tin nhắn */}
-                        <div className="chat-message-avatar">
-                          {showAvatar && !isOwn && (
-                            <div className="avatar">
-                              {renderAvatar(activeConversation, "message")}
-                            </div>
-                          )}
-                        </div>
+                      <React.Fragment key={msg.id}>
+                        {/* Date Separator */}
+                        {showDateSeparator && (
+                          <div className="chat-date-separator">
+                            <span>{formatDateSeparator(msg.created_at)}</span>
+                          </div>
+                        )}
 
-                        {/* Message Content */}
-                        <div className="chat-message-content">
-                          {/* Tên người gửi (chỉ hiển thị với tin nhắn không phải của mình) */}
-                          {showAvatar && !isOwn && (
-                            <div className="chat-message-sender">
-                              {senderName}
-                            </div>
-                          )}
-
-                          {msg.content && (
-                            <div className="chat-message-bubble">
-                              <p className="chat-message-text">{msg.content}</p>
-                            </div>
-                          )}
-
-                          {msg.image_urls && msg.image_urls.length > 0 && (
-                            <div
-                              className={`chat-message-images ${
-                                msg.image_urls.length === 1
-                                  ? "single"
-                                  : msg.image_urls.length === 2
-                                  ? "double"
-                                  : "grid"
-                              }`}
-                            >
-                              {msg.image_urls.map((url, i) => (
-                                <img
-                                  key={i}
-                                  src={url}
-                                  alt={`Attachment ${i + 1}`}
-                                  className="chat-message-image"
-                                  onClick={() => window.open(url, "_blank")}
-                                />
-                              ))}
-                            </div>
-                          )}
-
-                          <span className="chat-message-time">
-                            {formatTimeOnly(msg.created_at)}
-                            {isOwn && msg.is_read && (
-                              <span className="read-indicator"> ✓✓</span>
+                        {/* Message */}
+                        <div
+                          className={`chat-message ${isOwn ? "own" : "other"}`}
+                        >
+                          {/* Avatar cho tin nhắn */}
+                          <div className="chat-message-avatar">
+                            {showAvatar && !isOwn && (
+                              <div className="avatar">
+                                {renderAvatar(activeConversation, "message")}
+                              </div>
                             )}
-                          </span>
+                          </div>
+
+                          {/* Message Content */}
+                          <div className="chat-message-content">
+                            {msg.content && (
+                              <div className="chat-message-bubble">
+                                <p className="chat-message-text">
+                                  {msg.content}
+                                </p>
+                              </div>
+                            )}
+
+                            {msg.image_urls && msg.image_urls.length > 0 && (
+                              <div
+                                className={`chat-message-images ${
+                                  msg.image_urls.length === 1
+                                    ? "single"
+                                    : msg.image_urls.length === 2
+                                    ? "double"
+                                    : "grid"
+                                }`}
+                              >
+                                {msg.image_urls.map((url, i) => (
+                                  <img
+                                    key={i}
+                                    src={url}
+                                    alt={`Attachment ${i + 1}`}
+                                    className="chat-message-image"
+                                    onClick={() => window.open(url, "_blank")}
+                                  />
+                                ))}
+                              </div>
+                            )}
+
+                            <span className="chat-message-time">
+                              {formatTimeOnly(msg.created_at)}
+                              {isOwn && msg.is_read && (
+                                <span className="read-indicator"> ✓✓</span>
+                              )}
+                            </span>
+                          </div>
                         </div>
-                      </div>
+                      </React.Fragment>
                     );
                   })}
 
@@ -339,19 +353,6 @@ export default function ChatContent() {
 
               {/* Input Area */}
               <div className="chat-input-area">
-                {/* Quick Replies */}
-                <div className="chat-quick-replies">
-                  {quickReplies.map((reply, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setMessageInput(reply)}
-                      className="chat-quick-reply-btn"
-                    >
-                      {reply}
-                    </button>
-                  ))}
-                </div>
-
                 {/* Input Box */}
                 <div className="chat-input-box">
                   <input
@@ -369,7 +370,7 @@ export default function ChatContent() {
                     disabled={sending}
                     title="Gửi ảnh"
                   >
-                    <ImageIcon className="w-5 h-5" />
+                    <Image className="w-5 h-5" />
                   </button>
 
                   <div className="chat-input-wrapper">

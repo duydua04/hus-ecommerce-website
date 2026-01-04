@@ -164,3 +164,35 @@ export function getDateLabel(timestamp) {
     timeZone: "Asia/Ho_Chi_Minh",
   });
 }
+
+// Function mới cho date separator trong chat (có thứ trong tuần)
+export function formatDateSeparator(timestamp) {
+  if (!timestamp) return "";
+
+  if (isToday(timestamp)) {
+    return "Hôm nay";
+  }
+
+  if (isYesterday(timestamp)) {
+    return "Hôm qua";
+  }
+
+  const date = parseUTCTime(timestamp);
+
+  // Format: "Thứ Tư, 10 tháng 12, 2025"
+  const daysOfWeek = [
+    "Chủ Nhật",
+    "Thứ Hai",
+    "Thứ Ba",
+    "Thứ Tư",
+    "Thứ Năm",
+    "Thứ Sáu",
+    "Thứ Bảy",
+  ];
+  const dayOfWeek = daysOfWeek[date.getDay()];
+  const day = date.getDate();
+  const month = date.getMonth() + 1;
+  const year = date.getFullYear();
+
+  return `${dayOfWeek}, ${day} tháng ${month}, ${year}`;
+}
