@@ -13,12 +13,12 @@ const Header = () => {
 
   // Fetch user info on mount nếu chưa có user trong context
   useEffect(() => {
-    const token = localStorage.getItem("access_token");
+    const token = localStorage.getItem("userRole");
     if (!token || user) return; // Nếu đã có user thì không load lại
 
     const loadUser = async () => {
       try {
-        const userData = await api.profile.getProfile();
+        const userData = await api.auth.getMe();
         setUser(userData);
       } catch (err) {
         console.error("Load user error:", err);
@@ -58,11 +58,19 @@ const Header = () => {
   // Lấy tên hiển thị từ UserContext
   const getDisplayName = () => {
     if (!user) return 'Tài khoản';
-    return user.fullname || user.fname || user.email?.split('@')[0] || 'Tài khoản';
+
+    // Ưu tiên fname + lname
+    if (user.fname || user.lname) {
+      return `${user.lname || ''} ${user.fname || ''}`.trim();
+    }
+
+    return user.email?.split('@')[0] || 'Tài khoản';
   };
 
-  // Lấy avatar URL từ UserContext
-  const getAvatarUrl = () => user?.avatar_url || null;
+  // Lấy avatar URL từ UserContext - ƯU TIÊN avt_url từ /auth/me
+  const getAvatarUrl = () => {
+    return user?.avt_url || null;
+  };
 
   return (
     <header className="header">
@@ -79,7 +87,7 @@ const Header = () => {
                     width: 'auto'
                   }}
                 />
-              <span className="brand__name">FastBuy</span>
+              <span className="brand__name">Fastbuy</span>
             </Link>
           </div>
         </div>
@@ -141,21 +149,22 @@ const Header = () => {
                 aria-label="Tài khoản"
                 onClick={() => setShowUserMenu(!showUserMenu)}
               >
-                 {getAvatarUrl() ? (
-                    <img
-                      src={getAvatarUrl()}
-                      alt="avatar"
-                      className="header-avatar"
-                      onError={(e) => {
-                        e.target.onerror = null;
-                        e.target.style.display = 'none';
-                      }}
-                    />
-                  ) : (
-                    <div className="header-avatar header-avatar--fallback">
-                      👤
-                    </div>
-                  )}
+                {getAvatarUrl() ? (
+                  <img
+                    src={getAvatarUrl()}
+                    alt="avatar"
+                    className="header-avatar"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.style.display = 'none';
+                      e.target.parentElement.innerHTML = '<div class="header-avatar header-avatar--fallback">👤</div>';
+                    }}
+                  />
+                ) : (
+                  <div className="header-avatar header-avatar--fallback">
+                    👤
+                  </div>
+                )}
               </button>
 
               {showUserMenu && (
@@ -166,7 +175,6 @@ const Header = () => {
                         <div className="user-menu__avatar">
                           {getAvatarUrl() ? (
                             <img
-                              className="header-avatar"
                               src={getAvatarUrl()}
                               alt="avatar"
                               style={{

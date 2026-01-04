@@ -1,4 +1,4 @@
-// src/components/NotificationSidebar.jsx - THÊM NAVIGATION
+// src/components/NotificationSidebar.jsx
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useNotifications } from '../context/useNotifications';
@@ -15,7 +15,7 @@ export default function NotificationSidebar({ user }) {
     if (path === '/profile') return 'profile';
     if (path === '/addresses') return 'address';
     if (path === '/tracking') return 'tracking';
-    return 'profile'; // Mặc định
+    return 'profile';
   };
 
   const activeSection = getActiveSection();
@@ -27,16 +27,24 @@ export default function NotificationSidebar({ user }) {
     return user?.email || 'Người dùng';
   };
 
+  // Lấy avatar URL
   const getUserAvatar = () => {
-    const avatarUrl = user?.avatar_url || user?.avt_url;
+    const avatarUrl = user?.avt_url;
+
     if (avatarUrl) {
       return (
         <img
           src={avatarUrl}
           alt="avatar"
+          onError={(e) => {
+            console.error('Sidebar avatar load error');
+            e.target.style.display = 'none';
+            e.target.parentElement.innerHTML = '<div class="avatar-fallback">👤</div>';
+          }}
         />
       );
     }
+
     return <div className="avatar-fallback">👤</div>;
   };
 

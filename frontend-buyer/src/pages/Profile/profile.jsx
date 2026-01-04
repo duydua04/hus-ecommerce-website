@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import api from "../../services/api";
 import { useUser } from "../../context/UserContext";
 import NotificationSidebar from "../../components/notificationSidebar";
+import Modal from "../../components/modal";
 import "./profile.css";
 import Addresses from "../Addresses/addresses";
 
@@ -22,9 +23,69 @@ export default function Profile() {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
 
+  // Modal state
+  const [modal, setModal] = useState({
+    isOpen: false,
+    type: 'info',
+    title: '',
+    message: '',
+    onConfirm: null,
+    showCancelButton: false
+  });
+
+  // Helper functions for modal
+  const showModal = (config) => {
+    setModal({
+      isOpen: true,
+      ...config
+    });
+  };
+
+  const closeModal = () => {
+    setModal(prev => ({ ...prev, isOpen: false }));
+  };
+
+  const showSuccessModal = (message, title = "Thành công") => {
+    showModal({
+      type: 'success',
+      title,
+      message,
+      showCancelButton: false
+    });
+  };
+
+  const showErrorModal = (message, title = "Lỗi") => {
+    showModal({
+      type: 'error',
+      title,
+      message,
+      showCancelButton: false
+    });
+  };
+
+  const showWarningModal = (message, title = "Cảnh báo") => {
+    showModal({
+      type: 'warning',
+      title,
+      message,
+      showCancelButton: false
+    });
+  };
+
+  const showConfirmModal = (message, onConfirm, title = "Xác nhận") => {
+    showModal({
+      type: 'confirm',
+      title,
+      message,
+      showCancelButton: true,
+      onConfirm,
+      okText: 'Đồng ý',
+      cancelText: 'Hủy'
+    });
+  };
+
   /* ================= VALIDATION FUNCTIONS ================= */
   const validatePhoneNumber = (phone) => {
-    // Regex cho số điện thoại Việt Nam
     const phoneRegex = /^(0[1-9])+([0-9]{8})$/;
     return phoneRegex.test(phone);
   };
@@ -32,12 +93,10 @@ export default function Profile() {
   const validateForm = () => {
     const newErrors = {};
 
-    // Validate số điện thoại
     if (profile.phone && !validatePhoneNumber(profile.phone.trim())) {
       newErrors.phone = "Số điện thoại không đúng định dạng Việt Nam (vd: 0987654321)";
     }
 
-    // Validate họ và tên (tuỳ chọn)
     if (!profile.lname.trim()) {
       newErrors.lname = "Vui lòng nhập họ";
     }
@@ -69,21 +128,20 @@ export default function Profile() {
     const { name, value } = e.target;
     setProfile({ ...profile, [name]: value });
 
-    // Clear error khi người dùng bắt đầu nhập
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: null }));
     }
   };
 
   const handleSaveProfile = async () => {
-    // Validate trước khi lưu
     const validationErrors = validateForm();
 
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
-      alert("Vui lòng kiểm tra lại thông tin");
+      showWarningModal("Vui lòng kiểm tra lại thông tin");
       return;
     }
+
     try {
       setLoading(true);
       setErrors({});
@@ -92,14 +150,15 @@ export default function Profile() {
         fname: profile.fname,
         lname: profile.lname,
         phone: profile.phone,
+        avt_url: profile.avt_url || null,
       });
 
       setProfile(prev => ({ ...prev, ...updatedData }));
       setUser(prev => ({ ...prev, ...updatedData }));
 
-      alert("✅ Lưu hồ sơ thành công");
+      showSuccessModal("Lưu hồ sơ thành công");
     } catch (err) {
-      alert(err.message || "Cập nhật thất bại");
+      showErrorModal(err.message || "Cập nhật thất bại");
     } finally {
       setLoading(false);
     }
@@ -110,12 +169,12 @@ export default function Profile() {
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      alert('Vui lòng chọn file ảnh');
+      showErrorModal('Vui lòng chọn file ảnh');
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      alert('File ảnh không được vượt quá 5MB');
+      showErrorModal('File ảnh không được vượt quá 5MB');
       return;
     }
 
@@ -124,7 +183,10 @@ export default function Profile() {
   };
 
   const handleUploadAvatar = async () => {
-    if (!avatarFile) return alert("Vui lòng chọn ảnh");
+    if (!avatarFile) {
+      showWarningModal("Vui lòng chọn ảnh");
+      return;
+    }
 
     try {
       setLoading(true);
@@ -143,11 +205,11 @@ export default function Profile() {
       setAvatarPreview(null);
       setAvatarFile(null);
 
-      alert("✅ Avatar đã được lưu");
+      showSuccessModal("Avatar đã được lưu");
 
     } catch (err) {
       console.error(err);
-      alert(err.message || "Upload avatar thất bại");
+      showErrorModal(err.message || "Upload avatar thất bại");
     } finally {
       setLoading(false);
     }
@@ -160,21 +222,25 @@ export default function Profile() {
   };
 
   const handleDeleteAvatar = async () => {
-    if (!confirm('Bạn có chắc muốn xóa avatar?')) return;
+    showConfirmModal(
+      'Bạn có chắc muốn xóa avatar?',
+      async () => {
+        try {
+          setLoading(true);
+          await api.avatar.delete();
 
-    try {
-      setLoading(true);
-      await api.avatar.delete();
+          setProfile(prev => ({ ...prev, avt_url: null }));
+          setUser(prev => ({ ...prev, avt_url: null, avatar_url: null }));
 
-      setProfile(prev => ({ ...prev, avt_url: null }));
-      setUser(prev => ({ ...prev, avt_url: null, avatar_url: null }));
-
-      alert('✅ Xóa avatar thành công');
-    } catch (err) {
-      alert(err.message || 'Xóa avatar thất bại');
-    } finally {
-      setLoading(false);
-    }
+          showSuccessModal('Xóa avatar thành công');
+        } catch (err) {
+          showErrorModal(err.message || 'Xóa avatar thất bại');
+        } finally {
+          setLoading(false);
+        }
+      },
+      'Xác nhận xóa avatar'
+    );
   };
 
   const getCurrentAvatarUrl = () => {
@@ -235,10 +301,8 @@ export default function Profile() {
                   maxLength="10"
                 />
                 {errors.phone && <div className="error-message">{errors.phone}</div>}
-
               </div>
             </div>
-
 
             <div className="form-group">
               <label className="form-label">Avatar</label>
@@ -334,8 +398,20 @@ export default function Profile() {
             </div>
           </div>
         )}
-
       </main>
+
+      {/* Global Modal */}
+      <Modal
+        isOpen={modal.isOpen}
+        onClose={closeModal}
+        type={modal.type}
+        title={modal.title}
+        message={modal.message}
+        showCancelButton={modal.showCancelButton}
+        onOk={modal.onConfirm}
+        okText={modal.okText}
+        cancelText={modal.cancelText}
+      />
     </div>
   );
 }

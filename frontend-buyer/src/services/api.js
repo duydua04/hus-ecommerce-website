@@ -243,7 +243,7 @@ export const chatAPI = {
 };
 
 // ============================================
-// AVATAR APIs (Sửa upload/delete dùng credentials)
+// AVATAR APIs
 // ============================================
 export const avatarAPI = {
   upload: async (file) => {
@@ -256,7 +256,7 @@ export const avatarAPI = {
     });
     if (!response.ok) throw new Error('Upload failed');
     const data = await response.json();
-    return { ...data, avatar_url: data.public_url };
+    return { ...data, avt_url: data.public_url };
   },
   delete: async () => {
     const response = await fetch(`${API_BASE_URL}/avatars/me`, {
