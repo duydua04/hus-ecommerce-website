@@ -40,6 +40,12 @@ const ChatService = {
 
     return res.data;
   },
+
+  /* MARK AS READ */
+  async markAsRead(conversationId) {
+    const res = await axiosInstance.patch(`/chat/${conversationId}/read`);
+    return res.data;
+  },
 };
 
 export default ChatService;

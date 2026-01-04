@@ -65,9 +65,17 @@ export default function useChat({ role = "seller" } = {}) {
     setCursor(null);
     loadMessages(conversationId, true);
 
-    setConversations((prev) =>
-      prev.map((c) => (c.id === conversationId ? { ...c, unread_count: 0 } : c))
-    );
+    // Mark as read when selecting conversation
+    try {
+      await ChatService.markAsRead(conversationId);
+      setConversations((prev) =>
+        prev.map((c) =>
+          c.id === conversationId ? { ...c, unread_count: 0 } : c
+        )
+      );
+    } catch (error) {
+      console.error("Error marking conversation as read:", error);
+    }
   }, []);
 
   /* MESSAGES */
@@ -150,6 +158,19 @@ export default function useChat({ role = "seller" } = {}) {
     }
   };
 
+  const markConversationAsRead = async (conversationId) => {
+    try {
+      await ChatService.markAsRead(conversationId);
+      setConversations((prev) =>
+        prev.map((c) =>
+          c.id === conversationId ? { ...c, unread_count: 0 } : c
+        )
+      );
+    } catch (error) {
+      console.error("Error marking conversation as read:", error);
+    }
+  };
+
   /* WEBSOCKET */
 
   useEffect(() => {
@@ -166,6 +187,9 @@ export default function useChat({ role = "seller" } = {}) {
 
       if (activeConvRef.current === convId) {
         setMessages((prev) => [...prev, msg]);
+
+        // Auto mark as read when receiving message in active conversation
+        markConversationAsRead(convId);
       }
 
       setConversations((prev) => {
@@ -214,5 +238,6 @@ export default function useChat({ role = "seller" } = {}) {
 
     sendTextMessage,
     sendImageMessage,
+    markConversationAsRead,
   };
 }
