@@ -6,10 +6,13 @@ import Pagination from "../../components/common/Pagination/Pagination";
 import Button from "../../components/common/Button/Button";
 import SearchBox from "../../components/common/SearchBox/SearchBox";
 import CarrierModal from "./AddCarrier/AddCarrier";
-import AvatarUploadModal from "../../components/common/AvatarUpload/AvatarUpload";
+import AvatarUploadModal from "../../components/common/ImageUpload/ImageUpload";
 import ConfirmModal from "../../components/common/ConfirmModal/ConfirmModal";
 import useCarrier from "../../hooks/useCarrier";
+
 import "../../assets/styles/page.scss";
+import "../../assets/styles/modal.scss";
+import "./Transport.scss";
 
 // Avatar mặc định
 import defaultAvatar from "../../assets/images/default-avatar.png";
@@ -140,9 +143,11 @@ export default function TransportContent() {
     setCarrierToDelete(null);
   };
 
-  const handleAvatarUpload = async (carrierId, file) => {
+  const handleAvatarUpload = async (file) => {
+    if (!selectedCarrierId) return;
+
     try {
-      await uploadCarrierAvatar(carrierId, file);
+      await uploadCarrierAvatar(selectedCarrierId, file);
 
       setIsAvatarModalOpen(false);
       setSelectedCarrierId(null);
@@ -164,22 +169,29 @@ export default function TransportContent() {
   const columns = [
     {
       key: "carrier_avt_url",
-      label: "Avatar",
+      label: "Hình ảnh",
       className: "table__cell--avatar",
       render: (value, row) => (
-        <img
-          src={value || DEFAULT_AVATAR}
-          alt="Carrier avatar"
-          className="table__img table__img--clickable"
-          title="Click để cập nhật avatar"
+        <div
+          className="table__img-wrapper"
           onClick={() => {
             setSelectedCarrierId(row.carrier_id);
             setIsAvatarModalOpen(true);
           }}
-          onError={(e) => {
-            e.target.src = DEFAULT_AVATAR;
-          }}
-        />
+        >
+          <img
+            src={value || DEFAULT_AVATAR}
+            alt="Carrier"
+            className="table__img"
+            onError={(e) => {
+              e.target.src = DEFAULT_AVATAR;
+            }}
+          />
+          <div className="table__img-overlay">
+            <i className="bx bx-camera"></i>
+            <span>Cập nhật</span>
+          </div>
+        </div>
       ),
     },
     {
@@ -319,12 +331,14 @@ export default function TransportContent() {
 
       <AvatarUploadModal
         isOpen={isAvatarModalOpen}
-        carrierId={selectedCarrierId}
         onUpload={handleAvatarUpload}
         onClose={() => {
           setIsAvatarModalOpen(false);
           setSelectedCarrierId(null);
         }}
+        title="Cập nhật avatar đơn vị vận chuyển"
+        multiple={false}
+        maxSizeMB={2}
       />
 
       <ConfirmModal

@@ -5,6 +5,7 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
+
 import DashboardPage from "./pages/Dashboard/DashboardPage";
 import CategoryPage from "./pages/Category/CategoryPage";
 import BuyerPage from "./pages/User/Buyer/BuyerPage";
@@ -22,12 +23,13 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* ===== PUBLIC ROUTE ===== */}
+        {/* PUBLIC */}
         <Route path="/login" element={<LoginPage />} />
 
-        {/* ===== PROTECTED ROUTES - CHỈ ADMIN ===== */}
+        {/* ROOT */}
+        <Route path="/" element={<Navigate to="/login" replace />} />
 
-        {/* Dashboard - Trang chủ */}
+        {/* ADMIN */}
         <Route
           path="/dashboard"
           element={
@@ -37,7 +39,6 @@ function App() {
           }
         />
 
-        {/* Quản lý danh mục */}
         <Route
           path="/category"
           element={
@@ -47,7 +48,6 @@ function App() {
           }
         />
 
-        {/* Quản lý người mua */}
         <Route
           path="/buyer"
           element={
@@ -57,7 +57,6 @@ function App() {
           }
         />
 
-        {/* Quản lý người bán */}
         <Route
           path="/seller"
           element={
@@ -67,7 +66,6 @@ function App() {
           }
         />
 
-        {/* Quản lý khuyến mãi */}
         <Route
           path="/discount"
           element={
@@ -77,7 +75,6 @@ function App() {
           }
         />
 
-        {/* Quản lý vận chuyển */}
         <Route
           path="/transport"
           element={
@@ -87,24 +84,15 @@ function App() {
           }
         />
 
-        {/* Root path "/" redirect về dashboard */}
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute allowedRoles={["admin"]}>
-              <Navigate to="/dashboard" replace />
-            </ProtectedRoute>
-          }
-        />
-
-        {/*404 NOT FOUND*/}
+        {/* 404 */}
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Router>
   );
 }
 
-// Component 404
+/* 404 PAGE */
+
 function NotFoundPage() {
   return (
     <div

@@ -418,7 +418,7 @@ function ForgotPassword() {
               className="link-btn"
               onClick={handleBackToLogin}
             >
-              ← Quay lại đăng nhập
+              Quay lại đăng nhập
             </button>
           </div>
         </div>

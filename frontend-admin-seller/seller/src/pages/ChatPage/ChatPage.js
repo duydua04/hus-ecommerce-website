@@ -1,13 +1,13 @@
 import React from "react";
 import MainLayout from "../../components/layout/MainLayout";
-import DashboardContent from "./DashboardContent";
+import ChatContent from "./ChatContent";
 
-const DashboardPage = () => {
+const ChatPage = () => {
   return (
     <MainLayout>
-      <DashboardContent />
+      <ChatContent />
     </MainLayout>
   );
 };
 
-export default DashboardPage;
+export default ChatPage;

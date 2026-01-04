@@ -11,7 +11,7 @@ from ...utils.storage import storage
 from ...utils.security import verify_access_token
 
 from ...models.chat import Conversation, Message
-from ...models.users import Buyer, Seller
+from ...models.users import Buyer, Seller, Admin
 
 from ...schemas.chat import SendMessageRequest
 from ...config.db import get_db
@@ -53,6 +53,14 @@ class ChatService:
                 u = result.scalar_one_or_none()
                 if u:
                     return u.seller_id, role
+
+            elif role == 'admin':
+                stmt = select(Admin).where(Admin.email == email)
+                result = await db.execute(stmt)
+                u = result.scalar_one_or_none()
+                if u:
+                    # Admin không chat, nhưng cần ID để kết nối WebSocket nhận Noti
+                    return u.admin_id, role
         except Exception:
             pass
         return None, None
@@ -140,6 +148,13 @@ class ChatService:
     async def send_message(self, sender_id: int, sender_role: str, payload: SendMessageRequest):
         """Gửi tin nhắn trực tiếp"""
         sender_role = sender_role.lower()
+
+        if sender_role == 'admin':
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Admin cannot participate in chat"
+            )
+
         recipient_role = "seller" if sender_role == "buyer" else "buyer"
 
         recipient = None

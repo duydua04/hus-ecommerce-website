@@ -165,7 +165,7 @@ export default function BuyerContent() {
         title="Khách hàng"
         breadcrumbs={[
           { label: "Trang chủ", path: "/dashboard" },
-          { label: "Buyer", path: "/admin/buyers" },
+          { label: "Khách hàng", path: "/admin/buyer" },
         ]}
       />
 

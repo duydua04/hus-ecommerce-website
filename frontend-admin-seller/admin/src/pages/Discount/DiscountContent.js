@@ -8,7 +8,9 @@ import SearchBox from "../../components/common/SearchBox/SearchBox";
 import DiscountModal from "./AddDiscount/AddDiscount";
 import ConfirmModal from "../../components/common/ConfirmModal/ConfirmModal";
 import useDiscount from "../../hooks/useDiscount";
+
 import "../../assets/styles/page.scss";
+import "../../assets/styles/modal.scss";
 
 export default function DiscountContent() {
   const {
@@ -220,7 +222,7 @@ export default function DiscountContent() {
         title="Mã giảm giá"
         breadcrumbs={[
           { label: "Trang chủ", path: "/dashboard" },
-          { label: "Mã giảm giá", path: "/discounts" },
+          { label: "Mã giảm giá", path: "/discount" },
         ]}
       />
 

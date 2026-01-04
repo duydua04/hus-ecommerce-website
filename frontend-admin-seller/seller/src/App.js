@@ -18,6 +18,7 @@ import OrderPage from "./pages/Order/OrderPage";
 import LocationPage from "./pages/Location/LocationPage";
 import ProfilePage from "./pages/Profile/ProfilePage";
 import ReviewPage from "./pages/Review/ReviewPage";
+import ChatPage from "./pages/ChatPage/ChatPage";
 
 // Protected Route Component
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -30,14 +31,13 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* ===== PUBLIC ROUTES - Authentication ===== */}
+        {/*Authentication*/}
         <Route path="/login" element={<SellerLogin />} />
         <Route path="/register" element={<SellerRegister />} />
         <Route path="/forgot-password" element={<SellerForgotPassword />} />
 
-        {/* ===== PROTECTED ROUTES - CHỈ SELLER ===== */}
-
-        {/* Dashboard - Tổng quan */}
+        {/*SELLER*/}
+        {/* Dashboard */}
         <Route
           path="/dashboard"
           element={
@@ -97,10 +97,20 @@ function App() {
           }
         />
 
+        {/* Chat với khách hàng */}
+        <Route
+          path="/chat"
+          element={
+            <ProtectedRoute allowedRoles={["seller"]}>
+              <ChatPage />
+            </ProtectedRoute>
+          }
+        />
+
         {/* Root path "/" redirect về login */}
         <Route path="/" element={<Navigate to="/login" replace />} />
 
-        {/* 404 NOT FOUND - Phải đặt cuối cùng */}
+        {/* 404 NOT FOUND */}
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Router>
