@@ -2,10 +2,10 @@
 -- PostgreSQL database dump
 --
 
-\restrict NZUVZMJYckNqVH3uggAF8xo0BahO9dXsBb3bW5VRtEOkN7CH3G6mJdRaVYdMgq4
+\restrict g6fgmjlk3AqweN7ZCXMaW8RUjOF9vdpKUuYNgtF246AJT2YbfrDxMv6mEg2WhZ9
 
--- Dumped from database version 16.11 (Debian 16.11-1.pgdg13+1)
--- Dumped by pg_dump version 16.11 (Debian 16.11-1.pgdg13+1)
+-- Dumped from database version 16.10 (Debian 16.10-1.pgdg13+1)
+-- Dumped by pg_dump version 16.10 (Debian 16.10-1.pgdg13+1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -663,9 +663,12 @@ COPY public.address (address_id, fullname, street, ward, district, province, pho
 1	Hoàng Đình Duy	79 Ngụy Như Kon Tum	Nhân Chính	Thanh Xuân	Hà Nội	0123456789
 5	Duy	334 Nguyễn Trãi	Thanh Xuân Trung	Thanh Xuân	Hà Nội	555555555
 6	Huế	Tân Tiến	Chi Lăng	Hưng Hà	Thái Bình	045678944
-8	Nguyễn	Quang Trung	Văn Quán	Hà Đông	Hà Nội	0123456fa
-7	Nguyễn Văn A	Hà Đông	Quang Trung	Thanh Xuân	Hà Nội	0942856198
-10	Nguyễn Thị Hòa	thôn Tế cát	Xã Đức Lý	Huyện Lý Nhân	Tỉnh Hà Nam	065786542
+7	Nguyễn Nam	Thôn Tân Tiến	Chi Lăng	Hưng Hà	Thái Bình	03420300860
+9	Công ty Formen	144 Xuân Thủy	Dịch Vọng Hậu	Cầu Giấy 	Hà Nội	0906039205
+16	string	string	string	string	string	string
+17	Duy	???	Xã Chi Lăng	Huyện Hưng Hà	Tỉnh Thái Bình	0416515109
+18	Hoi	69 Nguy Nhu	Phường Nhân Chính	Quận Thanh Xuân	Thành phố Hà Nội	0979468985
+19	Hoang Duy	abc123	Phường Đồng Mai	Quận Hà Đông	Thành phố Hà Nội	0979468985
 \.
 
 
@@ -684,15 +687,15 @@ COPY public.admin (admin_id, email, phone, fname, lname, password, avt_url, crea
 --
 
 COPY public.buyer (buyer_id, email, phone, fname, lname, password, avt_url, buyer_tier, is_active, created_at) FROM stdin;
-1	myname@example.com	0994654771	Name	My	$2b$12$0cdDIhnA4qZ4uUd0R8ODvO7WjQpZMLiCJM/mbdw6nVKIHJSJguWz2	avatars/2025/10/8a54495ccfb34d1b9f861b82e4aad803.jpg	bronze	t	2025-08-22 11:01:29.930014
+1	myname@example.com	0994654771	Name1	My	$2b$12$0cdDIhnA4qZ4uUd0R8ODvO7WjQpZMLiCJM/mbdw6nVKIHJSJguWz2	avatars/2026/01/b69b1f90f9b64077b544b816ede89388.jpg	bronze	t	2025-08-22 11:01:29.930014
 2	duybeck04@gmail.com	\N	Hoàng	Duy	$2b$12$FRsLTk9dtfy7IVrXB0bP/.Trsgif01cBttY1xJJm4AjoG3kR/naLa	https://lh3.googleusercontent.com/a/ACg8ocKEzau7V4JTkki3XmQq_yriFsCncL2Y-prQwVI80DKiInyVUg=s96-c	bronze	t	2025-10-19 12:59:19.963175
 4	hoangdinhduy_t67@hus.edu.vn	\N	Duy	Hoàng Đình	$2b$12$rYkKPvVj2Il2LXQ3DWoM9.51rDUgJK0i2QEoEi/sxGCqJpFcT3yYO	https://lh3.googleusercontent.com/a/ACg8ocLeaW9k1VAGmfDQO6S_toCZPegMTAjXcmZ8fwl7RllChykNiQ=s96-c	bronze	t	2025-11-17 13:25:40.969192
 5	duyh83468@gmail.com	99997844565	Tùng	Vũ	$2b$12$E4KOWa0iQz6ZmtrX8JV2VOLIhrinxWDU51B/toxlpDJcLeumvcadm	\N	bronze	t	2025-11-19 15:25:16.57539
 7	linhlihoonsnie@gmail.com	0942873935	Linh	Phan Thị Thùy	$2b$12$BB8Twmw5yOZg8nA5gjK/QuFJeikh3NpFRRdIfQgtHQajl9UhT11Ie	\N	bronze	t	2025-12-02 07:57:47.668414
 8	vutung24@gmail.com	0373351214	Tùng	Vũ	$2b$12$dYElGIYJnycmUGUaLMykFuEbj2.aj79lgSABzzJgWaMaGaV9Fp.yO	\N	bronze	t	2025-12-03 07:32:09.479009
 6	23001521@hus.edu.vn	9988776655	Hòa	Nguyễn	$2b$12$JqUDv1U21aPvN7fgcHEG0OqLXslGSIYeJ8r.0ta88/VLNLNU.I3Xi	\N	bronze	t	2025-11-19 16:03:08.356999
-10	hoa@example.com	097642687674	string	string	$2b$12$Dzy2d0g6KwmbrE4/EXFdsuSsJrDOfPe8BryDd/xSBfLKRolIAO0t2	\N	bronze	t	2025-12-22 06:20:17.318798
-9	user@example.com	08765247141	Hòa	Nguyễn	$2b$12$1IvKvQBsoh8rpvqLRm3ki.SsXKQ0Z73WmBXE.r21.ibzOPfL6WlZi	https://hus-ecommerce.s3.ap-southeast-1.amazonaws.com/avatars/2026/01/65e76bd58e404ac49295d4a3a3f2686b.jpg	bronze	t	2025-12-22 06:18:47.917713
+10	21020966@vnu.edu.vn	\N	21020966	Hoàng Đình Duy	$2b$12$Jllvu7HOUpUvQcfk8PBjK.PaRfpKx.xrZPzTEo0nt0IQUl1S4XM6.	https://lh3.googleusercontent.com/a/ACg8ocJvQ9vKkLrGTCq7jHFlEf0pRug75Fv6sOTHX0iYjHLX9LROug=s96-c	bronze	f	2025-12-26 11:39:18.348635
+9	levungocanh_t67@hus.edu.vn	05557778844	Lê	Anh	$2b$12$k0Fyc8Q.ByGA1.eavVc5au08nvPYpzPck9pv9nShjxcNqn0gfHl4u	\N	bronze	f	2025-12-24 02:25:11.004372
 \.
 
 
@@ -701,12 +704,13 @@ COPY public.buyer (buyer_id, email, phone, fname, lname, password, avt_url, buye
 --
 
 COPY public.buyer_address (buyer_address_id, buyer_id, address_id, is_default, label) FROM stdin;
-1	1	1	t	home
+8	10	17	t	home
 5	1	5	f	other
+7	1	16	f	\N
 6	1	6	f	home
-8	9	8	f	office
-7	9	7	f	home
-10	9	10	t	other
+1	1	1	t	home
+9	2	18	f	home
+10	2	19	t	office
 \.
 
 
@@ -727,8 +731,7 @@ COPY public.carrier (carrier_id, carrier_name, carrier_avt_url, base_price, pric
 --
 
 COPY public.category (category_id, category_name, image_url) FROM stdin;
-14	Điện Gia Dụng	\N
-19	Cross Border - Hàng Quốc Tế	\N
+1	Thời Trang Nam	categories/2025/12/8be8b05d1d61421995338abf538d24ec.png
 2	Thời Trang Nữ	categories/2025/12/92d1d3ee674c4fc7a88095ad15b06612.png
 12	Đồ Chơi - Mẹ & Bé	categories/2025/12/f295fd146e9a4ba79e361450293e7c13.png
 11	Điện Thoại - Máy Tính Bảng	categories/2025/12/f173536a8c184896bbd5ef0e9d46ec88.png
@@ -751,7 +754,8 @@ COPY public.category (category_id, category_name, image_url) FROM stdin;
 29	Voucher - Dịch vụ	categories/2025/12/26e4fcfe30684e90919405a4414b2c83.jpg
 30	Túi thời trang nữ	categories/2025/12/585c175aff034d6c8cd0df08e619f28b.jpg
 31	Túi thời trang nam	categories/2025/12/ca2ca16be2ed40228730b6bf2c268338.jpg
-1	Thời Trang Nam	categories/2025/12/8be8b05d1d61421995338abf538d24ec.png
+19	Cross Border - Hàng Quốc Tế	categories/2026/01/c327b45223e448378e7097ae7df84464.jpg
+14	Điện Gia Dụng	categories/2026/01/c0021313a5e04a23948d7e8f4068c15d.jpg
 \.
 
 
@@ -760,15 +764,8 @@ COPY public.category (category_id, category_name, image_url) FROM stdin;
 --
 
 COPY public.discount (discount_id, code, discount_percent, min_order_value, max_discount, start_date, end_date, usage_limit, used_count, is_active) FROM stdin;
-1	ABC123	10.00	100000.00	100.00	2025-09-27	2025-09-30	1	0	t
-2	MNP123	50.00	50000.00	1000.00	2025-09-27	2025-10-29	200	0	t
-6	SHOPEE22512	40.00	300000.00	200000.00	2025-12-22	2025-12-30	20	0	t
-3	SALE2512	20.00	150000.00	200000.00	2025-12-22	2025-12-25	50	0	t
-4	SHOPEE2512	40.00	150000.00	200000.00	2025-12-22	2025-12-30	10	0	t
-5	SHOPEE12512	15.00	100000.00	200000.00	2025-12-22	2025-12-30	50	0	t
-7	SALE0101	20.00	100000.00	20.00	2025-12-31	2026-01-30	20	1	t
-10	SALE10101	30.00	150000.00	40000.00	2025-12-31	2026-01-30	20	1	t
-8	SALES0101	30.00	300000.00	100000.00	2025-12-31	2026-01-30	20	3	t
+2	MNP123	10.00	2.00	0.00	2025-12-22	2025-12-30	10	0	f
+1	ABC123	10.00	0.00	100000.00	2025-12-31	2026-12-31	100	0	t
 \.
 
 
@@ -777,62 +774,37 @@ COPY public.discount (discount_id, code, discount_percent, min_order_value, max_
 --
 
 COPY public."order" (order_id, buyer_id, buyer_address_id, payment_method, subtotal, shipping_price, discount_amount, total_price, order_date, delivery_date, order_status, payment_status, discount_id, carrier_id, notes) FROM stdin;
-1	9	7	cod	1162000.00	31540.00	174300.00	1019240.00	2025-12-22 12:35:42.044722	\N	cancelled	failed	5	5	string
-2	9	8	cod	358000.00	13180.00	71600.00	299580.00	2025-12-22 14:27:14.421565	2025-12-29 06:42:57.117426	delivered	paid	3	4	string
-4	9	7	cod	418000.00	19480.00	62700.00	374780.00	2025-12-24 08:45:51.777026	2025-12-29 06:55:43.582035	delivered	paid	5	1	string
-6	9	7	mim_pay	79000.00	13960.00	0.00	92960.00	2025-12-24 09:07:41.790435	2025-12-29 06:55:54.575689	delivered	paid	\N	1	hellu shop
-8	9	7	cod	158000.00	17280.00	23700.00	151580.00	2025-12-24 10:06:15.353347	2025-12-29 06:56:02.034076	delivered	paid	5	2	khum có
-9	9	7	cod	435810.00	24120.00	65371.50	394558.50	2025-12-24 10:09:11.448198	\N	cancelled	failed	5	2	khum có
-5	9	7	cod	500000.00	12520.00	75000.00	437520.00	2025-12-24 08:47:43.211026	2025-12-31 09:05:41.503775	delivered	paid	5	1	Bọc cẩn thận nhe shoppp :>
-7	9	7	cod	150000.00	13440.00	22500.00	140940.00	2025-12-24 09:40:26.048104	2025-12-31 09:32:31.680306	delivered	paid	5	2	khum có
-25	9	8	cod	315000.00	13440.00	20.00	328420.00	2025-12-31 11:17:58.259775	2026-01-02 07:52:07.331536	delivered	paid	7	2	string
-10	9	7	cod	108800.00	11800.00	20.00	120580.00	2025-12-31 09:51:45.970803	2025-12-31 09:55:09.973007	delivered	paid	7	1	giao nhanh nhé
-39	9	8	cod	129000.00	13120.00	20.00	142100.00	2026-01-02 08:30:46.753655	2026-01-02 08:31:10.110102	delivered	paid	7	1	string
-34	9	8	cod	157500.00	11080.00	20.00	168560.00	2026-01-02 05:59:47.385996	2026-01-02 06:03:00.669909	delivered	paid	7	1	string
-11	9	7	cod	150000.00	12160.00	20.00	162140.00	2025-12-31 09:58:38.80247	2025-12-31 10:02:07.169236	delivered	paid	7	1	giao nhanh nhé
-13	9	7	cod	166440.00	19480.00	20.00	185900.00	2025-12-31 10:08:33.730677	\N	cancelled	failed	7	1	giao nhanh nhé
-12	9	7	cod	237600.00	19600.00	20.00	257180.00	2025-12-31 10:03:53.791466	\N	cancelled	failed	7	1	giao nhanh nhé
-14	9	7	cod	280000.00	12520.00	20.00	292500.00	2025-12-31 10:21:25.346067	\N	cancelled	failed	7	1	giao nhanh nhé
-15	9	7	cod	280000.00	12520.00	20.00	292500.00	2025-12-31 10:24:33.401173	\N	cancelled	failed	7	1	giao nhanh nhé
-16	9	7	cod	280000.00	12520.00	20.00	292500.00	2025-12-31 10:26:23.670732	\N	cancelled	failed	7	1	giao nhanh nhé
-17	9	7	cod	280000.00	12520.00	20.00	292500.00	2025-12-31 10:29:29.950727	\N	cancelled	failed	7	1	giao nhanh nhé
-18	9	7	cod	280000.00	12520.00	20.00	292500.00	2025-12-31 10:33:05.470022	\N	cancelled	failed	7	1	giao nhanh nhé
-19	9	7	cod	119000.00	11320.00	20.00	130300.00	2025-12-31 10:37:26.501215	\N	cancelled	failed	7	1	giao nhanh nhé
-24	9	8	cod	315000.00	13440.00	20.00	328420.00	2025-12-31 11:15:01.969916	2026-01-02 08:00:08.964079	delivered	paid	7	2	string
-20	9	7	cod	150000.00	12160.00	40000.00	122160.00	2025-12-31 10:37:54.65906	2025-12-31 10:39:06.196481	delivered	paid	10	1	giao nhanh nhé
-33	9	8	cod	150000.00	13440.00	20.00	163420.00	2025-12-31 15:19:30.851976	2026-01-02 07:13:46.177046	delivered	paid	7	2	string
-21	9	7	cod	129000.00	13120.00	20.00	142100.00	2025-12-31 10:38:06.415385	2025-12-31 10:56:29.331606	delivered	paid	7	1	giao nhanh nhé
-45	9	7	cod	129000.00	13120.00	20.00	142100.00	2026-01-02 08:53:29.444828	2026-01-02 08:54:03.38387	delivered	paid	7	1	string
-23	9	8	cod	150000.00	13440.00	20.00	163420.00	2025-12-31 11:07:54.861697	2026-01-02 08:02:45.020091	delivered	paid	7	2	string
-32	9	8	cod	129000.00	14080.00	20.00	143060.00	2025-12-31 15:15:49.801957	2026-01-02 07:34:37.222535	delivered	paid	7	2	string
-40	9	8	cod	129000.00	13120.00	20.00	142100.00	2026-01-02 08:31:43.465498	2026-01-02 08:32:10.589414	delivered	paid	7	1	string
-31	9	8	cod	129000.00	14080.00	20.00	143060.00	2025-12-31 15:11:07.877036	2026-01-02 07:41:39.566325	delivered	paid	7	2	string
-22	9	7	cod	157500.00	12720.00	20.00	170200.00	2025-12-31 11:03:40.940582	2026-01-02 08:06:59.681976	delivered	paid	7	2	string
-30	9	8	cod	129000.00	14080.00	20.00	143060.00	2025-12-31 14:49:06.388149	2026-01-02 07:43:49.858305	delivered	paid	7	2	string
-29	9	8	cod	315000.00	13440.00	20.00	328420.00	2025-12-31 14:40:01.957088	2026-01-02 07:46:46.458662	delivered	paid	7	2	string
-35	9	8	cod	129000.00	13120.00	20.00	142100.00	2026-01-02 08:11:19.60658	2026-01-02 08:11:43.23647	delivered	paid	7	1	string
-28	9	8	cod	315000.00	13440.00	20.00	328420.00	2025-12-31 11:26:41.042608	2026-01-02 07:48:13.207527	delivered	paid	7	2	string
-46	9	7	cod	129000.00	13120.00	20.00	142100.00	2026-01-02 08:53:39.87543	\N	processing	pending	7	1	string
-27	9	8	cod	315000.00	13440.00	20.00	328420.00	2025-12-31 11:22:46.134498	2026-01-02 07:50:02.97363	delivered	paid	7	2	string
-36	9	8	cod	129000.00	13120.00	20.00	142100.00	2026-01-02 08:18:56.635638	2026-01-02 08:19:26.039168	delivered	paid	7	1	string
-26	9	8	cod	315000.00	13440.00	20.00	328420.00	2025-12-31 11:21:29.939769	2026-01-02 07:51:17.347034	delivered	paid	7	2	string
-41	9	8	cod	129000.00	13120.00	20.00	142100.00	2026-01-02 08:37:46.957781	2026-01-02 08:38:32.581108	delivered	paid	7	1	string
-37	9	8	cod	129000.00	13120.00	20.00	142100.00	2026-01-02 08:21:36.153132	2026-01-02 08:22:20.198201	delivered	paid	7	1	string
-42	9	8	cod	129000.00	13120.00	20.00	142100.00	2026-01-02 08:38:00.556793	2026-01-02 08:40:58.965077	delivered	paid	7	1	string
-38	9	8	cod	129000.00	13120.00	20.00	142100.00	2026-01-02 08:25:13.859344	2026-01-02 08:25:43.535215	delivered	paid	7	1	string
-50	9	7	cod	129000.00	13120.00	20.00	142100.00	2026-01-02 09:31:26.420377	2026-01-02 09:36:43.362821	delivered	paid	7	1	string
-47	9	7	cod	129000.00	13120.00	20.00	142100.00	2026-01-02 09:00:44.304887	2026-01-02 09:01:37.608614	delivered	paid	7	1	string
-43	9	8	cod	129000.00	13120.00	20.00	142100.00	2026-01-02 08:38:11.571017	2026-01-02 08:47:12.114768	delivered	paid	7	1	string
-54	9	10	cod	200000.00	16720.00	40000.00	176720.00	2026-01-04 03:21:25.27754	2026-01-04 03:27:00.651718	delivered	paid	10	1	\N
-44	9	7	cod	129000.00	13120.00	20.00	142100.00	2026-01-02 08:51:49.29583	2026-01-02 08:52:13.088806	delivered	paid	7	1	string
-51	9	7	cod	129000.00	13120.00	20.00	142100.00	2026-01-02 09:31:45.38494	2026-01-02 09:39:58.10776	delivered	paid	7	1	string
-48	9	7	cod	129000.00	13120.00	20.00	142100.00	2026-01-02 09:00:53.057209	2026-01-02 09:11:41.971534	delivered	paid	7	1	string
-55	9	10	cod	322000.00	15760.00	96600.00	241160.00	2026-01-04 06:30:08.931198	\N	pending	pending	8	1	\N
-49	9	7	cod	129000.00	13120.00	20.00	142100.00	2026-01-02 09:01:04.408407	2026-01-02 09:32:14.772355	delivered	paid	7	1	string
-56	9	10	cod	499000.00	19240.00	100000.00	418240.00	2026-01-04 06:30:37.882195	\N	pending	pending	8	1	\N
-52	9	7	cod	941800.00	19120.00	100000.00	860920.00	2026-01-02 09:46:33.59529	2026-01-02 09:46:58.786203	delivered	paid	8	1	string
-53	9	7	cod	118800.00	15200.00	20.00	133980.00	2026-01-03 18:25:53.069293	\N	pending	pending	7	2	string
-57	9	10	cod	644000.00	31840.00	100000.00	575840.00	2026-01-04 06:31:44.37767	\N	pending	pending	8	1	\N
+32	1	1	cod	189000.00	13780.00	0.00	202780.00	2026-01-04 09:39:01.742896	\N	processing	pending	\N	1	\N
+2	1	1	cod	210000.00	13760.00	21000.00	202760.00	2025-12-22 08:14:41.558677	2025-12-29 12:29:05.535055	delivered	paid	2	2	khong
+3	1	1	cod	239000.00	14320.00	23900.00	229420.00	2025-12-31 15:34:58.36119	\N	cancelled	failed	1	1	string
+4	1	1	cod	48300.00	12640.00	4830.00	56110.00	2025-12-31 16:03:42.911717	\N	cancelled	failed	1	1	string
+5	1	1	cod	48300.00	12640.00	4830.00	56110.00	2026-01-02 12:15:13.565391	2026-01-02 12:17:42.608482	delivered	paid	1	1	\N
+6	1	1	bank_transfer	1187000.00	37600.00	100000.00	1124600.00	2026-01-02 16:30:03.146113	2026-01-02 16:59:06.185287	delivered	paid	1	1	\N
+7	1	1	cod	322000.00	19280.00	32200.00	309080.00	2026-01-02 17:19:05.247571	2026-01-02 17:24:35.62047	delivered	paid	1	2	\N
+8	1	1	cod	75000.00	9260.00	0.00	84260.00	2026-01-02 17:30:16.937357	\N	pending	pending	\N	4	\N
+10	1	1	cod	157500.00	12720.00	0.00	170220.00	2026-01-03 02:43:21.130949	\N	pending	pending	\N	2	\N
+12	1	1	cod	187000.00	20080.00	0.00	207080.00	2026-01-03 02:47:11.665841	2026-01-03 03:04:04.867018	delivered	paid	\N	1	\N
+13	1	1	cod	135000.00	20020.00	0.00	155020.00	2026-01-03 03:10:48.909826	2026-01-03 03:12:44.082384	delivered	paid	\N	1	\N
+11	1	1	cod	499000.00	18160.00	0.00	517160.00	2026-01-03 02:44:32.805565	2026-01-03 03:26:40.760823	delivered	paid	\N	2	\N
+9	1	1	cod	505000.00	18520.00	0.00	523520.00	2026-01-02 17:32:09.246119	2026-01-03 03:28:12.78548	delivered	paid	\N	1	\N
+14	1	1	cod	738000.00	19010.00	73800.00	683210.00	2026-01-03 14:17:17.212759	\N	pending	pending	1	5	\N
+15	1	1	cod	499000.00	19240.00	49900.00	468340.00	2026-01-03 14:26:44.570271	\N	pending	pending	1	1	\N
+16	1	1	cod	322000.00	20920.00	0.00	342920.00	2026-01-03 14:46:11.537554	\N	pending	pending	\N	1	\N
+17	1	1	bank_transfer	389000.00	15650.00	0.00	404650.00	2026-01-03 14:57:39.530826	\N	pending	pending	\N	5	\N
+18	1	1	cod	499000.00	19240.00	0.00	518240.00	2026-01-03 15:25:56.878421	\N	pending	pending	\N	1	\N
+19	1	1	cod	499000.00	19240.00	0.00	518240.00	2026-01-03 15:49:01.800599	\N	pending	pending	\N	1	\N
+21	1	1	cod	180000.00	14380.00	0.00	194380.00	2026-01-04 07:25:22.977335	\N	processing	pending	\N	1	\N
+20	1	1	cod	96600.00	15280.00	0.00	111880.00	2026-01-04 07:21:58.371537	\N	processing	pending	\N	1	\N
+22	1	1	cod	83220.00	14740.00	0.00	97960.00	2026-01-04 07:27:51.076387	\N	processing	pending	\N	1	\N
+23	1	1	cod	79380.00	11310.00	0.00	90690.00	2026-01-04 07:29:26.451882	\N	processing	pending	\N	5	\N
+24	1	1	cod	239000.00	14320.00	0.00	253320.00	2026-01-04 07:40:43.560314	\N	processing	pending	\N	1	\N
+25	1	1	cod	180000.00	14380.00	0.00	194380.00	2026-01-04 08:34:45.667943	\N	cancelled	failed	\N	1	\N
+26	10	8	cod	239000.00	14320.00	0.00	253320.00	2026-01-04 08:37:35.09458	\N	pending	pending	\N	1	\N
+27	10	8	cod	89000.00	11440.00	0.00	100440.00	2026-01-04 08:43:02.045952	\N	pending	pending	\N	1	\N
+28	2	9	cod	180000.00	14380.00	0.00	194380.00	2026-01-04 08:57:59.882778	\N	cancelled	failed	\N	1	\N
+29	2	9	cod	180000.00	14380.00	0.00	194380.00	2026-01-04 09:00:33.96176	2026-01-04 09:01:25.399338	delivered	paid	\N	1	\N
+30	2	9	cod	322000.00	20920.00	0.00	342920.00	2026-01-04 09:04:20.950784	\N	cancelled	failed	\N	1	\N
+31	1	1	cod	189000.00	13780.00	0.00	202780.00	2026-01-04 09:23:27.076688	\N	processing	pending	\N	1	\N
 \.
 
 
@@ -841,69 +813,40 @@ COPY public."order" (order_id, buyer_id, buyer_address_id, payment_method, subto
 --
 
 COPY public.order_item (order_item_id, order_id, product_id, variant_id, size_id, quantity, unit_price, total_price) FROM stdin;
-1	1	40	35	98	1	215000.00	215000.00
-2	1	43	47	66	1	209000.00	209000.00
-3	1	71	74	167	1	738000.00	738000.00
-4	2	41	54	85	1	189000.00	189000.00
-5	2	42	50	69	1	169000.00	169000.00
-6	4	43	47	66	2	209000.00	418000.00
-7	5	60	86	183	2	250000.00	500000.00
-8	6	46	41	51	1	79000.00	79000.00
-9	7	58	30	36	1	75000.00	75000.00
-10	7	58	31	37	1	75000.00	75000.00
-11	8	46	41	51	2	79000.00	158000.00
-12	9	34	64	129	3	145270.00	435810.00
-13	10	55	26	32	2	54400.00	108800.00
-14	11	58	30	36	2	75000.00	150000.00
-15	12	32	72	165	2	118800.00	237600.00
-16	13	43	49	68	2	83220.00	166440.00
-17	14	60	86	183	2	140000.00	280000.00
-18	15	60	86	183	2	140000.00	280000.00
-19	16	60	86	183	2	140000.00	280000.00
-20	17	60	86	183	2	140000.00	280000.00
-21	18	60	86	183	2	140000.00	280000.00
-22	19	56	27	33	1	119000.00	119000.00
-23	20	58	30	36	2	75000.00	150000.00
-24	21	59	87	184	2	64500.00	129000.00
-25	22	61	85	182	1	157500.00	157500.00
-26	23	58	30	36	2	75000.00	150000.00
-27	24	61	85	182	2	157500.00	315000.00
-28	25	61	85	182	2	157500.00	315000.00
-29	26	61	85	182	2	157500.00	315000.00
-30	27	61	85	182	2	157500.00	315000.00
-31	28	61	85	182	2	157500.00	315000.00
-32	29	61	85	182	2	157500.00	315000.00
-33	30	59	87	184	2	64500.00	129000.00
-34	31	59	87	184	2	64500.00	129000.00
-35	32	59	87	184	2	64500.00	129000.00
-36	33	58	30	36	2	75000.00	150000.00
-37	34	61	85	182	1	157500.00	157500.00
-38	35	59	87	184	2	64500.00	129000.00
-39	36	59	87	184	2	64500.00	129000.00
-40	37	59	87	184	2	64500.00	129000.00
-41	38	59	87	184	2	64500.00	129000.00
-42	39	59	87	184	2	64500.00	129000.00
-43	40	59	87	184	2	64500.00	129000.00
-44	41	59	87	184	2	64500.00	129000.00
-45	42	59	87	184	2	64500.00	129000.00
-46	43	59	87	184	2	64500.00	129000.00
-47	44	59	87	184	2	64500.00	129000.00
-48	45	59	87	184	2	64500.00	129000.00
-49	46	59	87	184	2	64500.00	129000.00
-50	47	59	87	184	2	64500.00	129000.00
-51	48	59	87	184	2	64500.00	129000.00
-52	49	59	87	184	2	64500.00	129000.00
-53	50	59	87	184	2	64500.00	129000.00
-54	51	59	87	184	2	64500.00	129000.00
-55	52	61	85	182	2	157500.00	315000.00
-56	52	55	26	32	2	54400.00	108800.00
-57	52	56	29	35	2	119000.00	238000.00
-58	52	60	86	183	2	140000.00	280000.00
-59	53	32	71	164	1	118800.00	118800.00
-60	54	69	77	170	1	200000.00	200000.00
-61	55	70	75	168	1	322000.00	322000.00
-62	56	63	33	41	1	499000.00	499000.00
-63	57	67	80	174	2	322000.00	644000.00
+1	2	39	9	17	1	210000.00	210000.00
+2	3	38	7	8	1	239000.00	239000.00
+3	4	39	9	18	1	48300.00	48300.00
+4	5	39	10	21	1	48300.00	48300.00
+5	6	69	78	171	1	200000.00	200000.00
+6	6	67	80	174	1	322000.00	322000.00
+7	6	65	82	178	1	389000.00	389000.00
+8	6	64	83	180	1	276000.00	276000.00
+9	7	67	80	174	1	322000.00	322000.00
+10	8	58	30	36	1	75000.00	75000.00
+11	9	68	79	173	1	505000.00	505000.00
+12	10	61	85	182	1	157500.00	157500.00
+13	11	63	33	41	1	499000.00	499000.00
+14	12	62	32	38	1	187000.00	187000.00
+15	13	66	81	176	1	135000.00	135000.00
+16	14	71	74	167	1	738000.00	738000.00
+17	15	63	33	41	1	499000.00	499000.00
+18	16	67	80	174	1	322000.00	322000.00
+19	17	65	82	178	1	389000.00	389000.00
+20	18	63	33	41	1	499000.00	499000.00
+21	19	63	33	41	1	499000.00	499000.00
+22	20	39	9	17	2	48300.00	96600.00
+23	21	44	44	63	1	180000.00	180000.00
+24	22	43	47	66	1	83220.00	83220.00
+25	23	41	54	85	1	79380.00	79380.00
+26	24	38	7	9	1	239000.00	239000.00
+27	25	44	44	63	1	180000.00	180000.00
+28	26	38	7	10	1	239000.00	239000.00
+29	27	47	39	43	1	89000.00	89000.00
+30	28	44	44	63	1	180000.00	180000.00
+31	29	44	45	64	1	180000.00	180000.00
+32	30	67	80	174	1	322000.00	322000.00
+33	31	45	43	61	1	189000.00	189000.00
+34	32	45	43	61	1	189000.00	189000.00
 \.
 
 
@@ -913,7 +856,6 @@ COPY public.order_item (order_item_id, order_id, product_id, variant_id, size_id
 
 COPY public.product (product_id, name, seller_id, base_price, rating, review_count, category_id, description, discount_percent, weight, is_active, created_at, sold_quantity) FROM stdin;
 38	Bộ quần áo nam, set đồ nam Houston thời trang, chất thun cotton cao cấp - FORMEN SHOP- FMPS222	4	239000.00	0.0	0	1	Bộ quần áo nam, set đồ nam Houston thời trang, chất thun cotton cao cấp - FORMEN SHOP- FMPS222\nSet nam Houston nổi bật với đặc tính chất dày mịn, giúp bạn luôn cảm thấy thoáng mát và thoải mái...	0.00	0.72	t	2025-10-24 03:18:06.916946	0
-39	Áo thun nam cổ tròn tay ngắn, chất thun mè mềm mại, co giãn thoải mái – FORMEN SHOP – FMARD002	4	210000.00	0.0	0	1	THÔNG TIN SẢN PHẨM\n- Chất liệu: Chất vải caro mè- Màu sắc: Trắng, Đen, Xanh dương- Kích cỡ: M [50-58 Kg], L [58-65 Kg]. XL [65-75 Kg], XXL [75-85 Kg]\nHÌNH ẢNH SẢN PHẨM	77.00	0.44	t	2025-10-24 03:18:06.916946	0
 40	Áo chống nắng nam cao cấp, thông hơi, chống nắng, chống tia UV, chống bám bụi – FORMEN SHOP – FMTHT024	4	215000.00	0.0	0	1	CHI TIẾT SẢN PHẨM\nÁO KHOÁC NAM CHỐNG NẮNG, CHỐNG TIA UV\n- Chất liệu Aris lỗ thoáng Nhật 100% \n- Có 3 size: M &lt;60kg , L &lt;68kg , XL &lt;76kg\n- Có 4 màu: Đen - Xanh đen - Xám nhạt - Xám đậm\nHÌNH...	54.00	1.00	t	2025-10-24 03:18:06.916946	0
 41	Áo thun nam cổ tròn tay ngắn, chất thun lạnh mềm mại, co giãn thoải mái – FORMEN SHOP – FMPS134	4	189000.00	0.0	0	1	- Màu sắc: Xanh bích, Trắng, Cam- Chất liệu : poly co dãn 4 chiều- Form áo : form suông VN với 4 size M, L, XL, XXL dành cho người từ 50-85kg- Size: M&lt; 58KG, L&lt; 68KG , XL&lt; 76KG, XXL&lt; 85KG...	58.00	0.33	t	2025-10-24 03:18:06.916946	0
 36	Áo sơ mi nữ trung niên cổ tròn tay lỡ, Áo kiểu thêu hoa, Áo nữ bigsize NeSa Shop chất liệu cao cấp mềm nhẹ mát SMH.61	5	165000.00	0.0	0	2	Áo sơ mi nữ trung niên cổ tròn tay lỡ bigsize NeSa Shop chất liệu cao cấp mềm nhẹ mát\n   THÔNG TIN SẢN PHẨM\n   1.Tên sản phẩm: Áo sơ mi nữ, áo kiểu nữ trung niên Chảnh 24h\n   2. Đặc điểm:...	12.00	0.14	t	2025-10-24 03:16:10.047303	0
@@ -923,35 +865,36 @@ COPY public.product (product_id, name, seller_id, base_price, rating, review_cou
 50	Điện Thoại Realme Note 60x 3GB/64GB - Hàng Chính Hãng	6	2069000.00	0.0	0	11	Điện Thoại Realme Note 60x 3GB/64GB - Hàng Chính Hãng\nBộ sản phẩm bao gồm: Thân máy, sạc, cáp USB, dụng cụ lấy sim, vỏ bảo vệ, sách hướng dẫn sử dụng.\n\nSắc nét, mượt mà và dịu nhẹ cho đôi mắt\n- Trang...	0.00	0.19	t	2025-10-24 04:23:41.347605	0
 51	Điện Thoại Oppo A18 4GB/64GB - Hàng Chính Hãng	6	2589000.00	0.0	0	11	Điện Thoại Oppo A18 4GB/64GB - Hàng Chính Hãng\nBộ sản phẩm bao gồm: Thân máy, sạc, cáp USB, dụng cụ lấy sim, sách hướng dẫn, vỏ bảo vệ.\n\nHiển thị chi tiết hình ảnh\n- Với màn hình IPS LCD rộng 6.56...	0.00	0.27	t	2025-10-24 04:23:41.347605	0
 52	Điện Thoại Samsung Galaxy A06 4GB/64GB - Hàng Chính Hãng	6	3190000.00	0.0	0	11	Điện Thoại Samsung A06 4GB/64GB - Hàng Chính Hãng\nBộ sản phẩm bao gồm: Thân máy, cáp dữ liệu, tài liệu hướng dẫn, dụng cụ lấy sim.\n\nMàn hình to rộng 6.7". Trải nghiệm xem phim cực đã\n- Tối đa tầm...	0.00	0.30	t	2025-10-24 04:23:41.347605	0
+39	Áo thun nam cổ tròn tay ngắn, chất thun mè mềm mại, co giãn thoải mái – FORMEN SHOP – FMARD002	4	210000.00	5.0	2	1	THÔNG TIN SẢN PHẨM\n- Chất liệu: Chất vải caro mè- Màu sắc: Trắng, Đen, Xanh dương- Kích cỡ: M [50-58 Kg], L [58-65 Kg]. XL [65-75 Kg], XXL [75-85 Kg]\nHÌNH ẢNH SẢN PHẨM	77.00	0.44	t	2025-10-24 03:18:06.916946	2
 32	Áo sơ mi nữ form rộng dài tay NeSa Shop, Chất liệu Đũi mềm mịn, thoáng mát, áo kiểu nữ form rộng SMH.038	5	132000.00	0.0	0	2	Áo sơ mi kiểu tay lỡ cổ đức, áo kiểu nữ dễ thương, chất liệu Đũi tơ mềm mát, thấm hút mồ hôi NeSa Shop\n   THÔNG TIN VỀ SẢN PHẨM:\n   1. Tên sản phẩm: Áo sơ mi kiểu tay lỡ cổ đức, áo kiểu nữ dễ...	10.00	0.80	t	2025-10-24 03:16:10.047303	0
 33	Áo lụa trung niên cao cấp tặng mẹ form rộng tay lỡ cổ sơ mi cách điệu, áo kiểu nữ đẹp NeSa Shop SMH.59	5	155000.00	0.0	0	2	THÔNG TIN SẢN PHẨM\n   2. Đặc điểm: Áo được thiết kế dạng chui đầu rất dễ mặc và tôn dáng\n   - Có thể phối áo sơ mi nữ cùng với quần jean, quần kaki, quần tây, chân váy rất xinh\n   - Áo...	6.00	0.98	t	2025-10-24 03:16:10.047303	0
 34	Đồ bộ trung niên tay ngắn cho Bà cho Mẹ, chất liệu Đũi mát mẻ, thấm hút mồ hôi, đồ bộ mặc nhà NeSa Shop ĐBH.27	5	199000.00	0.0	0	2	Đồ bộ trung niên Tay cộc cho Bà cho Mẹ, chất liệu Đũi mát mẻ, thấm hút mồ hôi, đồ bộ mặc nhà.\n   THÔNG TIN SẢN PHẨM\n   1. Tên sản phẩm: Đồ bộ trung niên tay ngắn cho Bà cho Mẹ, chất liệu...	27.00	1.01	t	2025-10-24 03:16:10.047303	0
 35	Quần kiểu nữ ống suông, dài, chất liệu Tăm thái mát, vải mềm mịn, quần nữ form rộng, thoải mái, QNH.58	5	65000.00	0.0	0	2	Quần kiểu nữ ống suông, dài, chất liệu Đũi mát, vải mềm mịn, quần nữ form rộng, thoải mái.THÔNG TIN SẢN PHẨM1 Tên sản phẩm: Quần kiểu nữ ống suông, dài, chất liệu tăm thái mát, vải mềm mịn, quần nữ...	0.00	1.04	t	2025-10-24 03:16:10.047303	0
 53	Điện Thoại Samsung Galaxy A36 5G 8GB/128GB - Hàng Chính Hãng	6	6519000.00	0.0	0	11	Điện Thoại Samsung A36 5G 8GB/128GB - Hàng Chính Hãng\nBộ sản phẩm bao gồm: Thân máy, cáp sạc, dụng cụ lấy sim, sách hướng dẫn.\n\nMàn hình Super AMOLED 6,7 inch ấn tượng\n- Trang bị màn hình kích thước...	0.00	0.16	t	2025-10-24 04:23:41.347605	0
 54	Điện Thoại Samsung Galaxy A26 5G 8GB/128GB - Hàng Chính Hãng	6	5489000.00	0.0	0	11	Điện Thoại Samsung A26 5G 8GB/128GB - Hàng Chính Hãng\nBộ sản phẩm bao gồm: Thân máy, cáp dữ liệu, tài liệu hướng dẫn, dụng cụ lấy sim.\n\nMàn hình 120 Hz mượt mà, trải nghiệm cực đã\n- Trang bị tấm nền...	0.00	0.24	t	2025-10-24 04:23:41.347605	0
+61	Kem tan mỡ Missha Hot Burning Perfect Body Gel Hàn Quốc	7	350000.00	0.0	0	15	Kem tan mỡ Missha Hot Burning Perfect Body Gel Hàn QuốcXuất xứ: Hàn QuốcThương hiệu: MisshaThể tích: 200 ml\n\n- Kem tan mỡ Missha Hot Burning Perfect Body Gel còn nuôi dưỡng da mềm mại, mịn màng, xóa...	55.00	0.18	t	2025-10-24 04:46:46.432736	0
 42	Quần short nam FM NEWBASIC, chất thun Pique cao cấp, thời trang năng động - FORMEN SHOP - FMPS229	4	169000.00	0.0	0	1	Quần đùi nam, chất thun Pique cao cấp, 4 màu\nTủ đô của bạn chắc chắn không thể thiếu chiếc quần lưng chun thời trang này\nThông tin sản phẩm:\n– Chất thun Pique bền đẹp, thấm hút, co dãn tốt\n– Có big...	0.00	0.41	t	2025-10-24 03:18:06.916946	0
 43	Áo khoác dù nam, áo gió nam cao cấp, chống nắng, chống bám bụi – FORMEN SHOP – FMHN005	4	209000.00	0.0	0	1	THÔNG TIN SẢN PHẨM\nNếu mặc áo khoác vải Kaki sợ phai màu thì áo khoác dù là lựa chọn cực kì hợp lý ạ!Vải may 2 lớp chắc chắn, áo chống nước nhẹ, giặt nhanh khô nữa!Áo thiết kế hiện đại, có in chữ...	62.00	0.79	t	2025-10-24 03:18:06.916946	0
-44	Áo thun polo nam Cavalry chất thun cotton muối cao cấp - FORMEN SHOP - FMPS258	4	180000.00	0.0	0	1	Polo Cavalry\n—\nChất liệu: Cotton muối 100% cotton\nMàu sắc: Xanh đen, xám, rêu\nSize L: Dành cho nam từ 55kg đến 65kg\nSize XL: Dành cho nam từ 65kg đến 75kg\nSize XXL: Dành cho nam từ 75kg đến...	0.00	0.73	t	2025-10-24 03:18:06.916946	0
 45	Combo siêu tiết kiệm 3 áo thun thể thao nam, chất thun lạnh co giãn tốt, thoáng mát thoải mái vận động - FORMEN SHOP - FMCB3TY002	4	189000.00	0.0	0	1	Combo siêu tiết kiệm 3 áo thun thể thao nam, chất thun lạnh co giãn tốt, thoáng mát thoải mái vận động - FORMEN SHOP - FMCB3TY002\nÁo cổ tròn thể thao của FORMEN SHOP là 1 chiếc áo thun nam thể thao...	0.00	0.63	t	2025-10-24 03:18:06.916946	0
 46	Áo polo ngắn tay thời trang nam phối màu nhiều kiểu, chất thun cá sấu xịn - FORMEN SHOP - FMHK002	4	59000.00	0.0	0	1	Áo thun polo nam cổ bẻ thun cá sấu cao cấp, thiết kế đơn giản trơn basic - FORMEN SHOP - FMHK001\nÁo thun polo nam có bo cổ polo phối sọc cách điệu của FORMEN SHOP là 1 chiếc áo thun nam polo...	0.00	0.66	t	2025-10-24 03:18:06.916946	0
 47	Áo polo ngắn tay nam, chất thun poly mềm mịn co giãn 4 chiều, họa tiết phối màu trẻ trung - FORMEN SHOP - FMPS195	4	89000.00	0.0	0	1	Áo polo ngắn tay nam, chất thun poly mềm mịn co giãn 4 chiều, họa tiết phối màu trẻ trung - FORMEN SHOP - FMPS195\nÁo thun polo nam có bo cổ polo phối sọc cách điệu của FORMEN SHOP là 1 chiếc áo thun...	0.00	0.24	t	2025-10-24 03:18:06.916946	0
-62	Bình nước thủy tinh Elmich EL-8350T041 EL-8350T052 EL-8350T110, Hàng chính hãng, nhiều dung tích, có đồ lọc trà - JoyMall	8	187000.00	0.0	0	10	Bình nước thủy tinh Elmich EL-8350T041 EL-8350T052 EL-8350T110, Hàng chính hãng, nhiều dung tích, có đồ lọc trà-JoyMall\n \nTHÔNG TIN SẢN PHẨM\n1. EL-8350T041\nDung tích 415ml\nChất liệu Thủy tinh cao...	0.00	1.68	t	2025-10-24 05:26:08.193601	0
-63	Bình giữ nhiệt inox 316 Elmich EL8315 480ml, Hàng chính hãng, nắp dùng làm cốc, có lưới lọc -JoyMall	8	499000.00	0.0	0	10	Bình giữ nhiệt inox 316 Elmich EL8315 480ml, Hàng chính hãng, nắp có thể dùng làm cốc nước, có lưới lọc trà - JoyMall\n\nTHÔNG TIN SẢN PHẨM\nMàu sắc : Xanh đậm/ Xanh nhạt\nDung tích : 480 ml\nCông dụng:...	0.00	1.54	t	2025-10-24 05:26:08.193601	0
+44	Áo thun polo nam Cavalry chất thun cotton muối cao cấp - FORMEN SHOP - FMPS258	4	180000.00	0.0	0	1	Polo Cavalry\n—\nChất liệu: Cotton muối 100% cotton\nMàu sắc: Xanh đen, xám, rêu\nSize L: Dành cho nam từ 55kg đến 65kg\nSize XL: Dành cho nam từ 65kg đến 75kg\nSize XXL: Dành cho nam từ 75kg đến...	0.00	0.73	t	2025-10-24 03:18:06.916946	1
+55	Kem Mờ Sẹo Gentacin của Nhật 10g - Hỗ trợ trị sẹo lồi sẹo lõm	7	170000.00	0.0	0	15	Sẹo là điều khó có thể tránh khỏi sau khi da bị tổn thương. Không kể đến việc ảnh hưởng đến chức năng, việc có sẹo đã gây ra ảnh hưởng rất lớn đến thẩm mỹ và tâm lý. Đặc biệt là vết sẹo bị tối màu ở...	68.00	0.15	t	2025-10-24 04:46:46.432736	0
+56	SON GIÓ FRAN WILSON MOODMATCHER Giữ Ẩm Cho Môi USA	7	119000.00	0.0	0	15	Thông tin nổi bật\n\nSon Gió FRAN WILSON MOODMATCHER Giữ Ẩm Cho Môi USA\nFRAN WILSON là hãng mỹ phẩm xuất hiện hơn 30 năm tại mỹ, đặc biệt dòng son gió của hãng được khách hàng tin dùng. sản phẩm được...	0.00	0.22	t	2025-10-24 04:46:46.432736	0
+57	BỘ 10 MẶT NẠ 3W CLINIC FRESH POMEGRANATE MASK SHEET + TẶNG KÈM 01 MẶT NẠ CÙNG LOẠI	7	120000.00	0.0	0	15	Mặt nạ dưỡng trắng da chống lão hóa chiết xuất lựu 3W Clinic Fresh Pomegranate Mask Sheet 23ml\nThương hiệu: 3w Clinic\nXuất xứ: Hàn Quốc\nDung tích: 23ml/miếng\nLoại da: Mọi loại da.\n\n3W Clinic là một...	46.00	0.10	t	2025-10-24 04:46:46.432736	0
+58	Tẩy Tế bào Chết 3W Clinic 180ml Hàn Quốc	7	75000.00	0.0	0	15	Tẩy Tế bào Chết 3W Clinic 180ml Hàn Quốc\n\nHiện có:\n1. CAFE\n2. GẠO\n3. ỐC SÊN\n4. TRÀ XANH\n5. NHAU THAI CỪU\nTẩy Tế bào Chết 3W Clinic 180ml Hàn Quốc\n- Dung tích: 180ml\n- Xuất xứ: Hàn Quốc\n- Thương hiệu:...	0.00	0.18	t	2025-10-24 04:46:46.432736	0
+59	Bộ 10 gói mặt nạ dưỡng ẩm da chiết xuất nha đam 3W Clinic Fresh Aloe Mask Sheet 23ml X 10	7	150000.00	0.0	0	15	Thương hiệu: 3W CLinic\nXuất xứ: Hàn Quốc\nQuy cách: 1 miếng/gói 23ml\nMột làn da đẹp không chỉ là làn da trắng trẻo, láng mịn được hỗ trợ bởi các loại kem dưỡng da. Da đẹp phải là da khỏe, săn chắc từ...	57.00	0.26	t	2025-10-24 04:46:46.432736	0
+60	Mặt Nạ Vàng 3W Clinic Collagen Luxury Gold Peel Off Pack 100g	7	250000.00	0.0	0	15	Mặt Nạ Vàng Collagen Luxury Gold Peel Off Pack 100g\nXuất xứ: Hàn Quốc\nDung tích: 100ml\nLoại da: Mọi loại da.\n3W Clinic là một trong những thương hiệu mỹ phẩm Hàn Quốc được phái đẹp tin dùng tại nhiều...	44.00	0.21	t	2025-10-24 04:46:46.432736	0
 64	Máy xay tỏi ớt dùng pin sạc Elmich PBE-8659 250ml 50w, Hàng chính hãng, bảo hành 24 tháng - JoyMall	8	276000.00	0.0	0	10	Máy xay tỏi ớt cầm tay Elmich PBE-8659 250ml 50w không dây , dùng pin sạc, Hàng chính hãng, bảo hành 24 tháng - JoyMall\nThông số kỹ thuật\nDung lượng pin : 1800mAh\nCông suất : 50W\nĐiện áp :...	0.00	0.71	t	2025-10-24 05:26:08.193601	0
 65	Bình giữ nhiệt 900ml Elmich EL8299, Hàng chính hãng, inox 304, có lõi lọc pha trà, cà phê - JoyMall	8	389000.00	0.0	0	10	Bình giữ nhiệt 900ml Elmich EL8299, Hàng chính hãng, inox 304, có tay cầm, dùng gia đình, nắp có khóa an toàn - JoyMall\n\nTHÔNG TIN SẢN PHẨM\nMàu sắc: Màu sữa\nDung tích : 900ml\nCông dụng : Giữ nhiệt...	0.00	0.95	t	2025-10-24 05:26:08.193601	0
-66	Bộ Dụng Cụ Chế Biến Ăn Dặm Cho Bé Elmich BabyCare EL0774, Hàng Chính Hãng, Nhựa PP An Toàn - JoyMall	8	135000.00	0.0	0	10	Bộ Dụng Cụ Chế Biến Ăn Dặm Cho Bé Elmich BabyCare EL0774, Hàng Chính Hãng, Nhựa PP An Toàn - JoyMall\n\n \nThông số kỹ thuật\nMàu sắc : Be\nKhối lượng sản phẩm : 300g\nChất liệu : Nhựa PP\nThông tin từng bộ...	0.00	1.67	t	2025-10-24 05:26:08.193601	0
-67	Máy vắt cam Elmich CJE-3921OL 700ml , Hàng chính hãng, bảo hành 24 tháng - JoyMall	8	322000.00	0.0	0	10	Máy vắt cam Elmich CJE-3921OL 700ml 40w, Hàng chính hãng, xoay ép 2 chiều vắt kiệt nước, dễ tháo lắp, vệ sinh - JoyMall\n\nTHÔNG TIN SẢN PHẨM\nCông suất 40W\nDung tích 0.7 Lít\nChất liệu nhựa ABS, AS\nCó 2...	0.00	1.82	t	2025-10-24 05:26:08.193601	0
-59	Bộ 10 gói mặt nạ dưỡng ẩm da chiết xuất nha đam 3W Clinic Fresh Aloe Mask Sheet 23ml X 10	7	150000.00	4.9	19	15	Thương hiệu: 3W CLinic\nXuất xứ: Hàn Quốc\nQuy cách: 1 miếng/gói 23ml\nMột làn da đẹp không chỉ là làn da trắng trẻo, láng mịn được hỗ trợ bởi các loại kem dưỡng da. Da đẹp phải là da khỏe, săn chắc từ...	57.00	0.26	t	2025-10-24 04:46:46.432736	24
-55	Kem Mờ Sẹo Gentacin của Nhật 10g - Hỗ trợ trị sẹo lồi sẹo lõm	7	170000.00	5.0	1	15	Sẹo là điều khó có thể tránh khỏi sau khi da bị tổn thương. Không kể đến việc ảnh hưởng đến chức năng, việc có sẹo đã gây ra ảnh hưởng rất lớn đến thẩm mỹ và tâm lý. Đặc biệt là vết sẹo bị tối màu ở...	68.00	0.15	t	2025-10-24 04:46:46.432736	2
-57	BỘ 10 MẶT NẠ 3W CLINIC FRESH POMEGRANATE MASK SHEET + TẶNG KÈM 01 MẶT NẠ CÙNG LOẠI	7	120000.00	5.0	1	15	Mặt nạ dưỡng trắng da chống lão hóa chiết xuất lựu 3W Clinic Fresh Pomegranate Mask Sheet 23ml\nThương hiệu: 3w Clinic\nXuất xứ: Hàn Quốc\nDung tích: 23ml/miếng\nLoại da: Mọi loại da.\n\n3W Clinic là một...	46.00	0.10	t	2025-10-24 04:46:46.432736	0
-68	Bình giữ nhiệt gia đình 1.9L inox 304 Elmich EL8352, Hàng chính hãng, có tay cầm, nắp chống tràn - JoyMall	8	505000.00	0.0	0	10	Bình giữ nhiệt gia đình 1.9L inox 304 Elmich EL8352, Hàng chính hãng, có tay cầm, nắp chống tràn - JoyMall\n \nTHÔNG TIN SẢN PHẨM\nMàu sắc Đỏ\nDung tích 1.9L\nCông dụng Giữ nhiệt nóng, lạnh\nChất liệu Inox...	0.00	1.42	t	2025-10-24 05:26:08.193601	0
+62	Bình nước thủy tinh Elmich EL-8350T041 EL-8350T052 EL-8350T110, Hàng chính hãng, nhiều dung tích, có đồ lọc trà - JoyMall	8	187000.00	0.0	0	10	Bình nước thủy tinh Elmich EL-8350T041 EL-8350T052 EL-8350T110, Hàng chính hãng, nhiều dung tích, có đồ lọc trà-JoyMall\n \nTHÔNG TIN SẢN PHẨM\n1. EL-8350T041\nDung tích 415ml\nChất liệu Thủy tinh cao...	0.00	1.68	t	2025-10-24 05:26:08.193601	1
+66	Bộ Dụng Cụ Chế Biến Ăn Dặm Cho Bé Elmich BabyCare EL0774, Hàng Chính Hãng, Nhựa PP An Toàn - JoyMall	8	135000.00	0.0	0	10	Bộ Dụng Cụ Chế Biến Ăn Dặm Cho Bé Elmich BabyCare EL0774, Hàng Chính Hãng, Nhựa PP An Toàn - JoyMall\n\n \nThông số kỹ thuật\nMàu sắc : Be\nKhối lượng sản phẩm : 300g\nChất liệu : Nhựa PP\nThông tin từng bộ...	0.00	1.67	t	2025-10-24 05:26:08.193601	1
+63	Bình giữ nhiệt inox 316 Elmich EL8315 480ml, Hàng chính hãng, nắp dùng làm cốc, có lưới lọc -JoyMall	8	499000.00	0.0	0	10	Bình giữ nhiệt inox 316 Elmich EL8315 480ml, Hàng chính hãng, nắp có thể dùng làm cốc nước, có lưới lọc trà - JoyMall\n\nTHÔNG TIN SẢN PHẨM\nMàu sắc : Xanh đậm/ Xanh nhạt\nDung tích : 480 ml\nCông dụng:...	0.00	1.54	t	2025-10-24 05:26:08.193601	1
+69	Ly giữ nhiệt inox 304 Elmich EL8345 480ml, Hàng chính hãng, lớp silicone chống trượt - JoyMall	8	200000.00	0.0	0	10	Cốc giữ nhiệt inox 304 Elmich EL8345 dung tích 480ml, Hàng chính hãng, lớp silicone chống trượt - JoyMall\n\n \n\nĐẶC ĐIỂM NỔI BẬT:\n– Chất liệu inox 304 bền bỉ và an toàn: Thân cốc được làm từ inox 304,...	0.00	1.12	t	2025-10-24 05:26:08.193601	0
 70	Ly giữ nhiệt inox Elmich EL8309 900ml, Hàng chính hãng, giữ nhiệt tốt, nắp bật, kèm ống hút -JoyMall	8	322000.00	0.0	0	10	Ly giữ nhiệt Elmich EL8309 900ml, Hàng chính hãng, inox 304, giữ nóng lạnh, nắp bật, đi kèm ống hút - JoyMall\n\n\nTHÔNG TIN SẢN PHẨM\nMàu sắc : Xanh mint / Xanh navy\nDung tích : 900ml\nCông dụng : Giữ...	0.00	0.96	t	2025-10-24 05:26:08.193601	0
 71	Ấm Đun Nước Inox 304 Elmich EL-3373 3L, Hàng Chính Hãng, Đun Sôi Nhanh, Dùng Được Nhiều Bếp-JoyMall	8	738000.00	0.0	0	10	Ấm đun nước inox 304 Elmich EL-3373 3L, Hàng chính hãng, đun sôi nhanh, dùng được nhiều bếp-JoyMall\n\nThông tin sản phẩm\n– Chất liệu được làm bằng Inox 304 có độ bóng cao, tuyệt đối an toàn cho sức...	0.00	1.43	t	2025-10-24 05:26:08.193601	0
-61	Kem tan mỡ Missha Hot Burning Perfect Body Gel Hàn Quốc	7	350000.00	0.0	0	15	Kem tan mỡ Missha Hot Burning Perfect Body Gel Hàn QuốcXuất xứ: Hàn QuốcThương hiệu: MisshaThể tích: 200 ml\n\n- Kem tan mỡ Missha Hot Burning Perfect Body Gel còn nuôi dưỡng da mềm mại, mịn màng, xóa...	55.00	0.18	t	2025-10-24 04:46:46.432736	2
-60	Mặt Nạ Vàng 3W Clinic Collagen Luxury Gold Peel Off Pack 100g	7	250000.00	0.0	0	15	Mặt Nạ Vàng Collagen Luxury Gold Peel Off Pack 100g\nXuất xứ: Hàn Quốc\nDung tích: 100ml\nLoại da: Mọi loại da.\n3W Clinic là một trong những thương hiệu mỹ phẩm Hàn Quốc được phái đẹp tin dùng tại nhiều...	44.00	0.21	t	2025-10-24 04:46:46.432736	2
-56	SON GIÓ FRAN WILSON MOODMATCHER Giữ Ẩm Cho Môi USA	7	119000.00	4.0	1	15	Thông tin nổi bật\n\nSon Gió FRAN WILSON MOODMATCHER Giữ Ẩm Cho Môi USA\nFRAN WILSON là hãng mỹ phẩm xuất hiện hơn 30 năm tại mỹ, đặc biệt dòng son gió của hãng được khách hàng tin dùng. sản phẩm được...	0.00	0.22	t	2025-10-24 04:46:46.432736	2
-58	Tẩy Tế bào Chết 3W Clinic 180ml Hàn Quốc	7	75000.00	4.7	3	15	Tẩy Tế bào Chết 3W Clinic 180ml Hàn Quốc\n\nHiện có:\n1. CAFE\n2. GẠO\n3. ỐC SÊN\n4. TRÀ XANH\n5. NHAU THAI CỪU\nTẩy Tế bào Chết 3W Clinic 180ml Hàn Quốc\n- Dung tích: 180ml\n- Xuất xứ: Hàn Quốc\n- Thương hiệu:...	0.00	0.18	t	2025-10-24 04:46:46.432736	2
-69	Ly giữ nhiệt inox 304 Elmich EL8345 480ml, Hàng chính hãng, lớp silicone chống trượt - JoyMall	8	200000.00	5.0	1	10	Cốc giữ nhiệt inox 304 Elmich EL8345 dung tích 480ml, Hàng chính hãng, lớp silicone chống trượt - JoyMall\n\n \n\nĐẶC ĐIỂM NỔI BẬT:\n– Chất liệu inox 304 bền bỉ và an toàn: Thân cốc được làm từ inox 304,...	0.00	1.12	t	2025-10-24 05:26:08.193601	1
+67	Máy vắt cam Elmich CJE-3921OL 700ml , Hàng chính hãng, bảo hành 24 tháng - JoyMall	8	322000.00	0.0	0	10	Máy vắt cam Elmich CJE-3921OL 700ml 40w, Hàng chính hãng, xoay ép 2 chiều vắt kiệt nước, dễ tháo lắp, vệ sinh - JoyMall\n\nTHÔNG TIN SẢN PHẨM\nCông suất 40W\nDung tích 0.7 Lít\nChất liệu nhựa ABS, AS\nCó 2...	0.00	1.82	t	2025-10-24 05:26:08.193601	1
+68	Bình giữ nhiệt gia đình 1.9L inox 304 Elmich EL8352, Hàng chính hãng, có tay cầm, nắp chống tràn - JoyMall	8	505000.00	0.0	0	10	Bình giữ nhiệt gia đình 1.9L inox 304 Elmich EL8352, Hàng chính hãng, có tay cầm, nắp chống tràn - JoyMall\n \nTHÔNG TIN SẢN PHẨM\nMàu sắc Đỏ\nDung tích 1.9L\nCông dụng Giữ nhiệt nóng, lạnh\nChất liệu Inox...	0.00	1.42	t	2025-10-24 05:26:08.193601	1
 \.
 
 
@@ -1040,22 +983,12 @@ COPY public.product_image (product_image_id, product_id, image_url, is_primary) 
 89	45	products/2025/10/65f6fef6af44488a8f6449ddd9f46416.jpg	f
 90	45	products/2025/10/1b8970e5e0014a448afbfa52aaa4cfc3.jpg	f
 91	45	products/2025/10/56c1c4a69d62476ba131c81c8abda6c5.jpg	f
-92	46	products/2025/10/95f7304892f54634930093021521cd79.jpg	t
 93	46	products/2025/10/ec02b73e002b4187a81362849118bc0e.jpg	f
 94	46	products/2025/10/a8c0f80b896a49bb877f177be745ffef.jpg	f
 95	46	products/2025/10/60e3b3722da04a2b9759fcdbfe88ffb8.jpg	f
 96	46	products/2025/10/f112e7d8a2b744aaa7144bf0efbf1a9f.jpg	f
 97	46	products/2025/10/ddc3199599794327b6e0cac06ca69388.jpg	f
 98	46	products/2025/10/12ea16c0d14a4261a492de79a6827ff9.jpg	f
-99	47	products/2025/10/0eecea7baed247bc801b39c4616ad27f.png	t
-100	47	products/2025/10/4d13b93d459e4e2d909704569b2da2d9.jpg	f
-101	47	products/2025/10/2aaaa6cf5488407b9fe02826b711282a.jpg	f
-102	47	products/2025/10/0cd6580a6f814c449ec2bf6382305b92.jpg	f
-103	47	products/2025/10/720c7ba702cc427d9129c5a488cb1c93.jpg	f
-104	47	products/2025/10/d5fd8cac872449d9a0f5be30ec285ac9.jpg	f
-105	47	products/2025/10/647cefdf075241cfa2281d0a68589919.jpg	f
-106	47	products/2025/10/d944e021bc1c46bbbe5b35eda8c36679.jpg	f
-107	47	products/2025/10/7e133b6aafbf400da45a2a46ce0206fd.jpg	f
 108	32	products/2025/10/bfa73a6bc1794306845c85f1f8e27515.jpg	t
 109	32	products/2025/10/d546a2c3adf74ee7a9c5fbd72318da85.jpg	f
 110	32	products/2025/10/b3390fd1c05f4b42a9439b5f04e0fa1b.jpg	f
@@ -1083,6 +1016,15 @@ COPY public.product_image (product_image_id, product_id, image_url, is_primary) 
 132	34	products/2025/10/3559350d1c694b85ad15e00be01bbd0b.jpg	f
 133	34	products/2025/10/36c8401d01544d48b45a6345eba5c1c2.jpg	f
 134	34	products/2025/10/5dda35163d0a43bb9294d224a1534c98.jpg	f
+100	47	products/2025/10/4d13b93d459e4e2d909704569b2da2d9.jpg	f
+101	47	products/2025/10/2aaaa6cf5488407b9fe02826b711282a.jpg	f
+102	47	products/2025/10/0cd6580a6f814c449ec2bf6382305b92.jpg	f
+103	47	products/2025/10/720c7ba702cc427d9129c5a488cb1c93.jpg	f
+104	47	products/2025/10/d5fd8cac872449d9a0f5be30ec285ac9.jpg	f
+105	47	products/2025/10/647cefdf075241cfa2281d0a68589919.jpg	f
+92	46	products/2025/10/95f7304892f54634930093021521cd79.jpg	t
+106	47	products/2025/10/d944e021bc1c46bbbe5b35eda8c36679.jpg	f
+99	47	products/2025/10/0eecea7baed247bc801b39c4616ad27f.png	t
 135	35	products/2025/10/bbd7f2ff100a476cb2aae562a1716c90.jpg	t
 136	35	products/2025/10/b0b809151c404964af08b191ae75ab08.jpg	f
 137	35	products/2025/10/486e64ad312f4473b06ba9a70ef6c1e9.jpg	f
@@ -1277,19 +1219,13 @@ COPY public.product_image (product_image_id, product_id, image_url, is_primary) 
 --
 
 COPY public.product_size (size_id, variant_id, size_name, available_units, in_stock) FROM stdin;
-8	7	L	100	t
-9	7	M	100	t
-10	7	XL	100	t
 11	7	XXL	100	t
 13	8	M	50	t
 14	8	L	70	t
 15	8	XL	65	t
 16	8	XXL	30	t
-17	9	L <65kg	120	t
-18	9	M <58kg	100	t
 19	9	XL <75kg	82	t
 20	10	XL <75kg	33	t
-21	10	M <58kg	44	t
 22	10	L <65kg	55	t
 23	11	L <65kg	75	t
 24	11	M <58kg	41	t
@@ -1300,13 +1236,14 @@ COPY public.product_size (size_id, variant_id, size_name, available_units, in_st
 29	12	Size 3XL (80-95kg)	15	t
 30	24	6GB/128GB	20	t
 31	25	6GB/128GB	15	t
+32	26	10g	100	t
+33	27	3 x 8 x 3 cm	100	t
 34	28	3 x 8 x 3 cm	30	t
+35	29	3 x 8 x 3 cm	60	t
 37	31	180ml	90	t
-38	32	415ml	88	t
 39	32	520ml	72	t
 40	32	1.1l	100	t
 42	34	480ml	90	t
-43	39	S	200	t
 44	39	M	300	t
 45	39	L	400	t
 46	39	XL	200	t
@@ -1324,12 +1261,9 @@ COPY public.product_size (size_id, variant_id, size_name, available_units, in_st
 58	42	L	200	t
 59	42	XL	100	t
 60	42	XXL	200	t
-61	43	Oversize	1000	t
-63	44	Freesize	300	t
-64	45	Freesize	320	t
 65	46	Freesize	200	t
-66	47	Freesize	500	t
 67	48	Freesize	333	t
+68	49	Freesize	300	t
 69	50	M	200	t
 70	50	L	200	t
 71	50	XL	200	t
@@ -1346,7 +1280,6 @@ COPY public.product_size (size_id, variant_id, size_name, available_units, in_st
 82	53	L	351	t
 83	53	XL	112	t
 84	53	XXL	31	t
-85	54	M	121	t
 86	54	L	432	t
 87	54	XL	642	t
 88	54	XXL	111	t
@@ -1412,11 +1345,19 @@ COPY public.product_size (size_id, variant_id, size_name, available_units, in_st
 148	68	Size XL (60-69kg)	99	t
 149	68	Size 2XL (70-79kg)	99	t
 150	68	Size 3XL (80-90kg)	99	t
+21	10	M <58kg	43	t
+18	9	M <58kg	100	t
+36	30	180ml	129	t
+17	9	L <65kg	118	t
+38	32	415ml	87	t
+41	33	480ml	96	t
+64	45	Freesize	319	t
+66	47	Freesize	499	t
+85	54	M	120	t
+9	7	M	99	t
+10	7	XL	99	t
+61	43	Oversize	998	t
 151	69	Size M (40-49kg)	88	t
-33	27	3 x 8 x 3 cm	100	t
-35	29	3 x 8 x 3 cm	58	t
-36	30	180ml	122	t
-41	33	480ml	99	t
 152	69	Size L (50-59kg)	88	t
 153	69	Size XL (60-69kg)	99	t
 154	69	Size 2XL (70-79kg)	88	t
@@ -1426,14 +1367,14 @@ COPY public.product_size (size_id, variant_id, size_name, available_units, in_st
 158	70	Size XL (60-69kg)	76	t
 159	70	Size 2XL (70-79kg)	68	t
 160	70	Size 3XL (80-90kg)	86	t
+164	71	Freesize	444	t
+165	72	Freesize	333	t
 166	73	Freesize	222	t
-167	74	3L	100	t
+168	75	900ml	200	t
 169	76	480ml	111	t
-171	78	480ml	333	t
-173	79	1.9L	100	t
-176	81	Full bộ	388	t
-178	82	900ml	190	t
-180	83	250ml	100	t
+170	77	480ml	222	t
+183	86	100g	500	t
+184	87	10 gói	100	t
 185	88	180ml	232	t
 186	89	180ml	232	t
 187	90	180ml	111	t
@@ -1443,16 +1384,17 @@ COPY public.product_size (size_id, variant_id, size_name, available_units, in_st
 191	94	4GB/64GB	30	t
 192	95	3GB/64GB	25	t
 193	96	4GB/128GB	25	t
-68	49	Freesize	302	t
-165	72	Freesize	335	t
-184	87	10 gói	58	t
-32	26	10g	96	t
-182	85	250g	534	t
-183	86	100g	498	t
-164	71	Freesize	443	t
-170	77	480ml	221	t
-168	75	900ml	199	t
-174	80	700ml	328	t
+8	7	L	100	t
+180	83	250ml	99	t
+171	78	480ml	332	t
+173	79	1.9L	99	t
+182	85	250g	549	t
+176	81	Full bộ	387	t
+167	74	3L	99	t
+178	82	900ml	188	t
+43	39	S	199	t
+63	44	Freesize	299	t
+174	80	700ml	327	t
 \.
 
 
@@ -1548,12 +1490,12 @@ COPY public.product_variant (variant_id, product_id, variant_name, price_adjustm
 --
 
 COPY public.seller (seller_id, email, phone, fname, lname, password, shop_name, seller_tier, avt_url, average_rating, rating_count, is_active, created_at) FROM stdin;
-4	formenshop@example.com	0912345678	Nam	Nguyễn	$2b$12$jgzpQiXGBSwkOLEUkhNA9Oy486o7bEJ64Z7GVK1xEXVWVb9/BFU6G	Formen Shop	regular	avatars/2025/10/4ed5c95a75b64ba8bd169135203fa728.jpg	0.0	0	t	2025-10-24 02:12:42.636128
 5	nesashop@example.com	0712344567	Thu	Nguyễn	$2b$12$Ft2Sutg3Eq6Fyon4CMm7SudqW.cyHZQhk8nI1gOI74rxuROWsNTqO	Nesa Shop	regular	avatars/2025/10/e1071cc405b24a09b99353467e6707e4.jpeg	0.0	0	t	2025-10-24 02:58:58.828688
+8	joymall@example.com	0324506823	Joy	Mall	$2b$12$iRPKZxGH8oxY0qIwMiMY3eSMc26DjieL5PbUt1ODQUlULs7StJXkW	JoyMall Official	regular	avatars/2025/10/ed59eeb713b64e19a356e854aacf815a.jpeg	0.0	0	t	2025-10-24 05:23:15.660603
+7	myphamauth@example.com	06341867475	Mỹ	Phẩm	$2b$12$jIhojCWoq8JAXrGKoDDI3uZ/ovAq7FBIWZ1frR7IqrVBiq.m7ZTRO	Mỹ Phẩm Auth 68	regular	avatars/2025/10/b9ff18c81c754fd99d626b4f7dc629c2.jpg	0.0	0	t	2025-10-24 04:45:25.50184
 6	honghanhmobile@example.com	06341867476	Mỹ	Phẩm	$2b$12$tDWZjgTln/rcOZO4goLfqeUKxW2v.HxxuLxQVXCp9Qt9tmp2Or6UC	Mỹ Phẩm Auth 68	regular	avatars/2025/10/9c6dd9b5416d43c5abc51ea1324278c2.jpg	0.0	0	t	2025-10-24 04:22:20.066064
 3	duycp102k3@gmail.com	\N	Hoàng	Duy	$2b$12$U0KISdJNlsbGuP5j6i1./.Gn73s/A9knlOPxbo.o/KKUHk1l5KWmm	Hoàng Store	regular	https://lh3.googleusercontent.com/a/ACg8ocJ7cP2G-gS8PhNvAuAlySZ-sbM0-t7ol1WXuYeR3fyPEzRaEig=s96-c	0.0	0	t	2025-10-19 13:10:14.456849
-7	myphamauth@example.com	06341867475	Mỹ	Phẩm	$2b$12$jIhojCWoq8JAXrGKoDDI3uZ/ovAq7FBIWZ1frR7IqrVBiq.m7ZTRO	Mỹ Phẩm Auth 68	regular	avatars/2025/10/b9ff18c81c754fd99d626b4f7dc629c2.jpg	4.8	25	t	2025-10-24 04:45:25.50184
-8	joymall@example.com	0324506823	Joy	Mall	$2b$12$iRPKZxGH8oxY0qIwMiMY3eSMc26DjieL5PbUt1ODQUlULs7StJXkW	JoyMall Official	regular	avatars/2025/10/ed59eeb713b64e19a356e854aacf815a.jpeg	5.0	1	t	2025-10-24 05:23:15.660603
+4	formenshop@example.com	0912345678	Nam	Nguyễn	$2b$12$jgzpQiXGBSwkOLEUkhNA9Oy486o7bEJ64Z7GVK1xEXVWVb9/BFU6G	Formen Shop	regular	avatars/2025/10/4ed5c95a75b64ba8bd169135203fa728.jpg	5.0	2	t	2025-10-24 02:12:42.636128
 \.
 
 
@@ -1562,6 +1504,8 @@ COPY public.seller (seller_id, email, phone, fname, lname, password, shop_name, 
 --
 
 COPY public.seller_address (seller_address_id, seller_id, address_id, is_default, label) FROM stdin;
+1	4	7	f	warehouse
+3	4	9	t	headquarters
 \.
 
 
@@ -1570,8 +1514,9 @@ COPY public.seller_address (seller_address_id, seller_id, address_id, is_default
 --
 
 COPY public.shopping_cart (shopping_cart_id, buyer_id, created_at, updated_at) FROM stdin;
-2	1	2025-10-06 15:58:44.445106	2025-11-24 03:22:42.869897
-3	9	2025-12-22 07:16:09.058645	2025-12-31 07:16:28.629411
+2	1	2025-10-06 15:58:44.445106	2025-12-30 15:15:17.385647
+3	10	2026-01-04 08:23:59.556105	\N
+4	2	2026-01-04 08:56:22.770393	\N
 \.
 
 
@@ -1580,10 +1525,8 @@ COPY public.shopping_cart (shopping_cart_id, buyer_id, created_at, updated_at) F
 --
 
 COPY public.shopping_cart_item (shopping_cart_item_id, shopping_cart_id, product_id, variant_id, size_id, quantity, added_at) FROM stdin;
-9	2	39	9	17	1	2025-11-24 03:22:42.864301
-85	3	32	71	164	2	2026-01-04 03:34:40.15596
-86	3	35	63	128	1	2026-01-04 03:35:01.115447
-59	3	65	82	178	1	2026-01-02 05:48:46.530011
+36	3	46	41	51	1	2026-01-04 08:23:59.556105
+38	2	44	44	63	1	2026-01-04 08:35:01.098629
 \.
 
 
@@ -1591,7 +1534,7 @@ COPY public.shopping_cart_item (shopping_cart_item_id, shopping_cart_id, product
 -- Name: address_address_id_seq; Type: SEQUENCE SET; Schema: public; Owner: mywebsite
 --
 
-SELECT pg_catalog.setval('public.address_address_id_seq', 10, true);
+SELECT pg_catalog.setval('public.address_address_id_seq', 19, true);
 
 
 --
@@ -1633,28 +1576,28 @@ SELECT pg_catalog.setval('public.category_category_id_seq', 32, true);
 -- Name: discount_discount_id_seq; Type: SEQUENCE SET; Schema: public; Owner: mywebsite
 --
 
-SELECT pg_catalog.setval('public.discount_discount_id_seq', 10, true);
+SELECT pg_catalog.setval('public.discount_discount_id_seq', 2, true);
 
 
 --
 -- Name: order_item_order_item_id_seq; Type: SEQUENCE SET; Schema: public; Owner: mywebsite
 --
 
-SELECT pg_catalog.setval('public.order_item_order_item_id_seq', 63, true);
+SELECT pg_catalog.setval('public.order_item_order_item_id_seq', 34, true);
 
 
 --
 -- Name: order_order_id_seq; Type: SEQUENCE SET; Schema: public; Owner: mywebsite
 --
 
-SELECT pg_catalog.setval('public.order_order_id_seq', 57, true);
+SELECT pg_catalog.setval('public.order_order_id_seq', 32, true);
 
 
 --
 -- Name: product_image_product_image_id_seq; Type: SEQUENCE SET; Schema: public; Owner: mywebsite
 --
 
-SELECT pg_catalog.setval('public.product_image_product_image_id_seq', 319, true);
+SELECT pg_catalog.setval('public.product_image_product_image_id_seq', 320, true);
 
 
 --
@@ -1682,7 +1625,7 @@ SELECT pg_catalog.setval('public.product_variant_variant_id_seq', 96, true);
 -- Name: seller_address_seller_address_id_seq; Type: SEQUENCE SET; Schema: public; Owner: mywebsite
 --
 
-SELECT pg_catalog.setval('public.seller_address_seller_address_id_seq', 1, false);
+SELECT pg_catalog.setval('public.seller_address_seller_address_id_seq', 9, true);
 
 
 --
@@ -1696,14 +1639,14 @@ SELECT pg_catalog.setval('public.seller_seller_id_seq', 8, true);
 -- Name: shopping_cart_item_shopping_cart_item_id_seq; Type: SEQUENCE SET; Schema: public; Owner: mywebsite
 --
 
-SELECT pg_catalog.setval('public.shopping_cart_item_shopping_cart_item_id_seq', 88, true);
+SELECT pg_catalog.setval('public.shopping_cart_item_shopping_cart_item_id_seq', 45, true);
 
 
 --
 -- Name: shopping_cart_shopping_cart_id_seq; Type: SEQUENCE SET; Schema: public; Owner: mywebsite
 --
 
-SELECT pg_catalog.setval('public.shopping_cart_shopping_cart_id_seq', 3, true);
+SELECT pg_catalog.setval('public.shopping_cart_shopping_cart_id_seq', 4, true);
 
 
 --
@@ -2188,5 +2131,5 @@ ALTER PUBLICATION pub_all OWNER TO mywebsite;
 -- PostgreSQL database dump complete
 --
 
-\unrestrict NZUVZMJYckNqVH3uggAF8xo0BahO9dXsBb3bW5VRtEOkN7CH3G6mJdRaVYdMgq4
+\unrestrict g6fgmjlk3AqweN7ZCXMaW8RUjOF9vdpKUuYNgtF246AJT2YbfrDxMv6mEg2WhZ9
 

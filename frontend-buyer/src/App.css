@@ -26,7 +26,7 @@
     --blue-300: #93c5fd;
     --blue-400: #60a5fa;
     --blue-500: #3780f6;
-    --blue-600: #2563eb;
+    --blue-600: #3b82f6;
     --blue-700: #1d4ed8;
     --blue-800: #1e40af;
     --blue-900: #112a6e;
@@ -95,7 +95,7 @@
     --alpha-9: rgba(0,20,60,.7);
 
     /*main*/
-    --font-family: Calibri, sans-serif;
+    --font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;;
     --bg-color-base: #fff;
     --border-radius-base: 8px;
 }

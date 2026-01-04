@@ -559,7 +559,7 @@ export default function SearchResult() {
                       )}
                     </div>
 
-                    {p.sold_quantity > 0 && (
+                    {p.sold_quantity >= 0 && (
                       <div className="sold-count">
                         Đã bán: {p.sold_quantity}
                       </div>

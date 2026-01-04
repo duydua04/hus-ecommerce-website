@@ -240,6 +240,8 @@ export const chatAPI = {
     if (!response.ok) throw new Error('Upload failed');
     return response.json();
   },
+
+  markAsRead: (conversationId) => apiCall(`/chat/${conversationId}/read`, { method: 'PATCH' }),
 };
 
 // ============================================
