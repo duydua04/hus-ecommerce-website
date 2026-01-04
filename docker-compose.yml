@@ -1,0 +1,155 @@
+services:
+
+  db:
+    image: postgres:16
+    container_name: website_db
+    environment:
+      POSTGRES_USER: mywebsite
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: websitedb
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./backend/database.sql:/docker-entrypoint-initdb.d/01_init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mywebsite -d websitedb"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - app_network
+
+  mongo:
+    image: mongo:8.0
+    container_name: website_mongo
+    restart: always
+    command: ["mongod", "--quiet"]
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mywebsite
+      MONGO_INITDB_ROOT_PASSWORD: password
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    networks:
+      - app_network
+
+  redis:
+    image: redis:alpine
+    container_name: website_redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - app_network
+
+  backend_api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: website_api
+    env_file:
+      - ./backend/.env
+    depends_on:
+      db:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/app:/app/app
+    networks:
+      - app_network
+
+  celery_worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: website_worker
+    command: celery -A app.utils.celery_client.celery_app worker --loglevel=info
+    env_file:
+      - ./backend/.env
+    depends_on:
+      redis:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+    volumes:
+      - ./backend/app:/app/app
+    networks:
+      - app_network
+
+  frontend_buyer:
+    build:
+      context: ./frontend-buyer
+      dockerfile: Dockerfile
+    container_name: website_frontend_buyer
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend-buyer/src:/app/src
+      - /app/node_modules
+    networks:
+      - app_network
+    environment:
+      - VITE_API_URL=http://localhost:8000
+    command: npm run dev -- --host --port 3000
+
+  frontend_seller:
+    build:
+      context: ./frontend-admin-seller/seller
+      dockerfile: Dockerfile
+    container_name: website_frontend_seller
+    ports:
+      - "3001:3001"
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./frontend-admin-seller/seller/src:/app/src
+      - ./frontend-admin-seller/seller/public:/app/public
+      - /app/node_modules
+    networks:
+      - app_network
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000
+      - CHOKIDAR_USEPOLLING=true
+
+  frontend_admin:
+    build:
+      context: ./frontend-admin-seller/admin
+      dockerfile: Dockerfile
+    container_name: website_frontend_admin
+    ports:
+      - "3002:3002"
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./frontend-admin-seller/admin/src:/app/src
+      - ./frontend-admin-seller/admin/public:/app/public
+      - /app/node_modules
+    networks:
+      - app_network
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000
+      - CHOKIDAR_USEPOLLING=true
+
+volumes:
+  pgdata:
+  mongo_data:
+
+networks:
+  app_network:
+    driver: bridge
