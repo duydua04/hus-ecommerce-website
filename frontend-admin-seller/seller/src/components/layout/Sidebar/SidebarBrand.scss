@@ -13,8 +13,10 @@
 }
 
 .sidebar__brand-icon {
-  font-size: 32px;
-  min-width: 32px;
+  width: 56px;
+  height: 56px;
+  min-width: 56px;
+  object-fit: contain;
 }
 
 .sidebar--collapsed .sidebar__brand {

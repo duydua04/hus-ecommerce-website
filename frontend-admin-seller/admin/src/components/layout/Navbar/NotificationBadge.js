@@ -1,11 +1,11 @@
 import React from "react";
 
-const NotificationBadge = ({ count = 0 }) => {
+const NotificationBadge = ({ count = 0, onClick }) => {
   return (
-    <a href="#" className="navbar__notification">
+    <button type="button" className="navbar__notification" onClick={onClick}>
       <i className="bx bx-bell navbar__notification-icon"></i>
       {count > 0 && <span className="navbar__notification-badge">{count}</span>}
-    </a>
+    </button>
   );
 };
 

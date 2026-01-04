@@ -11,7 +11,7 @@ from ...utils.storage import storage
 from ...utils.security import verify_access_token
 
 from ...models.chat import Conversation, Message
-from ...models.users import Buyer, Seller
+from ...models.users import Buyer, Seller, Admin
 
 from ...schemas.chat import SendMessageRequest
 from ...config.db import get_db
@@ -53,6 +53,14 @@ class ChatService:
                 u = result.scalar_one_or_none()
                 if u:
                     return u.seller_id, role
+
+            elif role == 'admin':
+                stmt = select(Admin).where(Admin.email == email)
+                result = await db.execute(stmt)
+                u = result.scalar_one_or_none()
+                if u:
+                    # Admin không chat, nhưng cần ID để kết nối WebSocket nhận Noti
+                    return u.admin_id, role
         except Exception:
             pass
         return None, None
@@ -140,6 +148,13 @@ class ChatService:
     async def send_message(self, sender_id: int, sender_role: str, payload: SendMessageRequest):
         """Gửi tin nhắn trực tiếp"""
         sender_role = sender_role.lower()
+
+        if sender_role == 'admin':
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Admin cannot participate in chat"
+            )
+
         recipient_role = "seller" if sender_role == "buyer" else "buyer"
 
         recipient = None
@@ -265,6 +280,40 @@ class ChatService:
         results = await storage.upload_many(folder="chat", files=files)
 
         return {"urls": [public_url(r['object_key']) for r in results]}
+
+    async def mark_as_read(self, conversation_id: str, user_id: int, role: str):
+        """
+        Đánh dấu hội thoại là đã đọc.
+        Reset unread_count của role tương ứng về 0.
+        """
+        role = role.lower()
+
+        # 1. Tìm hội thoại
+        try:
+            conv = await Conversation.get(conversation_id)
+        except Exception:
+            conv = None
+
+        if not conv:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Conversation not found"
+            )
+
+        # 2. Kiểm tra quyền sở hữu (User có thuộc hội thoại này không?)
+        if role == 'buyer' and conv.buyer_id != user_id:
+            raise HTTPException(status_code=403, detail="Access denied")
+        if role == 'seller' and conv.seller_id != user_id:
+            raise HTTPException(status_code=403, detail="Access denied")
+
+        if not conv.unread_counts:
+            conv.unread_counts = {"buyer": 0, "seller": 0}
+
+        if conv.unread_counts.get(role, 0) > 0:
+            conv.unread_counts[role] = 0
+            await conv.save()
+
+        return {"success": True, "conversation_id": conversation_id}
 
 
 def get_chat_service(db: AsyncSession = Depends(get_db)):

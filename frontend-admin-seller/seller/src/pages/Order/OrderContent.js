@@ -3,12 +3,13 @@ import { X, Check } from "lucide-react";
 import PageHeader from "../../components/common/PageHeader/PageHeader";
 import Table from "../../components/common/Table/Table";
 import Pagination from "../../components/common/Pagination/Pagination";
-import Button from "../../components/common/Button/Button";
 import SearchBox from "../../components/common/SearchBox/SearchBox";
 import OrderDetailModal from "./OrderDetail/OrderDetail";
 import ConfirmModal from "../../components/common/ConfirmModal/ConfirmModal";
 import CancelOrderModal from "./CancelOrder/CancelOrder";
+
 import useOrder from "../../hooks/useOrder";
+import { formatDetailedTime } from "../../utils/timeUtils";
 
 import "../../assets/styles/page.scss";
 import "./Order.scss";
@@ -219,16 +220,7 @@ export default function OrderContent() {
       key: "order_date",
       label: "Ngày đặt",
       className: "table__cell--date",
-      render: (v) =>
-        v
-          ? new Date(v).toLocaleDateString("vi-VN", {
-              day: "2-digit",
-              month: "2-digit",
-              year: "numeric",
-              hour: "2-digit",
-              minute: "2-digit",
-            })
-          : "N/A",
+      render: (v) => (v ? formatDetailedTime(v) : "N/A"),
     },
     {
       key: "buyer_name",

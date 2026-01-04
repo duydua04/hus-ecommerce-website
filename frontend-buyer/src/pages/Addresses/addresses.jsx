@@ -274,7 +274,7 @@ export default function Addresses() {
 
   const validatePhoneNumber = (phone) => {
     // Regex cho số điện thoại Việt Nam
-    const phoneRegex = /^(0[3|5|7|8|9])+([0-9]{8})$/;
+    const phoneRegex = /^(0[1-9])+([0-9]{8})$/;
     return phoneRegex.test(phone);
   };
 

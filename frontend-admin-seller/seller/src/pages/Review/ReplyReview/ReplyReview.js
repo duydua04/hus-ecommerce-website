@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { X, Star, AlertCircle } from "lucide-react";
 import "./ReplyReview.scss";
 
+import { formatDetailedTime } from "../../../utils/timeUtils";
+
 export default function ReplyReviewModal({
   isOpen,
   review,
@@ -56,18 +58,6 @@ export default function ReplyReviewModal({
     );
   };
 
-  const formatDate = (dateString) => {
-    if (!dateString) return "";
-    const date = new Date(dateString);
-    return date.toLocaleString("vi-VN", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
   const remainingChars = 500 - replyText.length;
   const existingRepliesCount = review.replies?.length || 0;
 
@@ -108,7 +98,7 @@ export default function ReplyReviewModal({
             <div className="review-info__meta">
               <div className="review-rating">{renderStars(review.rating)}</div>
               <div className="review-date">
-                <span>{formatDate(review.created_at)}</span>
+                <span>{formatDetailedTime(review.created_at)}</span>
               </div>
             </div>
 
@@ -131,7 +121,7 @@ export default function ReplyReviewModal({
                       <div className="existing-reply__header">
                         <span className="reply-author">Shop</span>
                         <span className="reply-date">
-                          {formatDate(reply.reply_date)}
+                          {formatDetailedTime(reply.reply_date)}
                         </span>
                       </div>
                       <p className="existing-reply__text">{reply.reply_text}</p>
