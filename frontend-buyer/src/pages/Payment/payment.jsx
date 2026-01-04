@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
+import Modal from '../../components/Modal';
 import './payment.css';
 
 const Payment = () => {
@@ -24,6 +25,7 @@ const Payment = () => {
   const [notes, setNotes] = useState('');
   const [showAddressModal, setShowAddressModal] = useState(false);
   const [showVoucherModal, setShowVoucherModal] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
   const [totalWeight, setTotalWeight] = useState(0);
@@ -108,7 +110,6 @@ const Payment = () => {
       setLoading(true);
       setErrors({});
 
-      // 1. Load selected items
       const itemsData = await api.order.getSelectedItems(selectedItemIds);
       let formattedData = itemsData;
 
@@ -130,13 +131,11 @@ const Payment = () => {
       }
       setOrderData(formattedData);
 
-      // 2. Load addresses
       const addressData = await api.address.list();
       setAddresses(addressData);
       const defaultAddr = addressData.find(a => a.is_default);
       setSelectedAddress(defaultAddr || (addressData.length > 0 ? addressData[0] : null));
 
-      // 3. Load carriers
       const carriersData = await api.carrier.getAll();
       let carriersList = [];
       if (Array.isArray(carriersData)) carriersList = carriersData;
@@ -144,7 +143,6 @@ const Payment = () => {
       setCarriers(carriersList);
       if (carriersList.length > 0) setSelectedCarrier(carriersList[0]);
 
-      // 4. Tính tổng trọng lượng
       calculateTotalWeight();
 
     } catch (err) {
@@ -279,13 +277,16 @@ const Payment = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handlePlaceOrder = async () => {
+  const handlePlaceOrderClick = () => {
     if (!validateOrder()) return;
-    if (!window.confirm('Xác nhận đặt hàng?')) return;
+    setShowConfirmModal(true);
+  };
 
+  const handleConfirmOrder = async () => {
     try {
       setSubmitting(true);
       setErrors({});
+      setShowConfirmModal(false);
 
       const payload = {
         cart_item_ids: selectedItemIds,
@@ -386,7 +387,7 @@ const Payment = () => {
             )}
           </section>
 
-          {/* DANH SÁCH SẢN PHẨM - ĐÃ BỎ PHẦN HIỂN THỊ SHOP */}
+          {/* DANH SÁCH SẢN PHẨM */}
           <section className="product-section">
             <div className="product-header">
               <div style={{ width: '40%' }}>Sản phẩm</div>
@@ -397,7 +398,6 @@ const Payment = () => {
             </div>
 
             {orderData.length > 0 ? (
-              // Chỉ hiển thị sản phẩm, không có header shop
               orderData.flatMap((seller, idx) =>
                 seller.products?.map((product) => (
                   <div key={`${idx}-${product.shopping_cart_item_id}`} className="product-item">
@@ -569,13 +569,78 @@ const Payment = () => {
 
           <button
             className="checkout-button"
-            onClick={handlePlaceOrder}
+            onClick={handlePlaceOrderClick}
             disabled={submitting || !selectedAddress || !selectedCarrier || shippingFee === 0}
           >
             {submitting ? (<><span className="spinner"></span>Đang xử lý...</>) : 'Đặt Hàng'}
           </button>
         </aside>
       </div>
+
+      {/* MODAL XÁC NHẬN ĐẶT HÀNG */}
+      <Modal
+        isOpen={showConfirmModal}
+        onClose={() => !submitting && setShowConfirmModal(false)}
+        title="Xác nhận đơn hàng"
+        showCloseButton={!submitting}
+        showOkButton={false}
+        showCancelButton={false}
+        size="medium"
+      >
+        <div className="confirm-order-modal">
+          <p className="confirm-message">Bạn có chắc chắn muốn xác nhận đơn hàng này?</p>
+
+          <div className="order-summary-details">
+            <div className="summary-item">
+              <span className="summary-label">Số lượng sản phẩm:</span>
+              <span className="summary-value">{getTotalQuantity()} sản phẩm</span>
+            </div>
+            <div className="summary-item">
+              <span className="summary-label">Tạm tính:</span>
+              <span className="summary-value">{formatCurrency(calculateSubtotal())}</span>
+            </div>
+            <div className="summary-item">
+              <span className="summary-label">Phí vận chuyển:</span>
+              <span className="summary-value">{formatCurrency(shippingFee)}</span>
+            </div>
+            {discountAmount > 0 && (
+              <div className="summary-item discount">
+                <span className="summary-label">Giảm giá:</span>
+                <span className="summary-value">-{formatCurrency(discountAmount)}</span>
+              </div>
+            )}
+            <div className="summary-divider-line"></div>
+            <div className="summary-item total">
+              <span className="summary-label">Tổng thanh toán:</span>
+              <span className="summary-value">{formatCurrency(calculateTotal())}</span>
+            </div>
+          </div>
+
+          <div className="confirm-modal-actions">
+            <button
+              className="btn-cancel-confirm"
+              onClick={() => setShowConfirmModal(false)}
+              disabled={submitting}
+            >
+              Cancel
+            </button>
+            <button
+              className="btn-ok-confirm"
+              onClick={handleConfirmOrder}
+              disabled={submitting}
+            >
+              {submitting ? (
+                <>
+                  <span className="btn-spinner"></span>
+                  Đang xử lý...
+                </>
+              ) : (
+                'OK'
+              )}
+            </button>
+          </div>
+        </div>
+      </Modal>
 
       {/* MODAL CHỌN ĐỊA CHỈ */}
       {showAddressModal && (

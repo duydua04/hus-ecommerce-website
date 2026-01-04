@@ -309,6 +309,19 @@ class BuyerOrderService:
         # 5. CLEAR CÁC ITEM ĐÃ MUA KHỎI GIỎ HÀNG TRONG DATABASE
         for item in selected_items:
             await self.db.delete(item)
+        # 1.5 CẬP NHẬT USED_COUNT CỦA DISCOUNT (Nếu có dùng mã)
+        if payload.discount_id is not None:
+            # Truy vấn lại discount với row-level lock để tránh race condition
+            discount_stmt = select(Discount).where(Discount.discount_id == payload.discount_id).with_for_update()
+            discount_obj = (await self.db.execute(discount_stmt)).scalar_one_or_none()
+            
+            if discount_obj:
+                # Kiểm tra lại giới hạn sử dụng một lần nữa trước khi tăng count
+                if discount_obj.usage_limit is not None and discount_obj.used_count >= discount_obj.usage_limit:
+                    raise HTTPException(400, "Mã giảm giá đã hết lượt sử dụng")
+                
+                # Tăng số lần đã dùng
+                discount_obj.used_count += 1
 
         # 6. COMMIT DATABASE
         # Bước này chốt hạ dữ liệu trong MySQL
