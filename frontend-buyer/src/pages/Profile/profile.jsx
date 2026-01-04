@@ -1,4 +1,3 @@
-// src/pages/Profile/profile.jsx
 import React, { useEffect, useState } from "react";
 import { Link } from 'react-router-dom';
 import api from "../../services/api";
@@ -6,7 +5,6 @@ import { useUser } from "../../context/UserContext";
 import NotificationSidebar from "../../components/notificationSidebar";
 import Modal from "../../components/modal";
 import "./profile.css";
-import Addresses from "../Addresses/addresses";
 
 export default function Profile() {
   const [profile, setProfile] = useState({
@@ -134,8 +132,8 @@ export default function Profile() {
   };
 
   const handleSaveProfile = async () => {
+    // 1. Validate Form
     const validationErrors = validateForm();
-
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       showWarningModal("Vui lòng kiểm tra lại thông tin");
@@ -146,18 +144,56 @@ export default function Profile() {
       setLoading(true);
       setErrors({});
 
-      const updatedData = await api.profile.updateProfile({
+      // Biến này để lưu URL ảnh cuối cùng sẽ hiển thị
+      let finalAvatarUrl = profile.avt_url;
+
+      // ---------------------------------------------------------
+      // BƯỚC 1: XỬ LÝ UPLOAD ẢNH (NẾU CÓ)
+      // ---------------------------------------------------------
+      if (avatarFile) {
+        try {
+          console.log("Đang upload ảnh...");
+          const uploadRes = await api.avatar.upload(avatarFile);
+
+          // Lấy URL mới từ kết quả upload
+          finalAvatarUrl = uploadRes.public_url || uploadRes.avt_url;
+
+          // Reset file input
+          setAvatarFile(null);
+          setAvatarPreview(null);
+        } catch (uploadErr) {
+          console.error("Lỗi upload ảnh:", uploadErr);
+          showErrorModal("Không thể tải ảnh lên, nhưng sẽ tiếp tục lưu thông tin cá nhân.");
+          // Nếu lỗi, vẫn giữ finalAvatarUrl cũ
+        }
+      }
+
+      // ---------------------------------------------------------
+      // BƯỚC 2: CẬP NHẬT THÔNG TIN VĂN BẢN
+      // ---------------------------------------------------------
+      // Chỉ gửi các trường text, KHÔNG gửi avt_url
+      const updateProfileRes = await api.profile.updateProfile({
         fname: profile.fname,
         lname: profile.lname,
         phone: profile.phone,
-        avt_url: profile.avt_url || null,
       });
 
-      setProfile(prev => ({ ...prev, ...updatedData }));
-      setUser(prev => ({ ...prev, ...updatedData }));
+      // ---------------------------------------------------------
+      // BƯỚC 3: CẬP NHẬT GIAO DIỆN
+      // ---------------------------------------------------------
+      // Lấy thông tin text mới từ server + link ảnh mới nhất (từ Bước 1)
+      const finalProfileData = {
+        ...updateProfileRes,
+        avt_url: finalAvatarUrl
+      };
 
-      showSuccessModal("Lưu hồ sơ thành công");
+      setProfile(prev => ({ ...prev, ...finalProfileData }));
+      setUser(prev => ({ ...prev, ...finalProfileData }));
+
+      showSuccessModal("Cập nhật hồ sơ thành công");
+
     } catch (err) {
+      console.error(err);
       showErrorModal(err.message || "Cập nhật thất bại");
     } finally {
       setLoading(false);
@@ -182,6 +218,7 @@ export default function Profile() {
     setAvatarPreview(URL.createObjectURL(file));
   };
 
+  // Nút lưu ảnh riêng lẻ (nếu người dùng muốn bấm nút nhỏ bên cạnh ảnh)
   const handleUploadAvatar = async () => {
     if (!avatarFile) {
       showWarningModal("Vui lòng chọn ảnh");
@@ -192,7 +229,7 @@ export default function Profile() {
       setLoading(true);
 
       const uploadRes = await api.avatar.upload(avatarFile);
-      const newAvatarUrl = uploadRes.avatar_url;
+      const newAvatarUrl = uploadRes.public_url || uploadRes.avt_url;
 
       setProfile(prev => ({ ...prev, avt_url: newAvatarUrl }));
       setUser(prev => ({

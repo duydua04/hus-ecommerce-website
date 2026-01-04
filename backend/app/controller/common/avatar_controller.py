@@ -5,41 +5,53 @@ from ...config.s3 import public_url
 from ...middleware.auth import get_current_user
 from ...utils.storage import storage
 
+# Lưu ý: Import router tùy theo cấu trúc project của bạn
 router = APIRouter(
     prefix="/avatars",
     tags=["avatars"]
 )
 
-# Thuc hien upload avatar cho user hien tai
+
 @router.post("/me")
-async def upload_my_avatar(file: UploadFile, db: Session = Depends(get_db), info = Depends(get_current_user)):
-
-    #Lenh if chi cho phep upload anh len
+async def upload_my_avatar(
+        file: UploadFile,
+        db: Session = Depends(get_db),
+        info=Depends(get_current_user)
+):
+    # Check định dạng ảnh
     if not (file.content_type or "").lower().startswith("image/"):
-        raise HTTPException(status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, detail="Avatar must be an image")
+        raise HTTPException(
+            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            detail="Avatar must be an image"
+        )
 
-    # Upload len minio
     stored = await storage.upload_file("avatars", file, max_size_mb=10)
     avt_url_database = stored["object_key"]
-    avt_url = public_url(avt_url_database)
 
     user = info["user"]
     user.avt_url = avt_url_database
-    db.commit()
-    db.refresh(user)
+
+    await db.commit()
+    await db.refresh(user)
+
+    avt_url = public_url(avt_url_database)
 
     return {
         "role": info["role"],
         "email": user.email,
         "public_url": avt_url,
+        "avt_url": avt_url,
         "object_key": stored["object_key"],
         "size": stored["size"],
         "content_type": stored["content_type"]
     }
 
-# Xóa avarta
+
 @router.delete("/me")
-def delete_my_avatar(db: Session = Depends(get_db), info = Depends(get_current_user)):
+async def delete_my_avatar(
+        db: Session = Depends(get_db),
+        info=Depends(get_current_user)
+):
     user = info["user"]
 
     if not user.avt_url:
@@ -50,10 +62,16 @@ def delete_my_avatar(db: Session = Depends(get_db), info = Depends(get_current_u
 
     object_key = storage.extract_object_key(user.avt_url)
 
-    delete_resp = storage.delete_object(object_key)
+    # Xóa trên storage
+    delete_resp = await storage.delete_object(object_key)
 
     user.avt_url = None
-    db.commit()
-    db.refresh(user)
 
-    return {"deleted": True, "removed_from_storage": delete_resp.get("Deleted", False), "object_key": object_key}
+    await db.commit()
+    await db.refresh(user)
+
+    return {
+        "deleted": True,
+        "removed_from_storage": delete_resp.get("Deleted", False),
+        "object_key": object_key
+    }
