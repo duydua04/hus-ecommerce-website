@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../../services/api";
-import Chat from "../../components/Chat/Chat";
+import Chat from "../../components/Chat/chat.jsx";
 import "./detail.css";
 import useTime from "../../context/useTime";
 

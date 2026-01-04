@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
-import Modal from '../../components/Modal';
+import Modal from '../../components/modal.jsx';
 import './payment.css';
 
 const Payment = () => {

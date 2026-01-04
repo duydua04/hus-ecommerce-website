@@ -115,7 +115,7 @@ export const websocketAPI = {
       this.socket.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
-          console.log('📨 WebSocket message received:', data);
+          // console.log('📨 WebSocket message received:', data); // Uncomment nếu muốn debug chi tiết
 
           // Xử lý message theo type
           this.handleMessage(data);
@@ -198,7 +198,12 @@ export const websocketAPI = {
 
   // Xử lý message nhận được
   handleMessage: function(data) {
-    const { type, payload } = data;
+    // =================================================================
+    // [FIX] Sửa lỗi cấu trúc dữ liệu:
+    // Thay vì: const { type, payload } = data;
+    // Dùng Rest Operator (...) để lấy toàn bộ các trường còn lại (id, title, message...) làm payload
+    // =================================================================
+    const { type, ...payload } = data;
 
     // Gọi tất cả handlers cho loại message này
     const handlers = this.messageHandlers.get(type);
@@ -235,7 +240,7 @@ export const websocketAPI = {
     try {
       const message = JSON.stringify({ type, payload });
       this.socket.send(message);
-      console.log('📤 WebSocket message sent:', { type, payload });
+      // console.log('📤 WebSocket message sent:', { type, payload });
       return true;
     } catch (error) {
       console.error('Error sending WebSocket message:', error);
