@@ -17,13 +17,12 @@ const Header = () => {
 
     const loadUser = async () => {
       try {
-        const userData = await api.auth.getMe();
+        const userData = await api.auth.getMe("buyer");
         setUser(userData);
       } catch (err) {
         console.error("Load user error:", err);
       }
     };
-
     loadUser();
   }, [user, setUser]);
 

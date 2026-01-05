@@ -15,11 +15,10 @@ async def get_current_user(
         db: AsyncSession = Depends(get_db)
 ):
     """
-    Kiểm tra và trả về người dùng hiện tại (Async version).
+    Kiểm tra và trả về người dùng hiện tại.
     """
     token = None
 
-    # 1. Ưu tiên lấy token từ Header (cho Mobile App hoặc API client)
     auth_header = request.headers.get("Authorization")
     if auth_header and auth_header.startswith("Bearer "):
         token = auth_header.split(" ")[1]
@@ -32,6 +31,11 @@ async def get_current_user(
                 if found_token:
                     token = found_token
                     break
+
+        if not token:
+            role_param = request.query_params.get("role")
+            if role_param and role_param in ["buyer", "seller", "admin"]:
+                token = request.cookies.get(f"access_token_{role_param}")
 
         if not token:
             for role in ["admin", "seller", "buyer"]:

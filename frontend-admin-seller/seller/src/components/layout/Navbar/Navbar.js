@@ -10,7 +10,7 @@ const Navbar = ({ notificationCount = 0, onMenuClick }) => {
 
   useEffect(() => {
     axios
-      .get("/auth/me")
+      .get("/auth/me?role=seller")
       .then(({ data }) => {
         if (data.avt_url) setProfileImage(data.avt_url);
       })

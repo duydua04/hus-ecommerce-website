@@ -47,7 +47,7 @@ const apiCall = async (endpoint, options = {}) => {
 // AUTHENTICATION APIs
 // ============================================
 export const authAPI = {
-  getMe: () => apiCall('/auth/me'),
+  getMe: (role = 'buyer') => apiCall(`/auth/me?role=${role}`),
   loginBuyer: (email, password) =>
     apiCall('/auth/login/buyer', {
       method: 'POST',
@@ -59,7 +59,7 @@ export const authAPI = {
       body: JSON.stringify(userData),
     }),
   logout: () =>
-    apiCall('/auth/logout', {
+    apiCall('/auth/logout?role=buyer', {
       method: 'POST',
     }),
   refreshToken: () =>
