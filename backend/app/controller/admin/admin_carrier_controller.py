@@ -15,7 +15,7 @@ router = APIRouter(
 )
 
 
-@router.get("/", response_model=List[CarrierOut])
+@router.get("", response_model=List[CarrierOut])
 async def admin_list_carriers(
     q: Optional[str] = Query(None, description="Search by name"),
     limit: int = Query(100, ge=1),
@@ -29,7 +29,7 @@ async def admin_list_carriers(
     return await service.list_carrier(q=q, limit=limit, offset=offset)
 
 
-@router.post("/", response_model=CarrierOut, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=CarrierOut, status_code=status.HTTP_201_CREATED)
 async def admin_create_carrier(
     payload: CarrierCreate,
     service: AdminCarrierService = Depends(get_admin_carrier_service)

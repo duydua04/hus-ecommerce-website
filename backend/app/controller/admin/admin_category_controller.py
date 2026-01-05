@@ -17,7 +17,7 @@ router = APIRouter(
 )
 
 
-@router.get("/")
+@router.get("")
 async def api_list_categories(
     q: Optional[str] = Query(None, description="Search by category_name"),
     limit: int = Query(20, ge=1, le=200),
@@ -37,7 +37,7 @@ async def api_get_category(
     return await service.get(category_id)
 
 
-@router.post("/", response_model=CategoryResponse, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=CategoryResponse, status_code=status.HTTP_201_CREATED)
 async def api_create_category(
     payload: CategoryCreate,
     service: AdminCategoryService = Depends(get_admin_category_service)

@@ -9,7 +9,7 @@ router = APIRouter(
 )
 
 
-@router.get("/", response_model=SellerResponse)
+@router.get("", response_model=SellerResponse)
 async def get_my_profile(
         seller_info=Depends(require_seller),
         service: SellerProfileService = Depends(get_seller_profile_service)
@@ -21,7 +21,7 @@ async def get_my_profile(
     return await service.get_info(seller_id)
 
 
-@router.put("/", response_model=SellerResponse)
+@router.put("", response_model=SellerResponse)
 async def update_my_profile(
         payload: SellerUpdate,
         seller_info=Depends(require_seller),

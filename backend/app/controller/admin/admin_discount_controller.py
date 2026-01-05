@@ -11,7 +11,7 @@ router = APIRouter(
 )
 
 
-@router.get("/")
+@router.get("")
 async def admin_list_discount(
     q: str | None = None,
     limit: int = Query(10, ge=1),
@@ -22,7 +22,7 @@ async def admin_list_discount(
     return await service.list(q=q, limit=limit, offset=offset)
 
 
-@router.post("/", response_model=DiscountResponse, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=DiscountResponse, status_code=status.HTTP_201_CREATED)
 async def admin_create_discount(
     payload: DiscountCreate,
     service: AdminDiscountService = Depends(get_discount_service)
