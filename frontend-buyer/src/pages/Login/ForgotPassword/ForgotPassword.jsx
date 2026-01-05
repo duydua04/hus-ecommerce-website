@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+  import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 // Nếu muốn dùng api call chuẩn thì thay fetch bằng api.auth..., nhưng giữ nguyên fetch cũng được
 import "./ForgotPassword.css";
 
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = import.meta.env.VITE_API_URL
 
 function ForgotPassword() {
   const navigate = useNavigate();

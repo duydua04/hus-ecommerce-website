@@ -3,6 +3,10 @@ import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
 import "./home.css";
 
+import mainBannerImg from "../../assets/banners/main-interior.png";
+import smallBannerImg from "../../assets/banners/small-interior.png";
+import nullImage from "../../assets/confligloading/null.png";
+
 const Home = () => {
   const navigate = useNavigate();
   const [categories, setCategories] = useState([]);
@@ -134,7 +138,7 @@ const Home = () => {
                   </a>
                 </div>
                 <img
-                  src="src/assets/banners/main-interior.png"
+                  src={mainBannerImg}
                   alt="Main banner"
                   className="banner__image"
                 />
@@ -144,7 +148,7 @@ const Home = () => {
             <aside className="banner__small">
               <article className="banner__small-inner">
                 <img
-                  src="src/assets/banners/small-interior.png"
+                  src={smallBannerImg}
                   alt="Small banner"
                   className="banner__bg-image"
                 />
@@ -178,7 +182,7 @@ const Home = () => {
                 style={{ cursor: 'pointer' }}
               >
                 <img
-                  src={category.image_url || 'src/assets/confligloading/null.png'}
+                  src={category.image_url || nullImage}
                   alt={category.category_name}
                   className="popular__image"
                   onError={(e) => {
@@ -212,7 +216,7 @@ const Home = () => {
                 style={{ cursor: 'pointer' }}
               >
                 <img
-                  src={product.public_primary_image_url || '/assets/confligloading/null.png'}
+                  src={product.public_primary_image_url || nullImage}
                   alt={product.name}
                   className="product-card__image"
                   onError={(e) => {

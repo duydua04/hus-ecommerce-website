@@ -2,7 +2,7 @@ import uuid
 import json
 import base64
 from fastapi import HTTPException, Request, status, Depends
-# BackgroundTasks is no longer needed because Celery handles async execution
+
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from authlib.integrations.starlette_client import OAuthError

@@ -19,7 +19,7 @@ router = APIRouter(
     tags=["seller-products"]
 )
 
-@router.get("/", response_model=Page)
+@router.get("", response_model=Page)
 async def list_my_products(
     q: Optional[str] = Query(None),
     active_only: bool = Query(True),

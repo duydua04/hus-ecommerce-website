@@ -4,8 +4,15 @@
  * - Channel-based subscription system
  * - HttpOnly Cookie authentication
  */
+const API_BASE_URL = process.env.REACT_APP_API_URL || "https://api.fastbuy.io.vn";
 
-const WS_URL = process.env.REACT_APP_WS_URL || "ws://localhost:8000/websocket/";
+let wsBaseUrl = API_BASE_URL.replace('http://', 'ws://').replace('https://', 'wss://');
+
+if (wsBaseUrl.endsWith('/')) {
+  wsBaseUrl = wsBaseUrl.slice(0, -1);
+}
+
+const WS_URL = `${wsBaseUrl}/websocket/`;
 const RECONNECT_DELAY = 3000;
 
 // Message type mapping: backend type => channel name

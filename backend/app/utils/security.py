@@ -6,6 +6,9 @@ from fastapi import Response
 from jwt import ExpiredSignatureError, InvalidTokenError
 from ..config.settings import settings
 from ..schemas.auth import OAuth2Token
+import os
+
+IS_PRODUCTION = os.getenv("e") == "production"
 
 # ===== Password hashing =====
 def hash_password(plain: str):
@@ -115,12 +118,25 @@ def set_auth_cookies(response: Response, access_token: str, refresh_token: str):
     access_minutes = settings.OAUTH2_ACCESS_TOKEN_EXPIRE_MINUTES
     refresh_days = settings.OAUTH2_REFRESH_TOKEN_EXPIRE_DAYS
 
+    cookie_params = {
+        "httponly": True,
+        "samesite": "lax",
+        "secure": IS_PRODUCTION,
+        "domain": ".fastbuy.io.vn" if IS_PRODUCTION else None
+    }
+
     response.set_cookie(
-        key="access_token", value=access_token, httponly=True,
-        samesite="lax", secure=False, path="/", max_age=access_minutes * 60
+        key="access_token",
+        value=access_token,
+        path="/",
+        max_age=access_minutes * 60,
+        **cookie_params
     )
     response.set_cookie(
-        key="refresh_token", value=refresh_token, httponly=True,
-        samesite="lax", secure=False, path="/auth/refresh", max_age=refresh_days * 24 * 3600
+        key="refresh_token",
+        value=refresh_token,
+        path="/auth/refresh",
+        max_age=refresh_days * 24 * 3600,
+        **cookie_params
     )
 

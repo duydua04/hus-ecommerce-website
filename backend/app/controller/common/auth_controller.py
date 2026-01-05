@@ -12,7 +12,9 @@ from ...services.common.auth_service import AuthService, get_auth_service
 from ...services.common.gg_auth_service import GoogleAuthService, get_google_auth_service
 
 from ...utils.security import set_auth_cookies
+import os
 
+IS_PRODUCTION = os.getenv("e") == "production"
 router = APIRouter(
     prefix="/auth",
     tags=["auth"]
@@ -146,7 +148,6 @@ async def google_callback(
 async def forgot_password(
         payload: ForgotPasswordRequest,
         response: Response,
-        # background_tasks: BackgroundTasks, (Đã bỏ theo logic mới dùng Celery)
         service: AuthService = Depends(get_auth_service)
 ):
     """Gửi OTP qua email"""
@@ -158,8 +159,9 @@ async def forgot_password(
         value=result["reset_token"],
         httponly=True,
         samesite="lax",
-        secure=False,
-        max_age=5 * 60
+        secure=IS_PRODUCTION,
+        max_age=5 * 60,
+        domain=".fastbuy.io.vn" if IS_PRODUCTION else None
     )
     return {"message": "OTP has been sent to your email"}
 
@@ -179,8 +181,7 @@ def verify_otp(
             detail="Session missing or expired"
         )
 
-    # Hàm này trong Service là @staticmethod và tính toán CPU (hash compare)
-    # Không gọi DB -> Giữ nguyên def thường để FastAPI chạy trong Threadpool
+
     result = service.verify_otp_for_reset(payload.otp, token)
 
     response.set_cookie(
@@ -188,8 +189,9 @@ def verify_otp(
         value=result["permission_token"],
         httponly=True,
         samesite="lax",
-        secure=False,
-        max_age=5 * 60
+        secure=IS_PRODUCTION,
+        max_age=5 * 60,
+        domain=".fastbuy.io.vn" if IS_PRODUCTION else None
     )
     return {"message": "OTP valid, you can now reset password"}
 

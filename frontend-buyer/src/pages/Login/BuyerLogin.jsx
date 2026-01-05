@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import './BuyerLogin.css';
 
-const API_URL = 'http://localhost:8000';
+const API_URL = import.meta.env.VITE_API_URL || 'https://api.fastbuy.io.vn';
 
 function BuyerLogin() {
   const navigate = useNavigate();

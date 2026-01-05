@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
+const API_URL = process.env.REACT_APP_API_URL || "https://api.fastbuy.io.vn";
 
 // DEBUG: Log để kiểm tra API_URL
 console.log("Axios Config - API URL:", API_URL);
