@@ -64,7 +64,7 @@ services:
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d
       - ./frontend-builds:/var/www/html
-      - /etc/letsencrypt:/etc/nginx/ssl:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
     depends_on:
       - backend_api
     networks:
