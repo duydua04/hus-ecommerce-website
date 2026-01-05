@@ -14,7 +14,7 @@ if (wsBaseUrl.endsWith('/')) {
   wsBaseUrl = wsBaseUrl.slice(0, -1);
 }
 
-const WS_URL = `${wsBaseUrl}/websocket/`;
+const WS_URL = `${wsBaseUrl}/websocket/?role=seller`;
 const RECONNECT_DELAY = 3000;
 
 // Message type mapping: backend type => channel name

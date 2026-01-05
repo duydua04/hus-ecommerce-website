@@ -99,7 +99,7 @@ export const websocketAPI = {
         wsBaseUrl = wsBaseUrl.slice(0, -1);
       }
 
-      const wsUrl = `${wsBaseUrl}/websocket/`;
+      const wsUrl = `${wsBaseUrl}/websocket/?role=buyer`;
       this.socket = new WebSocket(wsUrl);
 
       this.socket.onopen = () => {

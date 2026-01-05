@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query, WebSocket, WebSocketDisconnect, status, Cookie
+from fastapi import APIRouter, Depends, Query, WebSocket, WebSocketDisconnect, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from ...config.db import get_db
 
@@ -14,42 +14,49 @@ router = APIRouter(
 @router.websocket("/")
 async def chat_socket_endpoint(
         websocket: WebSocket,
-        access_token: str | None = Cookie(default=None),
-        token: str | None = Query(default=None),
-
+        # 1. Nhận tham số role từ URL (ws://.../?role=buyer)
+        role: str = Query(default="buyer"),
         db: AsyncSession = Depends(get_db),
 ):
     """
-    [STREAM] Cổng kết nối WebSocket chung.
-    Hỗ trợ cả Cookie (Secure) và Query Param.
+    Cổng kết nối WebSocket chung.
     """
 
-    final_token = access_token if access_token else token
+    cookie_name = f"access_token_{role}"
+    final_token = websocket.cookies.get(cookie_name)
 
     if not final_token:
-        print("❌ [WS] No token found in Cookie or Query")
+        for r in ["admin", "seller", "buyer"]:
+            t = websocket.cookies.get(f"access_token_{r}")
+            if t:
+                final_token = t
+                role = r
+                break
+
+    # 3. Kiểm tra Token
+    if not final_token:
+        print(f"[WS] No token found for role: {role}")
+        # Đóng kết nối ngay nếu không có token
         await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
         return
 
-    # Authenticate
-    user_id, role = await ChatService.get_user_from_token(final_token, db)
+    user_id, token_role = await ChatService.get_user_from_token(final_token, db)
 
-    if not user_id:
-        print(f"❌ [WS] Invalid Token: {final_token[:10]}...")
+    if not user_id or token_role != role:
+        print(f"[WS] Invalid Token or Role Mismatch (Exp: {role}, Got: {token_role})")
         await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
         return
 
-    # Connect to Manager
     await socket_manager.connect_socket(websocket, user_id, role)
 
     try:
         while True:
-            # Keep connection alive
             await websocket.receive_text()
 
     except WebSocketDisconnect:
+        print(f"[WS] Disconnected: {user_id} ({role})")
         socket_manager.disconnect_socket(websocket, user_id, role)
 
     except Exception as e:
-        print(f"WebSocket Error: {e}")
+        print(f"[WS] Error: {e}")
         socket_manager.disconnect_socket(websocket, user_id, role)
