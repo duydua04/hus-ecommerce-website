@@ -37,7 +37,7 @@ const Header = () => {
 
   const handleLogout = async () => {
     try {
-      await api.auth.logout();
+      await api.auth.logout("buyer");
     } catch (err) {
       console.warn('Logout API failed:', err);
     }

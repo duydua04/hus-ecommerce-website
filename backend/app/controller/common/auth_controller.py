@@ -11,7 +11,7 @@ from ...schemas.user import BuyerResponse, SellerResponse
 from ...services.common.auth_service import AuthService, get_auth_service
 from ...services.common.gg_auth_service import GoogleAuthService, get_google_auth_service
 
-from ...utils.security import set_auth_cookies
+from ...utils.security import set_auth_cookies, delete_auth_cookies
 import os
 
 IS_PRODUCTION = os.getenv("e") == "production"
@@ -23,9 +23,6 @@ router = APIRouter(
 
 @router.get("/me")
 def get_me(info=Depends(get_current_user)):
-    """Lấy thông tin người dùng hiện tại"""
-    # Hàm này chỉ đọc thông tin từ token (dict) đã decode ở middleware
-    # Không gọi DB nên giữ nguyên def thường
     u = info["user"]
     return {
         "role": info["role"],
@@ -38,21 +35,12 @@ def get_me(info=Depends(get_current_user)):
 
 
 @router.post("/register/buyer", response_model=BuyerResponse)
-async def register_buyer(
-        payload: RegisterBuyer,
-        service: AuthService = Depends(get_auth_service)
-):
-    """Đăng ký Buyer"""
-    # [ASYNC] Phải await vì service gọi DB async
+async def register_buyer(payload: RegisterBuyer, service: AuthService = Depends(get_auth_service)):
     return await service.register_buyer(payload)
 
 
 @router.post("/register/seller", response_model=SellerResponse)
-async def register_seller(
-        payload: RegisterSeller,
-        service: AuthService = Depends(get_auth_service)
-):
-    """Đăng ký Seller"""
+async def register_seller(payload: RegisterSeller, service: AuthService = Depends(get_auth_service)):
     return await service.register_seller(payload)
 
 
@@ -63,7 +51,7 @@ async def login_admin(
         service: AuthService = Depends(get_auth_service)
 ):
     token_data = await service.login_admin(payload)
-    set_auth_cookies(response, token_data.access_token, token_data.refresh_token)
+    set_auth_cookies(response, token_data.access_token, token_data.refresh_token, role="admin")
     return token_data
 
 
@@ -74,7 +62,7 @@ async def login_buyer(
         service: AuthService = Depends(get_auth_service)
 ):
     token_data = await service.login_buyer(payload)
-    set_auth_cookies(response, token_data.access_token, token_data.refresh_token)
+    set_auth_cookies(response, token_data.access_token, token_data.refresh_token, role="buyer")
     return token_data
 
 
@@ -85,7 +73,7 @@ async def login_seller(
         service: AuthService = Depends(get_auth_service)
 ):
     token_data = await service.login_seller(payload)
-    set_auth_cookies(response, token_data.access_token, token_data.refresh_token)
+    set_auth_cookies(response, token_data.access_token, token_data.refresh_token, role="seller")
     return token_data
 
 
@@ -95,8 +83,17 @@ async def refresh(
         response: Response,
         service: AuthService = Depends(get_auth_service)
 ):
-    """Cấp lại Access Token mới từ Refresh Token"""
-    refresh_token = request.cookies.get("refresh_token")
+
+    refresh_token = None
+    role_found = None
+
+    for role in ["buyer", "seller", "admin"]:
+        t = request.cookies.get(f"refresh_token_{role}")
+        if t:
+            refresh_token = t
+            role_found = role
+            break
+
     if not refresh_token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -105,42 +102,28 @@ async def refresh(
 
     new_token = await service.refresh_access_token(refresh_token)
 
-    set_auth_cookies(response, new_token.access_token, new_token.refresh_token)
+    set_auth_cookies(response, new_token.access_token, new_token.refresh_token, role=role_found)
     return new_token
 
 
 @router.post("/logout")
-def logout(
-        response: Response,
-        service: AuthService = Depends(get_auth_service)
-):
-    """Đăng xuất: Xóa cookie"""
-    # Hàm logout trong service là @staticmethod và chỉ xóa cookie, không gọi DB
-    # Nên giữ nguyên def thường để tối ưu
-    return service.logout(response)
+def logout(response: Response, service: AuthService = Depends(get_auth_service), role: str = None):
+    """Đăng xuất: Xóa sạch cookie"""
+    return service.logout(response, role)
 
 
 @router.get("/google/login/buyer")
-async def google_login_buyer(
-        request: Request,
-        service: GoogleAuthService = Depends(get_google_auth_service)
-):
+async def google_login_buyer(request: Request, service: GoogleAuthService = Depends(get_google_auth_service)):
     return await service.login_start(request, role="buyer")
 
 
 @router.get("/google/login/seller")
-async def google_login_seller(
-        request: Request,
-        service: GoogleAuthService = Depends(get_google_auth_service)
-):
+async def google_login_seller(request: Request, service: GoogleAuthService = Depends(get_google_auth_service)):
     return await service.login_start(request, role="seller")
 
 
 @router.get("/google/callback")
-async def google_callback(
-        request: Request,
-        service: GoogleAuthService = Depends(get_google_auth_service)
-):
+async def google_callback(request: Request, service: GoogleAuthService = Depends(get_google_auth_service)):
     return await service.login_callback(request)
 
 

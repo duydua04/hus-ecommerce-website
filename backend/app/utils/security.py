@@ -9,6 +9,7 @@ from ..schemas.auth import OAuth2Token
 import os
 
 IS_PRODUCTION = os.getenv("e") == "production"
+ROLES_LIST = ["admin", "buyer", "seller"]
 
 # ===== Password hashing =====
 def hash_password(plain: str):
@@ -113,8 +114,9 @@ def issue_token(email: str, role: str):
         scope=role
     )
 
-def set_auth_cookies(response: Response, access_token: str, refresh_token: str):
-    """Set token vào HttpOnly Cookie"""
+
+def set_auth_cookies(response: Response, access_token: str, refresh_token: str, role: str):
+    """Set token vào HttpOnly Cookie với tên riêng biệt theo Role"""
     access_minutes = settings.OAUTH2_ACCESS_TOKEN_EXPIRE_MINUTES
     refresh_days = settings.OAUTH2_REFRESH_TOKEN_EXPIRE_DAYS
 
@@ -126,17 +128,40 @@ def set_auth_cookies(response: Response, access_token: str, refresh_token: str):
     }
 
     response.set_cookie(
-        key="access_token",
+        key=f"access_token_{role}",
         value=access_token,
         path="/",
         max_age=access_minutes * 60,
         **cookie_params
     )
     response.set_cookie(
-        key="refresh_token",
+        key=f"refresh_token_{role}",
         value=refresh_token,
         path="/auth/refresh",
         max_age=refresh_days * 24 * 3600,
         **cookie_params
     )
 
+
+def delete_auth_cookies(response: Response, role: str = None):
+    """
+    Xóa cookie.
+    """
+    cookie_params = {
+        "httponly": True,
+        "samesite": "lax",
+        "secure": IS_PRODUCTION,
+        "domain": ".fastbuy.io.vn" if IS_PRODUCTION else None
+    }
+
+    if role:
+        response.delete_cookie(key=f"access_token_{role}", path="/", **cookie_params)
+        response.delete_cookie(key=f"refresh_token_{role}", path="/auth/refresh", **cookie_params)
+
+    else:
+        for r in ROLES_LIST:
+            response.delete_cookie(key=f"access_token_{r}", path="/", **cookie_params)
+            response.delete_cookie(key=f"refresh_token_{r}", path="/auth/refresh", **cookie_params)
+
+    response.delete_cookie(key="access_token", path="/", **cookie_params)
+    response.delete_cookie(key="refresh_token", path="/auth/refresh", **cookie_params)

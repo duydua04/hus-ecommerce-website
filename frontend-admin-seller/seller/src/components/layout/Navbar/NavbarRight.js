@@ -54,7 +54,7 @@ const NavbarRight = ({ profileImage = "" }) => {
 
     setIsLoggingOut(true);
     try {
-      await api.post("/auth/logout");
+      await api.post("/auth/logout?role=seller");
     } catch (e) {
       console.error(e);
     } finally {

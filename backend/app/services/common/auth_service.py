@@ -10,7 +10,7 @@ from ...schemas.auth import RegisterBuyer, RegisterSeller, Login
 from ...schemas.user import BuyerResponse, SellerResponse
 from ...utils.security import (
     hash_password, verify_password, create_access_token,
-    verify_refresh_token, decode_token, issue_token
+    verify_refresh_token, decode_token, issue_token, delete_auth_cookies
 )
 from ...utils.otp import create_otp
 from ...tasks.email_task import send_otp_email_task
@@ -184,12 +184,12 @@ class AuthService:
 
 
     @staticmethod
-    def logout(response: Response):
+    def logout(response: Response, role: str = None):
 
-        response.delete_cookie("access_token", path="/")
-        response.delete_cookie("refresh_token", path="/auth/refresh")
+        delete_auth_cookies(response, role=role)
 
-        return {"message": "Logout successfully"}
+        return {"message": f"Logout {role if role else 'all'} successfully"}
+
 
     async def forgot_password_request(self, email: str, role: str):
         user = None

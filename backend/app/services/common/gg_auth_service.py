@@ -229,7 +229,7 @@ class GoogleAuthService:
             status_code=status.HTTP_302_FOUND
         )
 
-        set_auth_cookies(redirect_response, token_data.access_token, token_data.refresh_token)
+        set_auth_cookies(redirect_response, token_data.access_token, token_data.refresh_token, role=role)
 
         return redirect_response
 
