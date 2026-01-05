@@ -18,7 +18,7 @@ function ProtectedRoute({ children, allowedRoles = [] }) {
   const checkAuth = async () => {
     try {
       // Gọi API /auth/me để kiểm tra token từ cookies
-      const response = await axios.get("/auth/me");
+      const response = await axios.get("/auth/me?role=admin");
 
       if (response.data?.role) {
         setUserRole(response.data.role);
