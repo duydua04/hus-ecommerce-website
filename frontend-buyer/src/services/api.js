@@ -1,6 +1,4 @@
-// src/services/api.js
-
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 const handleResponse = async (response) => {
   if (!response.ok) {
@@ -96,7 +94,12 @@ export const websocketAPI = {
     try {
       // ✅ [CHANGE] Bỏ query param ?token=...
       // Cookie sẽ tự động được trình duyệt gửi đi khi handshake WS (cùng domain/localhost)
-      const wsUrl = `ws://localhost:8000/websocket/`;
+      let wsBaseUrl = API_BASE_URL.replace('http://', 'ws://').replace('https://', 'wss://');
+      if (wsBaseUrl.endsWith('/')) {
+        wsBaseUrl = wsBaseUrl.slice(0, -1);
+      }
+
+      const wsUrl = `${wsBaseUrl}/websocket/`;
       this.socket = new WebSocket(wsUrl);
 
       this.socket.onopen = () => {
