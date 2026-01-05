@@ -17,16 +17,29 @@ async def get_current_user(
     """
     Kiểm tra và trả về người dùng hiện tại (Async version).
     """
-    # 1. Lấy token từ cookies
-    token = request.cookies.get("access_token")
+    token = None
 
-    # 2. Nếu không có trong Cookie, thử tìm trong Header (Authorization: Bearer ...)
+    # 1. Ưu tiên lấy token từ Header (cho Mobile App hoặc API client)
+    auth_header = request.headers.get("Authorization")
+    if auth_header and auth_header.startswith("Bearer "):
+        token = auth_header.split(" ")[1]
+
     if not token:
-        auth_header = request.headers.get("Authorization")
-        if auth_header and auth_header.startswith("Bearer "):
-            token = auth_header.split(" ")[1]
+        if security_scopes.scopes:
+            for scope in security_scopes.scopes:
+                cookie_name = f"access_token_{scope}"
+                found_token = request.cookies.get(cookie_name)
+                if found_token:
+                    token = found_token
+                    break
 
-    # 3. Báo lỗi "Missing access token" nếu không tìm thấy
+        if not token:
+            for role in ["admin", "seller", "buyer"]:
+                found_token = request.cookies.get(f"access_token_{role}")
+                if found_token:
+                    token = found_token
+                    break
+
     if token is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -34,7 +47,6 @@ async def get_current_user(
             headers={"WWW-Authenticate": f'Bearer scope="{security_scopes.scope_str}"'}
         )
 
-    # 4. Giải mã token
     try:
         payload = verify_access_token(token)
     except ExpiredSignatureError:
@@ -53,7 +65,6 @@ async def get_current_user(
     role = payload.get('role')
     sub = payload.get('sub')
 
-    # 5. Kiểm tra Scope (Role)
     if security_scopes.scopes and role not in security_scopes.scopes:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -61,7 +72,6 @@ async def get_current_user(
             headers={"WWW-Authenticate": f'Bearer scope="{security_scopes.scope_str}"'}
         )
 
-    # 6. Query DB để lấy user (Async)
     user = None
     stmt = None
 
