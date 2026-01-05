@@ -1,4 +1,3 @@
-// src/components/header.jsx
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../services/api';
@@ -79,7 +78,7 @@ const Header = () => {
           <div className="brand">
             <Link to="/" className="brand__link">
               <img
-                  src="src/assets/Logo/Logo.png"
+                  src="/logo.png"
                   alt="FastBuy"
                   className="brand__logo"
                   style={{

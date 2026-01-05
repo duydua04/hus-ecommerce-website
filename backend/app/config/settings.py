@@ -43,12 +43,12 @@ class Settings(BaseSettings):
     MONGO_URL: str
     MONGO_DB_NAME: str
 
-    FRONTEND_BUYER_URL: str = "http://localhost:3000"
-    FRONTEND_SELLER_URL: str = "http://localhost:3001"
-    FRONTEND_ADMIN_URL: str =  "http://localhost:3002"
+    FRONTEND_BUYER_URL: str
+    FRONTEND_SELLER_URL: str
+    FRONTEND_ADMIN_URL: str
 
-    DEFAULT_BUYER_HOME: str = "/"
-    DEFAULT_SELLER_HOME: str = "/products"
+    DEFAULT_BUYER_HOME: str = ""
+    DEFAULT_SELLER_HOME: str = "/dashboard"
 
     REDIS_HOST: str = "localhost"
     REDIS_PORT: int = 6379
