@@ -1,76 +1,66 @@
-// src/context/useTime.js
 import { useCallback } from 'react';
 
 const useTime = () => {
-  // Hàm chuyển đổi thời gian từ UTC sang Asia/HoChiMinh (GMT+7)
-  const convertToHoChiMinhTime = useCallback((utcDateString) => {
-    if (!utcDateString || utcDateString === 'null' || utcDateString === 'undefined') {
-      console.warn('Invalid date string:', utcDateString);
-      return new Date();
-    }
+  /**
+   * Chuyển đổi chuỗi thời gian sang Date Object chuẩn.
+   * Tự động xử lý trường hợp thiếu múi giờ (UTC) từ Backend.
+   */
+  const toLocalTime = useCallback((dateInput) => {
+    if (!dateInput) return new Date();
 
-    try {
-      const date = new Date(utcDateString);
-      if (isNaN(date.getTime())) {
-        console.warn('Invalid date:', utcDateString);
-        return new Date();
+    if (dateInput instanceof Date) return dateInput;
+
+    let dateString = dateInput;
+
+    if (typeof dateString === 'string') {
+      if (!dateString.endsWith('Z') && !dateString.includes('+')) {
+         dateString += 'Z';
       }
+    }
 
-      // Chuyển từ UTC sang GMT+7 (Asia/HoChiMinh)
-      return new Date(date.getTime() + 7 * 60 * 60 * 1000);
-    } catch (error) {
-      console.error('Error converting time:', error);
+    const date = new Date(dateString);
+
+    // Fallback nếu date không hợp lệ
+    if (isNaN(date.getTime())) {
+      console.warn('Invalid date input:', dateInput);
       return new Date();
     }
+
+    return date;
   }, []);
 
-  // Hàm format thời gian theo định dạng Việt Nam
+  // --- Hàm format thời gian theo định dạng Việt Nam ---
   const formatVietnameseDateTime = useCallback((date) => {
     try {
-      if (!date) return '';
+      const dateObj = toLocalTime(date);
+      if (isNaN(dateObj.getTime())) return '';
 
-      // Nếu là string, chuyển đổi trước
-      const dateObj = typeof date === 'string' ? convertToHoChiMinhTime(date) : date;
 
-      if (isNaN(dateObj.getTime())) {
-        return '';
-      }
-
-      // Format theo kiểu Việt Nam
-      const day = dateObj.getDate().toString().padStart(2, '0');
-      const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
-      const year = dateObj.getFullYear();
-      const hour = dateObj.getHours().toString().padStart(2, '0');
-      const minute = dateObj.getMinutes().toString().padStart(2, '0');
-      const second = dateObj.getSeconds().toString().padStart(2, '0');
-
-      return `${day}/${month}/${year} ${hour}:${minute}:${second}`;
+      return new Intl.DateTimeFormat('vi-VN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false // Dùng định dạng 24h
+      }).format(dateObj);
     } catch (error) {
-      console.error('Error formatting date:', error);
       return '';
     }
-  }, [convertToHoChiMinhTime]);
+  }, [toLocalTime]);
 
-  // Hàm format thời gian ngắn gọn (relative time)
+
   const formatRelativeTime = useCallback((date) => {
     try {
-      if (!date) return '';
-
-      // Nếu là string, chuyển đổi trước
-      const dateObj = typeof date === 'string' ? convertToHoChiMinhTime(date) : date;
-
-      if (isNaN(dateObj.getTime())) {
-        return '';
-      }
+      const dateObj = toLocalTime(date);
+      if (isNaN(dateObj.getTime())) return '';
 
       const now = new Date();
-      const hoChiMinhNow = convertToHoChiMinhTime(now.toISOString());
-      const diffMs = hoChiMinhNow.getTime() - dateObj.getTime();
+      const diffMs = now.getTime() - dateObj.getTime();
 
-      // Nếu thời gian trong tương lai
-      if (diffMs < 0) {
-        return "Vừa xong";
-      }
+      if (diffMs < 0 && diffMs > -60000) return "Vừa xong";
+      if (diffMs < 0) return formatVietnameseDateTime(dateObj);
 
       const diffSec = Math.floor(diffMs / 1000);
       const diffMin = Math.floor(diffMs / (1000 * 60));
@@ -82,94 +72,62 @@ const useTime = () => {
       if (diffHour < 24) return `${diffHour} giờ trước`;
       if (diffDay < 7) return `${diffDay} ngày trước`;
 
-      // Nếu hơn 7 ngày, hiển thị ngày tháng
-      const day = dateObj.getDate().toString().padStart(2, '0');
-      const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
-      const year = dateObj.getFullYear();
-      return `${day}/${month}/${year}`;
+      // Nếu quá 7 ngày, hiển thị ngày/tháng/năm
+      return new Intl.DateTimeFormat('vi-VN', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      }).format(dateObj);
+
     } catch (error) {
-      console.error('Error formatting relative time:', error);
       return '';
     }
-  }, [convertToHoChiMinhTime]);
+  }, [toLocalTime, formatVietnameseDateTime]);
 
-  // Hàm format thời gian ngắn (chỉ giờ:phút)
+  // --- Hàm format thời gian ngắn (chỉ giờ:phút) ---
   const formatShortTime = useCallback((date) => {
     try {
-      if (!date) return '';
+      const dateObj = toLocalTime(date);
+      if (isNaN(dateObj.getTime())) return '';
 
-      const dateObj = typeof date === 'string' ? convertToHoChiMinhTime(date) : date;
-
-      if (isNaN(dateObj.getTime())) {
-        return '';
-      }
-
-      const hour = dateObj.getHours().toString().padStart(2, '0');
-      const minute = dateObj.getMinutes().toString().padStart(2, '0');
-      return `${hour}:${minute}`;
+      return new Intl.DateTimeFormat('vi-VN', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      }).format(dateObj);
     } catch (error) {
-      console.error('Error formatting short time:', error);
       return '';
     }
-  }, [convertToHoChiMinhTime]);
+  }, [toLocalTime]);
 
-  // Hàm sắp xếp mảng theo thời gian mới nhất lên đầu
   const sortByNewest = useCallback((array, dateField = 'created_at') => {
-    try {
-      if (!Array.isArray(array)) return [];
+    if (!Array.isArray(array)) return [];
+    return [...array].sort((a, b) => {
+      const timeA = toLocalTime(a[dateField]).getTime();
+      const timeB = toLocalTime(b[dateField]).getTime();
+      return timeB - timeA;
+    });
+  }, [toLocalTime]);
 
-      return [...array].sort((a, b) => {
-        try {
-          const timeA = a[dateField] ? convertToHoChiMinhTime(a[dateField]).getTime() : 0;
-          const timeB = b[dateField] ? convertToHoChiMinhTime(b[dateField]).getTime() : 0;
-          return timeB - timeA; // Giảm dần (mới nhất lên đầu)
-        } catch (error) {
-          console.error('Error sorting:', error);
-          return 0;
-        }
-      });
-    } catch (error) {
-      console.error('Error in sortByNewest:', error);
-      return array || [];
+  const getTimeInfo = useCallback((dateInput) => {
+    const localDate = toLocalTime(dateInput);
+
+    if (isNaN(localDate.getTime())) {
+      return { localDate: new Date(), formatted: '', relative: '', shortTime: '', timestamp: 0 };
     }
-  }, [convertToHoChiMinhTime]);
 
-  // Hàm lấy thông tin thời gian đầy đủ
-  const getTimeInfo = useCallback((utcDateString) => {
-    try {
-      const localDate = convertToHoChiMinhTime(utcDateString);
-
-      if (isNaN(localDate.getTime())) {
-        return {
-          localDate: new Date(),
-          formatted: '',
-          relative: '',
-          shortTime: '',
-          timestamp: 0
-        };
-      }
-
-      return {
-        localDate,
-        formatted: formatVietnameseDateTime(localDate),
-        relative: formatRelativeTime(localDate),
-        shortTime: formatShortTime(localDate),
-        timestamp: localDate.getTime()
-      };
-    } catch (error) {
-      console.error('Error getting time info:', error);
-      return {
-        localDate: new Date(),
-        formatted: '',
-        relative: '',
-        shortTime: '',
-        timestamp: 0
-      };
-    }
-  }, [convertToHoChiMinhTime, formatVietnameseDateTime, formatRelativeTime, formatShortTime]);
+    return {
+      localDate,
+      formatted: formatVietnameseDateTime(localDate),
+      relative: formatRelativeTime(localDate),
+      shortTime: formatShortTime(localDate),
+      timestamp: localDate.getTime()
+    };
+  }, [toLocalTime, formatVietnameseDateTime, formatRelativeTime, formatShortTime]);
 
   return {
-    convertToHoChiMinhTime,
+    toLocalTime,
+    convertToHoChiMinhTime: toLocalTime,
     formatVietnameseDateTime,
     formatRelativeTime,
     formatShortTime,

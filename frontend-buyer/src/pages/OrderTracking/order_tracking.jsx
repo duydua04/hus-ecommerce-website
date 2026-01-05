@@ -6,6 +6,7 @@ import api from '../../services/api';
 import NotificationSidebar from "../../components/notificationSidebar";
 import Modal from "../../components/modal";
 import './order_tracking.css';
+import useTime from '../../context/useTime'
 
 export default function OrderTracking() {
   const navigate = useNavigate();
@@ -17,6 +18,7 @@ export default function OrderTracking() {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [orderDetail, setOrderDetail] = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
+  const { formatVietnameseDateTime } = useTime();
 
   // Modal states
   const [modal, setModal] = useState({
@@ -376,15 +378,6 @@ export default function OrderTracking() {
     }).format(amount);
   };
 
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('vi-VN', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
 
   const hasReviewed = (productId) => {
     if (!orderDetail?.items) return false;
@@ -501,7 +494,7 @@ export default function OrderTracking() {
                   {/* Order Footer */}
                   <div className="order-footer">
                     <div className="order-date">
-                      Đặt hàng: {formatDate(order.order_date)}
+                      Đặt hàng: {formatVietnameseDateTime(order.order_date)}
                     </div>
                     <div className="order-actions">
                       <button
@@ -558,12 +551,12 @@ export default function OrderTracking() {
                     </div>
                     <div className="detail-row">
                       <span className="detail-label">Ngày đặt:</span>
-                      <span>{formatDate(orderDetail.order.order_date)}</span>
+                      <span>{formatVietnameseDateTime(orderDetail.order.order_date)}</span>
                     </div>
                     {orderDetail.order.delivery_date && (
                       <div className="detail-row">
                         <span className="detail-label">Ngày giao:</span>
-                        <span>{formatDate(orderDetail.order.delivery_date)}</span>
+                        <span>{formatVietnameseDateTime(orderDetail.order.delivery_date)}</span>
                       </div>
                     )}
                   </div>

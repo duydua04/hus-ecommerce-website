@@ -356,40 +356,37 @@ class BuyerOrderService:
 
    # ===================== CHI TIẾT ĐƠN HÀNG =====================
     async def get_order_detail(self, buyer_id: int, order_id: int):
-        # Lấy order với các relation cần thiết
         stmt = (
-        select(Order)
-        .options(
-            selectinload(Order.items)
-            .selectinload(OrderItem.product)  # Product
-            .selectinload(Product.variants),  # ProductVariant
+            select(Order)
+            .options(
+                # --- Phần load Items cũ của bạn (giữ nguyên) ---
+                selectinload(Order.items).selectinload(OrderItem.product).selectinload(Product.variants),
+                selectinload(Order.items).selectinload(OrderItem.product).selectinload(Product.images),
+                selectinload(Order.items).selectinload(OrderItem.variant),
+                selectinload(Order.items).selectinload(OrderItem.size),
+                selectinload(Order.items).selectinload(OrderItem.product).selectinload(Product.seller),
 
-            selectinload(Order.items)
-            .selectinload(OrderItem.product)  # Product
-            .selectinload(Product.images),    # ProductImage
+                selectinload(Order.shipping_address).selectinload(BuyerAddress.address),
 
-            selectinload(Order.items)
-            .selectinload(OrderItem.variant), # Liên kết trực tiếp OrderItem -> variant
-            selectinload(Order.items)
-            .selectinload(OrderItem.size),    # Liên kết trực tiếp OrderItem -> size
-
-            selectinload(Order.items)
-            .selectinload(OrderItem.product)
-            .selectinload(Product.seller)     # Product -> Seller
+                selectinload(Order.carrier)
+            )
+            .where(Order.buyer_id == buyer_id)
+            .where(Order.order_id == order_id)
         )
-        .where(Order.buyer_id == buyer_id)
-        .where(Order.order_id == order_id)
-    )
 
         order: Order = (await self.db.execute(stmt)).scalars().unique().first()
+
         if not order:
             raise HTTPException(404, "Không tìm thấy đơn hàng")
 
-        # Lấy địa chỉ và carrier
-        shipping_address_obj = await self.db.get(Address, order.buyer_address_id)
-        carrier_obj = await self.db.get(Carrier, order.carrier_id)
+        if not order.shipping_address or not order.shipping_address.address:
+            raise HTTPException(404, "Thông tin địa chỉ của đơn hàng bị lỗi hoặc đã bị xóa")
 
-        shipping_address = AddressResponse.model_validate(shipping_address_obj)
+        real_address_obj = order.shipping_address.address
+
+        shipping_address = AddressResponse.model_validate(real_address_obj)
+
+        carrier_obj = order.carrier
         carrier = CarrierResponse(
             carrier_id=carrier_obj.carrier_id,
             carrier_name=carrier_obj.carrier_name,
@@ -404,19 +401,14 @@ class BuyerOrderService:
             size = item.size
             seller_name = product.seller.shop_name if product.seller else "Unknown Seller"
 
-            # Ảnh chính
             primary_image = next((img for img in product.images if img.is_primary), None)
             image_url = public_url(primary_image.image_url) if primary_image else None
 
-            # Tính giá
             base_price = Decimal(product.base_price)
             price_adjustment = Decimal(variant.price_adjustment) if variant else Decimal(0)
             total_base_price = base_price + price_adjustment
 
-            price_after_discount = total_base_price * (Decimal(100) - product.discount_percent) / Decimal(100)
-            total_price = price_after_discount * Decimal(item.quantity)
 
-            # Map sang OrderItemResponse
             items_data.append(OrderItemResponseNew(
                 order_item_id=item.order_item_id,
                 order_id=item.order_id,
@@ -428,11 +420,7 @@ class BuyerOrderService:
                 size_name=size.size_name if size else "",
                 quantity=item.quantity,
                 unit_price=item.unit_price,
-                # total_price=total_price,
                 base_price_plus_adjustment=total_base_price,
-                # price_after_discount=price_after_discount,
-                # weight=Decimal(product.weight or 0),
-                # total_weight=Decimal(product.weight or 0) * Decimal(item.quantity),
                 public_image_url=image_url,
                 seller=seller_name
             ))
