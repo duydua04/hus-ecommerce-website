@@ -64,6 +64,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "https://fastbuy.io.vn",
+        "https://www.fastbuy.io.vn",
         "https://admin.fastbuy.io.vn",
         "https://seller.fastbuy.io.vn"
     ],
