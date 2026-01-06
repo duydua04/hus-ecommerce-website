@@ -61,7 +61,7 @@ async def list_product_reviews(
 async def list_my_reviews(
     page: int = Query(1, ge=1),
     limit: int = Query(10, ge=1, le=50),
-    info = Depends(get_current_user),
+    info = Depends(require_buyer),
     service: BuyerReviewService = Depends(get_buyer_review_service)
 ):
     """
@@ -77,7 +77,7 @@ async def list_my_reviews(
 @router.post("/upload")
 async def upload_review_files(
     files: List[UploadFile] = File(...),
-    info = Depends(get_current_user)
+    info = Depends(require_buyer)
 ):
     results = await storage.upload_many("reviews", files, max_size_mb=50)
 
@@ -98,7 +98,7 @@ async def create_review(
     payload: ReviewCreate,
     bg_tasks: BackgroundTasks, # Inject BackgroundTasks vào đây
     service: BuyerReviewService = Depends(get_buyer_review_service),
-    info: Any = Depends(get_current_user)
+    info: Any = Depends(require_buyer)
 ):
     # Truyền bg_tasks xuống hàm service
     return await service.create_review(
@@ -117,7 +117,7 @@ async def update_review(
     order_id: int,
     payload: ReviewUpdate,
     service: BuyerReviewService = Depends(get_buyer_review_service),
-    info = Depends(get_current_user)
+    info = Depends(require_buyer)
 ):
     return await service.update_review(
         buyer_id=info["user"].buyer_id,
@@ -133,7 +133,7 @@ async def delete_review(
     product_id: int,
     order_id: int,
     service: BuyerReviewService = Depends(get_buyer_review_service),
-    info = Depends(get_current_user)
+    info = Depends(require_buyer)
 ):
     """
     API dùng để **xóa đánh giá của người mua** cho một sản phẩm.\n\n

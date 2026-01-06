@@ -10,7 +10,7 @@ router = APIRouter(
 )
 
 
-@router.get("/")
+@router.get("")
 async def get_my_notifications(
         limit: int = Query(20, ge=1, le=100),
         cursor: Optional[str] = Query(None),

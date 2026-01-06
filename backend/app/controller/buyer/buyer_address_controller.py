@@ -1,15 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import APIRouter, Depends
 from typing import List, Optional
 
 from ...schemas.common import BuyerAddressLabel
-from ...config.db import get_db
 from ...middleware.auth import require_buyer
 from ...schemas.address import (
     AddressCreate,
     AddressUpdate,
     BuyerAddressUpdate,
-    BuyerAddressResponseOrder,
     BuyerAddressResponse
 )
 from ...services.buyer.buyer_address_service import BuyerAddressService, get_buyer_address_service
