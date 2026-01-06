@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import Button from "../../../components/common/Button/Button";
 import "./EditProfileModal.scss";
+import "../../../assets/styles/modal.scss";
 
 export default function EditProfileModal({
   isOpen,

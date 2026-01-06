@@ -133,7 +133,9 @@ export default function ProductModal({ isOpen, onClose, onSubmit, product }) {
           {/* Giá */}
           <div className="form-row">
             <div className="form-group">
-              <label className="form-group__label">Giá gốc *</label>
+              <label className="form-group__label">
+                Giá gốc <span className="required">*</span>
+              </label>
               <input
                 type="number"
                 name="base_price"
@@ -187,6 +189,31 @@ export default function ProductModal({ isOpen, onClose, onSubmit, product }) {
                       .replace(/[\u0300-\u036f]/g, "")
                   )
               }
+            />
+          </div>
+          {/* Cân nặng */}
+          <div className="form-group">
+            <label className="form-group__label">Cân nặng (kg)</label>
+            <input
+              type="number"
+              name="weight"
+              value={formData.weight}
+              onChange={handleChange}
+              className="form-group__input"
+              placeholder="Nhập cân nặng"
+            />
+          </div>
+
+          {/* Mô tả */}
+          <div className="form-group">
+            <label className="form-group__label">Mô tả sản phẩm</label>
+            <textarea
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              className="form-group__input"
+              rows="4"
+              placeholder="Nhập mô tả chi tiết về sản phẩm"
             />
           </div>
 
