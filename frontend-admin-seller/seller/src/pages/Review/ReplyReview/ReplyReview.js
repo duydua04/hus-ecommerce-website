@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { X, Star, AlertCircle } from "lucide-react";
 import "./ReplyReview.scss";
+import "../../../assets/styles/modal.scss";
 
 import { formatDetailedTime } from "../../../utils/timeUtils";
 
