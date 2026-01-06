@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 from .config import settings
 from .lifespan import lifespan
-
+from .middleware.redirect import DomainRedirectMiddleware
 
 
 
@@ -57,7 +57,7 @@ app = FastAPI(
     title="Ecommerce Website",
     lifespan=lifespan
 )
-
+app.add_middleware(DomainRedirectMiddleware)
 app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY)
 
 app.add_middleware(

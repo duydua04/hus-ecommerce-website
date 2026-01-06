@@ -85,11 +85,15 @@ async def refresh(
 ):
     host = request.headers.get("host", "").lower()
 
+    # Xác định role dựa vào subdomain
     if "admin.fastbuy.io.vn" in host:
         role = "admin"
     elif "seller.fastbuy.io.vn" in host:
         role = "seller"
+    elif "www.fastbuy.io.vn" in host:
+        role = "buyer"
     else:
+        # Fallback cho localhost/dev
         role = "buyer"
 
     refresh_token = request.cookies.get(f"refresh_token_{role}")
@@ -98,7 +102,6 @@ async def refresh(
         raise HTTPException(status_code=401, detail="Refresh token expired")
 
     new_token = await service.refresh_access_token(refresh_token)
-
     set_auth_cookies(response, new_token.access_token, new_token.refresh_token, role=role)
 
     return new_token

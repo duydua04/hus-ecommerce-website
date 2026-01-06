@@ -14,12 +14,11 @@ async def get_current_user(
         request: Request,
         db: AsyncSession = Depends(get_db)
 ):
-    """
-    Kiểm tra và trả về người dùng hiện tại.
-    """
+    """Kiểm tra và trả về người dùng hiện tại"""
     token = None
     host = request.headers.get("host", "").lower()
 
+    # 1. Ưu tiên Authorization header
     auth_header = request.headers.get("Authorization")
     if auth_header and auth_header.startswith("Bearer "):
         token = auth_header.split(" ")[1]
@@ -29,23 +28,17 @@ async def get_current_user(
             token = request.cookies.get("access_token_admin")
         elif "seller.fastbuy.io.vn" in host:
             token = request.cookies.get("access_token_seller")
-        elif "fastbuy.io.vn" in host:  # Bao gồm cả domain chính
+        elif "www.fastbuy.io.vn" in host:
             token = request.cookies.get("access_token_buyer")
-
-        # 3. Fallback: Nếu vẫn chưa tìm thấy (ví dụ chạy localhost hoặc IP),
-        # dùng logic scopes hoặc tìm lần lượt các cookie như cũ
-        if not token:
+        # Localhost/dev fallback
+        elif "localhost" in host or "127.0.0.1" in host:
             if security_scopes.scopes:
                 for scope in security_scopes.scopes:
                     token = request.cookies.get(f"access_token_{scope}")
-                    if token: break
+                    if token:
+                        break
 
-            if not token:
-                for role in ["admin", "seller", "buyer"]:
-                    token = request.cookies.get(f"access_token_{role}")
-                    if token: break
-
-    # --- Phần Verify Token giữ nguyên như cũ ---
+    # 3. Nếu vẫn không có token
     if token is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -53,6 +46,7 @@ async def get_current_user(
             headers={"WWW-Authenticate": f'Bearer scope="{security_scopes.scope_str}"'}
         )
 
+    # 4. Verify token
     try:
         payload = verify_access_token(token)
     except (ExpiredSignatureError, InvalidTokenError) as e:
@@ -65,7 +59,7 @@ async def get_current_user(
     role = payload.get('role')
     sub = payload.get('sub')
 
-    # KIỂM TRA BẢO MẬT: Role trong Token phải nằm trong scope yêu cầu của endpoint
+    # 5. Kiểm tra scope
     if security_scopes.scopes and role not in security_scopes.scopes:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -73,7 +67,7 @@ async def get_current_user(
             headers={"WWW-Authenticate": f'Bearer scope="{security_scopes.scope_str}"'}
         )
 
-    # --- Phần Query User DB giữ nguyên ---
+    # 6. Query user từ DB
     user = None
     if role == 'admin':
         stmt = select(Admin).where(Admin.email == sub)
@@ -95,10 +89,8 @@ async def get_current_user(
 def require_admin(info=Security(get_current_user, scopes=["admin"])):
     return info
 
-
 def require_buyer(info=Security(get_current_user, scopes=["buyer"])):
     return info
-
 
 def require_seller(info=Security(get_current_user, scopes=["seller"])):
     return info
