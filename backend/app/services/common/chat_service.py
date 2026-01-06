@@ -234,7 +234,7 @@ class ChatService:
 
         return new_msg
 
-    @staticmethod
+
     async def get_history(self, conversation_id: str, cursor: Optional[str], limit: int, user_id: int, role: str):
         """Lấy lịch sử chat có phân trang và kiểm tra quyền sở hữu"""
 
