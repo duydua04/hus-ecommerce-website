@@ -14,31 +14,37 @@ async def get_current_user(
         request: Request,
         db: AsyncSession = Depends(get_db)
 ):
-    """Kiểm tra và trả về người dùng hiện tại"""
+    """
+    Kiểm tra và trả về người dùng hiện tại
+    """
     token = None
-    host = request.headers.get("host", "").lower()
 
-    # 1. Ưu tiên Authorization header
     auth_header = request.headers.get("Authorization")
     if auth_header and auth_header.startswith("Bearer "):
         token = auth_header.split(" ")[1]
 
     if not token:
-        if "admin.fastbuy.io.vn" in host:
-            token = request.cookies.get("access_token_admin")
-        elif "seller.fastbuy.io.vn" in host:
-            token = request.cookies.get("access_token_seller")
-        elif "www.fastbuy.io.vn" in host:
-            token = request.cookies.get("access_token_buyer")
-        # Localhost/dev fallback
-        elif "localhost" in host or "127.0.0.1" in host:
-            if security_scopes.scopes:
-                for scope in security_scopes.scopes:
-                    token = request.cookies.get(f"access_token_{scope}")
-                    if token:
-                        break
+        if security_scopes.scopes:
+            for scope in security_scopes.scopes:
+                cookie_name = f"access_token_{scope}"
+                found_token = request.cookies.get(cookie_name)
+                if found_token:
+                    token = found_token
+                    break
 
-    # 3. Nếu vẫn không có token
+        if not token:
+            role_param = request.query_params.get("role")
+            if role_param and role_param in ["buyer", "seller", "admin"]:
+                token = request.cookies.get(f"access_token_{role_param}")
+
+        if not token:
+            for role in ["admin", "seller", "buyer"]:
+                found_token = request.cookies.get(f"access_token_{role}")
+                if found_token:
+                    token = found_token
+                    break
+
+    # 3. Báo lỗi "Missing access token" nếu không tìm thấy
     if token is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -46,29 +52,37 @@ async def get_current_user(
             headers={"WWW-Authenticate": f'Bearer scope="{security_scopes.scope_str}"'}
         )
 
-    # 4. Verify token
+    # 4. Giải mã token
     try:
         payload = verify_access_token(token)
-    except (ExpiredSignatureError, InvalidTokenError) as e:
+    except ExpiredSignatureError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=str(e),
+            detail="Access token expired",
+            headers={"WWW-Authenticate": f'Bearer scope="{security_scopes.scope_str}"'}
+        )
+    except InvalidTokenError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid access token",
             headers={"WWW-Authenticate": f'Bearer scope="{security_scopes.scope_str}"'}
         )
 
     role = payload.get('role')
     sub = payload.get('sub')
 
-    # 5. Kiểm tra scope
+    # 5. Kiểm tra Scope (Role) - Nếu API yêu cầu quyền cụ thể
     if security_scopes.scopes and role not in security_scopes.scopes:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail=f"Quyền {role} không thể truy cập tài nguyên này",
+            detail="Insufficient scope",
             headers={"WWW-Authenticate": f'Bearer scope="{security_scopes.scope_str}"'}
         )
 
-    # 6. Query user từ DB
+    # 6. Query DB để lấy user (Async)
     user = None
+    stmt = None
+
     if role == 'admin':
         stmt = select(Admin).where(Admin.email == sub)
     elif role == 'buyer':
@@ -81,7 +95,11 @@ async def get_current_user(
         user = result.scalar_one_or_none()
 
     if user is None:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not found",
+            headers={"WWW-Authenticate": f'Bearer scope="{security_scopes.scope_str}"'}
+        )
 
     return {"role": role, "sub": sub, "user": user}
 
@@ -89,8 +107,10 @@ async def get_current_user(
 def require_admin(info=Security(get_current_user, scopes=["admin"])):
     return info
 
+
 def require_buyer(info=Security(get_current_user, scopes=["buyer"])):
     return info
+
 
 def require_seller(info=Security(get_current_user, scopes=["seller"])):
     return info

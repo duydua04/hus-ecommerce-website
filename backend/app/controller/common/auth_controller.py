@@ -83,27 +83,26 @@ async def refresh(
         response: Response,
         service: AuthService = Depends(get_auth_service)
 ):
-    host = request.headers.get("host", "").lower()
 
-    # Xác định role dựa vào subdomain
-    if "admin.fastbuy.io.vn" in host:
-        role = "admin"
-    elif "seller.fastbuy.io.vn" in host:
-        role = "seller"
-    elif "www.fastbuy.io.vn" in host:
-        role = "buyer"
-    else:
-        # Fallback cho localhost/dev
-        role = "buyer"
+    refresh_token = None
+    role_found = None
 
-    refresh_token = request.cookies.get(f"refresh_token_{role}")
+    for role in ["buyer", "seller", "admin"]:
+        t = request.cookies.get(f"refresh_token_{role}")
+        if t:
+            refresh_token = t
+            role_found = role
+            break
 
     if not refresh_token:
-        raise HTTPException(status_code=401, detail="Refresh token expired")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Refresh token missing in cookie"
+        )
 
     new_token = await service.refresh_access_token(refresh_token)
-    set_auth_cookies(response, new_token.access_token, new_token.refresh_token, role=role)
 
+    set_auth_cookies(response, new_token.access_token, new_token.refresh_token, role=role_found)
     return new_token
 
 
