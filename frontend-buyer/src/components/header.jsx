@@ -85,7 +85,7 @@ const Header = () => {
                     width: 'auto'
                   }}
                 />
-              <span className="brand__name">Fastbuy</span>
+              <span className="brand__name">FastBuy</span>
             </Link>
           </div>
         </div>

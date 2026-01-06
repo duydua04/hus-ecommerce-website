@@ -149,6 +149,9 @@ class ChatService:
         """Gửi tin nhắn trực tiếp"""
         sender_role = sender_role.lower()
 
+        if sender_id == payload.recipient_id and sender_role == ("buyer" if sender_role == "buyer" else "seller"):
+            pass
+
         if sender_role == 'admin':
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
@@ -232,8 +235,27 @@ class ChatService:
         return new_msg
 
     @staticmethod
-    async def get_history(conversation_id: str, cursor: Optional[str], limit: int):
-        """Lấy lịch sử chat có phân trang"""
+    async def get_history(self, conversation_id: str, cursor: Optional[str], limit: int, user_id: int, role: str):
+        """Lấy lịch sử chat có phân trang và kiểm tra quyền sở hữu"""
+
+        try:
+            conv = await Conversation.get(conversation_id)
+        except Exception:
+            conv = None
+
+        if not conv:
+            raise HTTPException(status_code=404, detail="Hội thoại không tồn tại")
+
+        is_owner = (role == 'buyer' and conv.buyer_id == user_id) or \
+                   (role == 'seller' and conv.seller_id == user_id)
+
+        if not is_owner:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Bạn không có quyền xem tin nhắn này"
+            )
+
+        # 2. Query lấy tin nhắn
         query = Message.find(Message.conversation_id == conversation_id)
 
         if cursor:

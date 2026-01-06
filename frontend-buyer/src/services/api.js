@@ -311,7 +311,7 @@ export const reviewAPI = {
 // CÁC SERVICE KHÁC GIỮ NGUYÊN (VÌ DÙNG apiCall)
 // ============================================
 export const categoryAPI = {
-  getAll: () => apiCall('/common/categories/'),
+  getAll: () => apiCall('/common/categories'),
   getById: (categoryId) => apiCall(`/common/categories/${categoryId}`),
 };
 

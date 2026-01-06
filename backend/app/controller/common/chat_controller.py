@@ -1,106 +1,93 @@
 from typing import List, Optional
 from fastapi import APIRouter, Depends, Query, UploadFile, File
 
-from ...middleware.auth import get_current_user
-from ...schemas.chat import MessageResponse, ChatHistoryResponse, ConversationResponse, SendMessageRequest
-
-
-from ...services.common.chat_service import (
-    ChatService,
-    get_chat_service,
+from ...dependencies.chat_deps import get_chat_actor
+from ...services.common.chat_service import ChatService, get_chat_service
+from ...schemas.chat import (
+    MessageResponse,
+    ChatHistoryResponse,
+    ConversationResponse,
+    SendMessageRequest
 )
-
 
 router = APIRouter(
     prefix="/chat",
     tags=["chat"]
 )
 
-
 @router.post("/upload")
 async def upload_chat_images(
-        files: List[UploadFile] = File(...),
-        _=Depends(get_current_user),
-        service: ChatService = Depends(get_chat_service)
+    files: List[UploadFile] = File(...),
+    _= Depends(get_chat_actor),
+    service: ChatService = Depends(get_chat_service)
 ):
     """
-    Upload ảnh cho chat.
+    Upload 5 ảnh.
     """
     return await service.upload_images(files)
 
 
 @router.post("/send", response_model=MessageResponse)
 async def send_message(
-        payload: SendMessageRequest,
-        current_user: dict = Depends(get_current_user),
-        service: ChatService = Depends(get_chat_service)
+    payload: SendMessageRequest,
+    actor: dict = Depends(get_chat_actor),
+    service: ChatService = Depends(get_chat_service)
 ):
     """
-    Gửi tin nhắn (Text hoặc Ảnh).
+    Gửi tin nhắn
     """
-    user = current_user['user']
-    role = current_user['role']
-
-    user_id = service.get_user_id(user, role)
-
     return await service.send_message(
-        sender_id=user_id,
-        sender_role=role,
+        sender_id=actor['user_id'],
+        sender_role=actor['role'],
         payload=payload
     )
 
 
 @router.get("/conversations", response_model=List[ConversationResponse])
 async def get_inbox(
-        current_user: dict = Depends(get_current_user),
-        service: ChatService = Depends(get_chat_service)
+    actor: dict = Depends(get_chat_actor),
+    service: ChatService = Depends(get_chat_service)
 ):
     """
-    Lấy danh sách các cuộc trò chuyện.
+    Lấy danh sách các cuộc trò chuyện gần nhất của người dùng hiện tại.
     """
-    user = current_user['user']
-    role = current_user['role']
-    user_id = service.get_user_id(user, role)
-
-    return await service.get_inbox(user_id=user_id, role=role)
+    return await service.get_inbox(
+        user_id=actor['user_id'],
+        role=actor['role']
+    )
 
 
 @router.get("/{conversation_id}/messages", response_model=ChatHistoryResponse)
 async def get_messages(
-        conversation_id: str,
-        cursor: Optional[str] = Query(None),
-        limit: int = Query(20),
-        _=Depends(get_current_user),
-        service: ChatService = Depends(get_chat_service)
+    conversation_id: str,
+    cursor: Optional[str] = Query(None, description="Thời điểm tin nhắn cuối cùng để lấy các tin cũ hơn"),
+    limit: int = Query(20, ge=1, le=50),
+    actor: dict = Depends(get_chat_actor),
+    service: ChatService = Depends(get_chat_service)
 ):
     """
-    Lấy lịch sử tin nhắn theo phân trang (Cursor).
+    Lấy lịch sử tin nhắn của một hội thoại theo phân trang Cursor.
     """
-
     return await service.get_history(
         conversation_id=conversation_id,
         cursor=cursor,
-        limit=limit
+        limit=limit,
+        user_id=actor['user_id'],
+        role=actor['role']
     )
-
 
 
 @router.patch("/{conversation_id}/read")
 async def mark_conversation_read(
-        conversation_id: str,
-        current_user: dict = Depends(get_current_user),
-        service: ChatService = Depends(get_chat_service)
+    conversation_id: str,
+    actor: dict = Depends(get_chat_actor),
+    service: ChatService = Depends(get_chat_service)
 ):
     """
-    Đánh dấu một cuộc trò chuyện là đã đọc.
+    Đánh dấu toàn bộ tin nhắn trong hội thoại là đã đọc đối với vai trò hiện tại.
     """
-    user = current_user['user']
-    role = current_user['role']
-
-    user_id = service.get_user_id(user, role)
-
     return await service.mark_as_read(
         conversation_id=conversation_id,
-        user_id=user_id,
-        role=role
+        user_id=actor['user_id'],
+        role=actor['role']
     )

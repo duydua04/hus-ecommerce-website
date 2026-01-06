@@ -14,7 +14,7 @@ router = APIRouter(
 )
 
 
-@router.get("/", response_model=List)
+@router.get("", response_model=List)
 async def get_all_categories(
     service: PublicCategoryService = Depends(get_public_category_service)
 ):

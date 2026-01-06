@@ -51,7 +51,7 @@ async def get_product_details(
     )
 
 
-@router.post("/", response_model=ProductResponse, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=ProductResponse, status_code=status.HTTP_201_CREATED)
 async def create_product(
     payload: ProductCreate,
     seller_info=Depends(require_seller),
