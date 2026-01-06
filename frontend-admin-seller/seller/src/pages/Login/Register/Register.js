@@ -107,7 +107,7 @@ function SellerRegister() {
 
       // Redirect to login after 2 seconds
       setTimeout(() => {
-        navigate("/seller/login", {
+        navigate("/login", {
           state: { message: "Đăng ký thành công! Vui lòng đăng nhập." },
         });
       }, 2000);
