@@ -364,6 +364,13 @@
   transition: border-color 0.2s, box-shadow 0.2s;
   font-family: inherit;
   background: white;
+  color: #111827;
+}
+
+.form-input::placeholder,
+.form-textarea::placeholder {
+  color: #9ca3af;
+  opacity: 1;
 }
 
 .form-input:focus,
