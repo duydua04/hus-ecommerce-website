@@ -1,11 +1,11 @@
-import React, { useState } from "react";
-import { X, Plus, Trash } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { X, Plus, Trash, Edit2 } from "lucide-react";
 import useProduct from "../../../../hooks/useProduct";
 import ConfirmModal from "../../../../components/common/ConfirmModal/ConfirmModal";
 import "./SizeModal.scss";
 
 export default function SizeModal({ open, data, onClose, onSuccess }) {
-  const { createSize, deleteSize } = useProduct();
+  const { createSize, updateSize, deleteSize } = useProduct();
 
   const variant = data?.variant;
   const productId = data?.productId;
@@ -15,9 +15,37 @@ export default function SizeModal({ open, data, onClose, onSuccess }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  //Confirm delete state
+  // Confirm delete state
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingSizeId, setPendingSizeId] = useState(null);
+
+  // Edit size state
+  const [editMode, setEditMode] = useState(false);
+  const [editingSize, setEditingSize] = useState(null);
+
+  // Reset form khi đóng modal hoặc chuyển mode
+  useEffect(() => {
+    if (!open) {
+      setEditMode(false);
+      setEditingSize(null);
+      setName("");
+      setUnits(0);
+      setError("");
+    }
+  }, [open]);
+
+  // Load data khi vào edit mode
+  useEffect(() => {
+    if (editMode && editingSize) {
+      setName(editingSize.size_name || "");
+      setUnits(editingSize.available_units || 0);
+      setError("");
+    } else if (!editMode) {
+      setName("");
+      setUnits(0);
+      setError("");
+    }
+  }, [editMode, editingSize]);
 
   if (!open || !variant || !productId) return null;
 
@@ -45,8 +73,8 @@ export default function SizeModal({ open, data, onClose, onSuccess }) {
     return "Đã có lỗi xảy ra";
   };
 
-  /* Add size */
-  const handleAddSize = async (e) => {
+  /* Add/Update size */
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!name.trim()) {
@@ -70,16 +98,42 @@ export default function SizeModal({ open, data, onClose, onSuccess }) {
       setLoading(true);
       setError("");
 
-      await createSize(productId, variant.variant_id, payload);
+      if (editMode && editingSize) {
+        await updateSize(
+          productId,
+          variant.variant_id,
+          editingSize.size_id,
+          payload
+        );
+      } else {
+        await createSize(productId, variant.variant_id, payload);
+      }
 
       setName("");
       setUnits(0);
+      setEditMode(false);
+      setEditingSize(null);
       onSuccess?.();
     } catch (err) {
       setError(parseApiError(err));
     } finally {
       setLoading(false);
     }
+  };
+
+  /* Open edit mode */
+  const handleEditSize = (size) => {
+    setEditingSize(size);
+    setEditMode(true);
+  };
+
+  /* Cancel edit */
+  const handleCancelEdit = () => {
+    setEditMode(false);
+    setEditingSize(null);
+    setName("");
+    setUnits(0);
+    setError("");
   };
 
   /* Open confirm delete */
@@ -132,9 +186,11 @@ export default function SizeModal({ open, data, onClose, onSuccess }) {
             </div>
           )}
 
-          {/* Add size form */}
-          <form onSubmit={handleAddSize} className="size-form">
-            <h4 className="size-form__title">Thêm kích thước mới</h4>
+          {/* Add/Edit size form */}
+          <form onSubmit={handleSubmit} className="size-form">
+            <h4 className="size-form__title">
+              {editMode ? "Sửa kích thước" : "Thêm kích thước mới"}
+            </h4>
 
             <div className="size-form__inputs">
               <div className="form-group form-group--flex">
@@ -166,23 +222,41 @@ export default function SizeModal({ open, data, onClose, onSuccess }) {
                 />
               </div>
 
-              <button
-                type="submit"
-                className="btn btn--primary"
-                disabled={loading}
-              >
-                {loading ? (
-                  <>
-                    <span className="spinner" />
-                    <span>Đang thêm...</span>
-                  </>
-                ) : (
-                  <>
-                    <Plus size={16} />
-                    <span>Thêm</span>
-                  </>
+              <div className="size-form__buttons">
+                {editMode && (
+                  <button
+                    type="button"
+                    className="btn btn--secondary"
+                    onClick={handleCancelEdit}
+                    disabled={loading}
+                  >
+                    Hủy
+                  </button>
                 )}
-              </button>
+                <button
+                  type="submit"
+                  className="btn btn--primary"
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <>
+                      <span className="spinner" />
+                      <span>{editMode ? "Đang lưu..." : "Đang thêm..."}</span>
+                    </>
+                  ) : (
+                    <>
+                      {editMode ? (
+                        <span>Cập nhật</span>
+                      ) : (
+                        <>
+                          <Plus size={16} />
+                          <span>Thêm</span>
+                        </>
+                      )}
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
           </form>
 
@@ -202,6 +276,10 @@ export default function SizeModal({ open, data, onClose, onSuccess }) {
                     key={size.size_id}
                     className={`size-item ${
                       !size.in_stock ? "size-item--out" : ""
+                    } ${
+                      editingSize?.size_id === size.size_id
+                        ? "size-item--editing"
+                        : ""
                     }`}
                   >
                     <div className="size-item__info">
@@ -214,13 +292,24 @@ export default function SizeModal({ open, data, onClose, onSuccess }) {
                       </span>
                     </div>
 
-                    <button
-                      className="size-item__delete"
-                      title="Xóa kích thước"
-                      onClick={() => handleDeleteSize(size.size_id)}
-                    >
-                      <Trash size={16} />
-                    </button>
+                    <div className="size-item__actions">
+                      <button
+                        className="size-item__edit"
+                        title="Sửa kích thước"
+                        onClick={() => handleEditSize(size)}
+                        disabled={editMode}
+                      >
+                        <Edit2 size={16} />
+                      </button>
+                      <button
+                        className="size-item__delete"
+                        title="Xóa kích thước"
+                        onClick={() => handleDeleteSize(size.size_id)}
+                        disabled={editMode}
+                      >
+                        <Trash size={16} />
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>

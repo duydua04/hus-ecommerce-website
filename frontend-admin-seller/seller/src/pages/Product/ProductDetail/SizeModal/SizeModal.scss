@@ -125,6 +125,11 @@
   border: 1px solid #e2e8f0;
   margin-bottom: 24px;
 
+  &__buttons {
+    display: flex;
+    gap: 8px;
+  }
+
   &__title {
     font-size: 15px;
     font-weight: 600;
@@ -237,7 +242,14 @@
     text-transform: uppercase;
   }
 
-  &__delete {
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__delete,
+  &__edit {
     display: flex;
     align-items: center;
     justify-content: center;
