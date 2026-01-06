@@ -160,39 +160,28 @@ def delete_auth_cookies(response: Response, role: str = None):
     Cần truyền chính xác Domain lúc khởi tạo để trình duyệt chấp nhận lệnh xóa.
     """
 
-    def get_cookie_params(r):
-        target_domain = None
-        if IS_PRODUCTION:
-            if r == "seller":
-                target_domain = "seller.fastbuy.io.vn"
-            elif r == "admin":
-                target_domain = "admin.fastbuy.io.vn"
-            else:
-                target_domain = "fastbuy.io.vn"
-
+    def get_params(domain_name):
         return {
             "httponly": True,
             "samesite": "lax",
             "secure": IS_PRODUCTION,
-            "domain": target_domain
+            "domain": domain_name,
+            "path": "/"
         }
 
-    if role:
-        params = get_cookie_params(role)
-        response.delete_cookie(key=f"access_token_{role}", path="/", **params)
-        response.delete_cookie(key=f"refresh_token_{role}", path="/auth/refresh", **params)
+    roles = [role] if role else ["admin", "buyer", "seller"]
+    for r in roles:
+        domain = None
+        if IS_PRODUCTION:
+            domain = f"{r}.fastbuy.io.vn" if r != "buyer" else "fastbuy.io.vn"
 
-    else:
-        for r in ROLES_LIST:
-            params = get_cookie_params(r)
-            response.delete_cookie(key=f"access_token_{r}", path="/", **params)
-            response.delete_cookie(key=f"refresh_token_{r}", path="/auth/refresh", **params)
+        response.delete_cookie(key=f"access_token_{r}", **get_params(domain))
+        refresh_params = get_params(domain)
+        refresh_params["path"] = "/auth/refresh"
+        response.delete_cookie(key=f"refresh_token_{r}", **refresh_params)
 
-    legacy_params = {
-        "httponly": True,
-        "samesite": "lax",
-        "secure": IS_PRODUCTION,
-        "domain": ".fastbuy.io.vn" if IS_PRODUCTION else None
-    }
-    response.delete_cookie(key="access_token", path="/", **legacy_params)
-    response.delete_cookie(key="refresh_token", path="/auth/refresh", **legacy_params)
+    if IS_PRODUCTION:
+        legacy_domains = [".fastbuy.io.vn", ".www.fastbuy.io.vn"]
+        for d in legacy_domains:
+            for name in ["access_token", "refresh_token", "access_token_buyer", "access_token_seller"]:
+                response.delete_cookie(key=name, **get_params(d))
