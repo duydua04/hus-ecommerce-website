@@ -18,32 +18,34 @@ async def get_current_user(
     Kiểm tra và trả về người dùng hiện tại.
     """
     token = None
+    host = request.headers.get("host", "").lower()
 
     auth_header = request.headers.get("Authorization")
     if auth_header and auth_header.startswith("Bearer "):
         token = auth_header.split(" ")[1]
 
     if not token:
-        if security_scopes.scopes:
-            for scope in security_scopes.scopes:
-                cookie_name = f"access_token_{scope}"
-                found_token = request.cookies.get(cookie_name)
-                if found_token:
-                    token = found_token
-                    break
+        if "admin.fastbuy.io.vn" in host:
+            token = request.cookies.get("access_token_admin")
+        elif "seller.fastbuy.io.vn" in host:
+            token = request.cookies.get("access_token_seller")
+        elif "fastbuy.io.vn" in host:  # Bao gồm cả domain chính
+            token = request.cookies.get("access_token_buyer")
 
+        # 3. Fallback: Nếu vẫn chưa tìm thấy (ví dụ chạy localhost hoặc IP),
+        # dùng logic scopes hoặc tìm lần lượt các cookie như cũ
         if not token:
-            role_param = request.query_params.get("role")
-            if role_param and role_param in ["buyer", "seller", "admin"]:
-                token = request.cookies.get(f"access_token_{role_param}")
+            if security_scopes.scopes:
+                for scope in security_scopes.scopes:
+                    token = request.cookies.get(f"access_token_{scope}")
+                    if token: break
 
-        if not token:
-            for role in ["admin", "seller", "buyer"]:
-                found_token = request.cookies.get(f"access_token_{role}")
-                if found_token:
-                    token = found_token
-                    break
+            if not token:
+                for role in ["admin", "seller", "buyer"]:
+                    token = request.cookies.get(f"access_token_{role}")
+                    if token: break
 
+    # --- Phần Verify Token giữ nguyên như cũ ---
     if token is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -53,32 +55,26 @@ async def get_current_user(
 
     try:
         payload = verify_access_token(token)
-    except ExpiredSignatureError:
+    except (ExpiredSignatureError, InvalidTokenError) as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Access token expired",
-            headers={"WWW-Authenticate": f'Bearer scope="{security_scopes.scope_str}"'}
-        )
-    except InvalidTokenError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid access token",
+            detail=str(e),
             headers={"WWW-Authenticate": f'Bearer scope="{security_scopes.scope_str}"'}
         )
 
     role = payload.get('role')
     sub = payload.get('sub')
 
+    # KIỂM TRA BẢO MẬT: Role trong Token phải nằm trong scope yêu cầu của endpoint
     if security_scopes.scopes and role not in security_scopes.scopes:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Insufficient scope",
+            detail=f"Quyền {role} không thể truy cập tài nguyên này",
             headers={"WWW-Authenticate": f'Bearer scope="{security_scopes.scope_str}"'}
         )
 
+    # --- Phần Query User DB giữ nguyên ---
     user = None
-    stmt = None
-
     if role == 'admin':
         stmt = select(Admin).where(Admin.email == sub)
     elif role == 'buyer':
@@ -91,11 +87,7 @@ async def get_current_user(
         user = result.scalar_one_or_none()
 
     if user is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="User not found",
-            headers={"WWW-Authenticate": f'Bearer scope="{security_scopes.scope_str}"'}
-        )
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
 
     return {"role": role, "sub": sub, "user": user}
 

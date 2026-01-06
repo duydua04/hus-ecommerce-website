@@ -67,8 +67,8 @@ async def delete_my_avatar(
 
     user.avt_url = None
 
-    await db.commit()
-    await db.refresh(user)
+    db.commit()
+    db.refresh(user)
 
     return {
         "deleted": True,

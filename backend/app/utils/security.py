@@ -116,15 +116,25 @@ def issue_token(email: str, role: str):
 
 
 def set_auth_cookies(response: Response, access_token: str, refresh_token: str, role: str):
-    """Set token vào HttpOnly Cookie với tên riêng biệt theo Role"""
+    """Set token vào HttpOnly Cookie với tên và Domain riêng biệt theo Role"""
     access_minutes = settings.OAUTH2_ACCESS_TOKEN_EXPIRE_MINUTES
     refresh_days = settings.OAUTH2_REFRESH_TOKEN_EXPIRE_DAYS
+
+    # Xác định đích danh Subdomain để cô lập Cookie
+    target_domain = None
+    if IS_PRODUCTION:
+        if role == "seller":
+            target_domain = "seller.fastbuy.io.vn"
+        elif role == "admin":
+            target_domain = "admin.fastbuy.io.vn"
+        else:
+            target_domain = "fastbuy.io.vn"
 
     cookie_params = {
         "httponly": True,
         "samesite": "lax",
         "secure": IS_PRODUCTION,
-        "domain": ".fastbuy.io.vn" if IS_PRODUCTION else None
+        "domain": target_domain
     }
 
     response.set_cookie(
@@ -134,6 +144,7 @@ def set_auth_cookies(response: Response, access_token: str, refresh_token: str, 
         max_age=access_minutes * 60,
         **cookie_params
     )
+
     response.set_cookie(
         key=f"refresh_token_{role}",
         value=refresh_token,
@@ -146,22 +157,42 @@ def set_auth_cookies(response: Response, access_token: str, refresh_token: str, 
 def delete_auth_cookies(response: Response, role: str = None):
     """
     Xóa cookie.
+    Cần truyền chính xác Domain lúc khởi tạo để trình duyệt chấp nhận lệnh xóa.
     """
-    cookie_params = {
+
+    def get_cookie_params(r):
+        target_domain = None
+        if IS_PRODUCTION:
+            if r == "seller":
+                target_domain = "seller.fastbuy.io.vn"
+            elif r == "admin":
+                target_domain = "admin.fastbuy.io.vn"
+            else:
+                target_domain = "fastbuy.io.vn"
+
+        return {
+            "httponly": True,
+            "samesite": "lax",
+            "secure": IS_PRODUCTION,
+            "domain": target_domain
+        }
+
+    if role:
+        params = get_cookie_params(role)
+        response.delete_cookie(key=f"access_token_{role}", path="/", **params)
+        response.delete_cookie(key=f"refresh_token_{role}", path="/auth/refresh", **params)
+
+    else:
+        for r in ROLES_LIST:
+            params = get_cookie_params(r)
+            response.delete_cookie(key=f"access_token_{r}", path="/", **params)
+            response.delete_cookie(key=f"refresh_token_{r}", path="/auth/refresh", **params)
+
+    legacy_params = {
         "httponly": True,
         "samesite": "lax",
         "secure": IS_PRODUCTION,
         "domain": ".fastbuy.io.vn" if IS_PRODUCTION else None
     }
-
-    if role:
-        response.delete_cookie(key=f"access_token_{role}", path="/", **cookie_params)
-        response.delete_cookie(key=f"refresh_token_{role}", path="/auth/refresh", **cookie_params)
-
-    else:
-        for r in ROLES_LIST:
-            response.delete_cookie(key=f"access_token_{r}", path="/", **cookie_params)
-            response.delete_cookie(key=f"refresh_token_{r}", path="/auth/refresh", **cookie_params)
-
-    response.delete_cookie(key="access_token", path="/", **cookie_params)
-    response.delete_cookie(key="refresh_token", path="/auth/refresh", **cookie_params)
+    response.delete_cookie(key="access_token", path="/", **legacy_params)
+    response.delete_cookie(key="refresh_token", path="/auth/refresh", **legacy_params)
