@@ -70,7 +70,7 @@ async def login_admin(
     ***Đăng nhập dành cho Admin.**
     """
     token_data = await service.login_admin(payload)
-    set_auth_cookies(response, token_data.access_token, token_data.refresh_token)
+    set_auth_cookies(response, token_data.access_token, token_data.refresh_token, role="admin")
     return token_data
 
 
@@ -84,7 +84,7 @@ async def login_buyer(
     **Đăng nhập dành cho Người mua.**
     """
     token_data = await service.login_buyer(payload)
-    set_auth_cookies(response, token_data.access_token, token_data.refresh_token)
+    set_auth_cookies(response, token_data.access_token, token_data.refresh_token, role="buyer")
     return token_data
 
 
@@ -98,7 +98,7 @@ async def login_seller(
    **Đăng nhập dành cho Người bán.**
     """
     token_data = await service.login_seller(payload)
-    set_auth_cookies(response, token_data.access_token, token_data.refresh_token)
+    set_auth_cookies(response, token_data.access_token, token_data.refresh_token, role="seller")
     return token_data
 
 
@@ -109,7 +109,16 @@ async def refresh(
         service: AuthService = Depends(get_auth_service)
 ):
     """Cấp lại Access Token mới từ Refresh Token"""
-    refresh_token = request.cookies.get("refresh_token")
+    refresh_token = None
+    role_found = None
+
+    for role in ["buyer", "seller", "admin"]:
+        t = request.cookies.get(f"refresh_token_{role}")
+        if t:
+            refresh_token = t
+            role_found = role
+            break
+
     if not refresh_token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -118,19 +127,20 @@ async def refresh(
 
     new_token = await service.refresh_access_token(refresh_token)
 
-    set_auth_cookies(response, new_token.access_token, new_token.refresh_token)
+    set_auth_cookies(response, new_token.access_token, new_token.refresh_token, role=role_found)
     return new_token
 
 
 @router.post("/logout")
 def logout(
         response: Response,
-        service: AuthService = Depends(get_auth_service)
+        service: AuthService = Depends(get_auth_service),
+        role: str = None
 ):
     """Đăng xuất: Xóa cookie"""
     # Hàm logout trong service là @staticmethod và chỉ xóa cookie, không gọi DB
     # Nên giữ nguyên def thường để tối ưu
-    return service.logout(response)
+    return service.logout(response, role)
 
 
 @router.get("/google/login/buyer")
