@@ -59,12 +59,7 @@ async def create_order(
 # ===================== DANH SÁCH ĐƠN HÀNG CỦA BUYER THEO TRẠNG THÁI =====================
 @router.get(
     "/tracking",
-    response_model=List[BuyerOrderTrackingItem],
-    description=(
-        "API dùng để **theo dõi các đơn hàng của người mua**.\n\n"
-        "Người dùng có thể **lọc theo trạng thái đơn hàng** bằng tham số `tab`.\n\n"
-        "Nếu **không truyền `tab`**, hệ thống sẽ trả về **tất cả đơn hàng**."
-    ),
+    response_model=List[BuyerOrderTrackingItem]
 )
 async def list_buyer_orders(
     tab: OrderStatus | None = Query(
@@ -74,7 +69,20 @@ async def list_buyer_orders(
     buyer=Depends(require_buyer),
     service: BuyerOrderService = Depends(get_buyer_order_service),
 ):
-   
+    """
+    **Danh sách đơn hàng của tôi (Theo dõi đơn hàng).**
+
+    Dùng cho màn hình "Đơn mua" với các tab trạng thái.
+
+    ### Tham số `tab`:
+    Lọc đơn hàng theo các trạng thái sau:
+    - `pending`: Chờ xác nhận.
+    - `processing`: Đang xử lý.
+    - `shipped`: Đang giao hàng.
+    - `delivered`: Giao hàng thành công.
+    - `cancelled`: Đã hủy.
+    - **Nếu không truyền**: Trả về toàn bộ lịch sử đơn hàng.
+    """
     return await service.list_orders_tracking(
         buyer_id=buyer["user"].buyer_id,
         tab=tab
@@ -87,6 +95,11 @@ async def order_detail(
     buyer = Depends(require_buyer),
     service: BuyerOrderService = Depends(get_buyer_order_service)
 ):
+    """
+    **Xem chi tiết một đơn hàng cụ thể.**
+
+    Trả về đầy đủ thông tin: danh sách sản phẩm, giá tiền, địa chỉ giao hàng, phương thức thanh toán và lịch sử trạng thái đơn hàng.
+    """
     return await service.get_order_detail(buyer["user"].buyer_id, order_id)
 
 # ===== UPDATE ĐỊA CHỈ GIAO HÀNG CỦA ĐƠN =====
@@ -100,6 +113,11 @@ async def update_order_shipping_address(
     buyer = Depends(require_buyer),
     service: BuyerOrderService = Depends(get_buyer_order_service)
 ):
+    """
+    **Thay đổi địa chỉ giao hàng cho đơn hàng.**
+
+    **Điều kiện:** Chỉ có thể cập nhật khi đơn hàng đang ở trạng thái `pending` (Chờ xác nhận).
+    """
     return await service.update_order_shipping_address(
         buyer_id=buyer["user"].buyer_id,
         order_id=order_id,
@@ -113,6 +131,11 @@ async def cancel_order(
     buyer=Depends(require_buyer),
     service: BuyerOrderService = Depends(get_buyer_order_service)
 ):
+    """
+    **Hủy đơn hàng.**
+
+    **Điều kiện:** Buyer chỉ được phép hủy khi đơn hàng chưa chuyển sang trạng thái giao hàng.
+    """
     return await service.cancel_order(buyer["user"].buyer_id, order_id)
 
 # ===================== BUYER XÁC NHẬN ĐÃ NHẬN HÀNG =====================
@@ -122,4 +145,9 @@ async def confirm_received(
     buyer=Depends(require_buyer),
     service: BuyerOrderService = Depends(get_buyer_order_service)
 ):
+    """
+    **Xác nhận đã nhận hàng thành công.**
+
+    Dùng khi người dùng đã nhận được sản phẩm và hài lòng. Trạng thái đơn hàng sẽ chuyển sang `completed`.
+    """
     return await service.confirm_received(buyer["user"].buyer_id, order_id)

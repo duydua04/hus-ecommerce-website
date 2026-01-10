@@ -1,20 +1,33 @@
-from ast import stmt
-from unittest import result
-from fastapi import HTTPException, status, Depends
 from decimal import Decimal
-
-
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import and_, desc, select, func, asc, cast, Numeric
-from sqlalchemy.orm import selectinload
-from typing import Optional
 from enum import Enum
+from typing import Optional
 
-from ...schemas.common import Page, PageMeta
-from ...models import Product, ProductSize, ProductImage, ProductVariant, Category, Seller
-from ...schemas.product import ProductImageResponse, ProductList, ProductResponseBuyer, ProductResponse, ProductVariantLiteResponse, ProductVariantWithSizesResponse, ProductResponseBuyer, ShopInfoResponse
-from ...config.s3 import public_url
+from fastapi import Depends, HTTPException
+from sqlalchemy import Numeric,  asc, cast, func, select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
+
+# Config
 from ...config.db import get_db
+from ...config.s3 import public_url
+
+# Models
+from ...models import (
+    Product,
+    ProductImage,
+    ProductVariant,
+    Seller,
+)
+
+# Schemas
+from ...schemas.common import Page, PageMeta
+from ...schemas.product import (
+    ProductImageResponse,
+    ProductResponseBuyer,
+    ProductVariantLiteResponse,
+    ProductVariantWithSizesResponse,
+    ShopInfoResponse,
+)
 
 class RatingFilter(str, Enum):
     five = "5"

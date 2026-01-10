@@ -21,7 +21,7 @@ router = APIRouter(
 
 @router.get("/me")
 def get_me(info=Depends(get_current_user)):
-    """Lấy thông tin người dùng hiện tại"""
+    """**Lấy thông tin định danh của người dùng hiện tại.**"""
     # Hàm này chỉ đọc thông tin từ token (dict) đã decode ở middleware
     # Không gọi DB nên giữ nguyên def thường
     u = info["user"]
@@ -40,7 +40,11 @@ async def register_buyer(
         payload: RegisterBuyer,
         service: AuthService = Depends(get_auth_service)
 ):
-    """Đăng ký Buyer"""
+    """
+    **Đăng ký tài khoản Người mua (Buyer).**
+    
+    Hệ thống sẽ kiểm tra email duy nhất và mã hóa mật khẩu trước khi lưu trữ.
+    """
     # [ASYNC] Phải await vì service gọi DB async
     return await service.register_buyer(payload)
 
@@ -50,7 +54,7 @@ async def register_seller(
         payload: RegisterSeller,
         service: AuthService = Depends(get_auth_service)
 ):
-    """Đăng ký Seller"""
+    """**Đăng ký tài khoản Nhà bán hàng (Seller).**"""
     return await service.register_seller(payload)
 
 
@@ -60,6 +64,9 @@ async def login_admin(
         response: Response,
         service: AuthService = Depends(get_auth_service)
 ):
+    """
+    ***Đăng nhập dành cho Admin.**
+    """
     token_data = await service.login_admin(payload)
     set_auth_cookies(response, token_data.access_token, token_data.refresh_token)
     return token_data
@@ -71,6 +78,9 @@ async def login_buyer(
         response: Response,
         service: AuthService = Depends(get_auth_service)
 ):
+    """
+    **Đăng nhập dành cho Người mua.**
+    """
     token_data = await service.login_buyer(payload)
     set_auth_cookies(response, token_data.access_token, token_data.refresh_token)
     return token_data
@@ -82,6 +92,9 @@ async def login_seller(
         response: Response,
         service: AuthService = Depends(get_auth_service)
 ):
+    """
+   **Đăng nhập dành cho Người bán.**
+    """
     token_data = await service.login_seller(payload)
     set_auth_cookies(response, token_data.access_token, token_data.refresh_token)
     return token_data
@@ -123,6 +136,9 @@ async def google_login_buyer(
         request: Request,
         service: GoogleAuthService = Depends(get_google_auth_service)
 ):
+    """
+    **Đăng nhập dành cho Người mua bằng google.**
+    """
     return await service.login_start(request, role="buyer")
 
 
@@ -131,6 +147,9 @@ async def google_login_seller(
         request: Request,
         service: GoogleAuthService = Depends(get_google_auth_service)
 ):
+    """
+    **Đăng nhập dành cho Người bán bằng google.**
+    """
     return await service.login_start(request, role="seller")
 
 
@@ -139,6 +158,11 @@ async def google_callback(
         request: Request,
         service: GoogleAuthService = Depends(get_google_auth_service)
 ):
+    """
+    **Xử lý kết quả từ Google.**
+    
+    Google sẽ gửi mã xác thực về đây, hệ thống sẽ tiến hành tạo tài khoản hoặc đăng nhập và cấp Token.
+    """
     return await service.login_callback(request)
 
 

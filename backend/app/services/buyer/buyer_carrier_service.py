@@ -1,19 +1,26 @@
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
-from redis.asyncio import Redis
-from fastapi import Depends
-from typing import List
 from decimal import Decimal
-from ..common.carrier_service import BaseCarrierService
-from ...models import Carrier
-from ...schemas.carrier import CarrierOut, CarrierCalculateRequest, CarrierCalculateResponse
+
+from fastapi import Depends, HTTPException, status
+from pydantic import TypeAdapter
+from redis.asyncio import Redis
+from sqlalchemy import func, select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+# Configuration & Database
 from ...config.db import get_db
 from ...config.redis import get_redis_client
-from pydantic import TypeAdapter
-from fastapi import HTTPException, status
-from ...schemas.common import Page, PageMeta
-from sqlalchemy import select, func
 
+# Models
+from ...models import Carrier
+# Services
+from ..common.carrier_service import BaseCarrierService
+
+# Schemas
+from ...schemas.common import Page, PageMeta
+from ...schemas.carrier import (
+    CarrierOut, 
+    CarrierCalculateResponse
+)
 
 
 class BuyerCarrierService(BaseCarrierService):

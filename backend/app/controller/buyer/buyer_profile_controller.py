@@ -17,7 +17,11 @@ async def get_my_profile(
         buyer_info=Depends(require_buyer),
         service: BuyerProfileService = Depends(get_buyer_profile_service)
 ):
-    """Lấy thông tin hồ sơ Buyer"""
+    """
+    **Lấy thông tin chi tiết hồ sơ cá nhân của Người mua.**
+
+    API này trả về toàn bộ thông tin định danh và liên lạc của tài khoản đang đăng nhập.
+    """
     buyer_id = buyer_info["user"].buyer_id
 
     return await service.get_info(buyer_id)

@@ -7,7 +7,6 @@ from ...schemas.review import (
     ReviewResponse,
     ReviewCreate,
     ReviewUpdate,
-    ReviewReplyResponse,
 )
 from ...services.buyer.buyer_review_service import (
     BuyerReviewService,
@@ -31,7 +30,9 @@ async def list_review_media(
     service: BuyerReviewService = Depends(get_buyer_review_service),
 ):
     """
-    Danh sách ảnh + video review của tất cả sản phẩm
+    **Bộ sưu tập hình ảnh và video từ tất cả đánh giá.**
+
+    API này giúp khách hàng xem nhanh các hình ảnh thực tế của sản phẩm từ cộng đồng người mua.
     """
     return await service.list_all_review_media()
 
@@ -47,6 +48,14 @@ async def list_product_reviews(
     limit: int = Query(10, ge=1, le=50),
     service: BuyerReviewService = Depends(get_buyer_review_service),
 ):
+    """
+    **Xem danh sách đánh giá của một sản phẩm cụ thể.**
+
+    ### Tham số:
+    - **product_id**: ID của sản phẩm cần xem.
+    - **rating**: Lọc theo số sao (1-5). Để trống nếu muốn xem tất cả.
+    - **page/limit**: Phân trang dữ liệu.
+    """
     return await service.list_product_reviews(
         product_id=product_id,
         rating=rating,
@@ -65,7 +74,9 @@ async def list_my_reviews(
     service: BuyerReviewService = Depends(get_buyer_review_service)
 ):
     """
-    Trả về tất cả review của người mua hiện tại, phân trang theo `page` và `limit`.
+    **Xem lại các đánh giá tôi đã viết.**
+
+    Giúp người mua quản lý lịch sử đánh giá sản phẩm của chính họ.
     """
     buyer_id = info["user"].buyer_id
     return await service.list_my_reviews(
@@ -79,6 +90,15 @@ async def upload_review_files(
     files: List[UploadFile] = File(...),
     info = Depends(get_current_user)
 ):
+    """
+    **Tải lên ảnh/video để đính kèm vào đánh giá.**
+
+    ### Quy trình:
+    1. Gọi API này để tải file lên hệ thống lưu trữ (S3).
+    2. Nhận lại `object_key` và `public_url`.
+    3. Sử dụng `object_key` này để truyền vào mảng `media` trong API **Create Review**.
+
+    """
     results = await storage.upload_many("reviews", files, max_size_mb=50)
 
     return {
@@ -100,6 +120,13 @@ async def create_review(
     service: BuyerReviewService = Depends(get_buyer_review_service),
     info: Any = Depends(get_current_user)
 ):
+    """
+    **Viết đánh giá mới cho sản phẩm.**
+
+    ### Điều kiện:
+    - Người mua phải **đã mua và nhận hàng thành công** sản phẩm đó (xác thực qua `order_id`).
+
+    """
     # Truyền bg_tasks xuống hàm service
     return await service.create_review(
         buyer_id=info["user"].buyer_id, 
@@ -119,6 +146,11 @@ async def update_review(
     service: BuyerReviewService = Depends(get_buyer_review_service),
     info = Depends(get_current_user)
 ):
+    """
+    **Chỉnh sửa nội dung đánh giá.**
+
+    Người dùng có thể sửa đổi nội dung văn bản hoặc số sao đã đánh giá trước đó.
+    """
     return await service.update_review(
         buyer_id=info["user"].buyer_id,
         product_id=product_id,

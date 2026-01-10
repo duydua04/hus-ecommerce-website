@@ -31,7 +31,14 @@ async def mark_read(
     notif_id: str,
     admin_info: dict = Depends(require_admin)
 ):
-    """Đánh dấu đã đọc"""
+    """
+    **Cập nhật trạng thái thông báo thành "Đã đọc".**
+
+    Sử dụng khi Admin nhấn vào xem chi tiết hoặc nhấn nút "Đánh dấu đã đọc" trên giao diện.
+
+    ### Tham số đường dẫn:
+    - **notif_id**: ID của thông báo cần cập nhật.
+    """
     success = await notification_service.mark_as_read(
         notif_id,
         admin_info['user'].admin_id

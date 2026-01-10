@@ -1,47 +1,53 @@
-import asyncio
+from datetime import date, datetime
 from decimal import Decimal
-from datetime import datetime
-from http.client import RemoteDisconnected
 
-from fastapi import HTTPException, status
-from sqlalchemy import select, and_, desc, update
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
-from fastapi import Depends
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import joinedload
+from fastapi import Depends, HTTPException, status
 from redis.asyncio import Redis
+from sqlalchemy import and_, desc, select, update
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import joinedload, selectinload
 
+# Config
 from ...config.db import get_db
-from datetime import datetime, date
-
 from ...config.redis import get_redis_client
 from ...config.s3 import public_url
+
+# Models
 from ...models import (
-    Order,
-    OrderItem,
-    ShoppingCart,
-    ShoppingCartItem,
+    Address,
+    BuyerAddress,
     Carrier,
     Discount,
-    BuyerAddress,
-    Address,
+    Order,
+    OrderItem,
     Product,
-    ProductVariant,
     ProductSize,
-    Seller,
-    ProductImage,
-    ProductSize
+    ProductVariant,
+    ShoppingCart,
+    ShoppingCartItem,
 )
-from ...schemas.order import OrderCreate, OrderDetailResponse, OrderDetailResponse, OrderResponse, BuyerOrderTrackingItem, OrderTrackingFirstItem, OrderItemResponseNew
-from ...schemas.address import AddressResponse, AddressUpdate
-from ...schemas.carrier import CarrierCalculateResponse, CarrierResponse
-from ...schemas.common import OrderStatus, PaymentStatus
-from ...tasks.admin_dashboard_task import task_admin_add_order_stats
-from ...tasks.seller_dashboard_task import task_seller_recalc_dashboard
-from ...tasks.notification_task import task_send_notification
-from ...tasks.inventory import update_stock_db
+
+# Services
 from ...services.buyer.buyer_cart_service import CartServiceAsync
+
+# Schemas
+from ...schemas.address import AddressResponse, AddressUpdate
+from ...schemas.carrier import  CarrierResponse
+from ...schemas.common import OrderStatus, PaymentStatus
+from ...schemas.order import (
+    BuyerOrderTrackingItem,
+    OrderCreate,
+    OrderDetailResponse,
+    OrderItemResponseNew,
+    OrderResponse,
+    OrderTrackingFirstItem,
+)
+
+# Tasks
+from ...tasks.admin_dashboard_task import task_admin_add_order_stats
+from ...tasks.inventory import update_stock_db
+from ...tasks.notification_task import task_send_notification
+from ...tasks.seller_dashboard_task import task_seller_recalc_dashboard
 
 # ===================== TAB MAPPING =====================
 TAB_MAPPING = {

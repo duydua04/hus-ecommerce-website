@@ -1,15 +1,25 @@
+import json
+from fastapi import Depends, HTTPException, status
 from redis import Redis
-from sqlalchemy import select, update, delete
+from sqlalchemy import delete, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
-import json
 
-from ...config.redis import get_redis_client
-from ..common.address_service import BaseAddressService
-from ...models.address import Address, BuyerAddress
-from ...schemas.address import AddressCreate, AddressUpdate, AddressResponse, BuyerAddressResponse, BuyerAddressResponseOrder, BuyerAddressUpdate
+# Internal configuration and database
 from ...config.db import get_db
-from fastapi import HTTPException, status, Depends
+from ...config.redis import get_redis_client
+
+# Models and Services
+from ...models.address import  BuyerAddress
+from ..common.address_service import BaseAddressService
+
+# Schemas
+from ...schemas.address import (
+    AddressCreate,
+    AddressUpdate,
+    BuyerAddressResponse,
+    BuyerAddressUpdate,
+)
 
 class BuyerAddressService(BaseAddressService):
     def __init__(self, db: AsyncSession, redis: Redis):

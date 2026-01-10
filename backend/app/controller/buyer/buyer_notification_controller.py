@@ -18,7 +18,7 @@ async def get_my_notifications(
         buyer_info: dict = Depends(require_buyer)
 ):
     """
-    API lấy thông báo
+    Lấy danh sách thông báo của Người mua.
     """
     user = buyer_info['user']
 
@@ -37,7 +37,11 @@ async def mark_notification_read(
         buyer_info: dict = Depends(require_buyer)
 ):
     """
-    Đánh dấu đã đọc 1 thông báo
+    **Đánh dấu một thông báo cụ thể là đã đọc.**
+
+    Dùng khi người dùng nhấn vào một thông báo cụ thể trên danh sách.
+
+    - **notif_id**: ID của thông báo cần xử lý.
     """
     user = buyer_info['user']
 
@@ -56,7 +60,9 @@ async def mark_all_buyer_notifications_read(
     buyer_info: dict = Depends(require_buyer)
 ):
     """
-    API bổ sung: Đánh dấu đã đọc tất cả thông báo của Buyer
+    **Đánh dấu tất cả thông báo của người dùng là đã đọc.**
+
+    Chức năng "Đọc tất cả" thường dùng cho nút bấm ở góc danh sách thông báo để nhanh chóng làm sạch số lượng thông báo chưa đọc.
     """
     user = buyer_info['user']
     await notification_service.mark_all_as_read(user.buyer_id, role="buyer")

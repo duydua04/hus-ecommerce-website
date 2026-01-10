@@ -28,7 +28,13 @@ async def list_my_products(
     seller_info=Depends(require_seller),
     service: SellerProductService = Depends(get_seller_product_service)
 ):
-
+    """
+    **Lấy danh sách sản phẩm của gian hàng.**
+    
+    Hỗ trợ tìm kiếm theo tên và lọc theo trạng thái kinh doanh.
+    - **q**: Từ khóa tìm kiếm tên sản phẩm.
+    - **active_only**: `true` để lấy sản phẩm đang bán, `false` để lấy tất cả (bao gồm hàng đã ẩn).
+    """
     return await service.get_products(
         seller_id=seller_info['user'].seller_id,
         search=q,
@@ -44,7 +50,11 @@ async def get_product_details(
     seller_info=Depends(require_seller),
     service: SellerProductService = Depends(get_seller_product_service)
 ):
+    """
+    **Xem chi tiết thông tin sản phẩm của gian hàng.**
 
+    API này trả về thông tin đầy đủ nhất của một sản phẩm để phục vụ việc đổ dữ liệu lên form chỉnh sửa.
+    """
     return await service.get_detail(
         seller_id=seller_info["user"].seller_id,
         product_id=product_id
@@ -57,7 +67,11 @@ async def create_product(
     seller_info=Depends(require_seller),
     service: SellerProductService = Depends(get_seller_product_service)
 ):
-
+    """
+    **Đăng sản phẩm mới.**
+    
+    Tạo thông tin cơ bản cho sản phẩm (tên, mô tả, danh mục). Sau khi tạo, bạn cần thêm Biến thể và Hình ảnh ở các API tiếp theo.
+    """
     return await service.create_product(
         seller_id=seller_info['user'].seller_id,
         payload=payload
@@ -71,7 +85,11 @@ async def update_product(
     seller_info=Depends(require_seller),
     service: SellerProductService = Depends(get_seller_product_service)
 ):
+    """
+    **Cập nhật thông tin cơ bản của sản phẩm.**
 
+    Dùng để thay đổi các thông tin chung như tên sản phẩm, mô tả hoặc danh mục.
+    """
     return await service.update_product(
         seller_id=seller_info['user'].seller_id,
         product_id=product_id,
@@ -85,7 +103,9 @@ async def delete_product(
     seller_info=Depends(require_seller),
     service: SellerProductService = Depends(get_seller_product_service)
 ):
-
+    """
+    Xóa sản phẩm
+    """
     return await service.delete_product(
         seller_id=seller_info["user"].seller_id,
         product_id=product_id
@@ -99,7 +119,10 @@ async def create_variant(
     seller_info=Depends(require_seller),
     service: SellerProductService = Depends(get_seller_product_service)
 ):
-
+    """
+    **Thêm phân loại kích thước và cấu hình giá/tồn kho.**
+    
+    """
     return await service.create_variant(
         seller_id=seller_info["user"].seller_id,
         product_id=product_id,
@@ -115,7 +138,11 @@ async def update_variant(
     seller_info=Depends(require_seller),
     service: SellerProductService = Depends(get_seller_product_service)
 ):
-
+    """
+    **Cập nhật thông tin biến thể.**
+    
+    Dùng để sửa đổi tên biến thể (ví dụ: đổi từ 'Xanh biển' thành 'Xanh Navy').
+    """
     return await service.update_variant(
         seller_id=seller_info["user"].seller_id,
         product_id=product_id,
@@ -131,7 +158,9 @@ async def delete_variant(
     seller_info=Depends(require_seller),
     service: SellerProductService = Depends(get_seller_product_service)
 ):
-
+    """
+    **Xóa một biến thể sản phẩm.**
+    """
     return await service.delete_variant(
         seller_id=seller_info["user"].seller_id,
         product_id=product_id,
@@ -146,7 +175,9 @@ async def list_sizes(
     seller_info=Depends(require_seller),
     service: SellerProductService = Depends(get_seller_product_service)
 ):
-
+    """
+    **Lấy danh sách kích thước và tồn kho của một biến thể.**
+    """
     return await service.get_variant_sizes(
         seller_id=seller_info["user"].seller_id,
         product_id=product_id,
@@ -162,7 +193,9 @@ async def create_size(
     seller_info=Depends(require_seller),
     service: SellerProductService = Depends(get_seller_product_service)
 ):
-
+    """
+    **Thêm mới một kích thước cho biến thể.**
+    """
     return await service.create_size(
         seller_id=seller_info["user"].seller_id,
         product_id=product_id,
@@ -180,6 +213,10 @@ async def update_size(
     seller_info=Depends(require_seller),
     service: SellerProductService = Depends(get_seller_product_service)
 ):
+    """
+    **Cập nhật kích thước.**
+
+    """
     return await service.update_size(
         seller_id=seller_info["user"].seller_id,
         product_id=product_id,
@@ -197,6 +234,9 @@ async def delete_size(
     seller_info=Depends(require_seller),
     service: SellerProductService = Depends(get_seller_product_service)
 ):
+    """
+    **Xóa một tùy chọn kích thước.**
+    """
     return await service.delete_size(
         seller_id=seller_info["user"].seller_id,
         product_id=product_id,
@@ -213,6 +253,9 @@ async def upload_images(
     seller_info=Depends(require_seller),
     service: SellerProductService = Depends(get_seller_product_service)
 ):
+    """
+    **Tải lên nhiều hình ảnh cho sản phẩm.**
+    """
     return await service.upload_images(
         seller_id=seller_info["user"].seller_id,
         product_id=product_id,
@@ -228,7 +271,9 @@ async def set_primary_image(
     seller_info=Depends(require_seller),
     service: SellerProductService = Depends(get_seller_product_service)
 ):
-
+    """
+    **Thay đổi ảnh đại diện chính của sản phẩm.**
+    """
     return await service.set_primary_image(
         seller_id=seller_info["user"].seller_id,
         product_id=product_id,
@@ -243,7 +288,9 @@ async def delete_image(
     seller_info=Depends(require_seller),
     service: SellerProductService = Depends(get_seller_product_service)
 ):
-
+    """
+    **Xóa ảnh sản phẩm.**
+    """
     return await service.delete_image(
         seller_id=seller_info["user"].seller_id,
         product_id=product_id,

@@ -27,7 +27,11 @@ async def get_list_seller_address(
         service: SellerAddressService = Depends(get_seller_address_service)
 ):
     """
-    Lấy danh sách địa chỉ.
+    **Lấy danh sách tất cả địa chỉ của Nhà bán hàng.**
+
+    Dùng để hiển thị các địa chỉ mà Seller đã đăng ký (Kho hàng, văn phòng, nơi lấy hàng).
+
+    - **Yêu cầu**: Phải đăng nhập với quyền **Seller**.
     """
     seller_id = seller_info["user"].seller_id
     return await service.list(seller_id)
@@ -59,7 +63,11 @@ async def update_link_info(
         seller_info=Depends(require_seller),
         service: SellerAddressService = Depends(get_seller_address_service)
 ):
-    """Cập nhật thông tin liên kết"""
+    """
+    **Cập nhật thông tin bổ trợ (Nhãn/Mặc định).**
+
+    Dùng để đổi nhãn địa chỉ hoặc thay đổi ghi chú liên kết mà không sửa đổi vị trí địa lý của địa chỉ đó.
+    """
     seller_id = seller_info["user"].seller_id
 
     return await service.update_link(
@@ -76,7 +84,11 @@ async def update_address_content(
         seller_info=Depends(require_seller),
         service: SellerAddressService = Depends(get_seller_address_service)
 ):
-    """Cập nhật nội dung địa chỉ gốc"""
+    """
+    **Cập nhật nội dung địa lý của địa chỉ.**
+
+    Dùng khi Seller thay đổi số nhà, tên đường hoặc chuyển văn phòng/kho sang vị trí khác.
+    """
     seller_id = seller_info["user"].seller_id
 
     return await service.update_content(
@@ -92,7 +104,11 @@ async def set_default_address(
         seller_info=Depends(require_seller),
         service: SellerAddressService = Depends(get_seller_address_service)
 ):
-    """Set mặc định"""
+    """
+    **Thiết lập địa chỉ lấy hàng mặc định.**
+
+    Hệ thống sẽ sử dụng địa chỉ này để tính toán phí vận chuyển và gửi cho đơn vị vận chuyển khi có đơn hàng mới.
+    """
     seller_id = seller_info["user"].seller_id
 
     await service.set_default(user_id=seller_id, link_id=seller_address_id)
@@ -110,7 +126,7 @@ async def delete_address(
         seller_info=Depends(require_seller),
         service: SellerAddressService = Depends(get_seller_address_service)
 ):
-    """Xóa địa chỉ"""
+    """Xóa địa chỉ khỏi hệ thống"""
     seller_id = seller_info["user"].seller_id
 
     return await service.delete(
