@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
+import Modal from "../../components/modal";
 import "./cart.css";
 
 const Cart = () => {
@@ -10,7 +11,38 @@ const Cart = () => {
   const [selectedSellerId, setSelectedSellerId] = useState(null); // Theo dõi shop đang được chọn
   const [summary, setSummary] = useState({ subtotal: 0, total_items: 0 });
   const [loading, setLoading] = useState(true);
+  const [modal, setModal] = useState({
+      isOpen: false,
+      type: 'info',
+      title: '',
+      message: '',
+      onConfirm: null,
+      showCancelButton: false
+    });
 
+  // Confirm modal
+  const showModal = (config) => {
+      setModal({
+        isOpen: true,
+        ...config
+      });
+    };
+
+    const closeModal = () => {
+      setModal(prev => ({ ...prev, isOpen: false }));
+    };
+
+    const showConfirmModal = (message, onConfirm, title = "Xác nhận") => {
+      showModal({
+        type: 'confirm',
+        title,
+        message,
+        showCancelButton: true,
+        onConfirm,
+        okText: 'Đồng ý',
+        cancelText: 'Hủy'
+      });
+    };
   // ================= Fetch Cart Data =================
   const fetchCart = async () => {
     try {
@@ -87,7 +119,11 @@ const Cart = () => {
 
     // Nếu đang chọn shop khác và muốn chọn shop này
     if (selectedSellerId !== null && selectedSellerId !== sellerId && !allSelected) {
-      alert("Bạn chỉ có thể chọn sản phẩm từ một shop trong một đơn hàng. Vui lòng bỏ chọn sản phẩm hiện tại trước khi chọn từ shop khác.");
+      showModal({
+          type: 'warning',
+          title: 'Thông báo',
+          message: "Bạn chỉ có thể chọn sản phẩm từ một shop trong một đơn hàng. Vui lòng bỏ chọn sản phẩm hiện tại trước khi chọn từ shop khác."
+      });
       return;
     }
 
@@ -124,48 +160,61 @@ const Cart = () => {
 
   // ================= Delete Item =================
   const deleteItem = async (itemId, sellerId) => {
-    if (!confirm("Bạn có chắc muốn xóa sản phẩm này?")) return;
-
-    try {
-      await api.cart.removeItem(itemId);
-      setSelectedItems((prev) => {
-        const newSet = new Set(prev);
-        newSet.delete(itemId);
-        // Nếu đã xóa hết sản phẩm của shop này, reset selectedSellerId
-        if (newSet.size === 0) {
-          setSelectedSellerId(null);
-        }
-        return newSet;
-      });
-      await fetchCart();
-    } catch (err) {
-      console.error("Delete item error:", err);
-      alert(err.message || "Xóa sản phẩm thất bại");
-    }
-  };
+      showConfirmModal(
+        "Bạn có chắc muốn xóa sản phẩm này?",
+        async () => {
+          try {
+            await api.cart.removeItem(itemId);
+            setSelectedItems((prev) => {
+              const newSet = new Set(prev);
+              newSet.delete(itemId);
+              if (newSet.size === 0) {
+                setSelectedSellerId(null);
+              }
+              return newSet;
+            });
+            await fetchCart();
+          } catch (err) {
+            console.error("Delete item error:", err);
+            showModal({
+              type: 'error',
+              title: 'Lỗi',
+              message: err.message || "Xóa sản phẩm thất bại"
+            });
+          }
+        },
+        "Xác nhận xóa"
+      );
+    };
 
   // ================= Delete All Seller Items =================
   const deleteSellerItems = async (sellerProducts, sellerId) => {
-    if (!confirm(`Bạn có chắc muốn xóa tất cả sản phẩm của shop này?`))
-      return;
+      showConfirmModal(
+        `Bạn có chắc muốn xóa tất cả sản phẩm của shop này?`,
+        async () => {
+          try {
+            await Promise.all(
+              sellerProducts.map((p) => api.cart.removeItem(p.shopping_cart_item_id))
+            );
 
-    try {
-      await Promise.all(
-        sellerProducts.map((p) => api.cart.removeItem(p.shopping_cart_item_id))
+            if (selectedSellerId === sellerId) {
+              setSelectedSellerId(null);
+              setSelectedItems(new Set());
+            }
+
+            await fetchCart();
+          } catch (err) {
+            console.error("Delete seller items error:", err);
+            showModal({
+              type: 'error',
+              title: 'Lỗi',
+              message: "Xóa sản phẩm thất bại"
+            });
+          }
+        },
+        "Xác nhận xóa shop"
       );
-
-      // Nếu đang chọn shop này, reset selectedSellerId
-      if (selectedSellerId === sellerId) {
-        setSelectedSellerId(null);
-        setSelectedItems(new Set());
-      }
-
-      await fetchCart();
-    } catch (err) {
-      console.error("Delete seller items error:", err);
-      alert("Xóa sản phẩm thất bại");
-    }
-  };
+    };
 
   // ================= Update Variant/Size =================
   const updateVariantSize = async (itemId, variantId, sizeId) => {
@@ -184,8 +233,12 @@ const Cart = () => {
   // ================= Checkout =================
   const handleCheckout = () => {
     if (selectedItems.size === 0) {
-      alert("Vui lòng chọn sản phẩm để thanh toán");
-      return;
+      showModal({
+          type: 'info',
+          title: 'Thông báo',
+          message: "Vui lòng chọn sản phẩm để thanh toán"
+      });
+        return;
     }
 
     // Kiểm tra xem tất cả sản phẩm đã chọn có cùng seller không
@@ -589,6 +642,18 @@ const Cart = () => {
           </button>
         </aside>
       </div>
+      {/* Modal */}
+      <Modal
+          isOpen={modal.isOpen}
+          onClose={closeModal}
+          type={modal.type}
+          title={modal.title}
+          message={modal.message}
+          showCancelButton={modal.showCancelButton}
+          onOk={modal.onConfirm}
+          okText={modal.okText}
+          cancelText={modal.cancelText}
+      />
     </main>
   );
 };

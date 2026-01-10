@@ -6,7 +6,6 @@ import api from '../../services/api';
 import NotificationSidebar from "../../components/notificationSidebar";
 import Modal from "../../components/modal";
 import './order_tracking.css';
-import useTime from '../../context/useTime'
 
 export default function OrderTracking() {
   const navigate = useNavigate();
@@ -18,7 +17,12 @@ export default function OrderTracking() {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [orderDetail, setOrderDetail] = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
-  const { formatVietnameseDateTime } = useTime();
+  const [myReviews, setMyReviews] = useState([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [reviewsMeta, setReviewsMeta] = useState({ total: 0, limit: 10, offset: 0 });
+  const [showReviewDetailModal, setShowReviewDetailModal] = useState(false);
+  const [selectedReview, setSelectedReview] = useState(null);
+  const [reviewDetail, setReviewDetail] = useState(null);
 
   // Modal states
   const [modal, setModal] = useState({
@@ -49,7 +53,8 @@ export default function OrderTracking() {
     { key: 'processing', label: 'Đang xử lý' },
     { key: 'shipped', label: 'Đang giao' },
     { key: 'delivered', label: 'Hoàn thành' },
-    { key: 'cancelled', label: 'Đã hủy' }
+    { key: 'cancelled', label: 'Đã hủy' },
+    { key: 'reviews', label: 'Đánh giá của tôi' }
   ];
 
   // Helper functions for modal
@@ -94,6 +99,26 @@ export default function OrderTracking() {
     });
   };
 
+  const openReviewDetailModal = async (review) => {
+      setSelectedReview(review);
+      try {
+
+        const detail = await api.review.getReviewDetail(review.id);
+        setReviewDetail(detail);
+      } catch (error) {
+        console.error('Error loading review detail:', error);
+
+        setReviewDetail(review);
+      }
+      setShowReviewDetailModal(true);
+  };
+
+  const closeReviewDetailModal = () => {
+      setShowReviewDetailModal(false);
+      setSelectedReview(null);
+      setReviewDetail(null);
+  };
+
   // Load user info if not available
   useEffect(() => {
     const loadUserInfo = async () => {
@@ -114,8 +139,12 @@ export default function OrderTracking() {
   }, [user, setUser, navigate]);
 
   useEffect(() => {
-    loadOrders();
-  }, [activeTab]);
+      if (activeTab === 'reviews') {
+        loadMyReviews();
+      } else {
+        loadOrders();
+      }
+    }, [activeTab]);
 
   const loadOrders = async () => {
     try {
@@ -146,6 +175,20 @@ export default function OrderTracking() {
       setDetailLoading(false);
     }
   };
+
+  const loadMyReviews = async (page = 1) => {
+      try {
+        setReviewsLoading(true);
+        const response = await api.review.getMyReviews({ page, limit: 10 });
+        setMyReviews(response.data || []);
+        setReviewsMeta(response.meta || { total: 0, limit: 10, offset: 0 });
+      } catch (error) {
+        console.error('Error loading reviews:', error);
+        setMyReviews([]);
+      } finally {
+        setReviewsLoading(false);
+      }
+    };
 
   const handleOrderClick = async (order) => {
     setSelectedOrder(order);
@@ -378,12 +421,37 @@ export default function OrderTracking() {
     }).format(amount);
   };
 
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString('vi-VN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
 
   const hasReviewed = (productId) => {
     if (!orderDetail?.items) return false;
     const item = orderDetail.items.find(i => i.product_id === productId);
     return item?.has_reviewed === true;
   };
+
+  const handleDeleteReview = async (productId, orderId) => {
+      showConfirmModal(
+        'Bạn có chắc muốn xóa đánh giá này?',
+        async () => {
+          try {
+            await api.review.deleteReview(productId, orderId);
+            showSuccessModal('Xóa đánh giá thành công');
+            loadMyReviews();
+          } catch (error) {
+            showErrorModal('Không thể xóa đánh giá: ' + error.message);
+          }
+        },
+        'Xác nhận xóa đánh giá'
+      );
+    };
 
   return (
     <div className="order-tracking-page">
@@ -419,12 +487,116 @@ export default function OrderTracking() {
           </div>
 
           {/* Orders List */}
-          {loading ? (
+          {loading || reviewsLoading ? (
             <div className="loading-container">
               <div className="spinner"></div>
-              <p>Đang tải đơn hàng...</p>
+              <p>Đang tải...</p>
             </div>
-          ) : filteredOrders.length === 0 ? (
+          ) : activeTab === 'reviews' ? (
+              // Reviews List
+              myReviews.length === 0 ? (
+                  <div className="empty-state">
+                    <div className="empty-state__icon">⭐</div>
+                    <div className="empty-state__text">Chưa có đánh giá nào</div>
+                  </div>
+                ) : (
+                  <div className="review-table-container">
+                    <table className="review-table">
+                      <thead>
+                        <tr>
+                          <th>SẢN PHẨM</th>
+                          <th>THỜI GIAN</th>
+                          <th>ĐÁNH GIÁ</th>
+                          <th>NỘI DUNG</th>
+                          <th>PHẢN HỒI</th>
+                          <th>HÀNH ĐỘNG</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {myReviews.map(review => (
+                          <tr key={review.id}>
+                            {/* Cột SẢN PHẨM */}
+                            <td className="review-product-cell">
+                              <div className="review-product-name">
+                                  Sản phẩm #{review.product_id}
+                              </div>
+                            </td>
+
+                            {/* Cột THỜI GIAN */}
+                            <td className="review-customer-cell">
+                              <div className="review-date">
+                                  {formatDate(review.created_at)}
+                              </div>
+                            </td>
+
+                            {/* Cột ĐÁNH GIÁ */}
+                            <td className="review-rating-cell">
+                              <div className="review-stars-display">
+                                <span className="stars" className="review-score">
+                                  {'⭐'.repeat(review.rating)}
+                                  {' '}
+                                  {review.rating}/5
+                                </span>
+                              </div>
+                            </td>
+
+                            {/* Cột NỘI DUNG */}
+                            <td className="review-content-cell">
+                              <p className="review-text-content">
+                                {review.review_text || review.content || "Không có nội dung"}
+                              </p>
+                            </td>
+
+                            {/* Cột PHẢN HỒI */}
+                            <td className="review-response-cell">
+                              {review.has_response ? (
+                                <span className="review-response-badge responded">
+                                  {review.response_count || 1} phản hồi
+                                </span>
+                              ) : (
+                                <span className="review-response-badge pending">
+                                  Chưa phản hồi
+                                </span>
+                              )}
+                            </td>
+
+                            {/* Cột HÀNH ĐỘNG */}
+                            <td className="review-actions-cell">
+                              <div className="review-actions-buttons">
+                                <button
+                                    className="btn-action btn-detail"
+                                    onClick={() => openReviewDetailModal(review)}
+                                    title="Xem chi tiết"
+                                    >
+                                    👁
+                                </button>
+                                <button
+                                  className="btn-action btn-delete"
+                                  onClick={() => handleDeleteReview(review.product_id, review.order_id)}
+                                  title="Xóa đánh giá"
+                                >
+                                  <svg
+                                    width="14"
+                                    height="14"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                  >
+                                    <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14z" />
+                                    <line x1="10" y1="11" x2="10" y2="17" />
+                                    <line x1="14" y1="11" x2="14" y2="17" />
+                                  </svg>
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )
+            ) : filteredOrders.length === 0 ? (
             <div className="empty-state">
               <div className="empty-state__icon">📦</div>
               <div className="empty-state__text">Chưa có đơn hàng</div>
@@ -494,7 +666,7 @@ export default function OrderTracking() {
                   {/* Order Footer */}
                   <div className="order-footer">
                     <div className="order-date">
-                      Đặt hàng: {formatVietnameseDateTime(order.order_date)}
+                      Đặt hàng: {formatDate(order.order_date)}
                     </div>
                     <div className="order-actions">
                       <button
@@ -551,12 +723,12 @@ export default function OrderTracking() {
                     </div>
                     <div className="detail-row">
                       <span className="detail-label">Ngày đặt:</span>
-                      <span>{formatVietnameseDateTime(orderDetail.order.order_date)}</span>
+                      <span>{formatDate(orderDetail.order.order_date)}</span>
                     </div>
                     {orderDetail.order.delivery_date && (
                       <div className="detail-row">
                         <span className="detail-label">Ngày giao:</span>
-                        <span>{formatVietnameseDateTime(orderDetail.order.delivery_date)}</span>
+                        <span>{formatDate(orderDetail.order.delivery_date)}</span>
                       </div>
                     )}
                   </div>
@@ -698,7 +870,7 @@ export default function OrderTracking() {
         </div>
       )}
 
-      {/* Review Modal */}
+      {/* Write Review Modal */}
       {showReviewModal && reviewItem && (
         <div className="modal-overlay" onClick={closeReviewModal}>
           <div className="modal-content review-modal-content" onClick={(e) => e.stopPropagation()}>
@@ -818,6 +990,167 @@ export default function OrderTracking() {
           </div>
         </div>
       )}
+
+      {/* Review Detail Modal */}
+        {showReviewDetailModal && selectedReview && (
+          <div className="modal-overlay" onClick={closeReviewDetailModal}>
+            <div className="modal-content review-detail-modal" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <h3 className="modal-title">Chi tiết đánh giá</h3>
+                <button className="close-button" onClick={closeReviewDetailModal}>✕</button>
+              </div>
+
+              <div className="modal-body">
+                {/* Thông tin sản phẩm */}
+                <div className="review-detail-section">
+                  <h4 className="review-detail-section-title">Thông tin sản phẩm</h4>
+                  <div className="product-info-box">
+                    <div className="product-info-with-image">
+                      {/* Ảnh sản phẩm */}
+                      <div className="product-image-container">
+                        {(() => {
+                          const order = orders.find(o => o.order_id === selectedReview.order_id);
+                          const productImage = order?.first_item?.public_url ||
+                                              order?.first_item?.product_image ||
+                                              null;
+
+                          return productImage ? (
+                            <img src={productImage} alt="Sản phẩm" className="product-image" />
+                          ) : (
+                            <div className="no-product-image">📷</div>
+                          );
+                        })()}
+                      </div>
+
+                      <div className="product-name">
+                      <div className="info-label">Sản Phẩm: </div>
+                      <div className="info-value">
+                          {(() => {
+                            // Tìm order có order_id trùng với selectedReview.order_id
+                            const order = orders.find(o => o.order_id === selectedReview.order_id);
+                            return order.first_item?.product_name
+                          })()}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                </div>
+
+                <div className="review-detail-divider"></div>
+
+                {/* Thông tin người bán */}
+                <div className="review-detail-section">
+                  <h4 className="review-detail-section-title">Thông tin người bán</h4>
+                  <div className="seller-info-box">
+                    <div className="seller-info-with-image">
+                      {/* Ảnh shop*/}
+                      <div className="seller-image-container">
+                        {(() => {
+                          const order = orders.find(o => o.order_id === selectedReview.order_id);
+                          const shopImage = order?.seller_avatar || null;
+                          return <div className="no-seller-image">🏪</div>
+                        })()}
+                      </div>
+
+                    <div className="seller-info-text">
+                        <div className="info-row">
+                          <span className="info-label">Tên shop:</span>
+                          <span className="info-value">
+                            {(() => {
+                                const order = orders.find(o => o.order_id === selectedReview.order_id);
+                                return order?.shop_name || "My Shop";
+                              })()}
+                          </span>
+                        </div>
+                        <div className="info-row">
+                          <span className="info-label">Mã đơn hàng:</span>
+                          <span className="info-value">
+                            #{selectedReview.order_id}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="review-detail-divider"></div>
+
+                {/* Đánh giá chi tiết */}
+                <div className="review-detail-section">
+                  <h4 className="review-detail-section-title">Đánh giá</h4>
+                  <div className="review-detail-rating">
+                    <div className="stars-large">
+                      {'⭐'.repeat(selectedReview.rating)}
+                    </div>
+                    <div className="rating-score-large">{selectedReview.rating}/5</div>
+                  </div>
+                  <div className="review-detail-time">
+                    {formatDate(selectedReview.created_at)}
+                  </div>
+                  <div className="review-detail-content">
+                    {selectedReview.review_text || selectedReview.content || "tuyệt vời"}
+                  </div>
+                </div>
+
+                {/* Hình ảnh đính kèm */}
+                {((selectedReview.images && selectedReview.images.length > 0) ||
+                  (selectedReview.videos && selectedReview.videos.length > 0)) && (
+                  <div className="review-detail-section">
+                    <h4 className="review-detail-section-title">
+                      Hình ảnh đính kèm ({selectedReview.images?.length || 0})
+                    </h4>
+                    <div className="review-detail-media">
+                      {selectedReview.images?.map((img, idx) => (
+                        <div key={idx} className="review-detail-media-item">
+                          <img src={img} alt={`Hình ${idx + 1}`} />
+                        </div>
+                      ))}
+                      {selectedReview.videos?.map((vid, idx) => (
+                        <div key={idx} className="review-detail-media-item">
+                          <video src={vid} controls />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="review-detail-divider"></div>
+
+                {/* Phản hồi */}
+                <div className="review-detail-section">
+                  <h4 className="review-detail-section-title">Phản hồi</h4>
+                  {selectedReview.has_response ? (
+                    <div className="review-response-container">
+                      {reviewDetail?.responses?.map((response, idx) => (
+                        <div key={idx} className="review-response-item">
+                          <div className="response-header">
+                            <span className="response-sender">Người bán</span>
+                            <span className="response-time">
+                              {formatDate(response.created_at)}
+                            </span>
+                          </div>
+                          <div className="response-content">
+                            {response.content}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="no-response">
+                      *Chưa có phản hồi nào*
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="modal-footer">
+                <button className="btn-close-modal" onClick={closeReviewDetailModal}>
+                  Đóng
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
       {/* Global Modal */}
       <Modal

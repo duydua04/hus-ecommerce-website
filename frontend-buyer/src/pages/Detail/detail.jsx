@@ -28,9 +28,31 @@ const Detail = () => {
   const [replies, setReplies] = useState({});
   const [loadingReplies, setLoadingReplies] = useState({});
   const { formatRelativeTime, formatVietnameseDateTime } = useTime();
+  const [imageModalOpen, setImageModalOpen] = useState(false);
+  const [modalImageIndex, setModalImageIndex] = useState(0);
+  const [modalImages, setModalImages] = useState([]);
 
   // Chat ref
   const chatRef = useRef(null);
+
+  // Hàm xử lý Image Modal
+  const openImageModal = (images, startIndex = 0) => {
+    setModalImages(images);
+    setModalImageIndex(startIndex);
+    setImageModalOpen(true);
+  };
+
+  const closeImageModal = () => {
+    setImageModalOpen(false);
+  };
+
+  const nextModalImage = () => {
+    setModalImageIndex((prev) => (prev + 1) % modalImages.length);
+  };
+
+  const prevModalImage = () => {
+    setModalImageIndex((prev) => (prev - 1 + modalImages.length) % modalImages.length);
+  };
 
   // Fetch replies
   const fetchReplies = async (reviewId) => {
@@ -278,6 +300,11 @@ const Detail = () => {
                 <img
                   src={product.images[selectedImageIndex].public_image_url || product.images[selectedImageIndex].image_url}
                   alt={product.name}
+                  onClick={() => {
+                    const imageUrls = product.images.map(img => img.public_image_url || img.image_url);
+                    openImageModal(imageUrls, selectedImageIndex);
+                  }}
+                  style={{ cursor: 'pointer' }}
                   onError={(e) => {
                     e.target.onerror = null;
                     e.target.src = "https://via.placeholder.com/400x400?text=No+Image";
@@ -508,20 +535,27 @@ const Detail = () => {
 
                   <p className="review__content">{r.review_text || r.content}</p>
 
-                  {r.images?.length > 0 && (
-                    <div className="review__media">
-                      {r.images.map((img, i) => (
-                        <img key={i} src={img} alt="" />
-                      ))}
-                    </div>
-                  )}
-
-                  {r.videos?.length > 0 && (
-                    <div className="review__media">
-                      {r.videos.map((vid, i) => (
-                        <video key={i} src={vid} controls />
-                      ))}
-                    </div>
+                  {(r.images?.length > 0 || r.videos?.length > 0) && (
+                      <div className="review__media">
+                        {r.images?.map((img, i) => (
+                          <img
+                            key={`img-${i}`}
+                            src={img}
+                            alt=""
+                            onClick={() => openImageModal([...r.images, ...r.videos], i)}
+                            style={{ cursor: 'pointer' }}
+                          />
+                        ))}
+                        {r.videos?.map((vid, i) => (
+                          <video
+                            key={`vid-${i}`}
+                            src={vid}
+                            controls
+                            onClick={() => openImageModal([...r.images, ...r.videos], (r.images?.length || 0) + i)}
+                            style={{ cursor: 'pointer' }}
+                          />
+                        ))}
+                      </div>
                   )}
 
                   {replies[r.id] && replies[r.id].length > 0 && (
@@ -555,6 +589,31 @@ const Detail = () => {
                 >
                   {loadingReviews ? "Đang tải..." : `Xem thêm ${Math.min(20, reviewMeta.total - reviewMeta.limit)} đánh giá`}
                 </button>
+              )}
+
+              {/* Image Modal */}
+              {imageModalOpen && (
+                  <div className="image-modal-overlay" onClick={closeImageModal}>
+                    <div className="image-modal-content" onClick={(e) => e.stopPropagation()}>
+                      <button className="modal-close-btn" onClick={closeImageModal}>×</button>
+                      <button className="modal-nav-btn prev" onClick={prevModalImage}>‹</button>
+
+                      {modalImages[modalImageIndex]?.endsWith('.mp4') ||
+                       modalImages[modalImageIndex]?.includes('video') ? (
+                        <video
+                          src={modalImages[modalImageIndex]}
+                          controls
+                          autoPlay
+                          style={{ maxWidth: '100%', maxHeight: '90vh' }}
+                        />
+                      ) : (
+                        <img src={modalImages[modalImageIndex]} alt="Preview" />
+                      )}
+
+                      <button className="modal-nav-btn next" onClick={nextModalImage}>›</button>
+                      <div className="modal-counter">{modalImageIndex + 1} / {modalImages.length}</div>
+                    </div>
+                  </div>
               )}
             </>
           )}
