@@ -110,7 +110,7 @@ class BuyerOrderTrackingItem(BaseModel):
     order_status: str
 
     shop_name: str
-
+    shop_url: str|None
     first_item: OrderTrackingFirstItem
     total_items: int
 
