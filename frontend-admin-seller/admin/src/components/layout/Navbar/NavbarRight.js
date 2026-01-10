@@ -12,7 +12,8 @@ const NavbarRight = ({ profileImage = "" }) => {
 
   const wrapperRef = useRef(null);
 
-  const { notifications, unreadCount, markAsRead } = useNotification();
+  const { notifications, unreadCount, markAsRead, markAllAsRead } =
+    useNotification();
 
   /* SORT: unread => mới nhất*/
   const sortedNotifications = useMemo(() => {
@@ -57,12 +58,6 @@ const NavbarRight = ({ profileImage = "" }) => {
     }
   };
 
-  const handleProfileClick = () => {
-    setIsDropdownOpen(false);
-    setShowNotifications(false);
-    window.location.href = "/profile";
-  };
-
   return (
     <div className="navbar__right" ref={wrapperRef}>
       <NotificationBadge
@@ -74,6 +69,9 @@ const NavbarRight = ({ profileImage = "" }) => {
         <div className="navbar__notification-dropdown">
           <div className="navbar__notification-header">
             <span>Thông báo</span>
+            {unreadCount > 0 && (
+              <button onClick={markAllAsRead}>Đánh dấu đã đọc</button>
+            )}
           </div>
 
           <div className="navbar__notification-list">
