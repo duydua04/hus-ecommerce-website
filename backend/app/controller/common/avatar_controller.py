@@ -18,6 +18,17 @@ async def upload_my_avatar(
         db: Session = Depends(get_db),
         info=Depends(get_current_user)
 ):
+    """
+   **Tải lên và cập nhật ảnh đại diện (Avatar) cho người dùng hiện tại.**
+
+    API này xử lý việc tải tệp tin lên hệ thống lưu trữ đám mây, sau đó cập nhật đường dẫn vào hồ sơ người dùng trong cơ sở dữ liệu.
+
+    ### Quy trình xử lý:
+    1. **Kiểm tra định dạng**: Chỉ chấp nhận các tệp tin có `content-type` bắt đầu bằng `image/` (jpg, png, webp...).
+    2. **Kiểm tra dung lượng**: Giới hạn tối đa **10MB**.
+    3. **Lưu trữ**: Tải tệp lên thư mục `/avatars` trên Storage.
+    4. **Cập nhật DB**: Lưu `object_key` vào trường `avt_url` của người dùng.
+    """
     # Check định dạng ảnh
     if not (file.content_type or "").lower().startswith("image/"):
         raise HTTPException(
@@ -52,6 +63,9 @@ async def delete_my_avatar(
         db: Session = Depends(get_db),
         info=Depends(get_current_user)
 ):
+    """
+    **Xóa ảnh đại diện hiện tại.**
+    """
     user = info["user"]
 
     if not user.avt_url:

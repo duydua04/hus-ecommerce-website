@@ -21,7 +21,21 @@ async def admin_list_buyers(
     offset: int = Query(0, ge=0),
     service: AdminUserManagementService = Depends(get_admin_user_management_service)
 ):
-    """Lấy danh sách Buyer"""
+    """
+    **Lấy danh sách Người mua (Buyer) trong hệ thống.**
+
+    Hỗ trợ tìm kiếm theo tên/email và lọc theo trạng thái hoạt động.
+
+    ### Tham số:
+    - **q**: Từ khóa tìm kiếm 
+    - **active_only**: 
+        - `true`: Chỉ lấy tài khoản đang hoạt động (Mặc định).
+        - `false`: Lấy tất cả bao gồm cả tài khoản đã bị vô hiệu hóa.
+    - **limit/offset**: Phân trang dữ liệu (Tối đa 200 bản ghi/trang).
+
+    ### Quyền truy cập:
+    - Yêu cầu quyền **Administrator**.
+    """
     return await service.list_buyers(
         search_query=q,
         active_only=active_only,
@@ -38,7 +52,18 @@ async def admin_list_sellers(
     offset: int = Query(0, ge=0),
     service: AdminUserManagementService = Depends(get_admin_user_management_service)
 ):
-    """Lấy danh sách Seller"""
+    """
+    **Lấy danh sách các Nhà bán hàng (Seller).**
+
+    Admin sử dụng API này để kiểm soát danh sách gian hàng trên hệ thống.
+
+    ### Tham số:
+    - **q**: Tìm kiếm theo từ khóa
+    - **active_only**: Lọc theo trạng thái hoạt động của gian hàng.
+
+    ### Kết quả trả về:
+    - Trả về đối tượng phân trang chứa thông tin chi tiết về Shop và trạng thái xác thực.
+    """
     return await service.list_sellers(
         search_query=q,
         active_only=active_only,

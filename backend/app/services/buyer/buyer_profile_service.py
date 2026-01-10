@@ -1,11 +1,17 @@
 from __future__ import annotations
-from fastapi import HTTPException, status, Depends
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
 
-from ...models.users import Buyer
-from ...config.s3 import public_url
+from fastapi import Depends, HTTPException, status
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+# Config
 from ...config.db import get_db
+from ...config.s3 import public_url
+
+# Models
+from ...models.users import Buyer
+
+# Schemas
 from ...schemas.user import BuyerResponse, BuyerUpdate
 
 

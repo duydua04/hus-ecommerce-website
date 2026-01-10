@@ -3,16 +3,22 @@ from collections import defaultdict
 from decimal import Decimal
 from typing import Optional
 
-from fastapi import HTTPException, Depends
+from fastapi import Depends, HTTPException
+from redis.asyncio import Redis
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
-from redis.asyncio import Redis
 
 from ...config.db import get_db
 from ...config.redis import get_redis_client
 from ...config.s3 import public_url
-from ...models import Product, ProductVariant, ProductSize, ShoppingCart, ShoppingCartItem
+from ...models import (
+    Product,
+    ProductSize,
+    ProductVariant,
+    ShoppingCart,
+    ShoppingCartItem,
+)
 from ...schemas.product import UpdateCartItemRequest, UpdateVariantSizeRequest
 
 

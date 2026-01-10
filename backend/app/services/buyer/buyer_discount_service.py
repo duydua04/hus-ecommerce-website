@@ -1,16 +1,23 @@
-from typing import Optional
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
+from datetime import date, datetime
 from decimal import Decimal
-from ..common.discount_service import BaseDiscountService
-from ...models.catalog import Discount
-from ...schemas.discount import DiscountResponse
+from typing import Optional
+
+from fastapi import Depends, HTTPException, status
+from sqlalchemy import func, select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+# Config
 from ...config.db import get_db
-from fastapi import Depends
-from datetime import datetime, date
+
+# Models
+from ...models.catalog import Discount
+
+# Schemas
 from ...schemas.common import Page, PageMeta
-from sqlalchemy import select, func
-from fastapi import HTTPException, status
+from ...schemas.discount import DiscountResponse
+
+# Services
+from ..common.discount_service import BaseDiscountService
 
 class DiscountService(BaseDiscountService):
     # =============== ĐƯA RA DANH SÁCH MÃ GIẢM GIÁ =================

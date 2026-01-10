@@ -25,7 +25,11 @@ async def get_list_buyer_address(
     service: BuyerAddressService = Depends(get_buyer_address_service),
 ):
     """
-    Lấy danh sách địa chỉ của buyer.
+    **Lấy danh sách tất cả địa chỉ nhận hàng của Người mua.**
+
+    Dữ liệu bao gồm thông tin chi tiết địa chỉ và các thuộc tính liên kết (mặc định, nhãn).
+
+    - **Yêu cầu**: Người dùng đã đăng nhập với quyền **Buyer**.
     """
     buyer_id = buyer_info["user"].buyer_id
     return await service.list(buyer_id)
@@ -39,7 +43,17 @@ async def create_and_link_address(
     buyer_info=Depends(require_buyer),
     service: BuyerAddressService = Depends(get_buyer_address_service),
 ):
-    """Tạo và liên kết địa chỉ mới"""
+    """
+    **Tạo địa chỉ mới và liên kết trực tiếp vào tài khoản.**
+
+    ### Tham số:
+    - **payload**: Thông tin địa chỉ (Tỉnh/Thành, Quận/Huyện, Phường/Xã, Số nhà...).
+    - **is_default**: Nếu `true`, địa chỉ này sẽ tự động trở thành địa chỉ mặc định cho các đơn hàng sau.
+    - **label**: Phân loại địa chỉ (VD: `home`, `office`).
+
+    ### Quy tắc hệ thống:
+    - Nếu đây là địa chỉ **đầu tiên** được tạo, hệ thống sẽ tự động đặt làm mặc định bất kể giá trị `is_default`.
+    """
     buyer_id = buyer_info["user"].buyer_id
 
     return await service.create_and_link(
@@ -56,7 +70,11 @@ async def update_link_info(
     buyer_info=Depends(require_buyer),
     service: BuyerAddressService = Depends(get_buyer_address_service),
 ):
-    """Cập nhật thông tin liên kết"""
+    """
+    **Cập nhật thông tin bổ trợ của địa chỉ.**
+
+    Dùng để thay đổi Nhãn (Label) hoặc trạng thái mặc định mà không làm thay đổi nội dung địa chỉ gốc.
+    """
     buyer_id = buyer_info["user"].buyer_id
 
     return await service.update_link(
@@ -73,7 +91,11 @@ async def update_address_content(
     buyer_info=Depends(require_buyer),
     service: BuyerAddressService = Depends(get_buyer_address_service),
 ):
-    """Cập nhật nội dung địa chỉ gốc"""
+    """
+    **Cập nhật nội dung chi tiết của địa chỉ.**
+
+    Dùng khi người dùng sửa lại số nhà, tên đường hoặc thông tin hành chính của một địa chỉ đã lưu.
+    """
     buyer_id = buyer_info["user"].buyer_id
 
     return await service.update_content(
@@ -102,7 +124,11 @@ async def set_default_address(
     buyer_info=Depends(require_buyer),
     service: BuyerAddressService = Depends(get_buyer_address_service),
 ):
-    """Set địa chỉ mặc định"""
+    """
+    **Thiết lập địa chỉ làm mặc định.**
+
+    Khi một địa chỉ được chọn làm mặc định, trạng thái mặc định của các địa chỉ khác thuộc Buyer này sẽ tự động bị hủy bỏ.
+    """
     buyer_id = buyer_info["user"].buyer_id
 
     await service.set_default(

@@ -18,7 +18,16 @@ async def admin_list_discount(
     offset: int = Query(0, ge=0),
     service: AdminDiscountService = Depends(get_discount_service)
 ):
-    """Lấy danh sách mã giảm giá"""
+    """
+    **Lấy danh sách các mã giảm giá trong hệ thống.**
+
+    Hỗ trợ tìm kiếm và phân trang để quản lý danh sách mã hiệu quả.
+
+    ### Tham số:
+    - **q**: Tìm kiếm theo mã (code) hoặc tên chương trình giảm giá.
+    - **limit**: Số lượng bản ghi tối đa trả về (mặc định 10).
+    - **offset**: Vị trí bắt đầu lấy dữ liệu.
+    """
     return await service.list(q=q, limit=limit, offset=offset)
 
 
@@ -27,7 +36,12 @@ async def admin_create_discount(
     payload: DiscountCreate,
     service: AdminDiscountService = Depends(get_discount_service)
 ):
-    """Tạo mã giảm giá mới"""
+    """
+    **Tạo mã giảm giá mới cho hệ thống.**
+    
+    ### Lưu ý:
+    - Hệ thống sẽ kiểm tra để đảm bảo mã `code` không bị trùng lặp.
+    """
     return await service.create(payload)
 
 
@@ -37,7 +51,13 @@ async def admin_update_discount(
     payload: DiscountUpdate,
     service: AdminDiscountService = Depends(get_discount_service)
 ):
-    """Cập nhật thông tin mã giảm giá"""
+    """
+    **Cập nhật thông tin chi tiết của mã giảm giá.**
+
+    Cho phép chỉnh sửa các thông số như số lượng sử dụng, ngày hết hạn hoặc giá trị giảm.
+
+    - **discount_id**: ID định danh của mã giảm giá cần sửa.
+    """
     return await service.update(discount_id, payload)
 
 
@@ -48,7 +68,16 @@ async def admin_set_status(
     service: AdminDiscountService = Depends(get_discount_service)
 ):
     """
-    Bật/Tắt trạng thái kích hoạt của mã.
+    **Bật hoặc Tắt trạng thái hoạt động của mã giảm giá.**
+
+    Dùng để tạm dừng áp dụng mã mà không cần xóa khỏi hệ thống.
+
+    ### Request Body:
+    ```json
+    {
+        "is_active": true
+    }
+    ```
     """
     return await service.set_status(discount_id, is_active)
 
