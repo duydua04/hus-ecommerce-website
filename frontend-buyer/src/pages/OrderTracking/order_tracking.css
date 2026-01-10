@@ -835,3 +835,525 @@
     font-size: 28px;
   }
 }
+/* review list*/
+.reviews-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.review-table-container {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.review-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.review-table thead {
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.review-table th {
+  padding: 16px;
+  text-align: left;
+  font-weight: 600;
+  color: #495057;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.review-table tbody tr {
+  border-bottom: 1px solid #e9ecef;
+  transition: background-color 0.2s;
+}
+
+.review-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.review-table td {
+  padding: 16px;
+  vertical-align: top;
+}
+
+/* Cột SẢN PHẨM */
+.review-product-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.review-product-info {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Cột THỜI GIAN */
+.review-date {
+  font-size: 12px;
+  color: #6c757d;
+}
+
+/* Cột ĐÁNH GIÁ */
+.review-rating-cell {
+  min-width: 120px;
+}
+
+.review-stars-display {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-bottom: 4px;
+}
+
+.review-stars-display .star {
+  color: #ffc107;
+  font-size: 16px;
+}
+
+.review-score {
+  font-size: 12px;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+/* Cột NỘI DUNG */
+.review-content-cell {
+  max-width: 300px;
+}
+
+.review-text-content {
+  margin-bottom: 8px;
+  line-height: 1.5;
+  color: #212529;
+}
+
+.review-more-text {
+  font-size: 12px;
+  color: #6c757d;
+  cursor: pointer;
+}
+
+/* Cột PHẢN HỒI */
+.review-response-cell {
+  min-width: 100px;
+}
+
+.review-response-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.review-response-badge.pending {
+  background-color: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeaa7;
+}
+
+.review-response-badge.responded {
+  background-color: #d1ecf1;
+  color: #0c5460;
+  border: 1px solid #bee5eb;
+}
+
+/* Cột HÀNH ĐỘNG */
+.review-actions-cell {
+  min-width: 80px;
+}
+
+.review-actions-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-action {
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  border: 1px solid #dee2e6;
+  background: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  transition: all 0.2s;
+}
+
+.btn-action:hover {
+  background-color: #f8f9fa;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.btn-detail {
+   color: var(--neutral-700);
+}
+
+.btn-detail:hover {
+  background-color: white;
+  border-color: var(--blue-600);
+  color: var(--blue-600);
+}
+
+.btn-delete {
+  color: var(--neutral-700);
+}
+
+.btn-delete:hover {
+  background-color: white;
+  border-color: var(--red-600);
+  color: var(--red-600);
+}
+
+/* Trạng thái không có dữ liệu */
+.reviews-empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.reviews-empty-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.reviews-empty-text {
+  color: #6c757d;
+  font-size: 14px;
+}
+
+/* Review Detail Modal Styles */
+.review-detail-modal {
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.review-detail-section {
+  margin-bottom: 24px;
+}
+
+.review-detail-section-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: #212529;
+}
+
+.review-detail-divider {
+  height: 1px;
+  background: #e9ecef;
+  margin: 20px 0;
+}
+
+/* Product Info */
+.product-info-box {
+  background: #f8f9fa;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.product-name {
+  font-weight: 500;
+  color: #212529;
+  line-height: 1.5;
+}
+
+/* Seller Info*/
+.seller-info-box {
+  padding: 8px 0;
+}
+
+.info-row {
+  display: flex;
+  margin-bottom: 8px;
+  align-items: center;
+}
+
+.info-label {
+  width: 120px;
+  font-weight: 500;
+  color: #495057;
+}
+
+.info-value {
+  flex: 1;
+  color: #212529;
+}
+
+/* Rating */
+.review-detail-rating {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.stars-large {
+  font-size: 24px;
+  color: #ffc107;
+}
+
+.rating-score-large {
+  font-size: 18px;
+  font-weight: 600;
+  color: #212529;
+}
+
+.review-detail-time {
+  font-size: 14px;
+  color: #6c757d;
+  margin-bottom: 12px;
+}
+
+.review-detail-content {
+  font-size: 16px;
+  line-height: 1.6;
+  color: #212529;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid #28a745;
+}
+
+/* Media */
+.review-detail-media {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.review-detail-media-item {
+  width: 100px;
+  height: 100px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #dee2e6;
+}
+
+.review-detail-media-item img,
+.review-detail-media-item video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Responses */
+.no-response {
+  text-align: center;
+  padding: 24px;
+  color: #6c757d;
+  font-style: italic;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px dashed #dee2e6;
+}
+
+.review-response-container {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.review-response-item {
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.review-response-item:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.response-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.response-sender {
+  font-weight: 600;
+  color: #007bff;
+}
+
+.response-time {
+  font-size: 12px;
+  color: #6c757d;
+}
+
+.response-content {
+  line-height: 1.6;
+  color: #212529;
+  padding-left: 12px;
+  border-left: 3px solid #007bff;
+  padding: 8px 12px;
+  background: white;
+  border-radius: 4px;
+}
+
+/* Footer */
+.btn-close-modal {
+  padding: 10px 24px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.btn-close-modal:hover {
+  background: #0056b3;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .review-detail-modal {
+    max-width: 95%;
+  }
+
+  .info-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .info-label {
+    width: 100%;
+    margin-bottom: 4px;
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .review-table-container {
+    overflow-x: auto;
+  }
+
+  .review-table {
+    min-width: 800px;
+  }
+}
+
+/* Product info with image */
+.product-info-with-image {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.product-image-container {
+  width: 80px;
+  height: 80px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #e9ecef;
+  background: #f8f9fa;
+}
+
+.product-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.no-product-image {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: #adb5bd;
+}
+
+.product-info-text {
+  flex: 1;
+}
+
+.product-name {
+  font-weight: 600;
+  color: #212529;
+  margin-bottom: 4px;
+  line-height: 1.4;
+}
+
+.product-id {
+  font-size: 14px;
+  color: #6c757d;
+}
+
+/* Seller info with image */
+.seller-info-with-image {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.seller-image-container {
+  width: 60px;
+  height: 60px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid #dee2e6;
+  background: white;
+}
+
+.seller-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.no-seller-image {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  background: #f8f9fa;
+  color: #6c757d;
+}
+
+.seller-info-text {
+  flex: 1;
+}
+
+.info-row {
+  display: flex;
+  margin-bottom: 8px;
+  align-items: center;
+}
+
+.info-label {
+  width: 100px;
+  font-weight: 500;
+  color: #495057;
+  flex-shrink: 0;
+}
+
+.info-value {
+  flex: 1;
+  color: #212529;
+}
