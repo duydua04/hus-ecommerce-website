@@ -52,6 +52,17 @@ export default function useNotification() {
     }
   }, []);
 
+  const markAllAsRead = useCallback(async () => {
+    try {
+      await NotificationService.markAllAsRead();
+
+      setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
+      setUnreadCount(0);
+    } catch (err) {
+      console.error("Mark all as read failed:", err);
+    }
+  }, []);
+
   // WebSocket real-time notifications
   useEffect(() => {
     WebSocketClient.connect();
@@ -89,5 +100,6 @@ export default function useNotification() {
     hasMore: !!cursor,
     loadNotifications,
     markAsRead,
+    markAllAsRead,
   };
 }

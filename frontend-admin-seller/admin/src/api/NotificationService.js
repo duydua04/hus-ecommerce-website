@@ -28,6 +28,14 @@ const NotificationService = {
     const res = await axiosInstance.put(`/admin/notifications/${notifId}/read`);
     return res.data;
   },
+
+  /**
+   * Đánh dấu tất cả đã đọc
+   */
+  async markAllAsRead() {
+    const res = await axiosInstance.put("/admin/notifications/read-all");
+    return res.data;
+  },
 };
 
 export default NotificationService;
