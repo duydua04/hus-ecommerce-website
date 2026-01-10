@@ -355,6 +355,18 @@ class BuyerReviewService(BaseReviewService):
                 await new_db.rollback()
                 print(f"❌ Sync Rating Error: {e}")
 
+    # ===================== ORDER_ID ĐÃ ĐÁNH GIÁ =====================
+    async def list_reviewed_order_ids(self, buyer_id: int) -> list[int]:
+        reviews = await Review.find(
+            Review.buyer_id == buyer_id
+        ).to_list(None)
+
+        # lấy order_id duy nhất
+        order_ids = list({r.order_id for r in reviews})
+
+        return {
+            "reviewed_order_ids": order_ids
+        }
 def get_buyer_review_service(
     db: AsyncSession = Depends(get_db),
 ):

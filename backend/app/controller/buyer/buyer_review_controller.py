@@ -8,6 +8,7 @@ from ...schemas.review import (
     ReviewCreate,
     ReviewUpdate,
     ReviewReplyResponse,
+    ReviewedOrderIdsResponse,
 )
 from ...services.buyer.buyer_review_service import (
     BuyerReviewService,
@@ -106,6 +107,18 @@ async def create_review(
         info=info, 
         payload=payload, 
         bg_tasks=bg_tasks
+    )
+
+@router.get(
+    "/reviewed-orders",
+    response_model=ReviewedOrderIdsResponse
+)
+async def list_reviewed_order_ids(
+    info = Depends(get_current_user),
+    service: BuyerReviewService = Depends(get_buyer_review_service)
+):
+    return await service.list_reviewed_order_ids(
+        buyer_id=info["user"].buyer_id
     )
 
 @router.patch(

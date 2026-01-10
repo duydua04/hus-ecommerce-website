@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import api from "../../services/api";
 import "./home.css";
 
@@ -278,12 +278,11 @@ const Home = () => {
             <div className="video-reviews__editors-pick">
               <article className="card card--editors-pick">
                 <div className="card__body">
-                  <p className="card__text-primary">Ảnh và Video phản hồi</p>
-                  <h3 className="card__title">Video đánh giá sản phẩm</h3>
+                  <p className="card__text-primary">Ảnh và video phản hồi</p>
                   <p className="card__description">
                     Mua sắm uy tín, hàng thật, chất lượng thật!
                   </p>
-                  <a href="#" className="card__button">Phản hồi chân thật</a>
+                  <Link to="/tracking?tab=reviews" className="card__button">Phản hồi chân thật</Link>
                 </div>
               </article>
             </div>

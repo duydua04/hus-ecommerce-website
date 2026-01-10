@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import "./footer.css";
 
 const Footer = () => {
@@ -11,9 +12,9 @@ const Footer = () => {
 
           {/* Về Shop */}
           <div className="footer__column">
-            <h4 className="footer__column-title">Công việc</h4>
+            <h4 className="footer__column-title">Trang Web</h4>
             <ul className="footer__list">
-              <li className="footer__list-item"><a href="#" className="footer__link">Giới thiệu</a></li>
+              <li className="footer__list-item"><Link to="/" className="footer__link">Giới thiệu</Link></li>
               <li className="footer__list-item"><a href="#" className="footer__link">Tuyển dụng</a></li>
               <li className="footer__list-item"><a href="#" className="footer__link">Chính sách bảo mật</a></li>
             </ul>
@@ -23,9 +24,9 @@ const Footer = () => {
           <div className="footer__column">
             <h4 className="footer__column-title">Hỗ trợ</h4>
             <ul className="footer__list">
-              <li className="footer__list-item"><a href="#" className="footer__link">Trung tâm trợ giúp</a></li>
-              <li className="footer__list-item"><a href="#" className="footer__link">Hướng dẫn mua hàng</a></li>
-              <li className="footer__list-item"><a href="#" className="footer__link">Trạng thái đơn hàng</a></li>
+              <li className="footer__list-item"><Link to="/" className="footer__link">Trung tâm trợ giúp</Link></li>
+              <li className="footer__list-item"><Link to="/" className="footer__link">Hướng dẫn mua hàng</Link></li>
+              <li className="footer__list-item"><Link to="/tracking" className="footer__link">Trạng thái đơn hàng</Link></li>
             </ul>
           </div>
 
@@ -33,9 +34,9 @@ const Footer = () => {
           <div className="footer__column">
             <h4 className="footer__column-title">Danh mục</h4>
             <ul className="footer__list">
-              <li className="footer__list-item"><a href="#" className="footer__link">Điện thoại</a></li>
-              <li className="footer__list-item"><a href="#" className="footer__link">Laptop</a></li>
-              <li className="footer__list-item"><a href="#" className="footer__link">Phụ kiện</a></li>
+              <li className="footer__list-item"><Link to="/search?category=11" className="footer__link">Điện thoại</Link></li>
+              <li className="footer__list-item"><Link to="/search?category=20" className="footer__link">Laptop</Link></li>
+              <li className="footer__list-item"><Link to="/search??category=25" className="footer__link">Phụ kiện</Link></li>
             </ul>
           </div>
 
