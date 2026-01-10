@@ -39,3 +39,14 @@ async def mark_read(
     if not success:
         raise HTTPException(status_code=404, detail="Notification not found")
     return {"status": "ok"}
+
+@router.put("/read-all")
+async def mark_all_admin_notifications_read(
+    admin_info: dict = Depends(require_admin)
+):
+    """
+    API bổ sung: Đánh dấu đã đọc tất cả thông báo của Admin
+    """
+    user = admin_info['user']
+    await notification_service.mark_all_as_read(user.admin_id, role="admin")
+    return {"message": "Đã đánh dấu đã đọc tất cả thông báo"}
