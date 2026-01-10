@@ -25,7 +25,7 @@ class SellerCancelReason(BaseModel):
 class BuyerInfoShort(BaseModel):
     buyer_id: int
     full_name: str | None = None
-    phone: str
+    phone: Optional[str] = None
     avt_url: Optional[str] = None
     model_config = ConfigDict(from_attributes=True)
 
