@@ -55,7 +55,7 @@ Dự án được xây dựng theo mô hình Client-Server với các công ngh�
 ### Deployment 
 - **Cloud Server**: AWS EC2 (Amazon Linux 2023).
 - **Reverse Proxy**: Nginx.
-- **Process Manager**: Docker & Docker Compose (hoặc Supervisor/Systemd nếu bạn chạy trực tiếp).
+- **Process Manager**: Docker & Docker Compose 
 - **SSL/Security**: Let's Encrypt (HTTPS).
 
 ---
