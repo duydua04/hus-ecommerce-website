@@ -71,7 +71,7 @@ const Detail = () => {
     if (reviews.length > 0) {
       reviews.forEach(review => {
         if (review.replies && review.replies.length > 0) {
-          setReplies(prev => ({ ...prev, [review.id]: review.replies }));
+          setReplies(prev => ({ ...prev, [review._id]: review.replies }));
         }
       });
     }
@@ -554,13 +554,13 @@ const Detail = () => {
                       </div>
                   )}
 
-                  {replies[r.id] && replies[r.id].length > 0 && (
+                  {replies[r._id] && replies[r._id].length > 0 && (
                     <div className="seller-replies">
                       <div className="seller-replies__header">
                         <span className="seller-replies__icon">💬</span>
                         <span className="seller-replies__title">Phản hồi từ người bán:</span>
                       </div>
-                      {replies[r.id].map((reply, idx) => (
+                      {replies[r._id].map((reply, idx) => (
                         <div key={idx} className="seller-reply">
                           <div className="seller-reply__text">{reply.reply_text}</div>
                           <div className="seller-reply__date" title={formatVietnameseDateTime(reply.reply_date)}>
