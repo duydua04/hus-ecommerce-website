@@ -149,14 +149,16 @@ export default function ReviewDetailModal({
                     Video đính kèm ({review.videos.length})
                   </p>
                   <div className="review-media__grid">
-                    {review.videos.map((videoKey, idx) => (
+                    {review.videos.map((videoUrl, idx) => (
                       <div
                         key={idx}
                         className="review-media__item review-media__item--video"
                       >
-                        <Video size={32} />
-                        <span className="video-label">Video {idx + 1}</span>
-                        <span className="video-key">{videoKey}</span>
+                        <video
+                          src={videoUrl}
+                          controls
+                          className="review-video"
+                        />
                       </div>
                     ))}
                   </div>
