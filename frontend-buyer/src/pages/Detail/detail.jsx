@@ -356,12 +356,6 @@ const Detail = () => {
               </div>
             </div>
 
-            {product.description && (
-              <div className="product-description">
-                <p>{product.description}</p>
-              </div>
-            )}
-
             <div className="product-option">
               <label>Phân loại</label>
               <div className="product-option__buttons">
@@ -485,10 +479,12 @@ const Detail = () => {
         <section className="product-details">
           <h2>Thông tin sản phẩm</h2>
           <div className="product-details__content">
-            <p>{product.description || "Chưa có mô tả chi tiết"}</p>
-            {product.weight && (
-              <p><strong>Cân nặng:</strong> {product.weight} kg</p>
-            )}
+              <div className="description-text">
+                <p>{product.description || "Chưa có mô tả chi tiết"}</p>
+                {product.weight && (
+                  <p><strong>Cân nặng:</strong> {product.weight} kg</p>
+                )}
+              </div>
           </div>
         </section>
 
