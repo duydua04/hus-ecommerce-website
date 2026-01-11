@@ -1,6 +1,6 @@
 // src/pages/OrderTracking/order_tracking.jsx
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useUser } from '../../context/UserContext';
 import api from '../../services/api';
 import NotificationSidebar from "../../components/notificationSidebar";
@@ -23,6 +23,9 @@ export default function OrderTracking() {
   const [showReviewDetailModal, setShowReviewDetailModal] = useState(false);
   const [selectedReview, setSelectedReview] = useState(null);
   const [reviewDetail, setReviewDetail] = useState(null);
+  const location = useLocation();
+  const [reviewedOrderIds, setReviewedOrderIds] = useState([]);
+  const [loadingReviewedIds, setLoadingReviewedIds] = useState(false);
 
   // Modal states
   const [modal, setModal] = useState({
@@ -118,6 +121,36 @@ export default function OrderTracking() {
       setSelectedReview(null);
       setReviewDetail(null);
   };
+
+  // useEffect để tab thẳng đến tab cụ thể mà không cần qua all
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const tabParam = queryParams.get('tab');
+
+    if (tabParam && tabs.find(tab => tab.key === tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, [location.search]);
+
+  const loadReviewedOrderIds = async () => {
+    if (!user) return;
+
+    try {
+      setLoadingReviewedIds(true);
+      const response = await api.review.getReviewedOrderIds();
+      setReviewedOrderIds(response.reviewed_order_ids || []);
+    } catch (error) {
+      console.error('Error loading reviewed order ids:', error);
+      setReviewedOrderIds([]);
+    } finally {
+      setLoadingReviewedIds(false);
+    }
+  };
+
+  // Load reviewd order_id
+  useEffect(() => {
+      loadReviewedOrderIds();
+    }, [user]);
 
   // Load user info if not available
   useEffect(() => {
@@ -364,6 +397,10 @@ export default function OrderTracking() {
       showSuccessModal('Đánh giá thành công!');
       closeReviewModal();
 
+      await loadReviewedOrderIds();
+
+      setReviewedOrderIds(prev => [...prev, orderDetail.order.order_id]);
+
       await loadOrderDetail(orderDetail.order.order_id);
     } catch (error) {
       console.error('Submit review error:', error);
@@ -431,10 +468,8 @@ export default function OrderTracking() {
     });
   };
 
-  const hasReviewed = (productId) => {
-    if (!orderDetail?.items) return false;
-    const item = orderDetail.items.find(i => i.product_id === productId);
-    return item?.has_reviewed === true;
+  const hasReviewed = (orderId) => {
+    return reviewedOrderIds.includes(orderId);
   };
 
   const handleDeleteReview = async (productId, orderId) => {
@@ -612,7 +647,10 @@ export default function OrderTracking() {
                   {/* Order Header */}
                   <div className="order-header">
                     <div className="order-shop">
-                      <span className="shop-icon">🏪</span>
+                      <img
+                        className="shop-image"
+                        src={order.shop_url}
+                      />
                       <span className="shop-name">{order.shop_name}</span>
                     </div>
                     <div className="order-status">
@@ -670,7 +708,7 @@ export default function OrderTracking() {
                     </div>
                     <div className="order-actions">
                       <button
-                        className="btn-detail"
+                        className="btn-detail__order"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleOrderClick(order);
@@ -775,7 +813,7 @@ export default function OrderTracking() {
                         </div>
 
                         {/* Review button for delivered orders - Only show if not reviewed */}
-                        {orderDetail.order.order_status === 'delivered' && !hasReviewed(item.product_id) && (
+                        {orderDetail.order.order_status === 'delivered' && !hasReviewed(orderDetail.order.order_id) && (
                           <div className="item-review-action">
                             <button
                               className="btn-review"
@@ -784,13 +822,13 @@ export default function OrderTracking() {
                                 openReviewModal(item);
                               }}
                             >
-                              ⭐ Đánh giá
+                             Đánh giá sản phẩm
                             </button>
                           </div>
                         )}
 
                         {/* Show reviewed badge if already reviewed */}
-                        {hasReviewed(item.product_id) && (
+                        {hasReviewed(orderDetail.order.order_id) && (
                           <div className="item-review-action">
                             <span className="reviewed-badge">✓ Đã đánh giá</span>
                           </div>
@@ -1026,12 +1064,26 @@ export default function OrderTracking() {
                       <div className="info-label">Sản Phẩm: </div>
                       <div className="info-value">
                           {(() => {
-                            // Tìm order có order_id trùng với selectedReview.order_id
                             const order = orders.find(o => o.order_id === selectedReview.order_id);
                             return order.first_item?.product_name
                           })()}
                       </div>
-                    </div>
+                      <div className="info-row">
+                          <div className="info-label">Phân loại:</div>
+                          <div className="info-text_value">
+                              {(() => {
+                                  const order = orders.find(o => o.order_id === selectedReview.order_id);
+                                  return order.first_item?.variant_name || null;
+                              })()}
+                          </div>
+                          <div className="info-text_value">
+                                  {(() => {
+                                      const order = orders.find(o => o.order_id === selectedReview.order_id);
+                                      return order.first_item?.size_name || null;
+                                  })()}
+                              </div>
+                        </div>
+                      </div>
                   </div>
                 </div>
                 </div>
@@ -1047,8 +1099,22 @@ export default function OrderTracking() {
                       <div className="seller-image-container">
                         {(() => {
                           const order = orders.find(o => o.order_id === selectedReview.order_id);
-                          const shopImage = order?.seller_avatar || null;
-                          return <div className="no-seller-image">🏪</div>
+
+                          const shopImage = order?.shop_url || null;
+                          return shopImage ? (
+                            <img
+                              src={shopImage}
+                              alt="Shop"
+                              className="seller-image"
+                              onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.style.display = 'none';
+                                e.target.parentElement.innerHTML = '<div class="no-seller-image">🏪</div>';
+                              }}
+                            />
+                          ) : (
+                            <div className="no-seller-image">🏪</div>
+                          );
                         })()}
                       </div>
 

@@ -111,9 +111,17 @@
   gap: 8px;
 }
 
-.shop-icon {
-  font-size: 18px;
+.shop-image {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid #dee2e6;
+  background: white;
 }
+
+
 
 .shop-name {
   font-weight: 600;
@@ -228,10 +236,10 @@
   gap: 8px;
 }
 
-.btn-detail {
+.btn-detail__order {
   padding: 8px 16px;
-  background-color: #1976d2;
-  color: #fff;
+  background-color: var(--blue-600);
+  color: white;
   border: none;
   border-radius: 6px;
   cursor: pointer;
@@ -240,8 +248,9 @@
   transition: background-color 0.2s;
 }
 
-.btn-detail:hover {
-  background-color: #1565c0;
+.btn-detail__order:hover {
+  background-color: var(--neutral-200);
+  color: var(--blue-600);
 }
 
 /* ============================================ */
@@ -1342,7 +1351,8 @@
 
 .info-row {
   display: flex;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
+  margin-top: 10px;
   align-items: center;
 }
 
@@ -1356,4 +1366,8 @@
 .info-value {
   flex: 1;
   color: #212529;
+}
+.info-text_value {
+  flex: 1;
+  color: var(--neutral-500);
 }

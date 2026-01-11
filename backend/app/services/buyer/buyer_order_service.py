@@ -584,6 +584,7 @@ class BuyerOrderService:
             orders_map[order.order_id] = {
                 "order": order,
                 "shop_name": seller_name,
+                "shop_url": public_url(product.seller.avt_url),
                 "first_item": {
                     "product_id": product.product_id,
                     "product_name": product.name,
@@ -602,6 +603,7 @@ class BuyerOrderService:
                 order_id=data["order"].order_id,
                 order_status=data["order"].order_status,
                 shop_name=data["shop_name"],
+                shop_url=data["shop_url"],
                 first_item=OrderTrackingFirstItem(**data["first_item"]),
                 total_items=data["count"],
                 subtotal=data["order"].subtotal,

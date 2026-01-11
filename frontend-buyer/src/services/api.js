@@ -290,6 +290,8 @@ export const reviewAPI = {
     const query = new URLSearchParams({ page: params.page || 1, limit: params.limit || 10 });
     return apiCall(`/buyer/reviews?${query}`);
   },
+  getReviewedOrderIds: () =>
+    apiCall('/buyer/reviews/reviewed-orders'),
   uploadFiles: async (files = []) => {
     const formData = new FormData();
     files.forEach(file => formData.append('files', file));

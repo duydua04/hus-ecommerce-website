@@ -77,4 +77,5 @@ class ReviewMediaItem(BaseModel):
     images: List[str] = []
     videos: List[str] = []
 
-    
+class ReviewedOrderIdsResponse(BaseModel):
+    reviewed_order_ids: List[int]
