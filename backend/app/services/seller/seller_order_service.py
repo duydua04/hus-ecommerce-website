@@ -1,6 +1,6 @@
 from datetime import datetime
 from fastapi import HTTPException, Depends, status
-from sqlalchemy import select, desc, func
+from sqlalchemy import select, desc, func, distinct
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload, joinedload, load_only
 
@@ -158,6 +158,7 @@ class SellerOrderService:
                 selectinload(Order.carrier),
                 selectinload(Order.shipping_address).selectinload(BuyerAddress.address)
             )
+            .distinct()
         )
         result = await self.db.execute(stmt)
         order = result.scalar_one_or_none()
